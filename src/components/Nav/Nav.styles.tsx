@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const StyledNav = styled.nav`
 	display: flex;
 	justify-content: space-between;
-	padding: 1.25rem 1.5rem;
+	padding: 2rem 2.5rem;
 `;
 
 export const StyledNavLinkContainer = styled.div`
@@ -19,6 +19,7 @@ export const StyledNavTitleRest = styled(Link)`
 	display: inline-block;
 	position: relative;
 	overflow: hidden;
+	font-family: "Roboto Mono";
 
 	&:before,
 	&:after {

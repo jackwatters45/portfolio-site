@@ -5,8 +5,6 @@ import {
 	StyledNavTitleRest,
 } from "./Nav.styles";
 
-// commit
-// figure out cl issues -> not quite happy with navlink animations
 const Nav = () => {
 	return (
 		<StyledNav>
