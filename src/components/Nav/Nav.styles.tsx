@@ -5,6 +5,8 @@ export const StyledNav = styled.nav`
 	display: flex;
 	justify-content: space-between;
 	padding: 2rem 2.5rem;
+	position: fixed;
+	width: 100vw;
 `;
 
 export const StyledNavLinkContainer = styled.div`
@@ -58,13 +60,14 @@ export const StyledNavTitleRest = styled(Link)`
 export const StyledNavLink = styled(Link)`
 	text-transform: uppercase;
 	font-weight: 700;
-	font-size: 18px;
+	font-size: 1.25rem;
 	padding: 0.25rem;
 	position: relative;
 	line-height: normal;
 	height: fit-content;
 	white-space: nowrap;
 	overflow: hidden;
+	font-family: "Inconsolata";
 
 	&::before {
 		background: ${({ theme }) => theme.colors.text1};

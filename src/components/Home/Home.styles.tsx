@@ -1,26 +1,19 @@
 import styled from "styled-components";
 
 export const StyledHomeContainer = styled.section`
-	min-height: calc(100vh - 96px);
+	height: 100vh;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
+	align-items: flex-start;
 	padding: 2.5rem;
 	position: relative;
-`;
-
-export const StyledTitleContainer = styled.div`
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 2rem;
 `;
 
 export const StyledTitleText = styled.h1`
 	font-size: 10rem;
 	font-weight: 500;
 	font-family: "Bebas Neue";
-	align-self: flex-end;
 `;
 
 export const StyledSubtitleText = styled.h2`
@@ -31,4 +24,5 @@ export const StyledSubtitleText = styled.h2`
 	text-align: left;
 	line-height: 1.2;
 	min-height: 76.8px;
+	font-family: "Inconsolata";
 `;

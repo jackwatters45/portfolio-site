@@ -1,11 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
-// css
-// import "./styles/fonts.css";
-// import "./styles/reset.css";
-import theme from "./styles/theme";
+// styles
 import GlobalStyle from "./styles/globalStyle";
+import theme from "./styles/theme";
 
 // components
 import Layout from "./components/Layout";

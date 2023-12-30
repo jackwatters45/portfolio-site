@@ -2,7 +2,7 @@ import { createGlobalStyle } from "styled-components";
 
 const GlobalStyle = createGlobalStyle`  
   :root {
-    font-family: "Roboto Mono";
+    font-family: "Bebas Neue", "Roboto", sans-serif;
     line-height: 1.5;
     color-scheme: dark;
     font-synthesis: none;
@@ -12,10 +12,9 @@ const GlobalStyle = createGlobalStyle`
     -webkit-text-size-adjust: 100%;
   }
 
-
   html {
-    color: ${({ theme }) => theme.colors.text1};
-    background-color: ${({ theme }) => theme.colors.background1};
+    color: #fffbeb;
+    background-color: #171717;
     scroll-behavior: smooth;
   }
 

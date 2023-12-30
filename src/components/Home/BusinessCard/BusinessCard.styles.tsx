@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const StyledBlankCard = styled.div<{ $isOpen: boolean }>`
 	position: absolute;
-	right: 2rem;
-	bottom: 2rem;
+	right: 2.5rem;
+	bottom: 2.5rem;
 	background: ${({ theme }) => theme.colors.text1};
 
 	${({ $isOpen }) =>
