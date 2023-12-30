@@ -1,12 +1,5 @@
 import styled from "styled-components";
 
-export const StyledAboutPageContainer = styled.section`
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	position: relative;
-`;
-
 export const StyledHelloContainer = styled.div`
 	display: flex;
 	margin-top: 10vh;
@@ -14,7 +7,7 @@ export const StyledHelloContainer = styled.div`
 	flex-direction: column;
 	justify-content: flex-end;
 
-	margin: 8rem 6rem 0;
+	margin: 15vh 6rem 0;
 `;
 
 export const StyledNameText = styled.div`

@@ -1,13 +1,10 @@
+import { Section } from "@/styles/sharedStyles";
 import styled from "styled-components";
 
-export const StyledHomeContainer = styled.section`
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
+export const StyledHomeContainer = styled(Section)`
 	justify-content: flex-end;
 	align-items: flex-start;
 	padding: 2.5rem;
-	position: relative;
 `;
 
 export const StyledTitleText = styled.h1`

@@ -7,6 +7,7 @@ export const StyledNav = styled.nav`
 	padding: 2rem 2.5rem;
 	position: fixed;
 	width: 100vw;
+	z-index: 2;
 `;
 
 export const StyledNavLinkContainer = styled.div`

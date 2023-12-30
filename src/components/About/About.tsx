@@ -1,6 +1,6 @@
+import { Section } from "@/styles/sharedStyles";
 import {
 	StyledAboutImage,
-	StyledAboutPageContainer,
 	StyledAboutText,
 	StyledAboutTextImageContainer,
 	StyledHelloContainer,
@@ -15,7 +15,7 @@ import {
 
 const About = () => {
 	return (
-		<StyledAboutPageContainer>
+		<Section>
 			<StyledHelloContainer>
 				<StyledNameText>
 					{/* TODO hover -> hello in diff languages */}
@@ -35,7 +35,7 @@ const About = () => {
 					alt=""
 				/>
 			</StyledAboutTextImageContainer>
-		</StyledAboutPageContainer>
+		</Section>
 	);
 };
 

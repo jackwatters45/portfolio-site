@@ -5,6 +5,8 @@ import Nav from "../Nav";
 import { AppContainer } from "./Layout.styles";
 
 const About = lazy(() => import("../About"));
+const Projects = lazy(() => import("../Projects"));
+const Contact = lazy(() => import("../Contact"));
 
 const Layout = () => {
 	return (
@@ -13,6 +15,8 @@ const Layout = () => {
 			<Home />
 			<Suspense>
 				<About />
+				<Projects />
+				<Contact />
 			</Suspense>
 		</AppContainer>
 	);
