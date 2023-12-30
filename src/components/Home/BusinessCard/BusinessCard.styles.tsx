@@ -56,4 +56,5 @@ export const StyledCardImage = styled.img`
 	margin-top: 0.5rem;
 	width: 75px;
 	transform: rotateY(180deg);
+	cursor: pointer;
 `;

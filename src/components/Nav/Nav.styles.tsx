@@ -73,7 +73,7 @@ export const StyledNavLink = styled(Link)`
 		position: absolute;
 		transform: scaleX(0);
 		transform-origin: right;
-		transition: transform 2.5s ease-in-out;
+		transition: transform 0.5s ease-in-out;
 		z-index: -1;
 		border-radius: 0.125rem;
 	}

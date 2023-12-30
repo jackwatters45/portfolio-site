@@ -28,6 +28,9 @@
 		"*.{md,html,css,json,yml}": "prettier --write"
 	},
 	"dependencies": {
+		"@mdi/js": "^7.4.47",
+		"@mdi/react": "^1.6.1",
+		"jsbarcode": "^3.11.6",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-router": "^6.21.1",

@@ -1,4 +1,4 @@
-import { mdiGithub, mdiLinkedin } from "@mdi/js";
+import { mdiGithub, mdiInstagram, mdiLinkedin } from "@mdi/js";
 import Icon from "@mdi/react";
 
 import theme from "@/styles/theme";
@@ -14,7 +14,7 @@ import {
 import useBusinessCard from "./useBusinessCard";
 
 const BusinessCard = () => {
-	const { isOpen, openCard, contentVisible } = useBusinessCard();
+	const { isOpen, closeCard, openCard, contentVisible } = useBusinessCard();
 
 	return (
 		<StyledBlankCard onClick={!isOpen ? openCard : undefined} $isOpen={isOpen}>
@@ -36,8 +36,19 @@ const BusinessCard = () => {
 						</div>
 					</StyledCardTextContent>
 					<StyledCardImageIconsContainer className="flex-column">
-						<StyledCardImage src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png" />
+						<StyledCardImage
+							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
+							onClick={closeCard}
+							title="Chilly Watters"
+						/>
 						<StyledCardIconsContainer>
+							<a
+								href="https://www.instagram.com/jackwatters45/"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								<Icon path={mdiInstagram} size={1} color={theme.colors.background1} />
+							</a>
 							<a
 								href="https://www.linkedin.com/in/john-watters/"
 								target="_blank"
