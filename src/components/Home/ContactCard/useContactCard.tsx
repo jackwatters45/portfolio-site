@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const useBusinessCard = () => {
+const useContactCard = () => {
 	const cardRef = useRef<HTMLDivElement>(null);
 
 	const [isOpen, setIsOpen] = useState(false);
@@ -37,4 +37,4 @@ const useBusinessCard = () => {
 	return { cardRef, isOpen, closeCard, openCard, contentVisible };
 };
 
-export default useBusinessCard;
+export default useContactCard;

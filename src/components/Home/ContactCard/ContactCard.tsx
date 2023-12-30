@@ -12,11 +12,11 @@ import {
 	StyledCardName,
 	StyledBottomContent,
 	StyledContactText,
-} from "./BusinessCard.styles";
-import useBusinessCard from "./useBusinessCard";
+} from "./ContactCard.styles";
+import useContactCard from "./useContactCard";
 
-const BusinessCard = () => {
-	const { cardRef, isOpen, closeCard, openCard, contentVisible } = useBusinessCard();
+const ContactCard = () => {
+	const { cardRef, isOpen, closeCard, openCard, contentVisible } = useContactCard();
 
 	return (
 		<StyledBlankCard onClick={!isOpen ? openCard : undefined} $isOpen={isOpen}>
@@ -73,4 +73,4 @@ const BusinessCard = () => {
 	);
 };
 
-export default BusinessCard;
+export default ContactCard;
