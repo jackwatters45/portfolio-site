@@ -3,37 +3,47 @@ import {
 	StyledAboutImage,
 	StyledAboutText,
 	StyledAboutTextImageContainer,
+	StyledCircleScribble,
 	StyledHelloContainer,
 	StyledNameSubtext,
 	StyledNameText,
+	StyledPhotoCaption,
 } from "./About.styles";
-
-// TODO text
-// TODO hover -> hello in diff languages
-// TODO some quirky comment on the photo
-// TODO hover photo or associated text -> zoom in on tigre
+import useAbout from "./useAbout";
 
 const About = () => {
+	const { currentGreeting, loopThroughText, stopLooping } = useAbout();
+
 	return (
 		<Section>
 			<StyledHelloContainer>
 				<StyledNameText>
-					{/* TODO hover -> hello in diff languages */}
-					<span>Hello.</span>
-					<span>I am Jack</span>
+					<span onMouseEnter={loopThroughText} onMouseLeave={stopLooping}>
+						{`${currentGreeting}!`}
+					</span>
+					<span>{" I'm Jack."}</span>
 				</StyledNameText>
 				<StyledNameSubtext>(John)</StyledNameSubtext>
 			</StyledHelloContainer>
 			<StyledAboutTextImageContainer>
 				<StyledAboutText>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-					incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-					nostrud
+					<span>I am a full stack developer based in San Francisco</span>
+					<span>
+						I value elegant, minimalistic software that enhances user experience
+					</span>
+					<span>I enjoy travel, language learning and hiking with my dogs</span>
 				</StyledAboutText>
-				<StyledAboutImage
-					src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703920496/IMG_8366_ix17v0.jpg"
-					alt=""
-				/>
+				<div style={{ position: "relative", height: "fit-content" }}>
+					<StyledAboutImage
+						src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703920496/IMG_8366_ix17v0.jpg"
+						alt="Me and my cat friend Tigre"
+					/>
+					<StyledCircleScribble
+						src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703982209/tigre_circle_mtuhib.png"
+						alt=""
+					/>
+					<StyledPhotoCaption>Me and my friend Tigre</StyledPhotoCaption>
+				</div>
 			</StyledAboutTextImageContainer>
 		</Section>
 	);

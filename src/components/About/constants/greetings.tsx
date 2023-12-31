@@ -6,15 +6,15 @@ const greetings = [
 	"Ciao", // Italian
 	"Olá", // Portuguese
 	"Привет", // Russian
-	"こんにちは", // Japanese
-	"你好", // Chinese (Mandarin)
-	"안녕하세요", // Korean
+	// "こんにちは", // Japanese
+	// "你好", // Chinese (Mandarin)
+	// "안녕하세요", // Korean
 	"Merhaba", // Turkish
-	"नमस्ते", // Hindi
+	// "नमस्ते", // Hindi
 	"Salaam", // Persian
-	"שלום", // Hebrew
-	"مرحبا", // Arabic
-	"Γειά σου", // Greek
+	// "שלום", // Hebrew
+	// "مرحبا", // Arabic
+	// "Γειά σου", // Greek
 	"Sawubona", // Zulu
 	"Jambo", // Swahili
 	"Hej", // Swedish
@@ -28,7 +28,7 @@ const greetings = [
 	"Bună ziua", // Romanian
 	"Здраво", // Serbian
 	"Здравейте", // Bulgarian
-	"สวัสดี", // Thai
+	// "สวัสดี", // Thai
 	"Salam", // Azerbaijani
 	"Barev", // Armenian
 	"Halo", // Indonesian
