@@ -5,6 +5,8 @@ dist/
 env.d.ts
 vite.config.ts
 vitest.config.ts
+tailwind.config.js
+postcss.config.js
 coverage/
 tests/setup.js
 ```

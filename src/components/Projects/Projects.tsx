@@ -1,7 +1,5 @@
-import { Section } from "@/styles/sharedStyles";
-
 const Projects = () => {
-	return <Section>Projects</Section>;
+	return <div className="relative flex flex-col h-screen">Projects</div>;
 };
 
 export default Projects;
