@@ -1,20 +1,31 @@
-import {
-	StyledNav,
-	StyledNavLink,
-	StyledNavLinkContainer,
-	StyledNavTitleRest,
-} from "./Nav.styles";
+import { HashLink as Link } from "react-router-hash-link";
 
 const Nav = () => {
 	return (
-		<StyledNav>
-			<StyledNavTitleRest to="/">Watters</StyledNavTitleRest>
-			<StyledNavLinkContainer>
-				<StyledNavLink to="#about">About</StyledNavLink>
-				<StyledNavLink to="#projects">Projects</StyledNavLink>
-				<StyledNavLink to="#contact">Contact</StyledNavLink>
-			</StyledNavLinkContainer>
-		</StyledNav>
+		<nav className="flex justify-between px-10 py-8 fixed w-screen z-10">
+			<Link
+				to="#home"
+				className="line-through-animation text-xl uppercase"
+				style={{ fontFamily: "Roboto Mono" }}
+				smooth
+			>
+				Watters
+			</Link>
+			<div
+				className="text-xl uppercase h-8 flex gap-4 truncate font-bold leading-snug"
+				style={{ fontFamily: "Inconsolata" }}
+			>
+				<Link to="#about" className="wipe-animation" smooth>
+					About
+				</Link>
+				<Link to="#projects" className="wipe-animation" smooth>
+					Projects
+				</Link>
+				<Link to="#contact" className="wipe-animation" smooth>
+					Contact
+				</Link>
+			</div>
+		</nav>
 	);
 };
 
