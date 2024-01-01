@@ -1,5 +1,8 @@
 import { HashLink as Link } from "react-router-hash-link";
 
+import "../../styles/animations/line-through.css";
+import "../../styles/animations/wipe-animation.css";
+
 const Nav = () => {
 	return (
 		<nav className="flex justify-between px-10 py-8 fixed w-screen z-10">
@@ -12,7 +15,7 @@ const Nav = () => {
 				Watters
 			</Link>
 			<div
-				className="text-xl uppercase h-8 flex gap-4 truncate font-bold leading-snug"
+				className="text-xl uppercase h-8 flex gap-4 truncate font-bold -mt-0.5  leading-snug"
 				style={{ fontFamily: "Inconsolata" }}
 			>
 				<Link to="#about" className="wipe-animation" smooth>

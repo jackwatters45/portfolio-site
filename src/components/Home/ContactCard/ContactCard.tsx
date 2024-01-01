@@ -1,14 +1,13 @@
 import { mdiGithub, mdiInstagram, mdiLinkedin } from "@mdi/js";
 import Icon from "@mdi/react";
 
-import theme from "@/styles/theme";
 import useContactCard from "./useContactCard";
 
 const ContactCard = () => {
 	const { cardRef, isOpen, closeCard, openCard, contentVisible } = useContactCard();
 
 	return isOpen ? (
-		<div className="absolute right-10 bottom-10 text-neutral-900 bg-amber-50 w-[225px] h-[225px] transition">
+		<div className="absolute right-10 bottom-10 text-neutral-900 bg-amber-50 w-56 h-64 transition  hidden xl:block">
 			{contentVisible && (
 				<div
 					className="relative flex flex-col justify-between items-start h-full w-full px-3 py-5 text-left text-[1rem]"
@@ -42,21 +41,21 @@ const ContactCard = () => {
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								<Icon path={mdiInstagram} size={1} color={theme.colors.background1} />
+								<Icon path={mdiInstagram} size={1} color={"#171717"} />
 							</a>
 							<a
 								href="https://www.linkedin.com/in/john-watters/"
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								<Icon path={mdiLinkedin} size={1} color={theme.colors.background1} />
+								<Icon path={mdiLinkedin} size={1} color={"#171717"} />
 							</a>
 							<a
 								href="https://github.com/jackwatters45"
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								<Icon path={mdiGithub} size={1} color={theme.colors.background1} />
+								<Icon path={mdiGithub} size={1} color={"#171717"} />
 							</a>
 						</div>
 					</div>
@@ -65,7 +64,7 @@ const ContactCard = () => {
 		</div>
 	) : (
 		<button
-			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition"
+			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition  hidden xl:block"
 			onClick={openCard}
 		/>
 	);
