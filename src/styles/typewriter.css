@@ -1,6 +1,6 @@
 .typewriter {
 	overflow: hidden;
-	border-right: 0.1em solid white;
+	border-right: 0.1em solid #fffbeb;
 	white-space: nowrap;
 	animation: blink-caret 0.75s step-end infinite;
 }
@@ -12,6 +12,6 @@
 	}
 
 	50% {
-		border-color: white;
+		border-color: #fffbeb;
 	}
 }

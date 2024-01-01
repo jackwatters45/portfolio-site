@@ -2,7 +2,149 @@
 @tailwind components;
 @tailwind utilities;
 
-.flex-column {
-	display: flex;
-	flex-direction: column;
+:root {
+	font-family: "Bebas Neue", "Roboto", sans-serif;
+	line-height: 1.5;
+	color-scheme: dark;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
+}
+
+html {
+	color: #fffbeb;
+	background-color: #171717;
+	scroll-behavior: smooth;
+}
+
+button {
+	background: transparent;
+	outline: none;
+	border: none;
+	cursor: pointer;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+:hover {
+	transition: all 0.1s ease-in-out;
+}
+
+/* loading rotate animation */
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.rotate-animation {
+	animation: rotate 1s linear infinite;
+}
+
+/* tech stack slide animation */
+@keyframes slideAcross {
+	from {
+		transform: translateX(-50%);
+	}
+
+	to {
+		transform: translateX(0);
+	}
+}
+
+.repeated-text {
+	animation: slideAcross 15s linear infinite;
+}
+
+@keyframes slideAcrossReverse {
+	from {
+		transform: translateX(0);
+	}
+
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+.repeated-text-reverse {
+	animation: slideAcrossReverse 15s linear infinite;
+}
+
+/* line through animation */
+.line-through-animation {
+	display: inline-block;
+	position: relative;
+	overflow: hidden;
+}
+
+.line-through-animation::before,
+.line-through-animation::after {
+	content: "";
+	position: absolute;
+	width: 0%;
+	height: 2px;
+	top: 50%;
+	margin-top: -2.5px;
+	background: #fff;
+}
+
+.line-through-animation::before {
+	left: -2.5px;
+}
+
+.line-through-animation::after {
+	right: 2.5px;
+	background: #fff;
+	transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.line-through-animation:hover::before {
+	background: #fff;
+	width: 100%;
+	transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.line-through-animation:hover:after {
+	background: transparent;
+	width: 100%;
+	transition: 0s;
+}
+
+/* wipe-animation */
+.wipe-animation {
+	position: relative;
+	padding: 0.25rem;
+}
+
+.wipe-animation::before {
+	content: "";
+	inset: 0;
+	position: absolute;
+	transform: scaleX(0);
+	transform-origin: right;
+	transition: transform 0.5s ease-in-out;
+	z-index: -1;
+	border-radius: 0.125rem;
+	background-color: #fffbeb;
+}
+
+.wipe-animation:hover::before {
+	transform: scaleX(1);
+	transform-origin: left;
+}
+
+.wipe-animation:hover {
+	transform: scaleX(1);
+	transform-origin: right;
+	transition: transform 2.5s ease-in-out;
+	color: #171717;
 }

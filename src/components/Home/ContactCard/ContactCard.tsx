@@ -2,48 +2,41 @@ import { mdiGithub, mdiInstagram, mdiLinkedin } from "@mdi/js";
 import Icon from "@mdi/react";
 
 import theme from "@/styles/theme";
-import {
-	StyledCardTitle,
-	StyledBlankCard,
-	StyledCardContentContainer,
-	StyledCardIconsContainer,
-	StyledCardImage,
-	StyledCardImageTitleContainer,
-	StyledCardName,
-	StyledBottomContent,
-	StyledContactText,
-} from "./ContactCard.styles";
 import useContactCard from "./useContactCard";
 
 const ContactCard = () => {
 	const { cardRef, isOpen, closeCard, openCard, contentVisible } = useContactCard();
 
-	return (
-		<StyledBlankCard onClick={!isOpen ? openCard : undefined} $isOpen={isOpen}>
+	return isOpen ? (
+		<div className="absolute right-10 bottom-10 text-neutral-900 bg-amber-50 w-[225px] h-[225px] transition">
 			{contentVisible && (
-				<StyledCardContentContainer ref={cardRef}>
-					<StyledCardImageTitleContainer>
-						<StyledCardTitle className="flex-column">
-							<StyledCardName>Jack Watters</StyledCardName>
+				<div
+					className="relative flex flex-col justify-between items-start h-full w-full px-3 py-5 text-left text-[1rem]"
+					style={{ fontFamily: "Bebas Neue" }}
+					ref={cardRef}
+				>
+					<div className="flex justify-between w-full">
+						<div className="flex flex-col mt-2">
+							<span className="text-[1.75rem] leading-none">Jack Watters</span>
 							<span>Software Developer</span>
-						</StyledCardTitle>
-						<StyledCardImage
-							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
-							onClick={closeCard}
-							title="Chilly Watters"
-						/>
-					</StyledCardImageTitleContainer>
-					<StyledBottomContent>
-						<StyledContactText className="flex-column">
-							<a href="tel:+19544949167">
-								<span>Tel. 954-494-9167</span>
-							</a>
-							<a href="mailto:jack.watters@me.com">
-								<span>Email. jackwatters@me.com</span>
-							</a>
-							<span>17 Plymouth Ave, SF, 94941</span>
-						</StyledContactText>
-						<StyledCardIconsContainer>
+						</div>
+						<button onClick={closeCard}>
+							<img
+								src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
+								alt="Chilly Watters"
+								title="Chilly Watters"
+								className="w-[50px] cursor-pointer object-contain  "
+								style={{ transform: "rotateY(180deg)" }}
+							/>
+						</button>
+					</div>
+					<div className="flex justify-between w-full items-end leading-tight">
+						<div className="flex flex-col li ">
+							<a href="tel:+19544949167">Tel. 954-494-9167</a>
+							<a href="mailto:jack.watters@me.com">Email. jackwatters@me.com</a>
+							17 Plymouth Ave, SF, 94941
+						</div>
+						<div className="flex flex-col gap-2">
 							<a
 								href="https://www.instagram.com/jackwatters45/"
 								target="_blank"
@@ -65,11 +58,16 @@ const ContactCard = () => {
 							>
 								<Icon path={mdiGithub} size={1} color={theme.colors.background1} />
 							</a>
-						</StyledCardIconsContainer>
-					</StyledBottomContent>
-				</StyledCardContentContainer>
+						</div>
+					</div>
+				</div>
 			)}
-		</StyledBlankCard>
+		</div>
+	) : (
+		<button
+			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition"
+			onClick={openCard}
+		/>
 	);
 };
 

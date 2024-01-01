@@ -2,7 +2,6 @@ import { Suspense, lazy } from "react";
 
 import Home from "../Home";
 import Nav from "../Nav";
-import { AppContainer } from "./Layout.styles";
 
 const About = lazy(() => import("../About"));
 const Projects = lazy(() => import("../Projects"));
@@ -10,7 +9,7 @@ const Contact = lazy(() => import("../Contact"));
 
 const Layout = () => {
 	return (
-		<AppContainer>
+		<main className="h-screen w-screen overflow-x-hidden">
 			<Nav />
 			<Home />
 			<Suspense>
@@ -18,7 +17,7 @@ const Layout = () => {
 				<Projects />
 				<Contact />
 			</Suspense>
-		</AppContainer>
+		</main>
 	);
 };
 

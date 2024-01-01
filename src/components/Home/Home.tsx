@@ -1,17 +1,26 @@
 import useHome from "./useHome";
 import "../../styles/typewriter.css";
 import ContactCard from "./ContactCard";
-import { StyledHomeContainer, StyledSubtitleText, StyledTitleText } from "./Home.styles";
 
 const Home = () => {
 	const { subtitleText } = useHome();
 
 	return (
-		<StyledHomeContainer>
-			<StyledTitleText>Jack Watters</StyledTitleText>
-			<StyledSubtitleText className="typewriter">{subtitleText}</StyledSubtitleText>
+		<section
+			id="home"
+			className="relative flex flex-col justify-end h-screen p-10 items-start"
+		>
+			<h1 className="text-[10rem] font-medium" style={{ fontFamily: "Bebas Neue" }}>
+				Jack Watters
+			</h1>
+			<h2
+				className="typewriter font-medium text-[4rem] lowercase text-left leading-tight min-h-[80px]"
+				style={{ fontFamily: "Inconsolata" }}
+			>
+				{subtitleText}
+			</h2>
 			<ContactCard />
-		</StyledHomeContainer>
+		</section>
 	);
 };
 
