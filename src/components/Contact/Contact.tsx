@@ -1,79 +1,135 @@
+// TODO format contact + social -> diff header + regular text
+
+// TODO get in touch about part
+
 const Contact = () => {
 	return (
 		<section
-			className="relative flex flex-col justify-end h-screen"
+			className="relative flex flex-col items-center justify-between h-screen"
 			style={{ border: "1px solid white" }}
 			id="contact"
 		>
-			<div className="text-9xl" style={{ fontFamily: "Rubik Scribble" }}>
+			<div
+				className="text-9xl mt-16 text-center"
+				style={{ fontFamily: "Rubik Scribble" }}
+			>
 				Get in touch
 			</div>
-			<div>
-				<img
-					src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
-					alt=""
-					style={{ width: "200px" }}
-				/>
-				<div style={{ border: "1px solid white" }}>
-					<span>Social</span>
-					<a
-						href="https://www.instagram.com/jackwatters45/"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Instagram
-					</a>
-					<a
-						href="https://www.linkedin.com/in/john-watters/"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Linkedin
-					</a>
-					<a
-						href="https://github.com/jackwatters45"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Github
-					</a>
-					<a
-						href="https://open.spotify.com/user/jackwatters22?si=77d268609e904877"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Spotify
-					</a>
-				</div>
-				<div style={{ border: "1px solid white" }}>
-					<span>Contact</span>
-					<a href="tel:+19544949167">
-						<span>Tel. 954-494-9167</span>
-					</a>
-					<a href="mailto:jack.watters@me.com">
-						<span>Email. jackwatters@me.com</span>
-					</a>
-					<span>17 Plymouth Ave, San Francisco, 94941</span>
+			<div className="flex flex-col  gap-6 max-w-[80vw]">
+				<h3 className="text-3xl text-left ml-[10vw]">{"I'd love to discuss"}</h3>
+				<div className="flex flex-wrap  text-5xl gap-4 justify-center ">
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50    border-opacity-50">
+						Frontend Development
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50  border-opacity-50 ">
+						Startups
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						React
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						Small Business Consulting
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						UI/UX design
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						Language Acquisition
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						Reggaeton
+					</span>
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						Lacrosse
+					</span>{" "}
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						World Travel
+					</span>
 				</div>
 			</div>
-			<div
-				className="flex justify-evenly text-xl uppercase my-1 mx-4"
-				style={{ fontFamily: "Inconsolata" }}
-			>
-				<span>Design inspired by:</span>
-				<a href="https://bepatrickdavid.com/" target="_blank" rel="noopener noreferrer">
-					Patrick David
-				</a>
-				<a
-					href="https://lk.emotion-agency.com/"
-					target="_blank"
-					rel="noopener noreferrer"
+
+			<div>
+				<div className="flex justify-evenly gap-4 mb-12 max-h-[45vh]">
+					<div className=" w-1/3 my-8 mr-12 flex justify-center">
+						<img
+							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
+							alt=""
+							className="object-contain  max-h-full  self-start"
+						/>
+					</div>
+					<div className="flex flex-col  w-1/4">
+						<span className="text-[5vw]">Social</span>
+						<hr />
+						<div
+							className="flex flex-col gap-8 text-[2vw] my-8"
+							style={{ fontFamily: "Inconsolata" }}
+						>
+							<a
+								href="https://www.instagram.com/jackwatters45/"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Instagram
+							</a>
+							<a
+								href="https://www.linkedin.com/in/john-watters/"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Linkedin
+							</a>
+							<a
+								href="https://github.com/jackwatters45"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Github
+							</a>
+							<a
+								href="https://open.spotify.com/user/jackwatters22?si=77d268609e904877"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Spotify
+							</a>
+						</div>
+					</div>
+					<div className="flex flex-col w-1/4">
+						<span className="text-[5vw]">Contact</span>
+						<hr />
+						<div
+							className="flex flex-col gap-8 text-[2vw] my-8"
+							style={{ fontFamily: "Inconsolata" }}
+						>
+							<a href="tel:+19544949167">
+								<span>Tel. 954-494-9167</span>
+							</a>
+							<a href="mailto:jack.watters@me.com">
+								<span>Email. jackwatters@me.com</span>
+							</a>
+							<span>17 Plymouth Ave, San Francisco, 94941</span>
+						</div>
+					</div>
+				</div>
+				<div
+					className="flex justify-evenly text-xl uppercase my-1 mx-4"
+					style={{ fontFamily: "Inconsolata" }}
 				>
-					Leonid Kostetckyi
-				</a>
-				<a href="https://adrienlaurent.fr/" target="_blank" rel="noopener noreferrer">
-					Adrien Laurent
-				</a>
+					<span>Site Design inspired by:</span>
+					<a href="https://bepatrickdavid.com/" target="_blank" rel="noopener noreferrer">
+						Patrick David
+					</a>
+					<a
+						href="https://lk.emotion-agency.com/"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Leonid Kostetckyi
+					</a>
+					<a href="https://adrienlaurent.fr/" target="_blank" rel="noopener noreferrer">
+						Adrien Laurent
+					</a>
+				</div>
 			</div>
 		</section>
 	);
