@@ -1,0 +1,39 @@
+/* line through animation */
+.line-through-animation {
+	display: inline-block;
+	position: relative;
+	overflow: hidden;
+}
+
+.line-through-animation::before,
+.line-through-animation::after {
+	content: "";
+	position: absolute;
+	width: 0%;
+	height: 2px;
+	top: 50%;
+	margin-top: -2.5px;
+	background: #fff;
+}
+
+.line-through-animation::before {
+	left: -2.5px;
+}
+
+.line-through-animation::after {
+	right: 2.5px;
+	background: #fff;
+	transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.line-through-animation:hover::before {
+	background: #fff;
+	width: 100%;
+	transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.line-through-animation:hover:after {
+	background: transparent;
+	width: 100%;
+	transition: 0s;
+}

@@ -1,4 +1,3 @@
-import theme from "@/styles/theme";
 import { mdiGithub, mdiOpenInNew } from "@mdi/js";
 import Icon from "@mdi/react";
 import { HtmlHTMLAttributes } from "react";
@@ -17,8 +16,8 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
 	return (
 		<div
-			className="relative w-[28vw] h-[32vw] rounded transition-transform
-    hover:scale-110"
+			className="relative h-[calc(100%-20vh)] w-[33vw] rounded transition-transform
+    hover:scale-110 "
 			{...props}
 		>
 			<img
@@ -34,7 +33,7 @@ const ProjectCard = ({
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<Icon path={mdiGithub} size={1} color={theme.colors.text1} />
+					<Icon path={mdiGithub} size={1} color={"#fffbeb"} />
 				</a>
 				<a
 					className="absolute bottom-1.5 right-1.5"
@@ -42,7 +41,7 @@ const ProjectCard = ({
 					target="_blank"
 					rel="noopener noreferrer"
 				>
-					<Icon path={mdiOpenInNew} size={1} color={theme.colors.text1} />
+					<Icon path={mdiOpenInNew} size={1} color={"#fffbeb"} />
 				</a>
 			</div>
 		</div>

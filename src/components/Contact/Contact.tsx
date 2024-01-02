@@ -1,24 +1,20 @@
-// TODO format contact + social -> diff header + regular text
-
-// TODO get in touch about part
-
 const Contact = () => {
 	return (
 		<section
 			className="relative flex flex-col items-center justify-between h-screen"
-			style={{ border: "1px solid white" }}
 			id="contact"
+			style={{ border: "solid white" }}
 		>
 			<div
-				className="text-9xl mt-16 text-center"
+				className="text-[12vw] mt-16 text-center"
 				style={{ fontFamily: "Rubik Scribble" }}
 			>
 				Get in touch
 			</div>
 			<div className="flex flex-col  gap-6 max-w-[80vw]">
-				<h3 className="text-3xl text-left ml-[10vw]">{"I'd love to discuss"}</h3>
-				<div className="flex flex-wrap  text-5xl gap-4 justify-center ">
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50    border-opacity-50">
+				<h3 className="text-[2vw] text-left ml-[10vw]">{"I'd Always love to discuss"}</h3>
+				<div className="flex flex-wrap  text-[3vw] gap-4 justify-center ">
+					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						Frontend Development
 					</span>
 					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50  border-opacity-50 ">

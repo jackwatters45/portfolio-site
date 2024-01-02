@@ -29,7 +29,7 @@ const useProjectsAnimation = (projectsLength: number) => {
 
 		trackRef.current.animate(
 			{
-				transform: `translate(${nextPercentage}%, -67%)`,
+				transform: `translate(${nextPercentage}%, -50%)`,
 			},
 			{ duration: 1200, fill: "forwards" },
 		);
@@ -67,7 +67,7 @@ const useProjectsAnimation = (projectsLength: number) => {
 			if (trackRef.current) {
 				trackRef.current.animate(
 					{
-						transform: `translate(${newPercentage}%, -67%)`,
+						transform: `translate(${newPercentage}%, -50%)`,
 					},
 					{ duration: 600, fill: "forwards" },
 				);
