@@ -3,7 +3,6 @@ const Contact = () => {
 		<section
 			className="relative flex flex-col items-center gap-6 justify-between h-screen"
 			id="contact"
-			style={{ border: "solid white" }}
 		>
 			<h2
 				className="text-[min(22vw,10vmax)] mt-[10vmin] mx-8  leading-none text-center"
@@ -49,7 +48,8 @@ const Contact = () => {
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
 							alt=""
-							className="object-contain  max-h-full"
+							className="object-contain max-h-full"
+							draggable="false"
 						/>
 					</div>
 					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[6vmin]">

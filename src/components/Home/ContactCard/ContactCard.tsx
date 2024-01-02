@@ -26,6 +26,7 @@ const ContactCard = () => {
 								title="Chilly Watters"
 								className="w-[50px] cursor-pointer object-contain  "
 								style={{ transform: "rotateY(180deg)" }}
+								draggable="false"
 							/>
 						</button>
 					</div>

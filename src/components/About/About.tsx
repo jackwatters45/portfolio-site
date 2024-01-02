@@ -34,6 +34,7 @@ const About = () => {
 						className=" object-cover  max-h-[40vh] w-3/4 sm:w-[34vmin]"
 						src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703920496/IMG_8366_ix17v0.jpg"
 						alt="Me and my cat friend Tigre"
+						draggable="false"
 					/>
 					{/* TODO not close to right */}
 					{/* <img
