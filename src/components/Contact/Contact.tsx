@@ -1,63 +1,62 @@
 const Contact = () => {
 	return (
 		<section
-			className="relative flex flex-col items-center justify-between h-screen"
+			className="relative flex flex-col items-center gap-6 justify-between h-screen"
 			id="contact"
 			style={{ border: "solid white" }}
 		>
-			<div
-				className="text-[12vw] mt-16 text-center"
+			<h2
+				className="text-[min(22vw,10vmax)] mt-[10vmin] mx-8  leading-none text-center"
 				style={{ fontFamily: "Rubik Scribble" }}
 			>
 				Get in touch
-			</div>
-			<div className="flex flex-col  gap-6 max-w-[80vw]">
-				<h3 className="text-[2vw] text-left ml-[10vw]">{"I'd Always love to discuss"}</h3>
-				<div className="flex flex-wrap  text-[3vw] gap-4 justify-center ">
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+			</h2>
+			<div className="flex-col gap-1  mx-[10vmin] max-w-[1200px] hidden sm:flex">
+				<h3 className="text-[4.5vmin] text-center">{"I'd Always love to discuss"}</h3>
+				<div className="flex flex-wrap text-[3.3vmin] gap-2 justify-center ">
+					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						Frontend Development
 					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50  border-opacity-50 ">
-						Startups
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						Small Business Growth
 					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
-						React
-					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
-						Small Business Consulting
-					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
-						UI/UX design
-					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						Language Acquisition
 					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						React
+					</span>
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50  border-opacity-50 ">
+						Startups
+					</span>
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+						UI/UX design
+					</span>
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						Reggaeton
 					</span>
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						Lacrosse
-					</span>{" "}
-					<span className="pb-1 pt-2 px-4 border-2 border-solid rounded-full border-amber-50 border-opacity-50">
+					</span>
+					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50 border-opacity-50">
 						World Travel
 					</span>
 				</div>
 			</div>
-
 			<div>
-				<div className="flex justify-evenly gap-4 mb-12 max-h-[45vh]">
-					<div className=" w-1/3 my-8 mr-12 flex justify-center">
+				<div className="flex justify-evenly gap-4 items-center flex-col-reverse sm:flex-row sm:max-h-[40vh] sm:mb-8 mx-4">
+					<div className="w-3/4 max-h-[33vh] mb-4 sm:w-1/4 sm:mb-0 flex">
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
 							alt=""
-							className="object-contain  max-h-full  self-start"
+							className="object-contain  max-h-full"
 						/>
 					</div>
-					<div className="flex flex-col  w-1/4">
-						<span className="text-[5vw]">Social</span>
+					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[6vmin]">
+						<span className="text-4xl sm:text-[5vw] leading-none">Social</span>
 						<hr />
 						<div
-							className="flex flex-col gap-8 text-[2vw] my-8"
+							className="flex flex-col gap-4 sm:gap-6  text-2xl sm:text-[2.5vmin] my-6"
 							style={{ fontFamily: "Inconsolata" }}
 						>
 							<a
@@ -90,11 +89,11 @@ const Contact = () => {
 							</a>
 						</div>
 					</div>
-					<div className="flex flex-col w-1/4">
-						<span className="text-[5vw]">Contact</span>
+					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[6vmin]">
+						<span className="text-4xl sm:text-[5vw] leading-none">Contact</span>
 						<hr />
 						<div
-							className="flex flex-col gap-8 text-[2vw] my-8"
+							className="flex flex-col gap-4 sm:gap-6  text-2xl sm:text-[2.5vmin] my-6"
 							style={{ fontFamily: "Inconsolata" }}
 						>
 							<a href="tel:+19544949167">
@@ -108,7 +107,7 @@ const Contact = () => {
 					</div>
 				</div>
 				<div
-					className="flex justify-evenly text-xl uppercase my-1 mx-4"
+					className="flex justify-evenly flex-wrap text-xl uppercase my-2 mx-4"
 					style={{ fontFamily: "Inconsolata" }}
 				>
 					<span>Site Design inspired by:</span>
