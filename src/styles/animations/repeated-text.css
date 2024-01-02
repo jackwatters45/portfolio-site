@@ -10,7 +10,7 @@
 }
 
 .repeated-text {
-	animation: slideAcross 15s linear infinite;
+	animation: slideAcross 12s linear infinite;
 }
 
 @keyframes slideAcrossReverse {
@@ -24,5 +24,5 @@
 }
 
 .repeated-text-reverse {
-	animation: slideAcrossReverse 15s linear infinite;
+	animation: slideAcrossReverse 12s linear infinite;
 }

@@ -1,11 +1,11 @@
 const techStack1: string[] = [
 	"React",
 	"TailwindCSS",
+	"React Query",
 	"HTML5",
 	"SASS",
 	"CSS3",
 	"Vite",
-	"React Query",
 ];
 
 const techStack2: string[] = [

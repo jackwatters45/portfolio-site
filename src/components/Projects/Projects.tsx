@@ -1,7 +1,7 @@
 import ProjectCard from "./Card/ProjectCard";
 import useProjectsAnimation from "@/hooks/useProjectsAnimation";
 import { projectsData, techStack1, techStack2 } from "./constants";
-import "../../styles/animations/slide-animation.css";
+import "../../styles/animations/repeated-text.css";
 
 const Projects = () => {
 	const {
@@ -21,7 +21,7 @@ const Projects = () => {
 			<h2 className="text-7xl sm:text-9xl mx-12 mt-[8vmax] lg:mt-[8vmin] text-right ">
 				Some Projects
 			</h2>
-			<div className="relative flex-1 items-center flex justify-center mb-4 px-4 select-none">
+			<div className="relative flex-1 items-center flex justify-center mb-4 px-4">
 				<div
 					className="absolute flex gap-[4vmin] left-1/2 -translate-x-1/2"
 					ref={trackRef}
@@ -44,16 +44,20 @@ const Projects = () => {
 					))}
 				</div>
 			</div>
-			<div className="text-[6vmax] 2xl:text-[8vmin] w-full whitespace-nowrap overflow-hidden flex flex-col gap-3">
-				<div className="inline-flex gap-[5vw] will-change-transform repeated-text  leading-none">
+			<div className="text-[6vmax] 2xl:text-[8vmin] w-full whitespace-nowrap overflow-hidden block">
+				<div className="inline-block will-change-transform repeated-text leading-none">
 					{techStack1.map((technology, index) => (
-						<span key={index}>{technology}</span>
+						<span key={index} className="mx-12">
+							{technology}
+						</span>
 					))}
 				</div>
-				<hr />
-				<div className="relative inline-flex gap-[5vw] will-change-transform repeated-text-reverse leading-none my-2">
+				<hr className="mb-2" />
+				<div className="inline-block will-change-transform repeated-text-reverse leading-none">
 					{techStack2.map((technology, index) => (
-						<span key={index}>{technology}</span>
+						<span key={index} className="mx-12">
+							{technology}
+						</span>
 					))}
 				</div>
 			</div>

@@ -43,16 +43,16 @@ const Contact = () => {
 				</div>
 			</div>
 			<div>
-				<div className="flex justify-evenly gap-4 items-center flex-col-reverse sm:flex-row sm:max-h-[40vh] sm:mb-8 mx-4">
-					<div className="w-3/4 max-h-[33vh] mb-4 sm:w-1/4 sm:mb-0 flex">
+				<div className="flex justify-evenly gap-4 items-center flex-col-reverse sm:flex-row sm:max-h-[40vh] sm:mb-8 mx-4 w-screen">
+					<div className="w-3/4 h-[33vh] mb-4 sm:max-w-1/4 sm:w-fit sm:mb-0 flex">
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
 							alt=""
-							className="object-contain max-h-full"
+							className="object-contain max-h-full w-fit"
 							draggable="false"
 						/>
 					</div>
-					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[6vmin]">
+					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[4vmin]">
 						<span className="text-4xl sm:text-[5vw] leading-none">Social</span>
 						<hr />
 						<div
@@ -89,7 +89,7 @@ const Contact = () => {
 							</a>
 						</div>
 					</div>
-					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[6vmin]">
+					<div className="flex flex-col justify-start w-[75vw] sm:w-[27.5vmin] sm:mt-[4vmin]">
 						<span className="text-4xl sm:text-[5vw] leading-none">Contact</span>
 						<hr />
 						<div
