@@ -3,7 +3,7 @@ import { useTypingEffect } from "@/hooks/useTypingEffect";
 const texts = [
 	"Web dev",
 	"Work in progress",
-	"React nerd",
+	"React fanatic",
 	"Dog dad",
 	"Software enthusiast",
 	"Language learner",

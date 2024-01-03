@@ -11,7 +11,7 @@ const Home = () => {
 			className="relative flex flex-col justify-end h-screen p-10 items-start"
 		>
 			<div className="my-12">
-				<h1 className="text-[16vw] leading-tight" style={{ fontFamily: "Bebas Neue" }}>
+				<h1 className="text-[16vw] leading-none" style={{ fontFamily: "Bebas Neue" }}>
 					Jack Watters
 				</h1>
 				<h2

@@ -65,7 +65,7 @@ const ContactCard = () => {
 		</div>
 	) : (
 		<button
-			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition  hidden xl:block"
+			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition  hidden xl:block hover:scale-105"
 			onClick={openCard}
 		/>
 	);

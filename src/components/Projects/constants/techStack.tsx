@@ -3,7 +3,7 @@ const techStack1: string[] = [
 	"TailwindCSS",
 	"React Query",
 	"HTML5",
-	"SASS",
+	"Framer Motion",
 	"CSS3",
 	"Vite",
 ];
