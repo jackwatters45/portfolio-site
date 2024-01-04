@@ -4,7 +4,7 @@ Welcome to the repository of my portfolio website! This project showcases my ski
 
 ## Contact
 
-Feel free to reach out to me for any queries:
+Feel free to reach out to me for any inqueries:
 
 - Email: <jackwatters@me.com>
 - LinkedIn: [Jack Watters](https://www.linkedin.com/in/john-watters/)
