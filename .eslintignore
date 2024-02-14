@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.prettierrc.js
+.eslintrc.json
+env.d.ts
+vite.config.ts
+vitest.config.ts
+tailwind.config.js
+postcss.config.js
+coverage/
+tests/setup.js
+```

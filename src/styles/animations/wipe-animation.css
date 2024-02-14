@@ -1,0 +1,29 @@
+/* wipe-animation */
+.wipe-animation {
+	position: relative;
+	padding: 0.25rem;
+}
+
+.wipe-animation::before {
+	content: "";
+	inset: 0;
+	position: absolute;
+	transform: scaleX(0);
+	transform-origin: right;
+	transition: transform 0.5s ease-in-out;
+	z-index: -1;
+	border-radius: 0.125rem;
+	background-color: #fffbeb;
+}
+
+.wipe-animation:hover::before {
+	transform: scaleX(1);
+	transform-origin: left;
+}
+
+.wipe-animation:hover {
+	transform: scaleX(1);
+	transform-origin: right;
+	transition: transform 2.5s ease-in-out;
+	color: #171717;
+}

@@ -1,0 +1,28 @@
+/* tech stack slide animation */
+@keyframes slideAcross {
+	from {
+		transform: translateX(-50%);
+	}
+
+	to {
+		transform: translateX(0);
+	}
+}
+
+.repeated-text {
+	animation: slideAcross 12s linear infinite;
+}
+
+@keyframes slideAcrossReverse {
+	from {
+		transform: translateX(0);
+	}
+
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+.repeated-text-reverse {
+	animation: slideAcrossReverse 12s linear infinite;
+}

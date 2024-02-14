@@ -1,0 +1,14 @@
+/* loading rotate animation */
+@keyframes rotate-and-scale {
+  0% {
+    transform: rotate(0deg) scale(2.5);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(0.9);
+  }
+}
+
+.rotate-animation {
+  animation: rotate-and-scale 1.1s ease-in-out infinite;
+}
