@@ -1,8 +1,6 @@
 import "../styles/animations/line-through.css";
 import "../styles/animations/wipe-animation.css";
 
-
-
 const Nav = () => {
 	return (
 		<nav className="flex justify-between px-10 py-8 fixed w-screen z-10 h-fit">
@@ -18,7 +16,7 @@ const Nav = () => {
 				className="text-xl uppercase flex items-center flex-col sm:flex-row gap-2 sm:gap-4  font-bold -mt-0.5  leading-snug"
 				style={{ fontFamily: "Inconsolata" }}
 			>
-        <a href="BLOG" className="wipe-animation">
+				<a href="blog" className="wipe-animation">
 					Blog
 				</a>
 				<a href="#about" className="wipe-animation">
@@ -31,7 +29,12 @@ const Nav = () => {
 					Contact
 				</a>
 				<div className="flex gap-4">
-					<a href="https://www.linkedin.com/in/john-watters/" className="h-5 w-5 block">
+					<a
+						href="https://www.linkedin.com/in/john-watters/"
+						className="h-5 w-5 block"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						<svg viewBox="0 0 128 128">
 							<path
 								fill="white"
@@ -39,7 +42,12 @@ const Nav = () => {
 							></path>
 						</svg>
 					</a>
-					<a href="https://github.com/jackwatters45/" className="h-5 w-5 block">
+					<a
+						href="https://github.com/jackwatters45/"
+						className="h-5 w-5 block"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						<svg viewBox="0 0 128 128">
 							<g fill="#181616">
 								<path

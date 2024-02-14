@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Nav from "../components/Nav";
 import Loading from "../components/Loading";
 import Home from "../components/Home";
 import About from "../components/About";
@@ -13,9 +12,8 @@ import Contact from "../components/Contact";
 ---
 
 <Layout title="">
-	<main class="h-screen w-screen overflow-x-hidden">
+	<main >
 		<!-- {!isLoaded && <Loading />} -->
-		<Nav />
 		<Home />
 		<About />
 		<!-- <Projects /> -->

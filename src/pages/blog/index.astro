@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+const posts = await getCollection("posts");
+
+import PostPreview from "../../components/PostPreview";
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout title={"Jack's Thoughts"}>
+	<h2 class="text-3xl pb-8">some interesting title</h2>
+	<div class="flex flex-col gap-8">
+
+		{
+			posts.map((post) => {
+				return <PostPreview post={post.data} />;
+			})
+		}
+		</div>
+</BlogLayout>
+../../components/PostPreview

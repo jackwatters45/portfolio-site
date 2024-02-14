@@ -3,6 +3,8 @@ import { ViewTransitions } from "astro:transitions";
 import "../styles/global.css";
 import "../styles/fonts.css";
 import "../styles/reset.css";
+import Nav from "../components/Nav";
+
 interface Props {
 	title: string;
 }
@@ -22,6 +24,9 @@ const { title } = Astro.props;
 		<ViewTransitions />
 	</head>
 	<body>
-		<slot />
+		<main class="h-screen w-screen overflow-x-hidden">
+			<Nav />
+			<slot />
+		</main>
 	</body>
 </html>
