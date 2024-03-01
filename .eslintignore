@@ -1,6 +1,6 @@
 node_modules/
 dist/
-.prettierrc.js
+prettier.config.js
 .eslintrc.json
 env.d.ts
 vite.config.ts
@@ -9,4 +9,5 @@ tailwind.config.js
 postcss.config.js
 coverage/
 tests/setup.js
+src/pages/rss.xml.js
 ```

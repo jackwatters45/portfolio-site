@@ -1,37 +1,32 @@
 import "../styles/animations/line-through.css";
-import "../styles/animations/wipe-animation.css";
 
 const Nav = () => {
 	return (
-		<nav className="flex justify-between px-10 py-8 fixed w-screen z-10 h-fit">
+		<nav className="fixed z-10 flex h-fit w-screen justify-between px-10 py-8">
 			<a
-				href="#home"
-				className="line-through-animation text-xl uppercase"
-				style={{ fontFamily: "Roboto Mono" }}
+				href="/#home"
+				className="line-through-animation h-fit font-roboto-mono text-xl uppercase"
 				// smooth
 			>
 				Watters
 			</a>
-			<div
-				className="text-xl uppercase flex items-center flex-col sm:flex-row gap-2 sm:gap-4  font-bold -mt-0.5  leading-snug"
-				style={{ fontFamily: "Inconsolata" }}
-			>
-				<a href="blog" className="wipe-animation">
+			<div className="-mt-0.5 flex flex-col items-center gap-2 font-inconsolata text-xl font-bold  uppercase leading-snug  sm:flex-row sm:gap-4">
+				<a href="/blog" className="line-through-animation">
 					Blog
 				</a>
-				<a href="#about" className="wipe-animation">
+				<a href="/#about" className="line-through-animation">
 					About
 				</a>
-				<a href="#projects" className="wipe-animation">
+				<a href="/#projects" className="line-through-animation">
 					Projects
 				</a>
-				<a href="#contact" className="wipe-animation">
+				<a href="/#contact" className="line-through-animation">
 					Contact
 				</a>
 				<div className="flex gap-4">
 					<a
 						href="https://www.linkedin.com/in/john-watters/"
-						className="h-5 w-5 block"
+						className="block h-5 w-5"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
@@ -44,7 +39,7 @@ const Nav = () => {
 					</a>
 					<a
 						href="https://github.com/jackwatters45/"
-						className="h-5 w-5 block"
+						className="block h-5 w-5"
 						target="_blank"
 						rel="noopener noreferrer"
 					>

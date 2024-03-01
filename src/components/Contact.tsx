@@ -3,12 +3,11 @@ import { motion } from "framer-motion";
 const Contact = () => {
 	return (
 		<section
-			className="relative flex flex-col items-center gap-6 justify-between h-screen"
+			className="relative flex h-screen flex-col items-center justify-between gap-6"
 			id="contact"
 		>
 			<motion.h2
-				className="text-[min(22vw,10vmax)] mt-[10vmin] mx-8  leading-none text-center"
-				style={{ fontFamily: "Rubik Scribble" }}
+				className="mx-8 mt-[10vmin] text-center  font-rubik-scribble text-[min(22vw,10vmax)] leading-none"
 				initial={{ opacity: 0 }}
 				whileInView={{ opacity: 1 }}
 				viewport={{ once: true }}
@@ -16,9 +15,9 @@ const Contact = () => {
 			>
 				Get in touch
 			</motion.h2>
-			<div className="flex-col gap-1  mx-[10vmin] max-w-[1200px] hidden sm:flex">
+			<div className="mx-[10vmin] hidden  max-w-[1200px] flex-col gap-1 sm:flex">
 				<motion.h3
-					className="text-[4.5vmin] text-center"
+					className="text-center text-[4.5vmin]"
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
 					viewport={{ once: true }}
@@ -27,64 +26,61 @@ const Contact = () => {
 					{"I'd Always love to discuss"}
 				</motion.h3>
 				<motion.div
-					className="flex flex-wrap text-[3.3vmin] gap-2 justify-center "
+					className="flex flex-wrap justify-center gap-2 text-[3.3vmin] "
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
 					viewport={{ once: true }}
 					transition={{ delay: 0.25, duration: 1, ease: "easeInOut" }}
 				>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Frontend Development
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Small Business Growth
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Language Acquisition
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						React
 					</span>
-					<span className="pt-1 px-3  border-2 border-solid rounded-full border-amber-50  border-opacity-50 ">
+					<span className="rounded-full border-2  border-solid border-amber-50 border-opacity-50 px-3  pt-1 ">
 						Startups
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Brutalist design
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Magical Realism
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Reggaeton
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Lacrosse
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						World Travel
 					</span>
-					<span className="pt-1 px-3 border-2 border-solid rounded-full border-amber-50 border-opacity-50 hover:text-neutral-900 hover:bg-amber-50 hover:scale-105">
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Yerba Mate
 					</span>
 				</motion.div>
 			</div>
 			<div>
-				<div className="flex justify-evenly gap-4 items-start flex-col-reverse sm:flex-row sm:max-h-[40vh] sm:mb-8 mx-4 w-screen">
-					<div className="w-3/4 max-h-[33vh] mb-4 sm:max-w-[33vw] sm:w-fit sm:mb-0 flex self-start">
+				<div className="mx-4 flex w-screen flex-col-reverse items-start justify-evenly gap-4 sm:mb-8 sm:max-h-[40vh] sm:flex-row">
+					<div className="mb-4 flex max-h-[33vh] w-3/4 self-start sm:mb-0 sm:w-fit sm:max-w-[33vw]">
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
 							alt=""
-							className="object-contain  w-fit"
+							className="w-fit  object-contain"
 							draggable="false"
 						/>
 					</div>
-					<div className="flex flex-col justify-start w-[75vw] sm:w-1/4 sm:mt-[4vmin]">
-						<span className="text-4xl sm:text-[5vw] leading-none">Social</span>
+					<div className="flex w-[75vw] flex-col justify-start sm:mt-[4vmin] sm:w-1/4">
+						<span className="text-4xl leading-none sm:text-[5vw]">Social</span>
 						<hr />
-						<div
-							className="flex flex-col gap-6 text-2xl sm:text-[2.5vmin] mt-6"
-							style={{ fontFamily: "Inconsolata" }}
-						>
+						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl sm:text-[2.5vmin]">
 							<a
 								href="https://www.instagram.com/jackwatters45/"
 								target="_blank"
@@ -115,13 +111,10 @@ const Contact = () => {
 							</a>
 						</div>
 					</div>
-					<div className="flex flex-col justify-start w-[75vw] sm:w-1/4 sm:mt-[4vmin]">
-						<span className="text-4xl sm:text-[5vw] leading-none">Contact</span>
+					<div className="flex w-[75vw] flex-col justify-start sm:mt-[4vmin] sm:w-1/4">
+						<span className="text-4xl leading-none sm:text-[5vw]">Contact</span>
 						<hr />
-						<div
-							className="flex flex-col gap-6 text-2xl sm:text-[2.5vmin] mt-6"
-							style={{ fontFamily: "Inconsolata" }}
-						>
+						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl sm:text-[2.5vmin]">
 							<a href="tel:+19544949167">
 								<span>Tel. 954-494-9167</span>
 							</a>
@@ -132,10 +125,7 @@ const Contact = () => {
 						</div>
 					</div>
 				</div>
-				<div
-					className="flex justify-evenly flex-wrap text-xl uppercase my-2 mx-4"
-					style={{ fontFamily: "Inconsolata" }}
-				>
+				<div className="mx-4 my-2 flex flex-wrap justify-evenly font-inconsolata text-xl uppercase">
 					<span>Site Design inspired by:</span>
 					<a
 						href="https://bepatrickdavid.com/"

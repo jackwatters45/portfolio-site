@@ -1,16 +1,22 @@
 # My Blog
 
-- this needs linting + extensions for astro + tw
-
-- building blog -> moving it to just be part of portfolio site
+- commits
+- dumbass mdx error
+- post content styling -> <https://docs.astro.build/en/recipes/tailwind-rendered-markdown/>
 
 ## portfolio-site migration
 
-- check out the astro tools
-  - audit
-- framer motion + animations stuff doesn't work rn
-  - some might make sense to just convert to js? ie typewriter
+- react stuff fix
 - page titles + metadata
 - font blurry?
-- smooth animation for same page links
+- smooth animation for same page links + just page links in general
 - contact spacing wonky
+
+## once done
+
+- add blog posts
+
+## later
+
+- rss
+- fork -> cms

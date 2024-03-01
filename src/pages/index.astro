@@ -3,8 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import Loading from "../components/Loading";
 import Home from "../components/Home";
 import About from "../components/About";
-// import Projects from "../components/Projects";
 import Contact from "../components/Contact";
+import Projects from "../components/Projects";
 
 // let isLoaded = false;
 // setTimeout(() => (isLoaded = true), 1000);
@@ -12,11 +12,11 @@ import Contact from "../components/Contact";
 ---
 
 <Layout title="">
-	<main >
+	<main>
 		<!-- {!isLoaded && <Loading />} -->
-		<Home />
-		<About />
-		<!-- <Projects /> -->
-		<Contact />
+		<Home client:idle />
+		<About client:visible />
+		 <!-- <Projects client:visible /> -->
+		<!-- <Contact client:visible  />  -->
 	</main>
 </Layout>

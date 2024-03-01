@@ -9,12 +9,12 @@ const { title } = Astro.props;
 ---
 
 <Layout title={title}>
-	<div class="p-4 pt-28 flex flex-col items-center">
-		<slot />
+	<div class="p-4 pt-36 flex flex-col items-center self-center">
+		<div class="w-3/4 lg:w-2/3 max-w-screen-md"><slot /></div>
 	</div>
 </Layout>
 <style>
 	body {
-		font-family: "Inconsolata";
+		font-family: "Inconsolata", "Roboto Mono", "Roboto";
 	}
 </style>

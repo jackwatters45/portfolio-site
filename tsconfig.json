@@ -102,6 +102,6 @@
 		"typeRoots": ["./node_modules/@types", "/src/types"]
 	},
 	"include": ["src"],
-	"exclude": ["node_modules", "tools", "dist", "coverage"],
-  "extends": "astro/tsconfigs/base"
+	"exclude": ["node_modules", "tools", "dist", "coverage", "src/pages/rss.xml.js"],
+	"extends": "astro/tsconfigs/base"
 }

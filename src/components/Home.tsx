@@ -1,4 +1,3 @@
-// import ContactCard from "./ContactCard";
 import "../styles/animations/typewriter.css";
 import { useTypingEffect } from "../hooks/useTypingEffect";
 import textDescriptions from "@/constants/textDescriptions";
@@ -9,16 +8,13 @@ const Home = () => {
 	return (
 		<section
 			id="home"
-			className="relative flex flex-col justify-end h-screen p-10 items-start"
+			className="relative flex h-screen flex-col items-start justify-end p-10"
 		>
 			<div className="my-12">
-				<h1 className="text-[16vw] leading-none" style={{ fontFamily: "Bebas Neue" }}>
+				<h1 className="md:[20vw] font-bebas text-[24vw] leading-none antialiased xl:text-[16vw]">
 					Jack Watters
 				</h1>
-				<h2
-					className="typewriter font-medium text-[6vw] lowercase text-left leading-tight min-h-[7.5vw] w-fit"
-					style={{ fontFamily: "Inconsolata" }}
-				>
+				<h2 className="typewriter min-h-[10vw] w-fit text-left  font-inconsolata text-[8vw] font-medium lowercase leading-tight antialiased">
 					{subtitleText}
 				</h2>
 			</div>
