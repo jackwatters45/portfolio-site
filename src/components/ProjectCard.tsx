@@ -16,17 +16,17 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
 	return (
 		<div
-			className="relative w-[36vmax] lg:w-[36vmin] h-[44vmax] lg:h-[44vmin] rounded transition-transform
-    hover:scale-105 "
+			className="relative h-[44vmax] w-[36vmax] rounded transition-transform hover:scale-105 lg:h-[44vmin]
+    lg:w-[36vmin] "
 			{...props}
 		>
 			<img
 				src={previewImg}
 				alt="Project Preview"
-				className="absolute inset-0 object-cover object-center h-full rounded"
+				className="absolute inset-0 h-full rounded object-cover object-center"
 				draggable="false"
 			/>
-			<div className="absolute flex inset-0 bg-black bg-opacity-30 z-10 rounded opacity-0 hover:opacity-100">
+			<div className="absolute inset-0 z-10 flex rounded bg-black bg-opacity-30 opacity-0 hover:opacity-100">
 				<span className="mx-auto my-2 h-min text-2xl">{name}</span>
 				<a
 					className="absolute bottom-1.5 left-1.5"

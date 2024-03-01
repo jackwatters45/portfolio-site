@@ -44,15 +44,15 @@ const ContactCard = () => {
 	const { cardRef, isOpen, closeCard, openCard, contentVisible } = useContactCard();
 
 	return isOpen ? (
-		<div className="absolute right-10 bottom-10 text-neutral-900 bg-amber-50 w-56 h-64 transition  hidden xl:block">
+		<div className="absolute bottom-10 right-10 hidden h-64 w-56 bg-amber-50 text-neutral-900  transition xl:block">
 			{contentVisible && (
 				<div
-					className="relative flex flex-col justify-between items-start h-full w-full px-3 py-5 text-left text-[1rem]"
+					className="relative flex h-full w-full flex-col items-start justify-between px-3 py-5 text-left text-[1rem]"
 					style={{ fontFamily: "Bebas Neue" }}
 					ref={cardRef}
 				>
-					<div className="flex justify-between w-full">
-						<div className="flex flex-col mt-2">
+					<div className="flex w-full justify-between">
+						<div className="mt-2 flex flex-col">
 							<span className="text-[1.75rem] leading-none">Jack Watters</span>
 							<span>Software Developer</span>
 						</div>
@@ -67,8 +67,8 @@ const ContactCard = () => {
 							/>
 						</button>
 					</div>
-					<div className="flex justify-between w-full items-end leading-tight">
-						<div className="flex flex-col li ">
+					<div className="flex w-full items-end justify-between leading-tight">
+						<div className="li flex flex-col ">
 							<a href="tel:+19544949167">Tel. 954-494-9167</a>
 							<a href="mailto:jack.watters@me.com">Email. jackwatters@me.com</a>
 							17 Plymouth Ave, SF, 94941
@@ -102,7 +102,7 @@ const ContactCard = () => {
 		</div>
 	) : (
 		<button
-			className="absolute right-10 bottom-10 bg-amber-50 cursor-pointer h-[150px] w-[150px] transition  hidden xl:block hover:scale-105"
+			className="absolute bottom-10 right-10 hidden h-[150px] w-[150px] cursor-pointer bg-amber-50  transition hover:scale-105 xl:block"
 			onClick={openCard}
 		/>
 	);
