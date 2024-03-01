@@ -1,5 +1,6 @@
 ---
 import BlogLayout from "./BlogLayout.astro";
+import Prose from "../components/Prose.astro";
 
 const { frontmatter } = Astro.props;
 const { title } = frontmatter;
@@ -8,11 +9,13 @@ const { title } = frontmatter;
 <BlogLayout title={title}>
 	<div class="flex flex-col">
 		<h1 class="text-4xl font-bold">{frontmatter.title}</h1>
-		<p class="text-stone-300 pt-4">
+		<p class="pt-4 text-stone-300">
 			{new Date(frontmatter.pubDate).toLocaleDateString()}
 		</p>
-		<div class="font-roboto text-stone-300 pt-8 text-lg">
-			<slot />
+		<div class="pt-8">
+			<Prose>
+				<slot />
+			</Prose>
 		</div>
 		<div class="pt-8">
 			<hr class="pt-8 opacity-10" />
@@ -20,22 +23,22 @@ const { title } = frontmatter;
 				<div class="flex gap-2">
 					<a
 						href="https://www.linkedin.com/in/john-watters/"
-						class="font-roboto text-stone-400 text-lg underline cursor-pointer"
+						class="cursor-pointer font-roboto text-lg text-stone-400 underline"
 					>
 						connect on linkedin
 					</a>
-					<div class="text-stone-400 font-roboto text-lg font-bold">·</div>
+					<div class="font-roboto text-lg font-bold text-stone-400">·</div>
 					<a
 						href="https://github.com/jackwatters45"
-						class="font-roboto text-stone-400 text-lg underline cursor-pointer"
+						class="cursor-pointer font-roboto text-lg text-stone-400 underline"
 					>
 						follow on github
 					</a>
 				</div>
-				<div class="pt-12 pb-6">
+				<div class="pb-6 pt-12">
 					<a
 						href="/#home"
-						class="line-through-animation text-lg uppercase h-fit font-roboto-mono"
+						class="line-through-animation h-fit font-roboto-mono text-lg uppercase"
 					>
 						Watters
 					</a>

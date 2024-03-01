@@ -1,10 +1,5 @@
 # My Blog
 
-- clean up commits
-- add some padding to the bottom of index page
-- change index to light blue instead of yellow
-- post content styling -> <https://docs.astro.build/en/recipes/tailwind-rendered-markdown/>
-
 ## portfolio-site migration
 
 - react stuff fix
@@ -22,3 +17,4 @@
 
 - rss
 - fork -> cms
+- add prose styles as they become relevant
