@@ -10,7 +10,7 @@ const Home = () => {
 			id="home"
 			className="relative flex h-screen flex-col items-start justify-end p-10"
 		>
-			<div className="py-12">
+			<div className="">
 				<h1 className="font-bebas text-[24vw] leading-none antialiased md:text-[20vw] xl:text-[16vw]">
 					Jack Watters
 				</h1>

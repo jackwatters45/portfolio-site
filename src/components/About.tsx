@@ -4,17 +4,13 @@ import greetings from "../constants/greetings";
 import useLoopThroughText from "../hooks/useLoopThroughText";
 
 const useAbout = () => {
-	const { currentIndex, loopThroughText, stopLooping } = useLoopThroughText(
-		greetings.length,
-		100,
-	);
+	const { currentIndex, ...rest } = useLoopThroughText(greetings.length, 100);
 
 	const currentGreeting = greetings[currentIndex];
 
 	return {
 		currentGreeting,
-		loopThroughText,
-		stopLooping,
+		...rest,
 	};
 };
 
@@ -22,12 +18,12 @@ const About = () => {
 	const { currentGreeting, loopThroughText, stopLooping } = useAbout();
 
 	return (
-		<section className="relative flex h-screen flex-col justify-evenly" id="about">
-			<div className="flex w-full flex-col justify-end gap-[1vh] px-[6vw] pt-2">
+		<section className="relative flex h-screen flex-col justify-evenly py-4" id="about">
+			<div className="flex w-full flex-col justify-end gap-4 px-12">
 				<motion.span
 					onMouseEnter={loopThroughText}
 					onMouseLeave={stopLooping}
-					className="font-rubik-scribble text-[15vmin] leading-none md:text-[12vmin]"
+					className="font-rubik-scribble text-[15vmin] leading-none sm:text-[12vmin]"
 					initial={{ opacity: 0, y: "-50%" }}
 					whileInView={{ opacity: 1, y: "0" }}
 					viewport={{ once: true }}
@@ -55,7 +51,7 @@ const About = () => {
 				viewport={{ once: true }}
 				transition={{ delay: 0.75, duration: 1, ease: "easeInOut" }}
 			>
-				<div className="mt-5 flex max-w-[75%] flex-col gap-6 font-sans text-[4.5vmin] uppercase leading-normal sm:mt-10 sm:max-w-[min(50vw,66vw)] sm:pl-6 sm:text-[3.5vmin]">
+				<div className=" flex max-w-[75%] flex-col gap-6 font-sans text-[4.5vmin] uppercase leading-normal sm:pl-6 sm:pt-6 sm:text-[3.5vmin] md:max-w-[min(50vw,66vw)]">
 					<span>I am a full stack developer based in San Francisco</span>
 					<span>
 						I value elegant, minimalistic software that enhances user experience
@@ -69,7 +65,7 @@ const About = () => {
 						alt="Me and my cat friend Tigre"
 						draggable="false"
 					/>
-					<span className=" mt-[5%]  font-inconsolata text-[4vmin] leading-normal sm:ml-[10%] sm:text-[max(2vmin,1.5vw)]">
+					<span className="mt-[5%]  font-inconsolata text-[4vmin] leading-normal sm:ml-[10%] sm:text-[max(2vmin,1.5vw)]">
 						Me and my friend Tigre
 					</span>
 				</div>
