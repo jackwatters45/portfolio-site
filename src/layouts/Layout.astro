@@ -7,19 +7,27 @@ import Nav from "../components/Nav";
 
 interface Props {
 	title: string;
+	description?: string;
 }
 
-const { title } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+		<meta
+			name="description"
+			content={description || "Jack Watters' portfolio and blog!"}
+		/>
+		<link
+			rel="icon"
+			type="image/svg+xml"
+			href="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
+		/>
 		<title>{title}</title>
 		<ViewTransitions />
 	</head>
