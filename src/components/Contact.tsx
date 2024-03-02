@@ -1,9 +1,5 @@
 import { motion } from "framer-motion";
 
-interface HobbyBubbleProps {
-	hobby: string;
-}
-
 const Contact = () => {
 	return (
 		<section

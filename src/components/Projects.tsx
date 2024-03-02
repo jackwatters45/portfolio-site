@@ -1,12 +1,9 @@
 import { motion } from "framer-motion";
 
 import "../styles/animations/repeated-text.css";
-// import ProjectCard from "./ProjectCard";
 import useProjectsAnimation from "../hooks/useProjectsAnimation";
 import projectsData from "@/constants/projectsData";
 import { techStack1, techStack2 } from "../constants/techStacks";
-import Icon from "@mdi/react";
-import { mdiGithub, mdiOpenInNew } from "@mdi/js";
 
 const Projects = () => {
 	const {
@@ -73,7 +70,7 @@ const Projects = () => {
 									target="_blank"
 									rel="noopener noreferrer"
 								>
-									<Icon path={mdiGithub} size={1} color={"#fffbeb"} />
+									<img src="/github.svg" alt="" className="h-5 w-5" />
 								</a>
 								<a
 									className="absolute bottom-1.5 right-1.5"
@@ -81,7 +78,8 @@ const Projects = () => {
 									target="_blank"
 									rel="noopener noreferrer"
 								>
-									<Icon path={mdiOpenInNew} size={1} color={"#fffbeb"} />
+									<img src="/open-in-new.svg" alt="" className="h-5 w-5" />
+									{/* <Icon path={mdiOpenInNew} size={1} color={"#fffbeb"} /> */}
 								</a>
 							</div>
 						</div>

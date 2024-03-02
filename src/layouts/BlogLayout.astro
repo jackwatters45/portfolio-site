@@ -13,7 +13,7 @@ interface Props {
 const { title, description } = Astro.props;
 ---
 
-<Layout title={title}>
+<Layout title={title} description={description}>
 	<div class="p-4 pt-36 flex flex-col items-center self-center">
 		<div class="w-3/4 lg:w-2/3 max-w-screen-md"><slot /></div>
 	</div>
