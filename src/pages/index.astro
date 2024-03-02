@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Loading from "../components/Loading";
+import Loading from "../components/Loading.astro";
 import Home from "../components/Home";
 import About from "../components/About";
 import Contact from "../components/Contact";
@@ -11,12 +11,12 @@ import Projects from "../components/Projects";
 // style={{ overflowY: isLoaded ? undefined : "hidden" }}
 ---
 
-<Layout title="">
+<Layout title="Jack Watters">
 	<main>
 		<!-- {!isLoaded && <Loading />} -->
 		<Home client:idle />
 		<About client:visible />
-		 <!-- <Projects client:visible /> -->
-		<!-- <Contact client:visible  />  -->
+		 <Projects client:visible />
+		<Contact client:visible  /> 
 	</main>
 </Layout>

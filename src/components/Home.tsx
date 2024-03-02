@@ -18,7 +18,6 @@ const Home = () => {
 					{subtitleText}
 				</h2>
 			</div>
-			{/* <ContactCard /> */}
 		</section>
 	);
 };

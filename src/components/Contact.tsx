@@ -1,5 +1,9 @@
 import { motion } from "framer-motion";
 
+interface HobbyBubbleProps {
+	hobby: string;
+}
+
 const Contact = () => {
 	return (
 		<section
@@ -44,8 +48,8 @@ const Contact = () => {
 					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						React
 					</span>
-					<span className="rounded-full border-2  border-solid border-amber-50 border-opacity-50 px-3  pt-1 ">
-						Startups
+					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
+						Hockey
 					</span>
 					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
 						Brutalist design
