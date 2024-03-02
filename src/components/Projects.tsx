@@ -17,11 +17,11 @@ const Projects = () => {
 
 	return (
 		<section
-			className="relative flex h-screen flex-col justify-between gap-4"
+			className="relative flex h-screen flex-col justify-between gap-8 py-16"
 			id="projects"
 		>
 			<motion.h2
-				className="mx-12 mt-[8vmax] text-right text-7xl sm:text-[8vmax] lg:mt-[8vmin]"
+				className="px-12  text-right text-7xl sm:text-[8vmax] lg:mt-[8vmin]"
 				initial={{ opacity: 0, y: "-50%" }}
 				whileInView={{ opacity: 1, y: "0" }}
 				viewport={{ once: true }}
@@ -37,7 +37,7 @@ const Projects = () => {
 				transition={{ opacity: { delay: 1, duration: 3, ease: "easeInOut" } }}
 			>
 				<div
-					className="absolute left-1/2 flex -translate-x-1/2 gap-[4vmin]"
+					className="absolute left-1/2 flex -translate-x-1/2 gap-[5vmin]"
 					ref={trackRef}
 					tabIndex={0}
 					onKeyDown={handleKeyDown}
@@ -49,8 +49,8 @@ const Projects = () => {
 				>
 					{projectsData.map((project, index) => (
 						<div
-							className="relative h-[44vmax] w-[36vmax] rounded transition-transform hover:scale-105 lg:h-[44vmin]
-    lg:w-[36vmin] "
+							className="relative h-[40vmax] w-[32vmax] rounded transition-transform hover:scale-105 lg:h-[40vmin]
+    lg:w-[32vmin] "
 							role="option"
 							aria-selected={focusedIndex === index}
 							key={project.repoUrl}
@@ -79,7 +79,6 @@ const Projects = () => {
 									rel="noopener noreferrer"
 								>
 									<img src="/open-in-new.svg" alt="" className="h-5 w-5" />
-									{/* <Icon path={mdiOpenInNew} size={1} color={"#fffbeb"} /> */}
 								</a>
 							</div>
 						</div>
