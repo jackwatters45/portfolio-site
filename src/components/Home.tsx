@@ -10,11 +10,11 @@ const Home = () => {
 			id="home"
 			className="relative flex h-screen flex-col items-start justify-end p-10"
 		>
-			<div className="my-12">
-				<h1 className="md:[20vw] font-bebas text-[24vw] leading-none antialiased xl:text-[16vw]">
+			<div className="py-12">
+				<h1 className="font-bebas text-[24vw] leading-none antialiased md:text-[20vw] xl:text-[16vw]">
 					Jack Watters
 				</h1>
-				<h2 className="typewriter min-h-[10vw] w-fit text-left  font-inconsolata text-[8vw] font-medium lowercase leading-tight antialiased">
+				<h2 className="typewriter min-h-[10vw] w-fit text-left font-inconsolata text-[8vw] font-medium lowercase leading-tight antialiased">
 					{subtitleText}
 				</h2>
 			</div>

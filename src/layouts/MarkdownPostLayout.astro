@@ -20,7 +20,7 @@ const { title, description } = frontmatter;
 		<div class="pt-8">
 			<hr class="pt-8 opacity-10" />
 			<div class="">
-				<div class="flex gap-2">
+				<div class="flex flex-wrap gap-2">
 					<a
 						href="https://www.linkedin.com/in/john-watters/"
 						class="cursor-pointer font-roboto text-lg text-stone-400 underline"
@@ -48,29 +48,10 @@ const { title, description } = frontmatter;
 	</div>
 </BlogLayout>
 <style>
-	h2 {
-		color: var(--color-stone-300);
-	}
 	body {
-		line-height: 1.6;
+		user-select: auto;
 	}
-
-	/* Markdown Elements */
-	h3 {
-		font-size: 2rem;
-		font-weight: bold;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-	}
-
-	ul,
-	ol {
-		margin-top: 1rem;
-		margin-left: 2.5rem; /* Adjust the indentation */
-		list-style-type: disc; /* Sets the default list style */
-	}
-
-	li {
-		margin-bottom: 0.5rem;
+	a {
+		user-select: none;
 	}
 </style>
