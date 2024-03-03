@@ -110,7 +110,7 @@ const Contact = () => {
 							<a href="mailto:jack.watters@me.com">
 								<span>Email. jackwatters@me.com</span>
 							</a>
-							<span>17 Plymouth Ave, San Francisco, 94941</span>
+							<span>17 Plymouth Ave, San Francisco</span>
 						</div>
 					</div>
 				</div>

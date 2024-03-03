@@ -2,7 +2,7 @@
 import "../styles/animations/loading.css";
 ---
 
-<div class="loading z-20 flex h-screen w-screen items-center justify-center bg-neutral-900">
+<div id="loading" class="loading fixed z-20 flex h-screen w-screen items-center justify-center bg-neutral-900">
 	<img
 		class="rotate-animation h-10 w-10 origin-center"
 		src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
@@ -10,3 +10,9 @@ import "../styles/animations/loading.css";
 		draggable="false"
 	/>
 </div>
+<style>
+	#loading {
+		background-color: #171717;
+		z-index: 9999;
+	}
+</style>
