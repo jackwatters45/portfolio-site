@@ -1,5 +1,19 @@
 import { motion } from "framer-motion";
 
+const discussTags: string[] = [
+	"Frontend Development",
+	"Small Business Growth",
+	"Language Acquisition",
+	"React",
+	"Hockey",
+	"Brutalist design",
+	"Magical Realism",
+	"Reggaeton",
+	"Lacrosse",
+	"World Travel",
+	"Yerba Mate",
+];
+
 const Contact = () => {
 	return (
 		<section
@@ -7,7 +21,7 @@ const Contact = () => {
 			id="contact"
 		>
 			<motion.h2
-				className="mx-8 mt-[10vmin] text-center  font-rubik-scribble text-[min(22vw,10vmax)] leading-none"
+				className="px-8 pt-12 text-center font-rubik-scribble text-6xl leading-none sm:text-8xl xl:text-9xl"
 				initial={{ opacity: 0 }}
 				whileInView={{ opacity: 1 }}
 				viewport={{ once: true }}
@@ -15,9 +29,9 @@ const Contact = () => {
 			>
 				Get in touch
 			</motion.h2>
-			<div className="mx-[10vmin] hidden  max-w-[1200px] flex-col gap-1 sm:flex">
+			<div className="flex w-10/12 max-w-screen-xl flex-col gap-2">
 				<motion.h3
-					className="text-center text-[4.5vmin]"
+					className="text-center text-3xl sm:text-4xl lg:text-5xl"
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
 					viewport={{ once: true }}
@@ -26,61 +40,37 @@ const Contact = () => {
 					{"I'd Always love to discuss"}
 				</motion.h3>
 				<motion.div
-					className="flex flex-wrap justify-center gap-2 text-[3.3vmin] "
+					className="flex flex-wrap justify-center gap-2 "
 					initial={{ opacity: 0 }}
 					whileInView={{ opacity: 1 }}
 					viewport={{ once: true }}
 					transition={{ delay: 0.25, duration: 1, ease: "easeInOut" }}
 				>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Frontend Development
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Small Business Growth
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Language Acquisition
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						React
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Hockey
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Brutalist design
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Magical Realism
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Reggaeton
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Lacrosse
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						World Travel
-					</span>
-					<span className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 hover:scale-105 hover:bg-amber-50 hover:text-neutral-900">
-						Yerba Mate
-					</span>
+					{discussTags.map((tag) => (
+						<span
+							key={tag}
+							className="rounded-full border-2 border-solid border-amber-50 border-opacity-50 px-3 pt-1 text-2xl hover:scale-105 hover:bg-amber-50 hover:text-neutral-900  md:text-4xl xl:text-5xl"
+						>
+							{tag}
+						</span>
+					))}
 				</motion.div>
 			</div>
 			<div>
-				<div className="mx-4 flex w-screen flex-col-reverse items-start justify-evenly gap-4 sm:mb-8 sm:max-h-[40vh] sm:flex-row">
-					<div className="mb-4 flex max-h-[33vh] w-3/4 self-start sm:mb-0 sm:w-fit sm:max-w-[33vw]">
+				<div className="flex w-screen flex-col-reverse items-center justify-evenly gap-16 gap-4 px-4 sm:flex-row sm:items-start sm:gap-0">
+					<div className="hidden max-h-[50vh] w-1/4 self-center  pb-4 pt-3 md:flex lg:max-h-[40vh]">
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
-							alt=""
-							className="w-fit  object-contain"
+							alt="My dog Chilly"
+							className="object-contain"
 							draggable="false"
 						/>
 					</div>
-					<div className="flex w-[75vw] flex-col justify-start sm:mt-[4vmin] sm:w-1/4">
-						<span className="text-4xl leading-none sm:text-[5vw]">Social</span>
+					{/* TODO */}
+					<div className="flex w-[75vw] flex-col   sm:w-1/4 sm:pt-[4vmin]">
+						<span className="text-3xl sm:text-5xl lg:text-7xl ">Social</span>
 						<hr />
-						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl sm:text-[2.5vmin]">
+						<div className="mt-6 flex flex-col gap-2 gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
 							<a
 								href="https://www.instagram.com/jackwatters45/"
 								target="_blank"
@@ -111,10 +101,10 @@ const Contact = () => {
 							</a>
 						</div>
 					</div>
-					<div className="flex w-[75vw] flex-col justify-start sm:mt-[4vmin] sm:w-1/4">
-						<span className="text-4xl leading-none sm:text-[5vw]">Contact</span>
+					<div className="flex w-[75vw] flex-col sm:w-1/4 sm:pt-[4vmin]">
+						<span className="text-3xl sm:text-5xl lg:text-7xl">Contact</span>
 						<hr />
-						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl sm:text-[2.5vmin]">
+						<div className="mt-6 flex flex-col gap-2 gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
 							<a href="tel:+19544949167">
 								<span>Tel. 954-494-9167</span>
 							</a>
@@ -125,7 +115,7 @@ const Contact = () => {
 						</div>
 					</div>
 				</div>
-				<div className="mx-4 my-2 flex flex-wrap justify-evenly font-inconsolata text-xl uppercase">
+				<div className="flex flex-wrap justify-evenly px-4 py-2 pt-16 font-inconsolata text-xl uppercase md:pt-12">
 					<span>Site Design inspired by:</span>
 					<a
 						href="https://bepatrickdavid.com/"
