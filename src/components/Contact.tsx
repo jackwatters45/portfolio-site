@@ -66,7 +66,6 @@ const Contact = () => {
 							draggable="false"
 						/>
 					</div>
-					{/* TODO */}
 					<div className="flex w-[75vw] flex-col   sm:w-1/4 sm:pt-[4vmin]">
 						<span className="text-3xl sm:text-5xl lg:text-7xl ">Social</span>
 						<hr />

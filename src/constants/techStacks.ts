@@ -2,10 +2,10 @@ const _techStack1: string[] = [
 	"React",
 	"TailwindCSS",
 	"React Query",
-	"HTML5",
+	"Astro",
 	"Framer Motion",
-	"CSS3",
-	"Vite",
+	"PostgeSQL",
+	"Go",
 ];
 
 const _techStack2: string[] = [
@@ -13,7 +13,7 @@ const _techStack2: string[] = [
 	"NodeJs",
 	"Express",
 	"MongoDb",
-	"Javascript",
+	"NextJs",
 	"RedisDb",
 ];
 
