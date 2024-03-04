@@ -1,6 +1,8 @@
 ---
 import { getCollection } from "astro:content";
-const posts = await getCollection("posts");
+const posts = await getCollection("posts", ({ data }) => {
+	return data.published === true;
+});
 
 import BlogLayout from "../../layouts/BlogLayout.astro";
 ---
@@ -12,17 +14,13 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 				return (
 					<a
 						href={`blog/${post.slug}`}
-						class="flex flex-col gap-2 hover:animate-pulse delay-500 font-inconsolata"
+						class="flex flex-col gap-2 font-inconsolata delay-500 hover:animate-pulse"
 					>
-						<h3
-							class="font-bold text-3xl text-emerald-300"
-						>
-							{post.data.title}
-						</h3>
-						<div class="text-base leading-tight font font-roboto">
+						<h3 class="text-3xl font-bold text-emerald-300">{post.data.title}</h3>
+						<div class="font font-roboto text-base leading-tight">
 							{post.data.description}
 						</div>
-						<div class="text-sm font-roboto ">
+						<div class="font-roboto text-sm ">
 							{post.data.pubDate.toLocaleDateString()}
 						</div>
 					</a>

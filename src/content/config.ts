@@ -8,6 +8,7 @@ const postSchema = z.object({
 	description: z.string(),
 	author: z.string(),
 	tags: z.array(z.string()),
+	published: z.boolean(),
 });
 
 const postsCollection = defineCollection({
