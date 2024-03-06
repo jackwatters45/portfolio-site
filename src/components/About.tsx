@@ -52,11 +52,11 @@ const About = () => {
 				transition={{ delay: 0.75, duration: 1, ease: "easeInOut" }}
 			>
 				<div className=" flex max-w-[75%] flex-col gap-6 font-sans text-[4.5vmin] uppercase leading-normal sm:pl-6 sm:pt-6 sm:text-[3.5vmin] md:max-w-[min(50vw,66vw)]">
-					<span>I am a full stack developer based in San Francisco</span>
+					<span>I am a full stack developer based in San Francisco. </span>{" "}
 					<span>
-						I value elegant, minimalistic software that enhances user experience
+						I value elegant, minimalistic software that enhances user experience.
 					</span>
-					<span>I enjoy travel, language learning and hiking with my dogs</span>
+					<span>I enjoy travel, language learning and hiking with my dogs.</span>
 				</div>
 				<div className="relative flex h-fit flex-col items-center align-middle">
 					<img
