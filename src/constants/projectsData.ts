@@ -7,13 +7,6 @@ export interface IPortfolioProject {
 
 const projectsData: IPortfolioProject[] = [
 	{
-		name: "Members Only",
-		previewImg:
-			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704250148/members-only.jackwatters.dev__tgbemy.webp",
-		repoUrl: "https://github.com/jackwatters45/express-members-only",
-		liveUrl: "https://members-only.jackwatters.dev/",
-	},
-	{
 		name: "Schmedium Blog Platform",
 		previewImg:
 			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704262356/blog-api-frontend.jackwatters.dev_write_lppdlt.webp",
@@ -28,6 +21,13 @@ const projectsData: IPortfolioProject[] = [
 		liveUrl: "https://todo-list.jackwatters.dev/",
 	},
 	{
+		name: "Team Send",
+		previewImg:
+			"https://res.cloudinary.com/drheg5d7j/image/upload/v1713817686/team-send.jackwatters.dev__1_py7zpd.webp",
+		repoUrl: "https://github.com/jackwatters45/team-send",
+		liveUrl: "https://team-send.jackwatters.dev/",
+	},
+	{
 		name: "Odin Book",
 		previewImg:
 			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704265614/odin-book.jackwatters.dev_user_6591f3a62e76436d6db8732c_5_cjvt8e.webp",
@@ -40,20 +40,6 @@ const projectsData: IPortfolioProject[] = [
 			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704337056/jackwatters45.github.io__1_vtnp0k.webp",
 		repoUrl: "https://github.com/jackwatters45/jackwatters45.github.io",
 		liveUrl: "https://jackwatters45.github.io/",
-	},
-	{
-		name: "Wheres Waldo",
-		previewImg:
-			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704336771/jackwatters45.github.io_wheres-waldo-app__wbnfx1.webp",
-		repoUrl: "https://github.com/jackwatters45/wheres-waldo-app",
-		liveUrl: "https://jackwatters45.github.io/wheres-waldo-app/",
-	},
-	{
-		name: "Example Personal Portfolio",
-		previewImg:
-			"https://res.cloudinary.com/drheg5d7j/image/upload/v1704250294/jackwattersportfolio01.web.app__axyrgi.webp",
-		repoUrl: "https://github.com/jackwatters45/example-personal-portfolio",
-		liveUrl: "https://jackwattersportfolio01.web.app/",
 	},
 ];
 
