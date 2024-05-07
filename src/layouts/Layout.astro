@@ -3,6 +3,7 @@ import { ViewTransitions } from "astro:transitions";
 import "../styles/global.css";
 import "../styles/reset.css";
 import Nav from "../components/Nav.astro";
+import Posthog from "@/components/posthog.astro";
 
 interface Props {
 	title: string;
@@ -36,6 +37,7 @@ const { title, description } = Astro.props;
 			rel="stylesheet"
 		/>
 		<ViewTransitions />
+		<Posthog />
 	</head>
 	<body>
 		<main class="h-screen w-screen overflow-x-hidden">
