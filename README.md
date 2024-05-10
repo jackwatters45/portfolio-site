@@ -15,6 +15,7 @@ View live site [HERE](https://jackwatters.dev)
 - [React](https://reactjs.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Astro](https://astro.build/)
+- [Framer Motion](https://www.framer.com/motion/)
 
 ## Check out what I'm working on
 

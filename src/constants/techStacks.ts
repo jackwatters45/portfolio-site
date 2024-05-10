@@ -3,7 +3,7 @@ const _techStack1: string[] = [
 	"TailwindCSS",
 	"React Query",
 	"Astro",
-	"Framer Motion",
+	"Prisma",
 	"PostgeSQL",
 	"Go",
 ];
@@ -12,7 +12,7 @@ const _techStack2: string[] = [
 	"TypeScript",
 	"NodeJs",
 	"Express",
-	"MongoDb",
+	"Prisma",
 	"NextJs",
 	"RedisDb",
 ];

@@ -62,8 +62,11 @@ const Projects = () => {
 								className="absolute inset-0 h-full rounded object-cover object-center"
 								draggable="false"
 							/>
-							<div className="absolute inset-0 z-10 flex rounded bg-black bg-opacity-30 opacity-0 hover:opacity-100">
+							<div className="absolute inset-0 z-10 flex flex-col rounded bg-black bg-opacity-50 opacity-0 hover:opacity-100">
 								<span className="mx-auto my-2 h-min text-2xl">{project.name}</span>
+								<span className="mx-auto flex flex-grow -translate-y-6 items-center px-4 sm:px-8">
+									{project.description}
+								</span>
 								<a
 									className="absolute bottom-1.5 left-1.5"
 									href={project.repoUrl}
@@ -87,16 +90,16 @@ const Projects = () => {
 			</motion.div>
 			<div className="block w-full overflow-hidden whitespace-nowrap text-[5vmax] 2xl:text-[7vmin]">
 				<div className="repeated-text inline-block leading-none will-change-transform">
-					{techStack1.map((technology, index) => (
-						<span key={index} className="mx-12">
+					{techStack1.map((technology) => (
+						<span key={technology} className="mx-12">
 							{technology}
 						</span>
 					))}
 				</div>
 				<hr className="mb-2" />
 				<div className="repeated-text-reverse inline-block leading-none will-change-transform">
-					{techStack2.map((technology, index) => (
-						<span key={index} className="mx-12">
+					{techStack2.map((technology) => (
+						<span key={technology} className="mx-12">
 							{technology}
 						</span>
 					))}
