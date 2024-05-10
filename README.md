@@ -1,15 +1,21 @@
-# My Blog
+# Jack Watters' Portfolio
 
-- responsive
-  - contact spacing wonky
+Welcome to my personal website. My name is Jack, I'm a software developer with a passion for creating user-friendly productivity software.
 
-## once done
+Let’s connect! I'm always open to discussing potential collaborations, knowledge exchange, or simply chatting about the latest trends in web development, the intrigue of world travel, or the excitement of hockey (no Canucks fans):
 
-- add blog posts
-  - pub date
+Jack Watters - [LinkedIn](https://www.linkedin.com/in/john-watters/) - [twitter](https://twitter.com/w0tters) - <mailto:jackwattersdev@gmail.com>
 
-## later
+View live site [HERE](https://jackwatters.dev)
 
-- rss
-- fork -> cms
-- add prose styles as they become relevant
+![Site Preview](https://res.cloudinary.com/drheg5d7j/image/upload/v1715299534/protfolio-preview_wpxmmt.webp)
+
+## Website Tech
+
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Astro](https://astro.build/)
+
+## Check out what I'm working on
+
+<https://yatusabes.co>
