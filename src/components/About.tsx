@@ -3,19 +3,13 @@ import { motion } from "framer-motion";
 import greetings from "../constants/greetings";
 import useLoopThroughText from "../hooks/useLoopThroughText";
 
-const useAbout = () => {
-	const { currentIndex, ...rest } = useLoopThroughText(greetings.length, 100);
+const About = () => {
+	const { currentIndex, loopThroughText, stopLooping } = useLoopThroughText(
+		greetings.length,
+		100,
+	);
 
 	const currentGreeting = greetings[currentIndex];
-
-	return {
-		currentGreeting,
-		...rest,
-	};
-};
-
-const About = () => {
-	const { currentGreeting, loopThroughText, stopLooping } = useAbout();
 
 	return (
 		<section className="relative flex h-screen flex-col justify-evenly py-4" id="about">

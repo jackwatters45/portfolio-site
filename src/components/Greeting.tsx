@@ -12,7 +12,9 @@ export default function Greeting({ messages = [] }: GreetingProps) {
 	return (
 		<div>
 			<h3>{greeting}! Thank you for visiting!</h3>
-			<button onClick={() => setGreeting(randomMessage())}>New Greeting</button>
+			<button type="button" onClick={() => setGreeting(randomMessage())}>
+				New Greeting
+			</button>
 		</div>
 	);
 }

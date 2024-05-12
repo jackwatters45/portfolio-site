@@ -17,7 +17,7 @@ const Projects = () => {
 
 	return (
 		<section
-			className="relative flex h-screen flex-col justify-between gap-8 py-16"
+			className="relative flex min-h-screen flex-col justify-between gap-16 py-16 sm:gap-32 lg:gap-48"
 			id="projects"
 		>
 			<motion.h2
@@ -37,7 +37,7 @@ const Projects = () => {
 				transition={{ opacity: { delay: 1, duration: 3, ease: "easeInOut" } }}
 			>
 				<div
-					className="absolute left-1/2 flex -translate-x-1/2 gap-[5vmin]"
+					className="left-1/2 flex -translate-x-1/2 gap-[5vmin]"
 					ref={trackRef}
 					tabIndex={0}
 					onKeyDown={handleKeyDown}
@@ -88,7 +88,7 @@ const Projects = () => {
 					))}
 				</div>
 			</motion.div>
-			<div className="block w-full overflow-hidden whitespace-nowrap text-[5vmax] 2xl:text-[7vmin]">
+			<div className="block w-full overflow-hidden whitespace-nowrap text-[5vmax] 2xl:text-[6vmin]">
 				<div className="repeated-text inline-block leading-none will-change-transform">
 					{techStack1.map((technology) => (
 						<span key={technology} className="mx-12">

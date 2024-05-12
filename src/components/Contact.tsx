@@ -17,7 +17,7 @@ const discussTags: string[] = [
 const Contact = () => {
 	return (
 		<section
-			className="relative flex h-screen flex-col items-center justify-between gap-6"
+			className="relative flex h-screen flex-col items-center justify-between gap-16 pt-16 sm:gap-24 sm:pt-32 lg:gap-32 lg:pt-48"
 			id="contact"
 		>
 			<motion.h2
@@ -57,7 +57,7 @@ const Contact = () => {
 				</motion.div>
 			</div>
 			<div>
-				<div className="flex w-screen flex-col-reverse items-center justify-evenly gap-16 gap-4 px-4 sm:flex-row sm:items-start sm:gap-0">
+				<div className="flex w-screen flex-col-reverse items-center justify-evenly gap-4 px-4 sm:flex-row sm:items-start sm:gap-0">
 					<div className="hidden max-h-[50vh] w-1/4 self-center  pb-4 pt-3 md:flex lg:max-h-[40vh]">
 						<img
 							src="https://res.cloudinary.com/drheg5d7j/image/upload/v1703923329/Chilly_xmtdvm.jpg"
@@ -66,10 +66,10 @@ const Contact = () => {
 							draggable="false"
 						/>
 					</div>
-					<div className="flex w-[75vw] flex-col   sm:w-1/4 sm:pt-[4vmin]">
+					<div className="flex w-[75vw] flex-col sm:w-1/3 sm:pt-[4vmin] md:w-1/4">
 						<span className="text-3xl sm:text-5xl lg:text-7xl ">Social</span>
 						<hr />
-						<div className="mt-6 flex flex-col gap-2 gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
+						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
 							<a
 								href="https://www.instagram.com/jackwatters45/"
 								target="_blank"
@@ -100,10 +100,10 @@ const Contact = () => {
 							</a>
 						</div>
 					</div>
-					<div className="flex w-[75vw] flex-col sm:w-1/4 sm:pt-[4vmin]">
+					<div className="flex w-[75vw] flex-col sm:w-1/3 sm:pt-[4vmin] md:w-1/4">
 						<span className="text-3xl sm:text-5xl lg:text-7xl">Contact</span>
 						<hr />
-						<div className="mt-6 flex flex-col gap-2 gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
+						<div className="mt-6 flex flex-col gap-6 font-inconsolata text-2xl  md:text-3xl xl:text-4xl">
 							<a href="tel:+19544949167">
 								<span>Tel. 954-494-9167</span>
 							</a>
