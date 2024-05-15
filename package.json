@@ -21,7 +21,6 @@
 	},
 	"lint-staged": {
 		"*.{ts,tsx,js,cjs}": [
-			"pnpm run lint:fix",
 			"pnpm run format"
 		],
 		"*.{md,html,css,json,yml}": "prettier --write"

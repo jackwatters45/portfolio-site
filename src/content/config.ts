@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
 import { z, defineCollection } from "astro:content";
 
 // posts

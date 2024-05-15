@@ -1,0 +1,67 @@
+---
+title: "Team Send: Informal Team Communication"
+author: Jack Watters
+description: "A look into the creation of Team Send amd some of the decisions that went into it."
+pubDate: 2024-05-15
+tags: [coding]
+published: false
+---
+
+import BlogImage from "../../components/Blog-Image.tsx";
+
+My senior year at USC I was the housing manager of my fraternity. I only did it so I could bring my dog to the house, but it led me to my first real-world coding application. Among my responsibilities was making sure all live-ins paid their rent on time. I came to learn that it is shockingly (or maybe unshockingly) difficult to get a group of 30 college students to pay rent on time every month.
+
+<BlogImage 
+  src="/chilly.webp"
+  alt="My Dog Chilly Outside his 11th Birthday Celebration"
+  caption="Chilly's 11th Birthday Tailgate"
+/>
+
+One late night, I realized I could probably create a script that would send text messages to everyone who hadn't paid yet. It wasn't a perfect solution, but I figured I could drown them out with enough messages that they would eventually turn in rent to silence the messages. I was able to put together a simple script that read the treasurer's spreadsheet and send out a text message to anyone who hadn't paid yet. It was a simple solution, but it worked.
+
+Fast forward a few years and I found myself deciding to turn that script into a web app. I always knew I wanted to build it out, and I finally had the time and skills to do so. Team Send builds on this original idea and enables users to better communicate and coordinate with their informal teams. It merges emails, SMS, and GroupMe messages into a seamless communication experience.
+  
+### Team Send Now
+
+In its current iteration, Team Send is quite simple. Users create a group and add members and from there they can send out messages to the group. Users can send messages via a combination of email, SMS, and GroupMe. Messages can be scheduled to be sent at a later time, on a recurring basis, and include reminders. That's the basic functionality of Team Send. It isn't meant to receice responses or messages, rather serve as a one-way communication tool. 
+
+(May 2024) The GroupMe integration is a work in progress. I am fine tuning concurency considerations, as the group in Team Send is tied directly to a GroupMe group and changes in one need to be reflected in the other. 
+
+<BlogImage 
+  src="/ts-groups.webp"
+  alt="Team Send Dashboard"
+/>
+
+The main functionality of Team Send currently relies on Twilio for sms, Nodemailer for email, and GroupMe of course GroupMe for GroupMe messaging. I am using Pusher for real-time updates and Qstash for message scheduling. Currently, users are required to use their own Twilio accounts, but I am looking to add a paid tier that will include a Twilio account for users.
+
+Team Send is built using NextJs Pages Router. I had previously been doing most of my work in React without a Meta Framework, but I wanted to try out Next, mainly to revisit server-side rendering which I hadn't used since creating a PHP app for a class in college. Considering how controversial App Router is I decided Pages Router would be a better introduction. In retrospect, this was a mistake and something I wish I could go back on - I'll expand on this later.
+
+I scaffolded the project using create-t3-app, which I really enjoyed. tRPC is great and I hope they find a way to integrate it with RSC in a future release. I think RPCs do a great job of abstracting away the API layer and I think it's a great way to build out a project. 
+
+I was between deciding between Prisma and Drizzle as an ORM but settled on Prisma because it was much more established and I had used it before. Prisma is fine but I have been using Drizzle on more recent projects and really enjoy its similarity to SQL. That being said Prisma was a completely fine choice for this project and I am excited to see what they are doing with Prisma Accelerate and Pulse. I use postgres on Railway for all my projects and this one was no different. I have been using a Postgres Docker Image for local development and the combo has been working great.
+
+Tailwind was an obvious choice - I've been using it for a while and don't plan on changing any time soon. When I began in the React ecosystem I was a huge fan of Styled Components, but I watched a video on them from [Theo (t3․gg)](https://www.youtube.com/@t3dotgg/videos) and his argument for not separating the html from the styles just clicked with me. As much as tailwind can make your code ugly, I think it makes your code mucb more readable and maintainable.
+
+Rounding out the T3 stack, I used Auth.js (NextAuthJs) for auth. I've seen similar sentiments on tech Twitter, but Auth.js certainly isn't perfect. I've been using Clerk on recent projects and while its a breeze to set up, both options have their pros and cons. 
+
+Most components are built using Shadcn. As much as I enjoy building out components from scratch, the built in accessibility features of Shadcn and time saved allow you to focus on the more important parts of your app. I've been using Shadcn for a while and I think it's a great tool for building out components quickly and efficiently. I'm a huge fan of the concept of having the components locally in your app - It made the components incredibly flexible and easy to work with.
+
+### The Future of Team Send
+
+I am mainly looking to add a few useful integrations specifically Whatsapp. Because Team Send is directed towards more informal teams, I am not currently planning on adding Slack or Discord integrations. I am also looking to add a few more features to the GroupMe integration, such as the ability to add and remove members from the GroupMe group directly from Team Send. That is basically the scope of features planned for now; Team Send is meant to be a utility app and serve a quite specific purpose. 
+
+<BlogImage 
+  src="/next-routing.webp"
+  alt="Pages Router Evil??"
+/>
+
+
+### The Not Fun Stuff
+
+Pages Router isn't unusable, but I ran into quite a few things that I really didn't like. I encountered several challenges such as repetitive imports, managing middleware, and clunky data-fetching methods. Although its file-based routing system is somewhat usable, it often felt restrictive compared to centralized routing. Intrigued by improvements, I found that the Next.js App Router tends to resolve many of these issues, offering a more streamlined development experience. For a more comprehensive analysis of my experiences and insights, check out my detailed article on the subject.
+
+I have found Next itself to have some performance drawbacks. Both in production and development, Next often felt sluggish, contributing to delays that detracted from the overall user and developer experience. And don't get me started on build times, even with a pretty simple app and checks turned off, deployment takes forever compared to other frameworks. While TurboPack has brought some improvements, particularly in development, the performance lag is still a notable concern.
+
+Given these performance issues with Next, I'll definitely be looking at other frameworks for future projects. Options like SolidStart, Remix, and TanStack Start are appealing as they promise more efficient performance and a streamlined development process. I'm not moving off NextJs forever but some of the drawbacks (and twitter drama) don't have me overly excited to come back.
+
+Speaking of performance issues, serverless cold starts are so brutal. I don't want to have to deal with managing a vps, so this is more of a complaint than anything, so I'll just leave it at that.

@@ -1,0 +1,35 @@
+---
+title: "Navigating Next.js Pages Router"
+author: Jack Watters
+description: "A look into the Next.js Pages Router and some of the challenges I faced while using it."
+pubDate: 2024-05-14
+tags: [next, routing]
+published: true
+---
+
+SolidStart, Remix, and TanStack
+Having recently completed a project with [Next.js Pages Router](https://nextjs.org/docs/pages), I want to share my experiences and insights. This is not going to be a comparison to [Next.js App Router](https://nextjs.org/docs/app), instead I'll be comparing it to all of the javascript routing solutions I have used, which includes [TanStack Router](https://tanstack.com/router/latest), [React Router](https://reactrouter.com/en/main), [Solid's Router](https://docs.solidjs.com/solid-router) and most recently App Router. Despite its general popularity and adoption, I have found the file-based routing system to be somewhat lacking, even though it is manageable with some effort. My experiences revealed a few pain points that are worth discussing. 
+
+#### Centralized vs. File-Based Routing
+
+I generally favor centralized routing over file-based routing systems, mostly due to the clear, explicit control it offers over route definitions. With Pages Router, the file-based approach mandates that routes be defined by the files and directories within the `pages` folder. While this can reduce boilerplate code and provide a degree of simplicity, it also means less flexibility and control. Configuring nested routes or more complex routing scenarios can become cumbersome, and for someone who favors centralized routing, the automatic nature of file-based routing can feel restrictive.
+
+#### The Need for a Real Layout Page
+
+One significant frustration is the lack of a true layout page capability. A root layout works fine - just wrap your `_app.tsx` file - but nested layouts can be a pain. A more efficient approach would be having a dedicated layout component managed at a higher level, so the developer doesn’t need to reimport common components on every new page. This would not only streamline the development process but also ensure consistency across the entire application and prevent annoying bugs.
+
+#### Middleware and Route Guards: Simplifying Protection Logic
+
+Another challenge I faced was managing middleware and route guards to protect routes. Implementing these protections often involves a lot of repeated code scattered across different pages, making the codebase harder to maintain and more error-prone. I don't think that App Routers' [approach](https://nextjs.org/docs/app/building-your-application/routing/middleware) isn't terrible but I miss being able to just do it in the file where I define my routes. I think a more centralized approach to middleware and route guards would be beneficial, allowing developers to define these protections in a single location and apply them to multiple routes as needed.
+
+#### Data Fetching: Balancing Flexibility and Usability
+
+Data fetching in Pages Router has its strengths and weaknesses. Methods like `getServerSideProps` and `getStaticProps` are powerful for server-side rendering and static site generation but can feel clumsy and verbose. They often require boilerplate code that hampers the smooth developer experience. While these methods do a good job of ensuring flexibility in data fetching, their implementation could be more developer-friendly.
+
+On the horizon, `React Server Components` (RSC) offer an interesting approach to data fetching. They promise a more seamless integration of server-driven data-fetching but are still in the experimental stage. I am currently exploring their capabilities and am hopeful that they could fill the gaps left by traditional methods like `getServerSideProps` and `getStaticProps`. That being said I am still hesitant, as I think many are, to adopt it yet.
+
+#### Conclusion
+
+While the Pages Router provides a usable and straightforward file-based routing system, it is not without its challenges. The experience could be significantly improved with better layout management, centralized middleware, and more streamlined data-fetching methods. However, it’s worth noting that App Router does a decent job of addressing many of these issues. Features such as improved layout handling and more intuitive data-fetching capabilities offer a promising glimpse into the future of Next.js. Despite the hurdles, my overall journey with Pages Router has been educational. As the ecosystem evolves, I look forward to seeing how Next.js continues to enhance the development experience.
+
+(edit 11/15/24) As much as I usually find Ryan Florence unbearable over twitter, his React Conf speach was great and React Router v7 Looks incredibly promising. I will definitely be giving it a try on my next project. 
