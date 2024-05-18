@@ -10,15 +10,6 @@ export default {
 				"rubik-scribble": ["Rubik Scribble", "sans-serif"],
 				roboto: ["Roboto", "sans-serif"],
 			},
-			typography: {
-				DEFAULT: {
-					css: {
-						p: {
-							"text-align": "left !important",
-						},
-					},
-				},
-			},
 		},
 	},
 	plugins: [require("@tailwindcss/typography")],
