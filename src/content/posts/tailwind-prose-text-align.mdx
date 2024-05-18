@@ -4,5 +4,28 @@ author: Jack Watters
 description: "Learning about text-align: justify.. and how to remove it in Tailwind Typography."
 pubDate: 2024-05-17
 tags: [tailwind]
-published: false
+published: true
+blogUrl: "/tailwind-prose-text-align"
 ---
+
+import BlogImage from "../../components/Blog-Image.tsx";
+
+TLDR: `prose-p:text-justify` is included in the Astro Recipe and can be removed to fix text spacing issues.
+
+When creating this blog I used a helpful [recipe](https://docs.astro.build/en/recipes/tailwind-rendered-markdown/) from the Astro Docs. It worked great and I though nothing of it, but as I was working on a recent post (shameless self-plug: [Team Send: Informal Team Communication](https://www.jackwatters.dev/blog/team-send)) I noticed the text spacing was off. 
+
+<BlogImage 
+  src="/blog-images/text-justify.webp"
+  alt="Line 3 is too spaced out"
+  caption="See line 3"
+/>
+
+
+For most text it looks fine - I'd almost say it looks better, but when the spacing is off, it's hard to ignore. The culprit is `text-align: justify;` which I innitially thought was a Tailwind Typography default. I was wrong. It turns out it is included in the Astro recipe. `prose-p:text-justify` is the class causing the issue and can be removed to fix the spacing.
+
+<BlogImage 
+  src="/blog-images/astro-prose.webp"
+  caption="The culprit `prose-p:text-justify`"
+/>
+
+Maybe it's just the font I'm using, but it's a somewhat questionable class to include in the recipe. It's not a huge error, but it is time wasted debugging something that shouldn't have been an issue. Hopefully this saves someone else some time. Cheers!
