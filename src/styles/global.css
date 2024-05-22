@@ -1,39 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+	font-family: "Bebas Neue", "Roboto", sans-serif;
+	line-height: 1.5;
+	color-scheme: dark;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-font-smoothing: antialiased;
+	-webkit-text-size-adjust: 100%;
+}
 
-@layer base {
-	:root {
-		font-family: "Bebas Neue", "Roboto", sans-serif;
-		line-height: 1.5;
-		color-scheme: dark;
-		font-synthesis: none;
-		text-rendering: optimizeLegibility;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		-font-smoothing: antialiased;
-		-webkit-text-size-adjust: 100%;
-	}
+html {
+	color: #fffbeb;
+	background-color: #171717;
+	scroll-behavior: smooth;
+}
 
-	html {
-		color: #fffbeb;
-		background-color: #171717;
-		scroll-behavior: smooth;
-	}
+button {
+	background: transparent;
+	outline: none;
+	border: none;
+	cursor: pointer;
+}
 
-	button {
-		background: transparent;
-		outline: none;
-		border: none;
-		cursor: pointer;
-	}
+a {
+	text-decoration: none;
+	color: inherit;
+}
 
-	a {
-		text-decoration: none;
-		color: inherit;
-	}
-
-	:hover {
-		transition: all 0.1s ease-in-out;
-	}
+:hover {
+	transition: all 0.1s ease-in-out;
 }
