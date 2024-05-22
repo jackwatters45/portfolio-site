@@ -1,6 +1,5 @@
-import { z, defineCollection } from "astro:content";
+import { defineCollection, z } from "astro:content";
 
-// posts
 const postSchema = z.object({
 	title: z.string(),
 	pubDate: z.date(),
@@ -8,6 +7,7 @@ const postSchema = z.object({
 	author: z.string(),
 	tags: z.array(z.string()),
 	published: z.boolean(),
+	blogUrl: z.string(),
 });
 
 const postsCollection = defineCollection({
@@ -17,7 +17,6 @@ const postsCollection = defineCollection({
 
 export type Post = z.infer<typeof postSchema>;
 
-// all
 export const collections = {
 	posts: postsCollection,
 };
