@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 import "../styles/animations/repeated-text.css";
-import useProjectsAnimation from "../hooks/useProjectsAnimation";
+import useProjectsAnimation from "../lib/hooks/useProjectsAnimation";
 import projectsData from "@/constants/projectsData";
 import { techStack1, techStack2 } from "../constants/techStacks";
 

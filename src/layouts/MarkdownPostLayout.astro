@@ -1,14 +1,10 @@
 ---
-// import dayjs from "dayjs";
-// import utc from "dayjs/plugin/utc";
-
 import BlogLayout from "./BlogLayout.astro";
 import Prose from "../components/Prose.astro";
+import { formatDateString } from "../lib/utils.ts";
 
 const { frontmatter } = Astro.props;
-const { title, description, blogUrl, tags } = frontmatter;
-
-// dayjs.extend(utc);
+const { title, description, blogUrl, tags, pubDate } = frontmatter;
 ---
 
 <BlogLayout title={title} description={description}>
@@ -20,10 +16,9 @@ const { title, description, blogUrl, tags } = frontmatter;
 	</head>
 	<body>
 		<div class="flex flex-col">
-			<h1 class="font-inconsolata text-4xl font-bold">{frontmatter.title}</h1>
+			<h1 class="font-inconsolata text-4xl font-bold">{title}</h1>
 			<p class="pt-4 text-stone-300">
-				<!-- {dayjs(frontmatter.pubDate).utc().format("MMMM D, YYYY")} -->
-				{new Date(frontmatter.pubDate).toUTCString()}
+				{formatDateString(pubDate)}
 			</p>
 			<div class="pt-8">
 				<Prose>

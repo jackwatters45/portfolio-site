@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 import greetings from "../constants/greetings";
-import useLoopThroughText from "../hooks/useLoopThroughText";
+import useLoopThroughText from "../lib/hooks/useLoopThroughText";
 
 const About = () => {
 	const { currentIndex, loopThroughText, stopLooping } = useLoopThroughText(

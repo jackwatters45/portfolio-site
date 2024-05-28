@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import CoverLetterLayout from "@/layouts/CoverLetterLayout.astro";
+
+export async function getStaticPaths() {
+	const coverLEtterEntries = await getCollection("cover-letter");
+	return coverLEtterEntries.map((entry) => ({
+		params: { slug: entry.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<CoverLetterLayout frontmatter={entry.data}>
+	<Content />
+</CoverLetterLayout>

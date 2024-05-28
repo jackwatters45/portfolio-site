@@ -1,5 +1,5 @@
 import "../styles/animations/typewriter.css";
-import { useTypingEffect } from "../hooks/useTypingEffect";
+import { useTypingEffect } from "../lib/hooks/useTypingEffect";
 import textDescriptions from "@/constants/textDescriptions";
 
 const Home = () => {

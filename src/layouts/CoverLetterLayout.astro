@@ -1,0 +1,71 @@
+---
+import BlogLayout from "./BlogLayout.astro";
+import Prose from "../components/Prose.astro";
+import { formatDateString } from "../lib/utils.ts";
+
+const { frontmatter } = Astro.props;
+const { title, company, date, position } = frontmatter;
+---
+
+<BlogLayout title={title} description={undefined}>
+	<body>
+		<div class="flex flex-col">
+			<div class="pt-8">
+				<div class="font-roboto text-lg text-stone-300 dark:prose-invert
+				xl:text-xl">
+					<p class="">{formatDateString(date)}</p>
+					<p class="">{company}</p>
+					<p class="">{position}</p>
+				</div>
+				<div class="pt-8">
+					<Prose>
+						<slot />
+					</Prose>
+				</div>
+				<div class="pt-8">
+					<hr class="pt-8 opacity-10" />
+					<div class="">
+						<div class="flex flex-wrap gap-2">
+							<p class="font-roboto text-lg text-stone-400 cursor-default">San Francisco</p>
+							<div class="font-roboto text-lg font-bold text-stone-400">·</div>
+							<a
+								href="mailto:jack.watters@me.com"
+								class="cursor-pointer font-roboto text-lg text-stone-400 underline"
+								>jack.watters@me.com</a
+							>
+							<div class="font-roboto text-lg font-bold text-stone-400">·</div>
+							<a
+								href="https://www.linkedin.com/in/john-watters/"
+								class="cursor-pointer font-roboto text-lg text-stone-400 underline"
+							>
+								linkedin
+							</a>
+							<div class="font-roboto text-lg font-bold text-stone-400">·</div>
+							<a
+								href="https://github.com/jackwatters45"
+								class="cursor-pointer font-roboto text-lg text-stone-400 underline"
+							>
+								github
+							</a>
+							<div class="font-roboto text-lg font-bold text-stone-400">·</div>
+							<a
+								href="https://jackwattersdev.s3.us-west-2.amazonaws.com/John+Watters+Resume+2024.pdf"
+								class="cursor-pointer font-roboto text-lg text-stone-400 underline"
+							>
+								resume
+							</a>
+						</div>
+						<div class="pb-6 pt-12">
+							<a
+								href="/#home"
+								class="line-through-animation h-fit font-roboto-mono text-lg uppercase"
+							>
+								Watters
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</BlogLayout>

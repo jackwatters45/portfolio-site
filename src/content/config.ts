@@ -15,8 +15,19 @@ const postsCollection = defineCollection({
 	schema: postSchema,
 });
 
-export type Post = z.infer<typeof postSchema>;
+const coverLetterSchema = z.object({
+	title: z.string(),
+	company: z.string(),
+	position: z.string(),
+	date: z.date(),
+});
+
+const coverLettersCollection = defineCollection({
+	type: "content",
+	schema: coverLetterSchema,
+});
 
 export const collections = {
 	posts: postsCollection,
+	"cover-letter": coverLettersCollection,
 };
