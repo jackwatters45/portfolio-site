@@ -37,7 +37,7 @@ const Projects = () => {
 				transition={{ opacity: { delay: 1, duration: 3, ease: "easeInOut" } }}
 			>
 				<div
-					className="left-1/2 flex -translate-x-1/2 gap-[5vmin]"
+					className="relative left-full flex -translate-x-1/2 gap-[5vmin]"
 					ref={trackRef}
 					tabIndex={0}
 					onKeyDown={handleKeyDown}

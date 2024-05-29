@@ -17,7 +17,7 @@ const discussTags: string[] = [
 const Contact = () => {
 	return (
 		<section
-			className="relative flex h-screen flex-col items-center justify-between gap-16 pt-16 sm:gap-24 sm:pt-32 lg:gap-32 lg:pt-48"
+			className="relative flex min-h-screen flex-col items-center justify-between gap-16 pt-16 sm:gap-24 sm:pt-32 lg:gap-32 lg:pt-48"
 			id="contact"
 		>
 			<motion.h2

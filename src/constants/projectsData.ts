@@ -32,15 +32,14 @@ const projectsData: IPortfolioProject[] = [
 		repoUrl: "https://github.com/jackwatters45/team-send",
 		liveUrl: "https://team-send.yatusabes.co/",
 	},
-	// {
-	// 	name: "Responder",
-	// 	previewImg:
-	// 		"",
-	// 	description: "Optimize Google Business replies using OpenAI. In	progress...",
-	// 	repoUrl: "https://github.com/jackwatters45/responder",
-	// 	liveUrl: "https://responder.yatusabes.co/",
-
-	// },
+	{
+		name: "Responder",
+		previewImg:
+			"https://res.cloudinary.com/drheg5d7j/image/upload/v1716957830/responder.yatusabes.co__vhbgdy.webp",
+		description: "Optimize Google Business replies using OpenAI. In	progress...",
+		repoUrl: "https://github.com/jackwatters45/responder",
+		liveUrl: "https://responder.yatusabes.co/",
+	},
 	{
 		name: "Notion-inspired Todo List",
 		previewImg:

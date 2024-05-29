@@ -12,7 +12,10 @@ const About = () => {
 	const currentGreeting = greetings[currentIndex];
 
 	return (
-		<section className="relative flex h-screen flex-col justify-evenly py-4" id="about">
+		<section
+			className="relative flex min-h-screen flex-col justify-evenly py-4"
+			id="about"
+		>
 			<div className="flex w-full flex-col justify-end gap-4 px-12">
 				<motion.span
 					onMouseEnter={loopThroughText}
