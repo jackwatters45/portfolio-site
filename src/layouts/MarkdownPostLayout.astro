@@ -3,14 +3,14 @@ import BlogLayout from "./BlogLayout.astro";
 import Prose from "../components/Prose.astro";
 import { formatDateString } from "../lib/utils.ts";
 
-const { frontmatter } = Astro.props;
-const { title, description, blogUrl, tags, pubDate } = frontmatter;
+const { frontmatter, slug } = Astro.props;
+const { title, description, tags, pubDate } = frontmatter;
 ---
 
 <BlogLayout title={title} description={description}>
 	<head>
-		<link rel="canonical" href={`https://jackwatters.dev/blog/${blogUrl}`} />
-		<link rel="canonical" href={`https://jackwatters.dev/blog/${blogUrl}`} />
+		<link rel="canonical" href={`https://jackwatters.dev/blog/${slug}`} />
+		<link rel="canonical" href={`https://jackwatters.dev/blog/${slug}`} />
 		<meta property="og:type" content="article" />
 		<meta name="keywords" content={tags.join(", ")} />
 	</head>

@@ -6,8 +6,7 @@ const postSchema = z.object({
 	description: z.string(),
 	author: z.string(),
 	tags: z.array(z.string()),
-	published: z.boolean(),
-	blogUrl: z.string(),
+	draft: z.boolean().optional(),
 });
 
 const postsCollection = defineCollection({

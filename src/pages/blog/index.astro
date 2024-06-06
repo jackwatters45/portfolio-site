@@ -1,7 +1,8 @@
 ---
 import { getCollection } from "astro:content";
+
 const posts = await getCollection("posts", ({ data }) => {
-	return data.published === true;
+	return data?.draft !== true;
 });
 
 const sortedPosts = posts.sort((a, b) => {
