@@ -10,6 +10,7 @@ const sortedPosts = posts.sort((a, b) => {
 });
 
 import BlogLayout from "../../layouts/BlogLayout.astro";
+import { formatDateString } from "@/lib/utils";
 ---
 
 <BlogLayout title={"Jack's Thoughts"}>
@@ -25,9 +26,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 						<div class="font font-roboto text-base leading-tight">
 							{post.data.description}
 						</div>
-						<div class="font-roboto text-sm ">
-							{post.data.pubDate.toLocaleDateString()}
-						</div>
+						<div class="font-roboto text-sm ">{formatDateString(post.data.pubDate)}</div>
 					</a>
 				);
 			})
