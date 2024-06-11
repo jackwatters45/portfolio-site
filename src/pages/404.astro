@@ -1,14 +1,40 @@
 ---
-import BlogLayout from "../layouts/BlogLayout.astro";
+import CommonHead from '@/components/meta/common-head.astro';
 ---
 
-<BlogLayout title="Page Not Found">
-	<h1 class="pb-4 text-6xl font-bold">Oops! Page Not Found (404)</h1>
-	<p class="pb-8 text-3xl">Looks like you've wandered into uncharted territory.</p>
-	<a
-		href="/"
-		class="h-fit rounded-md bg-emerald-300 px-5 py-3 text-2xl font-medium text-white hover:bg-emerald-400"
-	>
-		Let's head back home.
-	</a>
-</BlogLayout>
+<html lang="en" class="dark">
+  <CommonHead title={'404'} />
+  <body>
+    <main class="h-screen w-screen overflow-x-hidden text-base">
+      <div class="container w-fit py-16 md:py-24 space-y-6 max-w-screen-sm">
+        <h1 class="font-serif italic text-xl">
+          Beep, Boop, Looks like you're lost.
+        </h1>
+
+        <p class="text-muted-foreground">
+          We've all been there. Let's get you back on track.
+        </p>
+        <div class="flex justify-between items-center w-full">
+          <div class="pt-4 font-serif">
+            <a
+              class="flex items-center gap-[6px] hover:underline underline-offset-4 p-2 -ml-2"
+              href="https://youtu.be/MsuuiVzS6Js?si=USZ4nIzIeWl7zTV1"
+              >I'm scared</a
+            >
+            <a
+              class="flex items-center gap-[6px] hover:underline underline-offset-4 p-2 -ml-2"
+              href="/">Take me home</a
+            >
+          </div>
+          <a href="/">
+            <img
+              src="/chilly-icon.png"
+              alt="Home Button"
+              class="h-10 scale-x-[-1] cursor-help"
+            />
+          </a>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

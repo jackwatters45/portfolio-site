@@ -1,16 +1,71 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Home from "../components/Home";
-import About from "../components/About";
-import Contact from "../components/Contact";
-import Projects from "../components/Projects";
+import Layout from '@/layouts/layout.astro';
+import Socials from '@/components/socials/socials.astro';
 ---
 
-<Layout title="Jack Watters">
-	<main>
-		<Home client:idle />
-		<About client:visible />
-		<Projects client:visible />
-		<Contact client:visible />
-	</main>
+<Layout>
+  <div class="space-y-6">
+    <p>
+      Full stack developer creating elegant, minimalistic software that enhances
+      user experience. Exploring design systems and environmental tech.
+      <em> Building and Learning. </em>
+    </p>
+    <p>
+      Currently consulting at Insurance BCX and working on a few personal
+      projects.
+    </p>
+  </div>
+  <div class="space-y-3 text-sm text-muted-foreground">
+    <a
+      href="/about"
+      class="block underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+      >a little more personal</a
+    >
+    <a
+      href="/blog"
+      class="block underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+      >unsolicited opinions</a
+    >
+  </div>
+  <div class="space-y-8">
+    <div class="space-y-3">
+      <a href="/building">Building</a>
+      <ul class="space-y-2 text-sm text-muted-foreground">
+        <li>
+          <a
+            class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+            href="https://musicapq.vercel.app/">Música Pa Que 💃</a
+          >
+        </li>
+        <li>
+          <a
+            class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+            href="https://laxtalk.vercel.app/">State of Lacrosse 2024</a
+          >
+        </li>
+        <li class="flex items-center gap-1">
+          <a
+            class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+            href="https://responder.yatusabes.co/"
+            >Responder
+          </a>{' '}
+          <span> - on hold </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="space-y-8">
+    <div class="space-y-3">
+      <a href="/building">Past Projects</a>
+      <ul class="space-y-2 text-sm text-muted-foreground">
+        <li>
+          <a
+            class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+            href="https://teamsend.yatusabes.co/">Team Send</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
+  <Socials />
 </Layout>

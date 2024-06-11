@@ -1,0 +1,27 @@
+---
+import CommonHead from '@/components/meta/common-head.astro';
+
+interface Props {
+  title?: string;
+}
+
+const { title }: Props = Astro.props;
+---
+
+<html lang="en" class="dark">
+  <CommonHead title={title} />
+  <body>
+    <main class="h-screen w-screen overflow-x-hidden text-base">
+      <div class="container max-w-screen-sm py-16 md:py-24">
+        <div class="pb-8">
+          <a href="/" class="cursor-custom">
+            John
+            <em class="font-serif text-lg"> (Jack) </em>
+            Watters
+          </a>
+        </div>
+        <div class="space-y-12"><slot /></div>
+      </div>
+    </main>
+  </body>
+</html>

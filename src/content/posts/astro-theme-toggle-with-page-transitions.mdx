@@ -7,14 +7,14 @@ tags: [astro]
 ---
 
 
-TLDR: Add an event listener for `astro:after-swap` that checks local storage to update the theme. In my case:
+TLDR: Add an event listener for `astro:after-swap` that checks local storage to update the theme.
 
 When working with [Astro](https://docs.astro.build/en/getting-started/) I like to take advantage of their built-in [view transitions](https://docs.astro.build/en/guides/view-transitions/). It takes two lines of code to add to your project and makes navigation feel very smooth. I didn't add a theme toggle to my site the first few times I used them in a project, but when I did opt for one in a recent project, I noticed a small issue.
 
 I didn't want to spend any time on a simple toggle switch so I opted to grab the one from [Shadcn](https://ui.shadcn.com/docs/dark-mode/astro). I've used it with other frameworks and it works great. The issue I ran into was that when navigating to a new page the theme reset to the default.
 
 
-import BlogImage from "../../components/Blog-Image.astro";
+import BlogImage from "../../components/blog/blog-image.astro";
 
 <BlogImage src="https://res.cloudinary.com/drheg5d7j/image/upload/v1717708102/theme-toggle-issue_udgybe.gif" alt="Theme reverts back to innitial on page navigate" />
 

@@ -1,0 +1,80 @@
+---
+import Layout from '@/layouts/layout.astro';
+import { Separator } from '@/components/ui/separator';
+import ListRow from '@/components/list/list-row.astro';
+import ListLink from '@/components/list/list-link.astro';
+import ListText from '@/components/list/list-sub-text.astro';
+---
+
+<Layout title="learning">
+  <div class="space-y-2">
+    <h1 class="font-serif">Learning</h1>
+    <p class="text-muted-foreground text-sm">
+      More than anything, I love learning. Here are some of the things I'm
+      currently learning or hope to learn some day.
+    </p>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Currently</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink>GIS </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Environmental Tech </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Spanish </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Writing </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>History </ListLink>
+        <ListText />
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Some Day</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink>Photography </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Video Editing </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Catalan </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Data Science </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Cooking </ListLink>
+        <ListText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Auto Mechanics </ListLink>
+        <ListText />
+      </ListRow>
+    </ul>
+  </div>
+</Layout>

@@ -1,3 +1,10 @@
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 export function formatDateString(dateString: string | Date): string {
 	// Parse the date string into a Date object
 	const date = new Date(dateString);
@@ -13,3 +20,4 @@ export function formatDateString(dateString: string | Date): string {
 
 	return `${month}/${day}/${year}`;
 }
+

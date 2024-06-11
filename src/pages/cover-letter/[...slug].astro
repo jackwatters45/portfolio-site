@@ -1,9 +1,10 @@
 ---
-import { getCollection } from "astro:content";
-import CoverLetterLayout from "@/layouts/CoverLetterLayout.astro";
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/layout.astro';
+import Socials from '@/components/socials/socials.astro';
 
 export async function getStaticPaths() {
-	const coverLEtterEntries = await getCollection("cover-letter");
+	const coverLEtterEntries = await getCollection('cover-letter');
 	return coverLEtterEntries.map((entry) => ({
 		params: { slug: entry.slug },
 		props: { entry },
@@ -14,6 +15,7 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 ---
 
-<CoverLetterLayout frontmatter={entry.data}>
+<Layout title={entry.data.title}>
 	<Content />
-</CoverLetterLayout>
+	<Socials />
+</Layout>

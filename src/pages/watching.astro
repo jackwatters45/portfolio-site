@@ -1,0 +1,216 @@
+---
+import Layout from '@/layouts/layout.astro';
+import ListRow from '@/components/list/list-row.astro';
+import ListLink from '@/components/list/list-link.astro';
+import ListSubText from '@/components/list/list-sub-text.astro';
+import { Separator } from '@/components/ui/separator';
+---
+
+<Layout title="watching">
+  <div class="space-y-2">
+    <h1 class="font-serif">Watching</h1>
+    <p class="text-muted-foreground text-sm">
+      Some of the movies, television, documentaries, podcasts I've enjoyed over
+      the years.
+    </p>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Currently</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink
+          href="https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2"
+          >Ministerio del Tiempo
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.adultswim.com/videos/smiling-friends"
+          >Smiling Friends
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://open.spotify.com/show/5rVz6WZuWQKxWalrPaIRxI"
+          >Central - Bukele
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Podcasts</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink href="https://www.youtube.com/@TheAlwaysSunnyPodcast"
+          >Always Sunny Podcast
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://open.spotify.com/show/0J74zdNxUVWHq4gLoq8MqX"
+          >Radio Ambulante
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://open.spotify.com/show/4AWbCJz3e72OaMvuzLHXX4"
+          >Unpacking Latin America
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Movies</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt11813216/">
+          Banshees of Inisherin
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt2379713/">
+          Spectre
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt1931533/">
+          Seven Psychopaths
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0945513/">
+          Source Code
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt1570728/">
+          Crazy, Stupid, Love
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0780536/">
+          In Bruges
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0477348/">
+          No Country for Old Men
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0425458/">
+          Six Shooter
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0103776/">
+          Batman Returns
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0034583/">
+          Casablanca
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Tv Shows</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0472954/"
+          >Always Sunny in Philadelphia
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt6468322/"
+          >La Casa de Papel
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt2741602/"
+          >The Blacklist
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt1695360/"
+          >The Legend of Korra
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt1055238/"
+          >Would I Lie to You?
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0866442/"
+          >Eastbound & Down
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0460091/"
+          >My Name is Earl
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0417299/"
+          >Avatar: The Last Airbender
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0163507/"
+          >Whose Line Is It Anyway?
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink href="https://www.imdb.com/title/tt0098936/"
+          >Twin Peaks
+        </ListLink>
+        <ListSubText />
+      </ListRow>
+    </ul>
+  </div>
+</Layout>

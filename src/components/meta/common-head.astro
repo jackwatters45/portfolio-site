@@ -1,0 +1,53 @@
+---
+import '../../styles/globals.css';
+
+import { ViewTransitions } from 'astro:transitions';
+import Posthog from '../meta/posthog.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const formattedTitle = title ? `Jack Watters - ${title}` : 'Jack Watters';
+---
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="generator" content={Astro.generator} />
+  <meta
+    name="description"
+    content={description || "Jack Watters' portfolio and blog!"}
+  />
+  <link rel="icon" type="image/svg+xml" href="/chilly-icon.png" />
+  <title>{formattedTitle}</title>
+
+  <!-- open graph -->
+  <meta property="og:title" content={formattedTitle} />
+  <meta
+    property="og:description"
+    content={description || "Jack Watters' portfolio and blog!"}
+  />
+  <meta
+    property="og:image"
+    content="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
+  />
+
+  <!-- twitter -->
+  <meta name="twitter:title" content={formattedTitle} />
+  <meta
+    name="twitter:description"
+    content={description || "Jack Watters' portfolio and blog!"}
+  />
+  <meta
+    name="twitter:image"
+    content="https://res.cloudinary.com/drheg5d7j/image/upload/v1703751903/chilly_Icon_aqnqzg.png"
+  />
+  <meta name="twitter:site" content="@w0tters" />
+
+  <ViewTransitions />
+  <Posthog />
+</head>

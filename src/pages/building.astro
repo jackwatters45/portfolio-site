@@ -1,0 +1,56 @@
+---
+import { Separator } from '@/components/ui/separator';
+import Layout from '@/layouts/layout.astro';
+import ListLink from '@/components/list/list-link.astro';
+import ListRow from '@/components/list/list-row.astro';
+import ListText from '@/components/list/list-sub-text.astro';
+---
+
+<Layout title="building">
+  <div class="space-y-2">
+    <h1 class="font-serif">Building</h1>
+    <p class="text-muted-foreground text-sm">TODO</p>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Currently</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink>Música Pa Que 💃</ListLink>
+        <ListText>Music Sharing</ListText>
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>State of Lacrosse 2024</ListLink>
+        <ListText>Lacrosse Wiki</ListText>
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Responder</ListLink>
+        <ListText>Review Responses </ListText>
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">2024</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink>Team Send</ListLink>
+        <ListText>Informal Team Communication </ListText>
+      </ListRow>
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <h2 class="font-serif">Seeds</h2>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+      <ListRow>
+        <ListLink>Scheduling App</ListLink>
+        <ListText>Find the best time for an event</ListText>
+      </ListRow>
+      <Separator />
+      <ListRow>
+        <ListLink>Language Learning</ListLink>
+        <ListText>Coordinate Learning with a book</ListText>
+      </ListRow>
+    </ul>
+  </div>
+</Layout>
