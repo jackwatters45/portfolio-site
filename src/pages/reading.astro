@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import ListRow from '@/components/list/list-row.astro';
 import ListLink from '@/components/list/list-link.astro';
 import ListText from '@/components/list/list-sub-text.astro';
+import { READING } from '@/lib/constants';
 ---
 
 <Layout title="reading">
@@ -16,91 +17,49 @@ import ListText from '@/components/list/list-sub-text.astro';
   <div class="space-y-3">
     <h2 class="font-serif">Currently</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1"
-          >Cien Años de Soledad</ListLink
-        >
-        <ListText>Magical Realism</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/297673.The_Brief_Wondrous_Life_of_Oscar_Wao"
-          >The Brief Wondrous Life of Oscar Wao</ListLink
-        >
-        <ListText>Fiction</ListText>
-      </ListRow>
+      {
+        READING.currently.map((book, i) => (
+          <>
+            <ListRow>
+              <ListLink href={book.link}>{book.name}</ListLink>
+              <ListText>{book.genre}</ListText>
+            </ListRow>
+            {i !== READING.currently.length - 1 ? <Separator /> : null }
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
-    <h2 class="font-serif">Read</h2>
+    <h2 class="font-serif">Recommend</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/41684130-el-alqumista"
-          >El Alquimista</ListLink
-        >
-        <ListText>Magical Realism</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/60965426-the-creative-act"
-          >The Creative Act: Way of Being</ListLink
-        >
-        <ListText>Philosophy</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/28686959-based-on-a-true-story?from_search=true&from_srp=true&qid=ctedItGJ9l&rank=1"
-          >Norm Macdonald: Based on a Link True Story</ListLink
-        >
-        <ListText>Comedic Fiction</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/49961.Notes_from_Underground_The_Double_and_Other_Stories"
-        >
-          Notes From the Underground, The Double, and Other Stories
-        </ListLink>
-        <ListText>Philosophical Fiction</ListText>
-      </ListRow>
+      {
+        READING.recommend.map((book, i) => (
+          <>
+            <ListRow>
+              <ListLink href={book.link}>{book.name}</ListLink>
+              <ListText>{book.genre}</ListText>
+            </ListRow>
+            {i !== READING.recommend.length - 1 ? <Separator /> : null }
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">Next</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink href="https://www.goodreads.com/book/show/426504.Ficciones"
-          >Ficciones</ListLink
-        >
-        <ListText>Magical realism</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink
-          href="https://www.goodreads.com/book/show/11.The_Hitchhiker_s_Guide_to_the_Galaxy"
-          >The Hitchhiker's Guide to the Galaxy</ListLink
-        >
-        <ListText>Science Fiction</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://www.goodreads.com/book/show/30659.Meditations"
-          >Meditations</ListLink
-        >
-        <ListText>Philosophy</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://www.goodreads.com/book/show/49552.The_Stranger"
-          >The Stranger</ListLink
-        >
-        <ListText>Philosophical Fiction</ListText>
-      </ListRow>
+      {
+        READING.next.map((book, i) => (
+          <>
+            <ListRow>
+              <ListLink href={book.link}>{book.name}</ListLink>
+              <ListText>{book.genre}</ListText>
+            </ListRow>
+            {i !== READING.next.length - 1 ? <Separator /> : null }
+          </>
+        ))
+      }
     </ul>
   </div>
 </Layout>

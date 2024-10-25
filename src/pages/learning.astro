@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import ListRow from '@/components/list/list-row.astro';
 import ListLink from '@/components/list/list-link.astro';
 import ListText from '@/components/list/list-sub-text.astro';
+import { LEARNING } from '@/lib/constants';
 ---
 
 <Layout title="learning">
@@ -17,64 +18,31 @@ import ListText from '@/components/list/list-sub-text.astro';
   <div class="space-y-3">
     <h2 class="font-serif">Currently</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink>GIS </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Environmental Tech </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Spanish </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Writing </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>History </ListLink>
-        <ListText />
-      </ListRow>
+      {
+        LEARNING.currently.map((skill, i) => (
+          <>
+            <ListRow>
+              <ListLink>{skill}</ListLink>
+            </ListRow>
+            {i !== LEARNING.next.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">Some Day</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink>Photography </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Video Editing </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Catalan </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Data Science </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Cooking </ListLink>
-        <ListText />
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Auto Mechanics </ListLink>
-        <ListText />
-      </ListRow>
+      {
+        LEARNING.next.map((skill, i) => (
+          <>
+            <ListRow>
+              <ListLink>{skill}</ListLink>
+            </ListRow>
+            {i !== LEARNING.next.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
 </Layout>

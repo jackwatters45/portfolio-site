@@ -11,8 +11,3 @@ View live site [HERE](https://jackwatters.dev)
 ## Check out what I'm working on
 
 <https://yatusabes.co>
-
-## Roadmap
-
-- Add a better projects section
-- Chilly photos

@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import ListRow from '@/components/list/list-row.astro';
 import ListLink from '@/components/list/list-link.astro';
 import ListText from '@/components/list/list-sub-text.astro';
+import { LISTENING } from '@/lib/constants';
 ---
 
 <Layout title="listening">
@@ -16,115 +17,47 @@ import ListText from '@/components/list/list-sub-text.astro';
   <div class="space-y-3">
     <h2 class="font-serif">Currently</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink
-          href="https://open.spotify.com/artist/6VD4UEUPvtsemqD3mmTqCR?si=LTO1Cl-IRgeO39kwazsobg"
-          >Deorro
-        </ListLink>
-        <ListText>House</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <div class="flex items-center gap-2">
-          <ListLink href="https://open.spotify.com/album/4JaYe7HIddzNaF3rUgJzHI"
-            >Sauce Boyz 2
-          </ListLink>
-          •
-          <ListLink
-            href="https://open.spotify.com/artist/5XJDexmWFLWOkjOEjOVX3e"
-            >Eladio Carrion</ListLink
-          >
-        </div>
-        <ListText>Reggaeton</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/5rLsN2LxYaEPLa1N7I2mPB"
-          >El Mató a un Policía Motorizado
-        </ListLink>
-        <ListText>Rock Independiente</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/3RTAXX6KGdljBsOIupyZgT"
-          >Los Bunkers
-        </ListLink>
-        <ListText>Rock</ListText>
-      </ListRow>
+      {
+        LISTENING.currently.map((item, i) => (
+          <>
+            <ListRow>
+              {item.album ? (
+                <div class="flex items-center gap-2">
+                  <ListLink href={item.albumLink}>{item.album}</ListLink>•
+                  <ListLink href={item.link}>{item.name}</ListLink>
+                </div>
+              ) : (
+                <ListLink href={item.link}>{item.name}</ListLink>
+              )}
+              <ListText>{item.genre}</ListText>
+            </ListRow>
+            {i !== LISTENING.currently.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">2024</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <div class="flex items-center gap-2">
-          <ListLink href="https://open.spotify.com/album/3RQQmkQEvNCY4prGKE6oc5"
-            >Un Verano Sin Ti
-          </ListLink>
-          •
-          <ListLink
-            href="https://open.spotify.com/artist/4q3ewBCX7sLwd24euuV69X"
-            >Bad Bunny
-          </ListLink>
-        </div>
-        <ListText>Reggaeton</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <div class="flex items-center gap-2">
-          <ListLink href="https://open.spotify.com/album/0cuBq2nDgGbjalgB4iUc7M"
-            >CASSETTE 01
-          </ListLink>
-          •
-          <ListLink
-            href="https://open.spotify.com/artist/3m5qlPf2OkihLz3dRYnkPA"
-            >Ovy On The Drums
-          </ListLink>
-        </div>
-        <ListText>Reggaeton</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/3MNvKeLzGSvOPtXJAjCOzf"
-          >Las Ligas Menores
-        </ListLink>
-        <ListText>Rock Independiente</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/3qsKSpcV3ncke3hw52JSMB"
-          >Young Miko
-        </ListLink>
-        <ListText> Reggaeton </ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/7CvTknweLr9feJtRGrpDBy"
-          >FloyyMenor
-        </ListLink>
-        <ListText> Reggaeton </ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/1HAO6fqdAGX5CiWxBvhiyv"
-          >Lolo Og
-        </ListLink>
-        <ListText> RKT </ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/0GM7qgcRCORpGnfcN2tCiB"
-          >Tainy
-        </ListLink>
-        <ListText> Reggaeton </ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink href="https://open.spotify.com/artist/5f9pQjPeDbuRF1GowQXo3L"
-          >Gusty DJ
-        </ListLink>
-        <ListText> RKT </ListText>
-      </ListRow>
+      {
+        LISTENING['2024'].map((item, i) => (
+          <>
+            <ListRow>
+              {item.album ? (
+                <div class="flex items-center gap-2">
+                  <ListLink href={item.albumLink}>{item.album}</ListLink>•
+                  <ListLink href={item.link}>{item.name}</ListLink>
+                </div>
+              ) : (
+                <ListLink href={item.link}>{item.name}</ListLink>
+              )}
+              <ListText>{item.genre}</ListText>
+            </ListRow>
+            {i !== LISTENING['2024'].length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
 </Layout>

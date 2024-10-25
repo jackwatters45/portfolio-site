@@ -5,6 +5,13 @@ interface Props {
   title?: string;
 }
 
+// url should probably do this part but i kinda like the simple path
+const nestedRoutes = ['learning', 'listening', 'reading', 'watching'];
+const pathname = Astro.url.pathname;
+const homeRoute = nestedRoutes.includes(pathname.split('/')[1])
+  ? '/about'
+  : '/';
+
 const { title }: Props = Astro.props;
 ---
 
@@ -14,7 +21,7 @@ const { title }: Props = Astro.props;
     <main class="h-screen w-screen overflow-x-hidden text-base">
       <div class="container max-w-screen-sm py-16 md:py-24">
         <div class="pb-8">
-          <a href="/" class="cursor-custom">
+          <a href={homeRoute} class="cursor-custom">
             John
             <em class="font-serif text-lg"> (Jack) </em>
             Watters

@@ -1,9 +1,10 @@
 ---
 import Socials from '@/components/socials/socials.astro';
 import Layout from '@/layouts/layout.astro';
+import { LEARNING, LISTENING, READING } from '@/lib/constants';
 ---
 
-<Layout title='about'>
+<Layout title="about">
   <div class="space-y-6">
     <p>
       I am a Canadian-American living in San Francisco. When not at my desk, I
@@ -11,8 +12,8 @@ import Layout from '@/layouts/layout.astro';
     </p>
     <p>
       I love everything LATAM and am always looking for new music, books, and
-      shows to enjoy. I am a passionate fan of the Edmonton Oilers and
-      Barcelona Feminí.
+      shows to enjoy. I'm a passionate fan of the Edmonton Oilers and Barcelona
+      Feminí.
     </p>
     <p>
       In 10 years, I hope to be a local somewhere in Latin America working on
@@ -22,37 +23,32 @@ import Layout from '@/layouts/layout.astro';
   <div class="space-y-3">
     <a href="/learning">Learning</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="#">GIS</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="#">Environmental Tech</a
-        >
-      </li>
+      {
+        LEARNING.currently
+          .slice(0, 3)
+          .map((skill) => (
+            <li class="underline underline-offset-4 decoration-muted-foreground">
+              {skill}
+            </li>
+          ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <a href="/reading">Reading</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1"
-          >Cien Años de Soledad</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://www.goodreads.com/book/show/297673.The_Brief_Wondrous_Life_of_Oscar_Wao"
-          >The Brief Wondrous Life of Oscar Wao
-        </a>
-      </li>
+      {
+        READING.currently.map((book) => (
+          <li>
+            <a
+              class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+              href={book.link}
+            >
+              {book.name}
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
@@ -90,27 +86,18 @@ import Layout from '@/layouts/layout.astro';
   <div class="space-y-3">
     <a href="/listening">Listening</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://open.spotify.com/artist/6VD4UEUPvtsemqD3mmTqCR?si=LTO1Cl-IRgeO39kwazsobg"
-          >Deorro</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://open.spotify.com/album/4JaYe7HIddzNaF3rUgJzHI"
-          >Sauce Boyz 2</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://open.spotify.com/artist/5rLsN2LxYaEPLa1N7I2mPB"
-          >El Mató a un Policía Motorizado</a
-        >
-      </li>
+      {
+        LISTENING.currently.slice(0, 3).map((item) => (
+          <li>
+            <a
+              class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+              href={item.link}
+            >
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </div>
   <Socials />

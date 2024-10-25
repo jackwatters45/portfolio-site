@@ -4,53 +4,62 @@ import Layout from '@/layouts/layout.astro';
 import ListLink from '@/components/list/list-link.astro';
 import ListRow from '@/components/list/list-row.astro';
 import ListText from '@/components/list/list-sub-text.astro';
+import { BUILDING } from '@/lib/constants';
 ---
 
 <Layout title="building">
   <div class="space-y-2">
     <h1 class="font-serif">Building</h1>
-    <p class="text-muted-foreground text-sm">TODO</p>
+    <p class="text-muted-foreground text-sm">
+      Some hobby projects that I work on in my free time. Whenever that is.
+    </p>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">Currently</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink>Música Pa Que 💃</ListLink>
-        <ListText>Music Sharing</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>State of Lacrosse 2024</ListLink>
-        <ListText>Lacrosse Wiki</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Responder</ListLink>
-        <ListText>Review Responses </ListText>
-      </ListRow>
+      {
+        BUILDING.currently.map((project, i) => (
+          <>
+            <ListRow>
+              <ListLink href={project.link}>{project.name}</ListLink>
+              <ListText>{project.description}</ListText>
+            </ListRow>
+            {i !== BUILDING.currently.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">2024</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink>Team Send</ListLink>
-        <ListText>Informal Team Communication </ListText>
-      </ListRow>
+      {
+        BUILDING.past.map((project, i) => (
+          <>
+            <ListRow>
+              <ListLink href={project.link}>{project.name}</ListLink>
+              <ListText>{project.description}</ListText>
+            </ListRow>
+            {i !== BUILDING.past.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
   <div class="space-y-3">
     <h2 class="font-serif">Seeds</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
-      <ListRow>
-        <ListLink>Scheduling App</ListLink>
-        <ListText>Find the best time for an event</ListText>
-      </ListRow>
-      <Separator />
-      <ListRow>
-        <ListLink>Language Learning</ListLink>
-        <ListText>Coordinate Learning with a book</ListText>
-      </ListRow>
+      {
+        BUILDING.seeds.map((project, i) => (
+          <>
+            <ListRow>
+              <ListLink href={project.link}>{project.name}</ListLink>
+              <ListText>{project.description}</ListText>
+            </ListRow>
+            {i !== BUILDING.seeds.length - 1 ? <Separator /> : null}
+          </>
+        ))
+      }
     </ul>
   </div>
 </Layout>
