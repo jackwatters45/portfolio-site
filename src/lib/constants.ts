@@ -116,16 +116,7 @@ export const BUILDING: Building = {
 			name: "Language Learning",
 			description: "Coordinate Learning with a book",
 			year: 2024,
-		},
-		{
-			name: "Marketplace Tracker",
-			description: "Track items accross multiple online marketplaces",
-			year: 2024,
-		},
-		{
-			name: "Lacrosse Platform",
-			description: "Lacrosse Wiki and Database",
-			year: 2024,
+			link: "https://github.com/jackwatters45/word-count-api"
 		},
 	],
 	past: [
@@ -143,6 +134,16 @@ export const BUILDING: Building = {
 		},
 	],
 	seeds: [
+		{
+			name: "Marketplace Tracker",
+			description: "Track items accross multiple online marketplaces",
+			year: 2024,
+		},
+		{
+			name: "Lacrosse Platform",
+			description: "Lacrosse Wiki and Database",
+			year: 2024,
+		},
 		{
 			name: "Used Sports Good Service",
 			description: "Sell or Donate Used Equipment",
@@ -173,17 +174,20 @@ export const LISTENING: Listening = {
 	currently: [
 		{
 			name: "legallyrxx",
-			link: "https://open.spotify.com/artist/4CairTbnNW5l8GxiRIzsZ3?si=DWtkjXl8T96BjuklLf7yhQ",
+			link:
+				"https://open.spotify.com/artist/4CairTbnNW5l8GxiRIzsZ3?si=DWtkjXl8T96BjuklLf7yhQ",
 			genre: "Reggaeton",
 		},
 		{
 			name: "Lalo Ebratt",
-			link: "https://open.spotify.com/artist/1GAymyGBvB4gQy5Z5LZ1Wj?si=eFP6hBnTS7WDX5m2JP4iRA",
+			link:
+				"https://open.spotify.com/artist/1GAymyGBvB4gQy5Z5LZ1Wj?si=eFP6hBnTS7WDX5m2JP4iRA",
 			genre: "Reggaeton",
 		},
 		{
 			name: "Sammy Virji",
-			link: "https://open.spotify.com/artist/1GuqTQbuixFHD6eBkFwVcb?si=LpFXJMCQS1y_0c6pQT8lLg",
+			link:
+				"https://open.spotify.com/artist/1GuqTQbuixFHD6eBkFwVcb?si=LpFXJMCQS1y_0c6pQT8lLg",
 			genre: "House",
 		},
 		{
