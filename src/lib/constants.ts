@@ -13,10 +13,10 @@ interface Reading {
 export const READING: Reading = {
 	currently: [
 		{
-			name: "Harry Potter (in spanish of course)",
-			link: "https://www.goodreads.com/book/show/#",
+			name: "Harry Potter (Spanish version)",
+			link: "https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix",
 			genre:
-				"https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix",
+				"Fiction",
 		},
 		{
 			name: "Meditations",
