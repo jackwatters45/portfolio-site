@@ -4,8 +4,8 @@ author: Jack Watters
 description: "Quick adjustment to an Astro theme toggle when using page transitions."
 pubDate: 2024-06-06
 tags: [astro]
+draft: true
 ---
-
 
 TLDR: Add an event listener for `astro:after-swap` that checks local storage to update the theme.
 
@@ -13,16 +13,18 @@ When working with [Astro](https://docs.astro.build/en/getting-started/) I like t
 
 I didn't want to spend any time on a simple toggle switch so I opted to grab the one from [Shadcn](https://ui.shadcn.com/docs/dark-mode/astro). I've used it with other frameworks and it works great. The issue I ran into was that when navigating to a new page the theme reset to the default.
 
-
 import BlogImage from "../../components/blog/blog-image.astro";
 
-<BlogImage src="https://res.cloudinary.com/drheg5d7j/image/upload/v1717708102/theme-toggle-issue_udgybe.gif" alt="Theme reverts back to innitial on page navigate" />
+<BlogImage
+  src="https://res.cloudinary.com/drheg5d7j/image/upload/v1717708102/theme-toggle-issue_udgybe.gif"
+  alt="Theme reverts back to innitial on page navigate"
+/>
 
 There are other posts about this and it is mentioned in the Astro docs, but I found that when I applied to solution from the docs it led to a pretty gnarly initial theme flicker. I wanted to share the solution that worked for me, to hopefully save someone else a few minutes.
 
 Here is the script I was using to handle the theme:
 
-``` tsx
+```tsx
 // layout-prose.astro
 <script is:inline>
   const getThemePreference = () => {
@@ -55,11 +57,11 @@ The solution was to add an event listener for `astro:after-swap` that would chec
 
 So, adding this event listener to the script in the layout file fixed the issue for me:
 
-``` ts
-  document.addEventListener('astro:after-swap', function () {
-    if (localStorage.getItem('theme') === 'dark')
-      document.documentElement.classList.toggle('dark', true);
-  });
+```ts
+document.addEventListener("astro:after-swap", function () {
+  if (localStorage.getItem("theme") === "dark")
+    document.documentElement.classList.toggle("dark", true);
+});
 ```
 
 Now the theme persists when navigating between pages. An easy fix, but annoying to debug if you don't know what you're looking for. I hope this helps someone else out there. Cheers!
@@ -68,7 +70,7 @@ Now the theme persists when navigating between pages. An easy fix, but annoying 
 
 Full Code:
 
-``` tsx
+```tsx
 // layout-prose.astro.astro
 ---
 import { ViewTransitions } from 'astro:transitions';
@@ -114,7 +116,7 @@ import { ViewTransitions } from 'astro:transitions';
 </html>
 ```
 
-``` tsx
+```tsx
 // mode-toggle.tsx
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
@@ -122,38 +124,41 @@ import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ModeToggle() {
-	const [theme, setThemeState] = React.useState<
-		"theme-light" | "dark" | "system"
-	>("theme-light");
+  const [theme, setThemeState] = React.useState<
+    "theme-light" | "dark" | "system"
+  >("theme-light");
 
-	React.useEffect(() => {
-		const isDarkMode = document.documentElement.classList.contains("dark");
-		setThemeState(isDarkMode ? "dark" : "theme-light");
-	}, []);
+  React.useEffect(() => {
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    setThemeState(isDarkMode ? "dark" : "theme-light");
+  }, []);
 
-	React.useEffect(() => {
-		const isDark =
-			theme === "dark" ||
-			(theme === "system" &&
-				window.matchMedia("(prefers-color-scheme: dark)").matches);
-		document.documentElement.classList[isDark ? "add" : "remove"]("dark");
-	}, [theme]);
+  React.useEffect(() => {
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+  }, [theme]);
 
-	return (
-		<Button
-			onClick={() =>
-				setThemeState((prev) => (prev === "dark" ? "theme-light" : "dark"))
-			}
-			variant="ghost"
-			size="icon"
-		>
-			<Sun className="h-[1rem] w-[1rem] rotate-0 scale-100 transition-all 
-      dark:-rotate-90 dark:scale-0" />
-			<Moon className="absolute h-[1rem] w-[1rem] rotate-90 scale-0 
-      transition-all dark:rotate-0 dark:scale-100" />
-			<span className="sr-only">Toggle theme</span>
-		</Button>
-	);
+  return (
+    <Button
+      onClick={() =>
+        setThemeState((prev) => (prev === "dark" ? "theme-light" : "dark"))
+      }
+      variant="ghost"
+      size="icon"
+    >
+      <Sun
+        className="h-[1rem] w-[1rem] rotate-0 scale-100 transition-all
+      dark:-rotate-90 dark:scale-0"
+      />
+      <Moon
+        className="absolute h-[1rem] w-[1rem] rotate-90 scale-0
+      transition-all dark:rotate-0 dark:scale-100"
+      />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
+  );
 }
-
 ```
