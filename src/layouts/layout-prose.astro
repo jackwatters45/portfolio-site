@@ -1,8 +1,10 @@
 ---
 import CommonHead from '@/components/meta/common-head.astro';
+import { cn } from '@/lib/utils';
 
 interface Props {
   title?: string;
+  className?: string;
 }
 
 // url should probably do this part but i kinda like the simple path
@@ -12,14 +14,14 @@ const homeRoute = nestedRoutes.includes(pathname.split('/')[1])
   ? '/about'
   : '/';
 
-const { title }: Props = Astro.props;
+const { title, className }: Props = Astro.props;
 ---
 
 <html lang="en" class="dark">
   <CommonHead title={title} />
   <body>
-    <main class="h-screen w-screen overflow-x-hidden text-base">
-      <div class="container max-w-screen-sm py-16 md:py-24">
+    <main class="h-screen w-screen overflow-x-hidden text-base flex flex-col">
+      <div class="container max-w-screen-sm py-16 md:py-24 flex-1 flex flex-col">
         <div class="pb-8">
           <a href={homeRoute} class="cursor-custom">
             John
@@ -27,7 +29,9 @@ const { title }: Props = Astro.props;
             Watters
           </a>
         </div>
-        <div class="space-y-12"><slot /></div>
+        <div class={cn("space-y-12 flex-1 flex flex-col", className)}>
+          <slot />
+        </div>
       </div>
     </main>
   </body>
