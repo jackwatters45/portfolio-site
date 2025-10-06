@@ -1,0 +1,25 @@
+---
+import CommonHead from '@/components/meta/common-head.astro';
+
+interface Props {
+  title?: string;
+}
+
+// url should probably do this part but i kinda like the simple path
+const nestedRoutes = ['learning', 'listening', 'reading', 'watching'];
+const pathname = Astro.url.pathname;
+const homeRoute = nestedRoutes.includes(pathname.split('/')[1])
+  ? '/about'
+  : '/';
+
+const { title }: Props = Astro.props;
+---
+
+<html lang="en" class="dark">
+  <CommonHead title={title} />
+  <body>
+    <main class="h-screen w-screen overflow-x-hidden text-base">
+      <slot />
+    </main>
+  </body>
+</html>

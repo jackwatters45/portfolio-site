@@ -23,7 +23,7 @@ There are other posts about this and it is mentioned in the Astro docs, but I fo
 Here is the script I was using to handle the theme:
 
 ``` tsx
-// Layout.astro
+// layout-prose.astro
 <script is:inline>
   const getThemePreference = () => {
     if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -69,7 +69,7 @@ Now the theme persists when navigating between pages. An easy fix, but annoying 
 Full Code:
 
 ``` tsx
-// Layout.astro.astro
+// layout-prose.astro.astro
 ---
 import { ViewTransitions } from 'astro:transitions';
 ---
