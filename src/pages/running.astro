@@ -1,0 +1,77 @@
+---
+
+import LineGraph from '@/components/line-graph/line-graph';
+import type { StravaActivityWithIndex } from '@/components/line-graph/types';
+import Layout from '@/layouts/layout-full-screen.astro';
+import { STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN } from "astro:env/server";
+
+const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    client_id: STRAVA_CLIENT_ID,
+    client_secret: STRAVA_CLIENT_SECRET,
+    refresh_token: STRAVA_REFRESH_TOKEN,
+    grant_type: 'refresh_token',
+  }),
+});
+
+const tokenData = await tokenResponse.json();
+
+if (tokenData.errors) {
+  throw new Error(
+    `Strava token error: ${JSON.stringify(tokenData.errors)}`,
+  );
+}
+
+const accessToken = tokenData.access_token;
+
+const activitiesResponse = await fetch(
+  'https://www.strava.com/api/v3/athlete/activities?per_page=200',
+  {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  },
+);
+
+const activitiesData = await activitiesResponse.json();
+
+if (activitiesData.errors) {
+  throw new Error(
+    `Strava API error: ${JSON.stringify(activitiesData.errors)}. You need to re-authorize with scope: activity:read_all`,
+  );
+}
+
+const activities = activitiesData as StravaActivityWithIndex[];
+
+const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+const activitiesWithIndex = activities.map((activity) => {
+  const activityDate = new Date(activity.start_date);
+  const diffTime = activityDate.getTime() - startOfYear.getTime();
+  const index = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  return {
+    ...activity,
+    index,
+  };
+});
+
+
+---
+<Layout title='Running'>
+  <div class="absolute mt-16 md:mt-24 z-50 left-1/2 -translate-x-1/2">
+    <div class="container flex flex-col space-y-4 w-[min(640px,100vw)]">
+      <a href="/" class="cursor-custom">
+        John
+        <em class="font-serif text-lg"> (Jack) </em>
+        Watters
+      </a>
+      <p class="text-sm text-muted-foreground">
+
+      my running log for 2025. might have to scroll. ui ripped from <a href="https://rauno.me/" class=" decoration-muted-foreground  hover:underline transition-all">Rauno Freiburg</a>
+      </p>
+    </div>
+  </div>
+    <div class="absolute inset-0">
+      <LineGraph client:load data={activitiesWithIndex} />
+    </div>
+</Layout>
