@@ -30,6 +30,7 @@ import ListRow from '@/components/list/list-row.astro';
     >
   </div>
   <div class="space-y-8">
+  {BUILDING.currently.length > 0 && (
     <div class="space-y-3">
       <a href="/building">Building</a>
       <ul class="space-y-2 text-sm text-muted-foreground">
@@ -46,10 +47,9 @@ import ListRow from '@/components/list/list-row.astro';
           ))
         }
       </ul>
-    </div>
-  </div>
-  <div class="space-y-8">
-    <div class="space-y-3">
+    </div>)}
+    {BUILDING.past.length > 0 &&
+    (<div class="space-y-3">
       <a href="/building">Past Projects</a>
       <ul class="space-y-2 text-sm text-muted-foreground">
         {
@@ -65,7 +65,7 @@ import ListRow from '@/components/list/list-row.astro';
           ))
         }
       </ul>
-    </div>
+    </div>)}
   </div>
   <Socials />
 </Layout>
