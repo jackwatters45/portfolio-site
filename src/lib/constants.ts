@@ -13,14 +13,19 @@ interface Reading {
 export const READING: Reading = {
   currently: [
     {
-      name: 'Harry Potter (Spanish version)',
-      link: 'https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix',
-      genre: 'Fiction',
+      name: 'Speaker for the Dead',
+      link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
+      genre: 'Sci-Fi',
     },
     {
-      name: 'Meditations',
-      link: 'https://www.goodreads.com/book/show/30659.Meditations',
-      genre: 'Philosophy',
+      name: 'The Almanack of Naval Ravikant',
+      link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
+      genre: 'Personal Development',
+    },
+    {
+      name: 'For Whom the Bell Tolls',
+      link: 'https://www.goodreads.com/book/show/46170.For_Whom_the_Bell_Tolls?ref=nav_sb_ss_1_14',
+      genre: 'Historical Fiction',
     },
   ],
   recommend: [
@@ -28,6 +33,21 @@ export const READING: Reading = {
       name: 'Cien Años de Soledad',
       link: 'https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1',
       genre: 'Magical Realism',
+    },
+    {
+      name: 'The Stranger',
+      link: 'https://www.goodreads.com/book/show/49552.The_Stranger',
+      genre: 'Philosophical Fiction',
+    },
+    {
+      name: 'Meditations',
+      link: 'https://www.goodreads.com/book/show/30659.Meditations',
+      genre: 'Philosophy',
+    },
+    {
+      name: 'Harry Potter (Spanish version)',
+      link: 'https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix',
+      genre: 'Fiction',
     },
     {
       name: 'El Alquimista',
@@ -56,11 +76,7 @@ export const READING: Reading = {
       link: 'https://www.goodreads.com/book/show/426504.Ficciones',
       genre: 'Magical realism',
     },
-    {
-      name: 'The Stranger',
-      link: 'https://www.goodreads.com/book/show/49552.The_Stranger',
-      genre: 'Philosophical Fiction',
-    },
+
     {
       name: "The Hitchhiker's Guide to the Galaxy",
       link: 'https://www.goodreads.com/book/show/11.The_Hitchhiker_s_Guide_to_the_Galaxy',
@@ -76,17 +92,16 @@ interface Learning {
 
 export const LEARNING: Learning = {
   currently: [
+    'History',
     'Spanish',
-    'Machine Vision',
     'Environmental Tech',
     'Writing',
-    'History',
+    'Machine Vision',
   ],
   next: [
     'Photography',
     'Video Editing',
     'Catalan',
-    'Data Science',
     'Cooking',
     'Auto Mechanics',
   ],
@@ -111,7 +126,7 @@ export const BUILDING: Building = {
       name: 'LaxDB',
       description: 'Tooling for managing and analyzing athletic teams',
       year: 2025,
-      link: 'https://github.com/jackwatters45/word-count-api',
+      link: 'https://github.com/jackwatters45/lax-db',
     },
   ],
   past: [],
@@ -119,11 +134,6 @@ export const BUILDING: Building = {
     {
       name: 'Marketplace Tracker',
       description: 'Track items accross multiple online marketplaces',
-      year: 2024,
-    },
-    {
-      name: 'Lacrosse Platform',
-      description: 'Lacrosse Wiki and Database',
       year: 2024,
     },
     {
