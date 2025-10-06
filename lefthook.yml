@@ -2,7 +2,7 @@ pre-commit:
   parallel: true
   commands:
     check:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc, md}"
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,md,astro}"
       run: bunx biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true {staged_files} && git update-index --again
     types:
       run: bun run typecheck
@@ -11,7 +11,7 @@ pre-push:
   parallel: true
   commands:
     check:
-      glob: "*.{js,ts,jsx,tsx,json,md}"
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,md,astro}"
       run: bunx biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true {staged_files} && git update-index --again
     types:
       run: bun run typecheck
