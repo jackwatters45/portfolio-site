@@ -1,9 +1,13 @@
 ---
 
+import {
+  STRAVA_CLIENT_ID,
+  STRAVA_CLIENT_SECRET,
+  STRAVA_REFRESH_TOKEN,
+} from 'astro:env/server';
 import LineGraph from '@/components/line-graph/line-graph';
 import type { StravaActivityWithIndex } from '@/components/line-graph/types';
 import Layout from '@/layouts/layout-full-screen.astro';
-import { STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN } from "astro:env/server";
 
 const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
   method: 'POST',
@@ -19,9 +23,7 @@ const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
 const tokenData = await tokenResponse.json();
 
 if (tokenData.errors) {
-  throw new Error(
-    `Strava token error: ${JSON.stringify(tokenData.errors)}`,
-  );
+  throw new Error(`Strava token error: ${JSON.stringify(tokenData.errors)}`);
 }
 
 const accessToken = tokenData.access_token;
@@ -54,8 +56,6 @@ const activitiesWithIndex = activities.map((activity) => {
     index,
   };
 });
-
-
 ---
 <Layout title='Running'>
   <div class="absolute mt-16 md:mt-24 z-50 left-1/2 -translate-x-1/2">
@@ -72,6 +72,6 @@ const activitiesWithIndex = activities.map((activity) => {
     </div>
   </div>
     <div class="absolute inset-0">
-      <LineGraph client:load data={activitiesWithIndex} />
+      <LineGraph client:only="react" data={activitiesWithIndex} />
     </div>
 </Layout>
