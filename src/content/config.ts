@@ -1,32 +1,19 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from 'astro:content';
 
 const postSchema = z.object({
-	title: z.string(),
-	pubDate: z.date(),
-	description: z.string(),
-	author: z.string(),
-	tags: z.array(z.string()),
-	draft: z.boolean().optional(),
+  title: z.string(),
+  pubDate: z.date(),
+  description: z.string(),
+  author: z.string(),
+  tags: z.array(z.string()),
+  draft: z.boolean().optional(),
 });
 
 const postsCollection = defineCollection({
-	type: "content",
-	schema: postSchema,
-});
-
-const coverLetterSchema = z.object({
-	title: z.string(),
-	company: z.string(),
-	position: z.string(),
-	date: z.date(),
-});
-
-const coverLettersCollection = defineCollection({
-	type: "content",
-	schema: coverLetterSchema,
+  type: 'content',
+  schema: postSchema,
 });
 
 export const collections = {
-	posts: postsCollection,
-	"cover-letter": coverLettersCollection,
+  posts: postsCollection,
 };
