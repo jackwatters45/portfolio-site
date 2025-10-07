@@ -404,15 +404,27 @@ interface Watching {
 export const WATCHING: Watching = {
   currently: [
     {
-      name: 'The Penguin',
-      link: 'https://play.max.com/show/5756c2bf-36f8-4890-b1f9-ef168f1d8e9c',
+      name: 'Suits',
+      link: 'https://www.disneyplus.com/browse/entity-16ced814-5ed7-4f3c-9b8d-0660a12fc2ee?distributionPartner=google',
     },
     {
-      name: 'Ministerio del Tiempo',
-      link: 'https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2',
+      name: 'Anthony Bourdain: Parts Unknown',
+      link: 'https://www.primevideo.com/dp/amzn1.dv.gti.28baa2f2-f652-04f1-77cf-226eb28fc7d8?autoplay=0&ref_=atv_cf_strg_wb',
+    },
+    {
+      name: 'How About Tomorrow?',
+      link: 'https://tomorrow.fm/',
     },
   ],
   podcasts: [
+    {
+      name: 'WAR MODE',
+      link: 'https://open.spotify.com/show/3mPoh0V6S7qwjZDGOUE2BE?si=3017e7a44ef94192',
+    },
+    {
+      name: "Matt and Shane's Secret Podcast",
+      link: 'https://open.spotify.com/show/32p08HngccrVVyugc45Ljp?si=0f04db4a259a495c',
+    },
     {
       name: 'Central - Bukele',
       link: 'https://open.spotify.com/show/5rVz6WZuWQKxWalrPaIRxI',
@@ -473,6 +485,18 @@ export const WATCHING: Watching = {
     },
   ],
   shows: [
+    {
+      name: 'Vice Principals',
+      link: 'https://play.hbomax.com/show/9714271a-a41c-4321-be01-3287f450528e?utm_source=universal_search',
+    },
+    {
+      name: 'The Penguin',
+      link: 'https://play.max.com/show/5756c2bf-36f8-4890-b1f9-ef168f1d8e9c',
+    },
+    {
+      name: 'Ministerio del Tiempo',
+      link: 'https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2',
+    },
     {
       name: 'Always Sunny in Philadelphia',
       link: 'https://www.imdb.com/title/tt0472954/',

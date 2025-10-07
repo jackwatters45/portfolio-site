@@ -1,7 +1,7 @@
 ---
 import Socials from '@/components/socials/socials.astro';
 import Layout from '@/layouts/layout-prose.astro';
-import { LEARNING, LISTENING, READING } from '@/lib/constants';
+import { LEARNING, LISTENING, READING, WATCHING } from '@/lib/constants';
 ---
 
 <Layout title="about">
@@ -46,38 +46,6 @@ import { LEARNING, LISTENING, READING } from '@/lib/constants';
     </ul>
   </div>
   <div class="space-y-3">
-    <a href="/watching">Watching</a>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2"
-          >Ministerio del Tiempo</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://www.nhl.com/playoffs/2024/bracket">Stanley Cup</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://www.adultswim.com/videos/smiling-friends"
-          >Smiling Friends</a
-        >
-      </li>
-      <li>
-        <a
-          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-          href="https://open.spotify.com/show/5rVz6WZuWQKxWalrPaIRxI"
-          >Central - Bukele</a
-        >
-      </li>
-    </ul>
-  </div>
-  <div class="space-y-3">
     <a href="/listening">Listening</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
@@ -92,6 +60,21 @@ import { LEARNING, LISTENING, READING } from '@/lib/constants';
           </li>
         ))
       }
+    </ul>
+  </div>
+  <div class="space-y-3">
+    <a href="/watching">Watching</a>
+    <ul class="space-y-2 text-sm text-muted-foreground">
+    {
+      WATCHING.currently.slice(0, 3).map((item) => (
+      <li>
+        <a
+          class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
+          href={item.link}
+          >{item.name}</a
+        >
+      </li>
+      ))}
     </ul>
   </div>
   <a href="/running" class="">Running Log</a>
