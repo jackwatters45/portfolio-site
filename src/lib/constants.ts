@@ -149,7 +149,7 @@ export const BUILDING: Building = {
   ],
 } as const;
 
-interface MusicItem {
+export interface MusicItem {
   name: string;
   link: string;
   genre: string;
@@ -157,102 +157,225 @@ interface MusicItem {
   albumLink?: string;
 }
 
+type ListeningStage = {
+  index: number;
+  items: Array<MusicItem>;
+};
 interface Listening {
-  currently: Array<MusicItem>;
-  '2024': Array<MusicItem>;
+  currently: ListeningStage;
+  '2025': ListeningStage;
+  '2024': ListeningStage;
 }
 
 export const LISTENING: Listening = {
-  currently: [
-    {
-      name: 'legallyrxx',
-      link: 'https://open.spotify.com/artist/4CairTbnNW5l8GxiRIzsZ3?si=DWtkjXl8T96BjuklLf7yhQ',
-      genre: 'Reggaeton',
-    },
-    {
-      name: 'Lalo Ebratt',
-      link: 'https://open.spotify.com/artist/1GAymyGBvB4gQy5Z5LZ1Wj?si=eFP6hBnTS7WDX5m2JP4iRA',
-      genre: 'Reggaeton',
-    },
-    {
-      name: 'Sammy Virji',
-      link: 'https://open.spotify.com/artist/1GuqTQbuixFHD6eBkFwVcb?si=LpFXJMCQS1y_0c6pQT8lLg',
-      genre: 'House',
-    },
-    {
-      name: 'Los Abuelos De La Nada',
-      link: 'https://open.spotify.com/artist/5R3NywPPOyhLfdvutgg0me?si=WwKqKLauQL65tFNJ1f1U5Q',
-      genre: 'Rock',
-    },
-  ],
-  '2024': [
-    {
-      name: 'Deorro',
-      link: 'https://open.spotify.com/artist/6VD4UEUPvtsemqD3mmTqCR?si=LTO1Cl-IRgeO39kwazsobg',
-      genre: 'House',
-    },
-    {
-      name: 'Eladio Carrion',
-      link: 'https://open.spotify.com/artist/5XJDexmWFLWOkjOEjOVX3e',
-      genre: 'Reggaeton',
-      album: 'Sauce Boyz 2',
-      albumLink: 'https://open.spotify.com/album/4JaYe7HIddzNaF3rUgJzHI',
-    },
-    {
-      name: 'El Mató a un Policía Motorizado',
-      link: 'https://open.spotify.com/artist/5rLsN2LxYaEPLa1N7I2mPB',
-      genre: 'Rock Independiente',
-    },
-    {
-      name: 'Los Bunkers',
-      link: 'https://open.spotify.com/artist/3RTAXX6KGdljBsOIupyZgT',
-      genre: 'Rock',
-    },
-    {
-      name: 'Bad Bunny',
-      link: 'https://open.spotify.com/artist/4q3ewBCX7sLwd24euuV69X',
-      genre: 'Reggaeton',
-      album: 'Un Verano Sin Ti',
-      albumLink: 'https://open.spotify.com/album/3RQQmkQEvNCY4prGKE6oc5',
-    },
-    {
-      name: 'Ovy On The Drums',
-      link: 'https://open.spotify.com/artist/3m5qlPf2OkihLz3dRYnkPA',
-      genre: 'Reggaeton',
-      album: 'CASSETTE 01',
-      albumLink: 'https://open.spotify.com/album/0cuBq2nDgGbjalgB4iUc7M',
-    },
-    {
-      name: 'Las Ligas Menores',
-      link: 'https://open.spotify.com/artist/3MNvKeLzGSvOPtXJAjCOzf',
-      genre: 'Rock Independiente',
-    },
-    {
-      name: 'Young Miko',
-      link: 'https://open.spotify.com/artist/3qsKSpcV3ncke3hw52JSMB',
-      genre: 'Reggaeton',
-    },
-    {
-      name: 'FloyyMenor',
-      link: 'https://open.spotify.com/artist/7CvTknweLr9feJtRGrpDBy',
-      genre: 'Reggaeton',
-    },
-    {
-      name: 'Lolo Og',
-      link: 'https://open.spotify.com/artist/1HAO6fqdAGX5CiWxBvhiyv',
-      genre: 'RKT',
-    },
-    {
-      name: 'Tainy',
-      link: 'https://open.spotify.com/artist/0GM7qgcRCORpGnfcN2tCiB',
-      genre: 'Reggaeton',
-    },
-    {
-      name: 'Gusty DJ',
-      link: 'https://open.spotify.com/artist/5f9pQjPeDbuRF1GowQXo3L',
-      genre: 'RKT',
-    },
-  ],
+  currently: {
+    index: 0,
+    items: [
+      {
+        name: 'Demm Deep',
+        link: 'https://open.spotify.com/artist/1MzQYOcw4DMB9ISBhZTa7g?si=1XROGwzXQqW0CrU9DtuKXA',
+        genre: 'House',
+      },
+      {
+        name: 'Vlads',
+        link: 'https://open.spotify.com/artist/25yl7NIlTYP3f3p2R6mG0R?si=nN99W8RRQhCcuQSvIOSKqg',
+        genre: 'Indie Rock',
+      },
+      {
+        name: 'Nemzzz',
+        link: 'https://open.spotify.com/artist/3DHtfeD4PsmR9YGhCP4VF7?si=0FkU8uuBRDe7rS056Q9_cw',
+        genre: 'Rap',
+      },
+      {
+        name: 'The Bends',
+        link: 'https://open.spotify.com/artist/2xBejdNon0VS3Egq8he7sb?si=dWhNPj9nQrmR_eQFt3yjEQ',
+        genre: 'Indie Rock',
+      },
+      {
+        name: '49th & Main',
+        link: 'https://open.spotify.com/artist/0nnF48t4C8uqGS5HPnCN3F?si=PWVeQHz2Q5GmSxD-ItcR_A',
+        genre: 'House',
+      },
+      {
+        name: 'MOTO BANDIT',
+        link: 'https://open.spotify.com/artist/5eMzbeca8z31KcAKRGaGpJ?si=VWb4QPKdR0W6GNqy5H84Fw',
+        genre: 'Alternative/Indie',
+      },
+      {
+        name: 'Demm Deep',
+        link: 'https://open.spotify.com/artist/1MzQYOcw4DMB9ISBhZTa7g?si=1XROGwzXQqW0CrU9DtuKXA',
+        genre: 'House',
+        album: 'Friday Night',
+        albumLink:
+          'https://open.spotify.com/album/4YFmoJXlZyuIYvTgjaf6AX?si=7JoPnm-cTmSCnMcfOc7B3Q',
+      },
+      {
+        name: 'Lance Savali',
+        link: 'https://open.spotify.com/artist/3BJfXq3PuHFiHrD6PcfpCd?si=AG7WVgxgTbic1RNKx6XYZA',
+        genre: 'House',
+        album: "TN's",
+        albumLink:
+          'https://open.spotify.com/album/6re07313Esj1OipNfjjUdh?si=WPA7NVilSmS3t-PQrvDMzw',
+      },
+    ],
+  },
+  '2025': {
+    index: 1,
+    items: [
+      {
+        name: 'Harvey Street',
+        link: 'https://open.spotify.com/artist/3uY3EnY1EntZaMeKnIS42A?si=357f8dF9R_uT1012gsa2Ww',
+        genre: 'Indie Rock',
+      },
+      {
+        name: 'Winyah',
+        link: 'https://open.spotify.com/artist/4iyP4VOGOLzbt2Vxcyu6zG?si=KYUpyi0WRO-0G6fCyrffGw',
+        genre: 'Indie Rock',
+      },
+      {
+        name: 'Quevedo',
+        link: 'https://open.spotify.com/artist/52iwsT98xCoGgiGntTiR7K?si=WNv9SHONTki7_3Tk-N8wng',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Sam Barber',
+        link: 'https://open.spotify.com/artist/08GfvCW09pv2QP4y9sle2a?si=1ESM3SocQU23xTEdkoWikA',
+        genre: 'Folk/Country',
+      },
+      {
+        name: 'Zulan',
+        link: 'https://open.spotify.com/artist/2Yz9F5lQVc0p6SDxkw2BvF?si=pz-nqi5mQFWm-Nj80WK3Ng',
+        genre: 'House Latino',
+      },
+      {
+        name: 'Pescado Rabioso',
+        link: 'https://open.spotify.com/artist/3q1NXsv9XypOUCJfEatXH9?si=R2JsNhcTSdyHDIQZuYjRxg',
+        genre: 'Rock Latino',
+      },
+      {
+        name: 'Nighty Noise',
+        link: 'https://open.spotify.com/artist/5jf1AJPDmVVMVw7DUOG3Jt?si=qqVitp5ISS-c6VOg6SMixg',
+        genre: 'House Latino',
+        album: 'Loquito Por ti',
+        albumLink:
+          'https://open.spotify.com/album/4aTn8g92Qv159GVkKFOWgl?si=i_ZBO3RlQty8dNKvLK_E4w',
+      },
+      {
+        name: 'The Band',
+        link: 'https://open.spotify.com/artist/4vpDg7Y7fU982Ds30zawDA?si=IWprdvUyRHOzLRukD_H4NA',
+        genre: 'Rock',
+      },
+      {
+        name: 'Jack Van Cleaf',
+        link: 'https://open.spotify.com/artist/7nW46aJfNHxK9Y3M5Dhadk?si=-QWKwyX0TyuMZo2tyGRXXA',
+        genre: 'Folk/Country',
+      },
+      {
+        name: 'Alleh y Yorghaki',
+        link: 'https://open.spotify.com/artist/4eq1q0o9XPyNq9RG3fNDD1?si=VFBZtSy8RLeyN0_-1LwkwA',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Bad Bunny',
+        link: 'https://open.spotify.com/artist/4q3ewBCX7sLwd24euuV69X?si=_-f46akAQRalbtVjQnLjwQ',
+        genre: 'Reggaeton',
+        album: 'DeBÍ TiRAR MáS FOToS',
+        albumLink:
+          'https://open.spotify.com/album/5K79FLRUCSysQnVESLcTdb?si=JgPqaHmkR923xkSbKQVu5w',
+      },
+    ],
+  },
+  '2024': {
+    index: 2,
+    items: [
+      {
+        name: 'legallyrxx',
+        link: 'https://open.spotify.com/artist/4CairTbnNW5l8GxiRIzsZ3?si=DWtkjXl8T96BjuklLf7yhQ',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Lalo Ebratt',
+        link: 'https://open.spotify.com/artist/1GAymyGBvB4gQy5Z5LZ1Wj?si=eFP6hBnTS7WDX5m2JP4iRA',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Sammy Virji',
+        link: 'https://open.spotify.com/artist/1GuqTQbuixFHD6eBkFwVcb?si=LpFXJMCQS1y_0c6pQT8lLg',
+        genre: 'House',
+      },
+      {
+        name: 'Los Abuelos De La Nada',
+        link: 'https://open.spotify.com/artist/5R3NywPPOyhLfdvutgg0me?si=WwKqKLauQL65tFNJ1f1U5Q',
+        genre: 'Rock',
+      },
+      {
+        name: 'Deorro',
+        link: 'https://open.spotify.com/artist/6VD4UEUPvtsemqD3mmTqCR?si=LTO1Cl-IRgeO39kwazsobg',
+        genre: 'House',
+      },
+      {
+        name: 'Eladio Carrion',
+        link: 'https://open.spotify.com/artist/5XJDexmWFLWOkjOEjOVX3e',
+        genre: 'Reggaeton',
+        album: 'Sauce Boyz 2',
+        albumLink: 'https://open.spotify.com/album/4JaYe7HIddzNaF3rUgJzHI',
+      },
+      {
+        name: 'El Mató a un Policía Motorizado',
+        link: 'https://open.spotify.com/artist/5rLsN2LxYaEPLa1N7I2mPB',
+        genre: 'Rock Independiente',
+      },
+      {
+        name: 'Los Bunkers',
+        link: 'https://open.spotify.com/artist/3RTAXX6KGdljBsOIupyZgT',
+        genre: 'Rock',
+      },
+      {
+        name: 'Bad Bunny',
+        link: 'https://open.spotify.com/artist/4q3ewBCX7sLwd24euuV69X',
+        genre: 'Reggaeton',
+        album: 'Un Verano Sin Ti',
+        albumLink: 'https://open.spotify.com/album/3RQQmkQEvNCY4prGKE6oc5',
+      },
+      {
+        name: 'Ovy On The Drums',
+        link: 'https://open.spotify.com/artist/3m5qlPf2OkihLz3dRYnkPA',
+        genre: 'Reggaeton',
+        album: 'CASSETTE 01',
+        albumLink: 'https://open.spotify.com/album/0cuBq2nDgGbjalgB4iUc7M',
+      },
+      {
+        name: 'Las Ligas Menores',
+        link: 'https://open.spotify.com/artist/3MNvKeLzGSvOPtXJAjCOzf',
+        genre: 'Rock Independiente',
+      },
+      {
+        name: 'Young Miko',
+        link: 'https://open.spotify.com/artist/3qsKSpcV3ncke3hw52JSMB',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'FloyyMenor',
+        link: 'https://open.spotify.com/artist/7CvTknweLr9feJtRGrpDBy',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Lolo Og',
+        link: 'https://open.spotify.com/artist/1HAO6fqdAGX5CiWxBvhiyv',
+        genre: 'RKT',
+      },
+      {
+        name: 'Tainy',
+        link: 'https://open.spotify.com/artist/0GM7qgcRCORpGnfcN2tCiB',
+        genre: 'Reggaeton',
+      },
+      {
+        name: 'Gusty DJ',
+        link: 'https://open.spotify.com/artist/5f9pQjPeDbuRF1GowQXo3L',
+        genre: 'RKT',
+      },
+    ],
+  },
 } as const;
 
 interface WatchItem {
