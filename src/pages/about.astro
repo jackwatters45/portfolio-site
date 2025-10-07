@@ -81,7 +81,7 @@ import { LEARNING, LISTENING, READING } from '@/lib/constants';
     <a href="/listening">Listening</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        LISTENING.currently.slice(0, 3).map((item) => (
+        LISTENING.currently.items.slice(0, 3).map((item) => (
           <li>
             <a
               class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
