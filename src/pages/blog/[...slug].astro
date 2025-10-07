@@ -1,15 +1,15 @@
 ---
-import { getCollection } from "astro:content";
-import Layout from '@/layouts/layout-prose.astro';
+import { getCollection } from 'astro:content';
+import Prose from '@/components/blog/prose.astro';
 import Socials from '@/components/socials/socials.astro';
-import Prose from "@/components/blog/prose.astro";
+import Layout from '@/layouts/layout-prose.astro';
 
 export async function getStaticPaths() {
-	const blogEntries = await getCollection("posts");
-	return blogEntries.map((entry) => ({
-		params: { slug: entry.slug },
-		props: { entry },
-	}));
+  const blogEntries = await getCollection('posts');
+  return blogEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
 }
 
 const { entry } = Astro.props;
@@ -17,9 +17,8 @@ const { Content } = await entry.render();
 ---
 
 <Layout title={entry.data.title}>
-	<Prose>
-
-		<Content />
+  <Prose>
+	<Content />
 	<Socials />
 	</Prose>
 </Layout>

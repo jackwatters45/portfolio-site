@@ -2,13 +2,13 @@
 import { getCollection } from 'astro:content';
 
 const posts = await getCollection('posts', ({ data }) => {
-	return data?.draft !== true;
+  return data?.draft !== true;
 });
 
 const sortedPosts = posts.sort((a, b) => {
-	return (
-		new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
-	);
+  return (
+    new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+  );
 });
 
 import Layout from '@/layouts/layout-prose.astro';
