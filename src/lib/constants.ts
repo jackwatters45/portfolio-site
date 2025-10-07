@@ -30,14 +30,24 @@ export const READING: Reading = {
   ],
   recommend: [
     {
-      name: 'Cien Años de Soledad',
-      link: 'https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1',
-      genre: 'Magical Realism',
+      name: "Ender's Game",
+      link: 'https://www.goodreads.com/book/show/375802.Ender_s_Game?from_search=true&from_srp=true&qid=ZaEbuHgFCk&rank=1',
+      genre: 'Sci-Fi',
+    },
+    {
+      name: 'Project Hail Mary',
+      link: 'https://www.goodreads.com/book/show/54493401-project-hail-mary',
+      genre: 'Sci-Fi',
     },
     {
       name: 'The Stranger',
       link: 'https://www.goodreads.com/book/show/49552.The_Stranger',
       genre: 'Philosophical Fiction',
+    },
+    {
+      name: 'Cien Años de Soledad',
+      link: 'https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1',
+      genre: 'Magical Realism',
     },
     {
       name: 'Meditations',
