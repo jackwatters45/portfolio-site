@@ -197,9 +197,28 @@ export const LISTENING: Listening = {
         genre: 'Rap',
       },
       {
-        name: 'The Bends',
-        link: 'https://open.spotify.com/artist/2xBejdNon0VS3Egq8he7sb?si=dWhNPj9nQrmR_eQFt3yjEQ',
-        genre: 'Indie Rock',
+        name: 'Demm Deep',
+        link: 'https://open.spotify.com/artist/1MzQYOcw4DMB9ISBhZTa7g?si=1XROGwzXQqW0CrU9DtuKXA',
+        genre: 'House',
+        album: 'Friday Night',
+        albumLink:
+          'https://open.spotify.com/album/4YFmoJXlZyuIYvTgjaf6AX?si=7JoPnm-cTmSCnMcfOc7B3Q',
+      },
+      {
+        name: 'KARMA',
+        link: 'https://open.spotify.com/artist/2CbSXiRcLCT8xjNeoebez9?si=1T6H-k0IRfuKeupB7wYxog',
+        genre: 'House',
+        album: 'Sprinter',
+        albumLink:
+          'https://open.spotify.com/album/1LrwZakIRGBHovLTDBCQSj?si=4NFuUlDZQc2mnfIpab4rLA',
+      },
+      {
+        name: 'Lance Savali',
+        link: 'https://open.spotify.com/artist/3BJfXq3PuHFiHrD6PcfpCd?si=AG7WVgxgTbic1RNKx6XYZA',
+        genre: 'House',
+        album: "TN's",
+        albumLink:
+          'https://open.spotify.com/album/6re07313Esj1OipNfjjUdh?si=WPA7NVilSmS3t-PQrvDMzw',
       },
       {
         name: '49th & Main',
@@ -212,20 +231,9 @@ export const LISTENING: Listening = {
         genre: 'Alternative/Indie',
       },
       {
-        name: 'Demm Deep',
-        link: 'https://open.spotify.com/artist/1MzQYOcw4DMB9ISBhZTa7g?si=1XROGwzXQqW0CrU9DtuKXA',
-        genre: 'House',
-        album: 'Friday Night',
-        albumLink:
-          'https://open.spotify.com/album/4YFmoJXlZyuIYvTgjaf6AX?si=7JoPnm-cTmSCnMcfOc7B3Q',
-      },
-      {
-        name: 'Lance Savali',
-        link: 'https://open.spotify.com/artist/3BJfXq3PuHFiHrD6PcfpCd?si=AG7WVgxgTbic1RNKx6XYZA',
-        genre: 'House',
-        album: "TN's",
-        albumLink:
-          'https://open.spotify.com/album/6re07313Esj1OipNfjjUdh?si=WPA7NVilSmS3t-PQrvDMzw',
+        name: 'The Bends',
+        link: 'https://open.spotify.com/artist/2xBejdNon0VS3Egq8he7sb?si=dWhNPj9nQrmR_eQFt3yjEQ',
+        genre: 'Indie Rock',
       },
     ],
   },
