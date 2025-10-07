@@ -3,15 +3,13 @@ import CommonHead from '@/components/meta/common-head.astro';
 
 interface Props {
   title?: string;
-  disableRocketLoader?: boolean;
 }
 
-const { title, disableRocketLoader }: Props = Astro.props;
+const { title }: Props = Astro.props;
 ---
 
 <html lang="en" class="dark">
   <CommonHead title={title} />
-  {disableRocketLoader && <script data-cfasync="false" is:inline></script>}
   <body>
     <main class="h-screen w-screen overflow-x-hidden text-base">
       <slot />
