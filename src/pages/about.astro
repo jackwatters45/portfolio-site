@@ -18,7 +18,7 @@ import { LEARNING, LISTENING, READING, WATCHING } from '@/lib/constants';
     <a href="/learning">Learning</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        LEARNING.currently
+        LEARNING.currently.items
           .slice(0, 3)
           .map((skill) => (
             <li class="underline underline-offset-4 decoration-muted-foreground">
@@ -32,7 +32,7 @@ import { LEARNING, LISTENING, READING, WATCHING } from '@/lib/constants';
     <a href="/reading">Reading</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        READING.currently.map((book) => (
+        READING.currently.items.slice(0, 3).map((book) => (
           <li>
             <a
               class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
@@ -66,7 +66,7 @@ import { LEARNING, LISTENING, READING, WATCHING } from '@/lib/constants';
     <a href="/watching">Watching</a>
     <ul class="space-y-2 text-sm text-muted-foreground">
     {
-      WATCHING.currently.slice(0, 3).map((item) => (
+      WATCHING.currently.items.slice(0, 3).map((item) => (
       <li>
         <a
           class="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"

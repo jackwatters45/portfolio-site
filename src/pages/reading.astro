@@ -5,6 +5,9 @@ import ListText from '@/components/list/list-sub-text.astro';
 import { Separator } from '@/components/ui/separator';
 import Layout from '@/layouts/layout-prose.astro';
 import { READING } from '@/lib/constants';
+import { getDisplayArr } from '@/lib/utils';
+
+const reading = getDisplayArr(READING);
 ---
 
 <Layout title="reading">
@@ -14,52 +17,24 @@ import { READING } from '@/lib/constants';
       Some books I'm currently reading, have read, or plan to read
     </p>
   </div>
+  {reading.map((stage) => {
+    if(!stage.items.length)return null;
+    return (
   <div class="space-y-3">
-    <h2 class="font-serif">Currently</h2>
+    <h2 class="font-serif capitalize">{stage.title}</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        READING.currently.map((book, i) => (
-          <>
-            <ListRow>
-              <ListLink href={book.link}>{book.name}</ListLink>
-              <ListText>{book.genre}</ListText>
-            </ListRow>
-            {i !== READING.currently.length - 1 ? <Separator /> : null }
-          </>
+        stage.items.map((book, i) => (
+        <>
+          <ListRow>
+            <ListLink href={book.link}>{book.name}</ListLink>
+            <ListText>{book.genre}</ListText>
+          </ListRow>
+          {i !== stage.items.length - 1 ? <Separator /> : null}
+        </>
         ))
       }
     </ul>
   </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Recommend</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        READING.recommend.map((book, i) => (
-          <>
-            <ListRow>
-              <ListLink href={book.link}>{book.name}</ListLink>
-              <ListText>{book.genre}</ListText>
-            </ListRow>
-            {i !== READING.recommend.length - 1 ? <Separator /> : null }
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Next</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        READING.next.map((book, i) => (
-          <>
-            <ListRow>
-              <ListLink href={book.link}>{book.name}</ListLink>
-              <ListText>{book.genre}</ListText>
-            </ListRow>
-            {i !== READING.next.length - 1 ? <Separator /> : null }
-          </>
-        ))
-      }
-    </ul>
-  </div>
+  )})}
 </Layout>
