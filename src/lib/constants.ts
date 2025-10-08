@@ -13,11 +13,6 @@ interface Reading {
 export const READING: Reading = {
   currently: [
     {
-      name: 'Speaker for the Dead',
-      link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
-      genre: 'Sci-Fi',
-    },
-    {
       name: 'The Almanack of Naval Ravikant',
       link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
       genre: 'Personal Development',
@@ -29,6 +24,11 @@ export const READING: Reading = {
     },
   ],
   recommend: [
+    {
+      name: 'Speaker for the Dead',
+      link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
+      genre: 'Sci-Fi',
+    },
     {
       name: "Ender's Game",
       link: 'https://www.goodreads.com/book/show/375802.Ender_s_Game?from_search=true&from_srp=true&qid=ZaEbuHgFCk&rank=1',
