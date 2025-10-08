@@ -1,25 +1,13 @@
 ---
-import type { ValueOf } from 'node_modules/astro/dist/type-utils';
 import ListLink from '@/components/list/list-link.astro';
 import ListRow from '@/components/list/list-row.astro';
 import ListText from '@/components/list/list-sub-text.astro';
 import { Separator } from '@/components/ui/separator';
 import Layout from '@/layouts/layout-prose.astro';
 import { LISTENING } from '@/lib/constants';
+import { getDisplayArr } from '@/lib/utils';
 
-type ListeningArr = Array<{
-  title: keyof typeof LISTENING;
-  items: ValueOf<typeof LISTENING>['items'];
-  index: number;
-}>;
-
-const listening = Object.entries(LISTENING)
-  .map(([title, obj]) => ({
-    title,
-    items: obj.items,
-    index: obj.index,
-  }))
-  .sort((a, b) => a.index - b.index) as ListeningArr;
+const listening = getDisplayArr(LISTENING);
 ---
 
 <Layout title="listening">
@@ -29,29 +17,31 @@ const listening = Object.entries(LISTENING)
       Some of the songs, albums, artists, genres I have had on repeat
     </p>
   </div>
-  {listening.map((stage) => (
-  <div class="space-y-3">
-    <h2 class="font-serif">{stage.title}</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        stage.items.map((item, i) => (
-          <>
-            <ListRow>
-              {item.album ? (
-                <div class="flex items-center gap-2">
-                  <ListLink href={item.albumLink}>{item.album}</ListLink>•
+  {listening.map((stage) => {
+    if(!stage.items.length)return null;
+    return (
+    <div class="space-y-3">
+      <h2 class="font-serif capitalize">{stage.title}</h2>
+      <ul class="space-y-2 text-sm text-muted-foreground">
+        {
+          stage.items.map((item, i) => (
+            <>
+              <ListRow>
+                {item.album ? (
+                  <div class="flex items-center gap-2">
+                    <ListLink href={item.albumLink}>{item.album}</ListLink>•
+                    <ListLink href={item.link}>{item.name}</ListLink>
+                  </div>
+                ) : (
                   <ListLink href={item.link}>{item.name}</ListLink>
-                </div>
-              ) : (
-                <ListLink href={item.link}>{item.name}</ListLink>
-              )}
-              <ListText>{item.genre}</ListText>
-            </ListRow>
-            {i !== stage.items.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  ))}
-</Layout>
+                )}
+                <ListText>{item.genre}</ListText>
+              </ListRow>
+              {i !== stage.items.length - 1 ? <Separator /> : null}
+            </>
+          ))
+        }
+      </ul>
+    </div>
+    )})}
+    </Layout>

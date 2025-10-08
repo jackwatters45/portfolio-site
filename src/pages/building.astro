@@ -5,6 +5,9 @@ import ListText from '@/components/list/list-sub-text.astro';
 import { Separator } from '@/components/ui/separator';
 import Layout from '@/layouts/layout-prose.astro';
 import { BUILDING } from '@/lib/constants';
+import { getDisplayArr } from '@/lib/utils';
+
+const building = getDisplayArr(BUILDING);
 ---
 
 <Layout title="building">
@@ -14,52 +17,26 @@ import { BUILDING } from '@/lib/constants';
       Some hobby projects that I work on in my free time. Whenever that is.
     </p>
   </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Currently</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        BUILDING.currently.map((project, i) => (
-          <>
-            <ListRow>
-              <ListLink href={project.link}>{project.name}</ListLink>
-              <ListText>{project.description}</ListText>
-            </ListRow>
-            {i !== BUILDING.currently.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">2024</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        BUILDING.past.map((project, i) => (
-          <>
-            <ListRow>
-              <ListLink href={project.link}>{project.name}</ListLink>
-              <ListText>{project.description}</ListText>
-            </ListRow>
-            {i !== BUILDING.past.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Seeds</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        BUILDING.seeds.map((project, i) => (
-          <>
-            <ListRow>
-              <ListLink href={project.link}>{project.name}</ListLink>
-              <ListText>{project.description}</ListText>
-            </ListRow>
-            {i !== BUILDING.seeds.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
+  {building.map((stage) =>
+  {
+    if(!stage.items.length)return null;
+    return (
+      <div class="space-y-3">
+        <h2 class="font-serif capitalize">{stage.title}</h2>
+        <ul class="space-y-2 text-sm text-muted-foreground">
+          {
+            stage.items.map((project, i) => (
+              <>
+                <ListRow>
+                  <ListLink href={project.link}>{project.name}</ListLink>
+                  <ListText>{project.description}</ListText>
+                </ListRow>
+                {i !== stage.items.length - 1 ? <Separator /> : null}
+              </>
+            ))
+          }
+        </ul>
+      </div>
+    )
+  })}
 </Layout>

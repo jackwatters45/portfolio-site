@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { ListStage } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,4 +20,23 @@ export function formatDateString(dateString: string | Date): string {
   const day = String(date.getUTCDate()).padStart(2, '0');
 
   return `${month}/${day}/${year}`;
+}
+
+export type RenderArr<T extends Record<string, ListStage<Item>>, Item> = Array<{
+  title: keyof T;
+  items: Item[];
+  index: number;
+}>;
+
+export function getDisplayArr<
+  T extends Record<string, ListStage<Item>>,
+  Item = T[keyof T]['items'][number],
+>(entries: T): RenderArr<T, Item> {
+  return Object.entries(entries)
+    .map(([title, obj]) => ({
+      title,
+      items: obj.items,
+      index: obj.index,
+    }))
+    .sort((a, b) => a.index - b.index);
 }

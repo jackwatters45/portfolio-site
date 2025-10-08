@@ -4,6 +4,9 @@ import ListRow from '@/components/list/list-row.astro';
 import { Separator } from '@/components/ui/separator';
 import Layout from '@/layouts/layout-prose.astro';
 import { LEARNING } from '@/lib/constants';
+import { getDisplayArr } from '@/lib/utils';
+
+const learning = getDisplayArr(LEARNING);
 ---
 
 <Layout title="learning">
@@ -14,34 +17,22 @@ import { LEARNING } from '@/lib/constants';
       currently learning or hope to learn some day.
     </p>
   </div>
+  {learning.map((stage) => {
+    if(!stage.items.length)return null;
+    return (
   <div class="space-y-3">
-    <h2 class="font-serif">Currently</h2>
+    <h2 class="font-serif capitalize">{stage.title}</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        LEARNING.currently.map((skill, i) => (
+      stage.items.map((skill, i) => (
           <>
             <ListRow>
               <ListLink>{skill}</ListLink>
             </ListRow>
-            {i !== LEARNING.next.length - 1 ? <Separator /> : null}
+            {i !== stage.items.length - 1 ? <Separator /> : null}
           </>
         ))
       }
     </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Some Day</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        LEARNING.next.map((skill, i) => (
-          <>
-            <ListRow>
-              <ListLink>{skill}</ListLink>
-            </ListRow>
-            {i !== LEARNING.next.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
+  </div>)})}
 </Layout>

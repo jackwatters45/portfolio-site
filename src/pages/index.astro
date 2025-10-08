@@ -30,12 +30,12 @@ import { BUILDING } from '@/lib/constants';
     >
   </div>
   <div class="space-y-8">
-  {BUILDING.currently.length > 0 && (
+  {BUILDING.currently.items.length > 0 && (
     <div class="space-y-3">
       <a href="/building">Building</a>
       <ul class="space-y-2 text-sm text-muted-foreground">
         {
-          BUILDING.currently.map((project) => (
+          BUILDING.currently.items.map((project) => (
             <ListRow>
               <ListLink
                 className="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
@@ -48,12 +48,12 @@ import { BUILDING } from '@/lib/constants';
         }
       </ul>
     </div>)}
-    {BUILDING.past.length > 0 &&
+    {BUILDING.past.items.length > 0 &&
     (<div class="space-y-3">
       <a href="/building">Past Projects</a>
       <ul class="space-y-2 text-sm text-muted-foreground">
         {
-          BUILDING.past.map((project) => (
+          BUILDING.past.items.map((project) => (
             <ListRow>
               <ListLink
                 className="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"

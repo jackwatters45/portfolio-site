@@ -1,120 +1,137 @@
+import type { ListStage } from './types';
+
 interface Book {
   name: string;
   link: string;
   genre: string;
 }
 
-interface Reading {
-  currently: Array<Book>;
-  recommend: Array<Book>;
-  next: Array<Book>;
-}
+type Reading = {
+  currently: ListStage<Book>;
+  recommend: ListStage<Book>;
+  next: ListStage<Book>;
+};
 
 export const READING: Reading = {
-  currently: [
-    {
-      name: 'The Almanack of Naval Ravikant',
-      link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
-      genre: 'Personal Development',
-    },
-    {
-      name: 'For Whom the Bell Tolls',
-      link: 'https://www.goodreads.com/book/show/46170.For_Whom_the_Bell_Tolls?ref=nav_sb_ss_1_14',
-      genre: 'Historical Fiction',
-    },
-  ],
-  recommend: [
-    {
-      name: 'Speaker for the Dead',
-      link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
-      genre: 'Sci-Fi',
-    },
-    {
-      name: "Ender's Game",
-      link: 'https://www.goodreads.com/book/show/375802.Ender_s_Game?from_search=true&from_srp=true&qid=ZaEbuHgFCk&rank=1',
-      genre: 'Sci-Fi',
-    },
-    {
-      name: 'Project Hail Mary',
-      link: 'https://www.goodreads.com/book/show/54493401-project-hail-mary',
-      genre: 'Sci-Fi',
-    },
-    {
-      name: 'The Stranger',
-      link: 'https://www.goodreads.com/book/show/49552.The_Stranger',
-      genre: 'Philosophical Fiction',
-    },
-    {
-      name: 'Cien Años de Soledad',
-      link: 'https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1',
-      genre: 'Magical Realism',
-    },
-    {
-      name: 'Meditations',
-      link: 'https://www.goodreads.com/book/show/30659.Meditations',
-      genre: 'Philosophy',
-    },
-    {
-      name: 'Harry Potter (Spanish version)',
-      link: 'https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix',
-      genre: 'Fiction',
-    },
-    {
-      name: 'El Alquimista',
-      link: 'https://www.goodreads.com/book/show/41684130-el-alqumista',
-      genre: 'Magical Realism',
-    },
-    {
-      name: 'The Creative Act: Way of Being',
-      link: 'https://www.goodreads.com/book/show/60965426-the-creative-act',
-      genre: 'Philosophy',
-    },
-    {
-      name: 'Norm Macdonald: Based on a Link True Story',
-      link: 'https://www.goodreads.com/book/show/28686959-based-on-a-true-story?from_search=true&from_srp=true&qid=ctedItGJ9l&rank=1',
-      genre: 'Memoir',
-    },
-    {
-      name: 'Notes From the Underground, The Double, and Other Stories',
-      link: 'https://www.goodreads.com/book/show/49961.Notes_from_Underground_The_Double_and_Other_Stories',
-      genre: 'Philosophical Fiction',
-    },
-  ],
-  next: [
-    {
-      name: 'Ficciones',
-      link: 'https://www.goodreads.com/book/show/426504.Ficciones',
-      genre: 'Magical realism',
-    },
+  currently: {
+    index: 0,
+    items: [
+      {
+        name: 'The Almanack of Naval Ravikant',
+        link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
+        genre: 'Personal Development',
+      },
+      {
+        name: 'For Whom the Bell Tolls',
+        link: 'https://www.goodreads.com/book/show/46170.For_Whom_the_Bell_Tolls?ref=nav_sb_ss_1_14',
+        genre: 'Historical Fiction',
+      },
+    ],
+  },
+  recommend: {
+    index: 1,
+    items: [
+      {
+        name: 'Speaker for the Dead',
+        link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
+        genre: 'Sci-Fi',
+      },
+      {
+        name: "Ender's Game",
+        link: 'https://www.goodreads.com/book/show/375802.Ender_s_Game?from_search=true&from_srp=true&qid=ZaEbuHgFCk&rank=1',
+        genre: 'Sci-Fi',
+      },
+      {
+        name: 'Project Hail Mary',
+        link: 'https://www.goodreads.com/book/show/54493401-project-hail-mary',
+        genre: 'Sci-Fi',
+      },
+      {
+        name: 'The Stranger',
+        link: 'https://www.goodreads.com/book/show/49552.The_Stranger',
+        genre: 'Philosophical Fiction',
+      },
+      {
+        name: 'Cien Años de Soledad',
+        link: 'https://www.goodreads.com/book/show/370523.Cien_a_os_de_soledad?from_search=true&from_srp=true&qid=9iOtGqU8Td&rank=1',
+        genre: 'Magical Realism',
+      },
+      {
+        name: 'Meditations',
+        link: 'https://www.goodreads.com/book/show/30659.Meditations',
+        genre: 'Philosophy',
+      },
+      {
+        name: 'Harry Potter (Spanish version)',
+        link: 'https://www.goodreads.com/book/show/15876.Harry_Potter_y_la_Orden_del_F_nix',
+        genre: 'Fiction',
+      },
+      {
+        name: 'El Alquimista',
+        link: 'https://www.goodreads.com/book/show/41684130-el-alqumista',
+        genre: 'Magical Realism',
+      },
+      {
+        name: 'The Creative Act: Way of Being',
+        link: 'https://www.goodreads.com/book/show/60965426-the-creative-act',
+        genre: 'Philosophy',
+      },
+      {
+        name: 'Norm Macdonald: Based on a Link True Story',
+        link: 'https://www.goodreads.com/book/show/28686959-based-on-a-true-story?from_search=true&from_srp=true&qid=ctedItGJ9l&rank=1',
+        genre: 'Memoir',
+      },
+      {
+        name: 'Notes From the Underground, The Double, and Other Stories',
+        link: 'https://www.goodreads.com/book/show/49961.Notes_from_Underground_The_Double_and_Other_Stories',
+        genre: 'Philosophical Fiction',
+      },
+    ],
+  },
+  next: {
+    index: 2,
+    items: [
+      {
+        name: 'Ficciones',
+        link: 'https://www.goodreads.com/book/show/426504.Ficciones',
+        genre: 'Magical realism',
+      },
 
-    {
-      name: "The Hitchhiker's Guide to the Galaxy",
-      link: 'https://www.goodreads.com/book/show/11.The_Hitchhiker_s_Guide_to_the_Galaxy',
-      genre: 'Science Fiction',
-    },
-  ],
+      {
+        name: "The Hitchhiker's Guide to the Galaxy",
+        link: 'https://www.goodreads.com/book/show/11.The_Hitchhiker_s_Guide_to_the_Galaxy',
+        genre: 'Science Fiction',
+      },
+    ],
+  },
 } as const;
 
-interface Learning {
-  currently: Array<string>;
-  next: Array<string>;
-}
+type Learning = {
+  currently: ListStage<string>;
+  next: ListStage<string>;
+};
 
 export const LEARNING: Learning = {
-  currently: [
-    'History',
-    'Spanish',
-    'Environmental Tech',
-    'Writing',
-    'Machine Vision',
-  ],
-  next: [
-    'Photography',
-    'Video Editing',
-    'Catalan',
-    'Cooking',
-    'Auto Mechanics',
-  ],
+  currently: {
+    index: 0,
+    items: [
+      'History',
+      'Spanish',
+      'Environmental Tech',
+      'Writing',
+      'Machine Vision',
+    ],
+  },
+  next: {
+    index: 1,
+    items: [
+      'Photography',
+      'Video Editing',
+      'Catalan',
+      'Cooking',
+      'Auto Mechanics',
+    ],
+  },
 } as const;
 
 interface Project {
@@ -124,58 +141,63 @@ interface Project {
   link?: string;
 }
 
-interface Building {
-  currently: Array<Project>;
-  past: Array<Project>;
-  seeds: Array<Project>;
-}
+type Building = {
+  currently: ListStage<Project>;
+  past: ListStage<Project>;
+  seeds: ListStage<Project>;
+};
 
 export const BUILDING: Building = {
-  currently: [
-    {
-      name: 'LaxDB',
-      description: 'Tooling for managing and analyzing athletic teams',
-      year: 2025,
-      link: 'https://github.com/jackwatters45/lax-db',
-    },
-  ],
-  past: [],
-  seeds: [
-    {
-      name: 'Marketplace Tracker',
-      description: 'Track items accross multiple online marketplaces',
-      year: 2024,
-    },
-    {
-      name: 'Used Sports Good Service',
-      description: 'Sell or Donate Used Equipment',
-      year: 2025,
-    },
-    {
-      name: 'Scheduling App',
-      description: 'Find the best time for an event',
-      year: 2025,
-    },
-  ],
+  currently: {
+    index: 0,
+    items: [
+      {
+        name: 'LaxDB',
+        description: 'Tooling for managing and analyzing athletic teams',
+        year: 2025,
+        link: 'https://github.com/jackwatters45/lax-db',
+      },
+    ],
+  },
+  past: {
+    index: 1,
+    items: [],
+  },
+  seeds: {
+    index: 2,
+    items: [
+      {
+        name: 'Marketplace Tracker',
+        description: 'Track items accross multiple online marketplaces',
+        year: 2024,
+      },
+      {
+        name: 'Used Sports Good Service',
+        description: 'Sell or Donate Used Equipment',
+        year: 2025,
+      },
+      {
+        name: 'Scheduling App',
+        description: 'Find the best time for an event',
+        year: 2025,
+      },
+    ],
+  },
 } as const;
 
-export interface MusicItem {
+export type MusicItem = {
   name: string;
   link: string;
   genre: string;
   album?: string;
   albumLink?: string;
-}
-
-type ListeningStage = {
-  index: number;
-  items: Array<MusicItem>;
 };
-interface Listening {
-  currently: ListeningStage;
-  '2025': ListeningStage;
-  '2024': ListeningStage;
-}
+
+type Listening = {
+  currently: ListStage<MusicItem>;
+  '2025': ListStage<MusicItem>;
+  '2024': ListStage<MusicItem>;
+};
 
 export const LISTENING: Listening = {
   currently: {
@@ -402,148 +424,160 @@ interface WatchItem {
   description?: string;
 }
 
-interface Watching {
-  currently: Array<WatchItem>;
-  podcasts: Array<WatchItem>;
-  movies: Array<WatchItem>;
-  shows: Array<WatchItem>;
-}
+type Watching = {
+  currently: ListStage<WatchItem>;
+  podcasts: ListStage<WatchItem>;
+  movies: ListStage<WatchItem>;
+  shows: ListStage<WatchItem>;
+};
 
 export const WATCHING: Watching = {
-  currently: [
-    {
-      name: 'Suits',
-      link: 'https://www.disneyplus.com/browse/entity-16ced814-5ed7-4f3c-9b8d-0660a12fc2ee?distributionPartner=google',
-    },
-    {
-      name: 'Anthony Bourdain: Parts Unknown',
-      link: 'https://www.primevideo.com/dp/amzn1.dv.gti.28baa2f2-f652-04f1-77cf-226eb28fc7d8?autoplay=0&ref_=atv_cf_strg_wb',
-    },
-    {
-      name: 'How About Tomorrow?',
-      link: 'https://tomorrow.fm/',
-    },
-  ],
-  podcasts: [
-    {
-      name: 'WAR MODE',
-      link: 'https://open.spotify.com/show/3mPoh0V6S7qwjZDGOUE2BE?si=3017e7a44ef94192',
-    },
-    {
-      name: "Matt and Shane's Secret Podcast",
-      link: 'https://open.spotify.com/show/32p08HngccrVVyugc45Ljp?si=0f04db4a259a495c',
-    },
-    {
-      name: 'Central - Bukele',
-      link: 'https://open.spotify.com/show/5rVz6WZuWQKxWalrPaIRxI',
-    },
-    {
-      name: 'Always Sunny Podcast',
-      link: 'https://www.youtube.com/@TheAlwaysSunnyPodcast',
-    },
-    {
-      name: 'Radio Ambulante',
-      link: 'https://open.spotify.com/show/0J74zdNxUVWHq4gLoq8MqX',
-    },
-    {
-      name: 'Unpacking Latin America',
-      link: 'https://open.spotify.com/show/4AWbCJz3e72OaMvuzLHXX4',
-    },
-  ],
-  movies: [
-    {
-      name: 'Banshees of Inisherin',
-      link: 'https://www.imdb.com/title/tt11813216/',
-    },
-    {
-      name: 'Spectre',
-      link: 'https://www.imdb.com/title/tt2379713/',
-    },
-    {
-      name: 'Seven Psychopaths',
-      link: 'https://www.imdb.com/title/tt1931533/',
-    },
-    {
-      name: 'Source Code',
-      link: 'https://www.imdb.com/title/tt0945513/',
-    },
-    {
-      name: 'Crazy, Stupid, Love',
-      link: 'https://www.imdb.com/title/tt1570728/',
-    },
-    {
-      name: 'In Bruges',
-      link: 'https://www.imdb.com/title/tt0780536/',
-    },
-    {
-      name: 'No Country for Old Men',
-      link: 'https://www.imdb.com/title/tt0477348/',
-    },
-    {
-      name: 'Six Shooter',
-      link: 'https://www.imdb.com/title/tt0425458/',
-    },
-    {
-      name: 'Batman Returns',
-      link: 'https://www.imdb.com/title/tt0103776/',
-    },
-    {
-      name: 'Casablanca',
-      link: 'https://www.imdb.com/title/tt0034583/',
-    },
-  ],
-  shows: [
-    {
-      name: 'Vice Principals',
-      link: 'https://play.hbomax.com/show/9714271a-a41c-4321-be01-3287f450528e?utm_source=universal_search',
-    },
-    {
-      name: 'The Penguin',
-      link: 'https://play.max.com/show/5756c2bf-36f8-4890-b1f9-ef168f1d8e9c',
-    },
-    {
-      name: 'Ministerio del Tiempo',
-      link: 'https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2',
-    },
-    {
-      name: 'Always Sunny in Philadelphia',
-      link: 'https://www.imdb.com/title/tt0472954/',
-    },
-    {
-      name: 'La Casa de Papel',
-      link: 'https://www.imdb.com/title/tt6468322/',
-    },
-    {
-      name: 'The Blacklist',
-      link: 'https://www.imdb.com/title/tt2741602/',
-    },
-    {
-      name: 'The Legend of Korra',
-      link: 'https://www.imdb.com/title/tt1695360/',
-    },
-    {
-      name: 'Would I Lie to You?',
-      link: 'https://www.imdb.com/title/tt1055238/',
-    },
-    {
-      name: 'Eastbound & Down',
-      link: 'https://www.imdb.com/title/tt0866442/',
-    },
-    {
-      name: 'My Name is Earl',
-      link: 'https://www.imdb.com/title/tt0460091/',
-    },
-    {
-      name: 'Avatar: The Last Airbender',
-      link: 'https://www.imdb.com/title/tt0417299/',
-    },
-    {
-      name: 'Whose Line Is It Anyway?',
-      link: 'https://www.imdb.com/title/tt0163507/',
-    },
-    {
-      name: 'Twin Peaks',
-      link: 'https://www.imdb.com/title/tt0098936/',
-    },
-  ],
+  currently: {
+    index: 0,
+    items: [
+      {
+        name: 'Suits',
+        link: 'https://www.disneyplus.com/browse/entity-16ced814-5ed7-4f3c-9b8d-0660a12fc2ee?distributionPartner=google',
+      },
+      {
+        name: 'Anthony Bourdain: Parts Unknown',
+        link: 'https://www.primevideo.com/dp/amzn1.dv.gti.28baa2f2-f652-04f1-77cf-226eb28fc7d8?autoplay=0&ref_=atv_cf_strg_wb',
+      },
+      {
+        name: 'How About Tomorrow?',
+        link: 'https://tomorrow.fm/',
+      },
+    ],
+  },
+  podcasts: {
+    index: 1,
+    items: [
+      {
+        name: 'WAR MODE',
+        link: 'https://open.spotify.com/show/3mPoh0V6S7qwjZDGOUE2BE?si=3017e7a44ef94192',
+      },
+      {
+        name: "Matt and Shane's Secret Podcast",
+        link: 'https://open.spotify.com/show/32p08HngccrVVyugc45Ljp?si=0f04db4a259a495c',
+      },
+      {
+        name: 'Central - Bukele',
+        link: 'https://open.spotify.com/show/5rVz6WZuWQKxWalrPaIRxI',
+      },
+      {
+        name: 'Always Sunny Podcast',
+        link: 'https://www.youtube.com/@TheAlwaysSunnyPodcast',
+      },
+      {
+        name: 'Radio Ambulante',
+        link: 'https://open.spotify.com/show/0J74zdNxUVWHq4gLoq8MqX',
+      },
+      {
+        name: 'Unpacking Latin America',
+        link: 'https://open.spotify.com/show/4AWbCJz3e72OaMvuzLHXX4',
+      },
+    ],
+  },
+  movies: {
+    index: 2,
+    items: [
+      {
+        name: 'Banshees of Inisherin',
+        link: 'https://www.imdb.com/title/tt11813216/',
+      },
+      {
+        name: 'Spectre',
+        link: 'https://www.imdb.com/title/tt2379713/',
+      },
+      {
+        name: 'Seven Psychopaths',
+        link: 'https://www.imdb.com/title/tt1931533/',
+      },
+      {
+        name: 'Source Code',
+        link: 'https://www.imdb.com/title/tt0945513/',
+      },
+      {
+        name: 'Crazy, Stupid, Love',
+        link: 'https://www.imdb.com/title/tt1570728/',
+      },
+      {
+        name: 'In Bruges',
+        link: 'https://www.imdb.com/title/tt0780536/',
+      },
+      {
+        name: 'No Country for Old Men',
+        link: 'https://www.imdb.com/title/tt0477348/',
+      },
+      {
+        name: 'Six Shooter',
+        link: 'https://www.imdb.com/title/tt0425458/',
+      },
+      {
+        name: 'Batman Returns',
+        link: 'https://www.imdb.com/title/tt0103776/',
+      },
+      {
+        name: 'Casablanca',
+        link: 'https://www.imdb.com/title/tt0034583/',
+      },
+    ],
+  },
+  shows: {
+    index: 3,
+    items: [
+      {
+        name: 'Vice Principals',
+        link: 'https://play.hbomax.com/show/9714271a-a41c-4321-be01-3287f450528e?utm_source=universal_search',
+      },
+      {
+        name: 'The Penguin',
+        link: 'https://play.max.com/show/5756c2bf-36f8-4890-b1f9-ef168f1d8e9c',
+      },
+      {
+        name: 'Ministerio del Tiempo',
+        link: 'https://www.amazon.com/El-ministerio-del-tiempo-Season/dp/B09JV86JF2',
+      },
+      {
+        name: 'Always Sunny in Philadelphia',
+        link: 'https://www.imdb.com/title/tt0472954/',
+      },
+      {
+        name: 'La Casa de Papel',
+        link: 'https://www.imdb.com/title/tt6468322/',
+      },
+      {
+        name: 'The Blacklist',
+        link: 'https://www.imdb.com/title/tt2741602/',
+      },
+      {
+        name: 'The Legend of Korra',
+        link: 'https://www.imdb.com/title/tt1695360/',
+      },
+      {
+        name: 'Would I Lie to You?',
+        link: 'https://www.imdb.com/title/tt1055238/',
+      },
+      {
+        name: 'Eastbound & Down',
+        link: 'https://www.imdb.com/title/tt0866442/',
+      },
+      {
+        name: 'My Name is Earl',
+        link: 'https://www.imdb.com/title/tt0460091/',
+      },
+      {
+        name: 'Avatar: The Last Airbender',
+        link: 'https://www.imdb.com/title/tt0417299/',
+      },
+      {
+        name: 'Whose Line Is It Anyway?',
+        link: 'https://www.imdb.com/title/tt0163507/',
+      },
+      {
+        name: 'Twin Peaks',
+        link: 'https://www.imdb.com/title/tt0098936/',
+      },
+    ],
+  },
 } as const;

@@ -6,6 +6,9 @@ import ListSubText from '@/components/list/list-sub-text.astro';
 import { Separator } from '@/components/ui/separator';
 import Layout from '@/layouts/layout-prose.astro';
 import { WATCHING } from '@/lib/constants';
+import { getDisplayArr } from '@/lib/utils';
+
+const watching = getDisplayArr(WATCHING);
 ---
 
 <Layout title="watching">
@@ -16,68 +19,25 @@ import { WATCHING } from '@/lib/constants';
       the years.
     </p>
   </div>
+  {watching.map((stage) =>
+  {
+    if(!stage.items.length)return null;
+    return (
   <div class="space-y-3">
-    <h2 class="font-serif">Currently</h2>
+    <h2 class="font-serif capitalize">{stage.title}</h2>
     <ul class="space-y-2 text-sm text-muted-foreground">
       {
-        WATCHING.currently.map((item, i) => (
+      stage.items.map((item, i) => (
           <>
             <ListRow>
               <ListLink href={item.link}>{item.name}</ListLink>
               <ListSubText>{item.description}</ListSubText>
             </ListRow>
-            {i !== WATCHING.currently.length - 1 ? <Separator /> : null}
+            {i !== stage.items.length - 1 ? <Separator /> : null}
           </>
         ))
       }
     </ul>
   </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Podcasts</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        WATCHING.podcasts.map((item, i) => (
-          <>
-            <ListRow>
-              <ListLink href={item.link}>{item.name}</ListLink>
-              <ListSubText>{item.description}</ListSubText>
-            </ListRow>
-            {i !== WATCHING.podcasts.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Movies</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        WATCHING.movies.map((item, i) => (
-          <>
-            <ListRow>
-              <ListLink href={item.link}>{item.name}</ListLink>
-              <ListSubText>{item.description}</ListSubText>
-            </ListRow>
-            {i !== WATCHING.movies.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
-  <div class="space-y-3">
-    <h2 class="font-serif">Tv Shows</h2>
-    <ul class="space-y-2 text-sm text-muted-foreground">
-      {
-        WATCHING.shows.map((item, i) => (
-          <>
-            <ListRow>
-              <ListLink href={item.link}>{item.name}</ListLink>
-              <ListSubText>{item.description}</ListSubText>
-            </ListRow>
-            {i !== WATCHING.shows.length - 1 ? <Separator /> : null}
-          </>
-        ))
-      }
-    </ul>
-  </div>
+)})}
 </Layout>
