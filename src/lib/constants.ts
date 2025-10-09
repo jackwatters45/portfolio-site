@@ -17,6 +17,11 @@ export const READING: Reading = {
     index: 0,
     items: [
       {
+        name: 'The Savage Detectives',
+        link: 'https://www.goodreads.com/book/show/63033.The_Savage_Detectives?from_search=true&from_srp=true&qid=D9qp2j3g5J&rank=1',
+        genre: 'Magical Realism',
+      },
+      {
         name: 'The Almanack of Naval Ravikant',
         link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
         genre: 'Personal Development',
