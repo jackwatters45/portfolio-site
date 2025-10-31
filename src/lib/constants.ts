@@ -487,6 +487,10 @@ export const WATCHING: Watching = {
     index: 2,
     items: [
       {
+        name: 'The Penguin Lessons',
+        link: 'https://www.imdb.com/title/tt26677014/',
+      },
+      {
         name: 'Banshees of Inisherin',
         link: 'https://www.imdb.com/title/tt11813216/',
       },
