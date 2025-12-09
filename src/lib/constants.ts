@@ -17,14 +17,9 @@ export const READING: Reading = {
     index: 0,
     items: [
       {
-        name: 'The Savage Detectives',
-        link: 'https://www.goodreads.com/book/show/63033.The_Savage_Detectives?from_search=true&from_srp=true&qid=D9qp2j3g5J&rank=1',
-        genre: 'Magical Realism',
-      },
-      {
-        name: 'The Almanack of Naval Ravikant',
-        link: 'https://www.goodreads.com/book/show/54898389-the-almanack-of-naval-ravikant?ref=nav_sb_ss_1_10',
-        genre: 'Personal Development',
+        name: 'The Shadow of the Wind',
+        link: 'https://www.goodreads.com/book/show/1232.The_Shadow_of_the_Wind',
+        genre: 'Mystery',
       },
       {
         name: 'For Whom the Bell Tolls',
@@ -36,6 +31,31 @@ export const READING: Reading = {
   recommend: {
     index: 1,
     items: [
+      {
+        name: 'The Long Shoe',
+        link: 'https://www.goodreads.com/book/show/222493271-the-long-shoe',
+        genre: 'Mystery',
+      },
+      {
+        name: 'The Hotel Avocado',
+        link: 'https://www.goodreads.com/book/show/210352077-the-hotel-avocado',
+        genre: 'Mystery',
+      },
+      {
+        name: 'The Satsuma Complex',
+        link: 'http://goodreads.com/book/show/61401116-the-satsuma-complex',
+        genre: 'Mystery',
+      },
+      {
+        name: 'The Old Man and the Sea',
+        link: 'https://www.goodreads.com/book/show/2165.The_Old_Man_and_the_Sea?ref=nav_sb_ss_1_11',
+        genre: 'Novel',
+      },
+      {
+        name: 'The Savage Detectives',
+        link: 'https://www.goodreads.com/book/show/63033.The_Savage_Detectives?from_search=true&from_srp=true&qid=D9qp2j3g5J&rank=1',
+        genre: 'Novel',
+      },
       {
         name: 'Speaker for the Dead',
         link: 'https://www.goodreads.com/book/show/7967.Speaker_for_the_Dead',
@@ -208,6 +228,21 @@ export const LISTENING: Listening = {
   currently: {
     index: 0,
     items: [
+      {
+        name: 'FREDDY L',
+        link: 'https://open.spotify.com/artist/6UisYsxBIJxT8NGZvmzXsm?si=_LtTACA9TdGyzrfULDYIBg',
+        genre: 'Indie Rock',
+      },
+      {
+        name: 'Wunderhorse',
+        link: 'https://open.spotify.com/artist/41pd7r1XBRsvdxY3vHEgib?si=GOBZ_ifZSiGOV80At7pl0w',
+        genre: 'Indie Rock',
+      },
+      {
+        name: 'campthehills',
+        link: 'https://open.spotify.com/artist/01Xh6d2xRTGEpxZw0Khyrs?si=WhqEEOpfST2o2Jq8uLjK_Q',
+        genre: 'Indie',
+      },
       {
         name: 'Demm Deep',
         link: 'https://open.spotify.com/artist/1MzQYOcw4DMB9ISBhZTa7g?si=1XROGwzXQqW0CrU9DtuKXA',
@@ -441,12 +476,8 @@ export const WATCHING: Watching = {
     index: 0,
     items: [
       {
-        name: 'Suits',
-        link: 'https://www.disneyplus.com/browse/entity-16ced814-5ed7-4f3c-9b8d-0660a12fc2ee?distributionPartner=google',
-      },
-      {
-        name: 'Anthony Bourdain: Parts Unknown',
-        link: 'https://www.primevideo.com/dp/amzn1.dv.gti.28baa2f2-f652-04f1-77cf-226eb28fc7d8?autoplay=0&ref_=atv_cf_strg_wb',
+        name: 'Shameless',
+        link: 'https://www.imdb.com/title/tt1586680/',
       },
       {
         name: 'How About Tomorrow?',
@@ -535,6 +566,14 @@ export const WATCHING: Watching = {
   shows: {
     index: 3,
     items: [
+      {
+        name: 'Suits',
+        link: 'https://www.disneyplus.com/browse/entity-16ced814-5ed7-4f3c-9b8d-0660a12fc2ee?distributionPartner=google',
+      },
+      {
+        name: 'Anthony Bourdain: Parts Unknown',
+        link: 'https://www.primevideo.com/dp/amzn1.dv.gti.28baa2f2-f652-04f1-77cf-226eb28fc7d8?autoplay=0&ref_=atv_cf_strg_wb',
+      },
       {
         name: 'Vice Principals',
         link: 'https://play.hbomax.com/show/9714271a-a41c-4321-be01-3287f450528e?utm_source=universal_search',
