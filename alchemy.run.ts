@@ -14,6 +14,9 @@ export default Alchemy.Stack(
     return yield* Cloudflare.Website.StaticSite('site', {
       command: 'bun run build',
       outdir: 'dist',
+      dev: {
+        command: 'bun astro dev',
+      },
       url: true,
       domain:
         stage === 'prod'
