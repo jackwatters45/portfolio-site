@@ -1,74 +1,23 @@
 ---
-import ListLink from '@/components/list/list-link.astro';
-import ListRow from '@/components/list/list-row.astro';
 import Socials from '@/components/socials/socials.astro';
 import Layout from '@/layouts/layout-prose.astro';
-import { BUILDING } from '@/lib/constants';
 ---
 
 <Layout >
   <div class="space-y-6">
     <p>
-      Full stack developer creating elegant, minimalistic software that enhances
-      user experience. Exploring design systems and environmental tech.
+      Californian living in Melbourne, Australia. Working towards a Master of Teaching (Secondary) at <a href="https://www.unimelb.edu.au" class="inline-link">University of Melbourne</a>. Moonlighting as a founding CSR for <a href="https://hospitable.com" class="inline-link">Hospitable</a>'s insurance branch, Align Insurance Services.
     </p>
     <p>
-      Currently serving as the lead developer at a stealth startup and
-      consulting at Insurance BCX. Working on a few personal projects.
+      Experimenting with <a href="https://moodboard.jackwatters.dev" class="inline-link">Mood Boards</a> for inspiration and memory curation.
+
+      Slowly developing a <a href="/secret-tool" class="inline-link">secret tool</a> to expand available tooling for a dear hobby of mine.
+    </p>
+    <p class="italic text-s [font-synthesis:style]">
+      Figuring it out.
     </p>
   </div>
-  <div class="space-y-3 text-sm text-muted-foreground">
-    <a
-      href="/about"
-      class="block underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-      >a little more personal</a
-    >
-    <a
-      href="/blog"
-      class="block underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-      >unsolicited opinions</a
-    >
-  </div>
-  <div class="space-y-8">
-  {BUILDING.currently.items.length > 0 && (
-    <div class="space-y-3">
-      <a href="/building">Building</a>
-      <ul class="space-y-2 text-sm text-muted-foreground">
-        {
-          BUILDING.currently.items.map((project) => (
-            <ListRow>
-              <ListLink
-                className="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-                href={project.link}
-              >
-                {project.name}
-              </ListLink>
-            </ListRow>
-          ))
-        }
-      </ul>
-    </div>)}
-    {BUILDING.past.items.length > 0 &&
-    (<div class="space-y-3">
-      <a href="/building">Past Projects</a>
-      <ul class="space-y-2 text-sm text-muted-foreground">
-        {
-          BUILDING.past.items.map((project) => (
-            <ListRow>
-              <ListLink
-                className="underline underline-offset-4 decoration-muted-foreground hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground transition-all"
-                href={project.link}
-              >
-                {project.name}
-              </ListLink>
-            </ListRow>
-          ))
-        }
-      </ul>
-    </div>)}
-  </div>
   <div class="flex-1 content-end">
-
   <Socials />
   </div>
 </Layout>

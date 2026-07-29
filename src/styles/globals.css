@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+	.inline-link {
+		@apply text-muted-foreground italic underline underline-offset-4 decoration-muted-foreground transition-all hover:underline-offset-[5px] hover:decoration-2 hover:decoration-foreground;
+		margin-inline-end: 0.08em;
+		font-synthesis: style;
+	}
+}
+
 @layer base {
 	:root {
 		--background: #fffbeb;
@@ -115,9 +123,8 @@
 
 
 	::selection {
-    background: var(--color-orange);
-    color: white;
-  }
+		background: rgb(255 255 255 / 18%);
+	}
 
 	@font-face {
 		font-family: 'Inconsolata';
@@ -132,7 +139,7 @@
 		font-style: normal;
 		font-weight: 400;
 		font-display: swap;
-		src: url(/fonts/Newsreader.ttf) format('ttf');
+		src: url(/fonts/Newsreader.ttf) format('truetype');
 	}
 }
 
