@@ -102,7 +102,7 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "typeRoots": ["./node_modules/@types", "/src/types"]
   },
-  "include": ["src"],
+  "include": ["src", "alchemy.run.ts"],
   "exclude": [
     "node_modules",
     "tools",
