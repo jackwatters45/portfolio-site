@@ -1,49 +1,11 @@
 ---
 
-import {
-  STRAVA_CLIENT_ID,
-  STRAVA_CLIENT_SECRET,
-  STRAVA_REFRESH_TOKEN,
-} from 'astro:env/server';
 import LineGraph from '@/components/line-graph/line-graph';
 import type { StravaActivityWithIndex } from '@/components/line-graph/types';
 import Layout from '@/layouts/layout-full-screen.astro';
 
-const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    client_id: STRAVA_CLIENT_ID,
-    client_secret: STRAVA_CLIENT_SECRET,
-    refresh_token: STRAVA_REFRESH_TOKEN,
-    grant_type: 'refresh_token',
-  }),
-});
-
-const tokenData = await tokenResponse.json();
-
-if (tokenData.errors) {
-  throw new Error(`Strava token error: ${JSON.stringify(tokenData.errors)}`);
-}
-
-const accessToken = tokenData.access_token;
-
-const activitiesResponse = await fetch(
-  'https://www.strava.com/api/v3/athlete/activities?per_page=200',
-  {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  },
-);
-
-const activitiesData = await activitiesResponse.json();
-
-if (activitiesData.errors) {
-  throw new Error(
-    `Strava API error: ${JSON.stringify(activitiesData.errors)}. You need to re-authorize with scope: activity:read_all`,
-  );
-}
-
-const activities = activitiesData as StravaActivityWithIndex[];
+// Strava data fetching is temporarily disabled.
+const activities: StravaActivityWithIndex[] = [];
 
 const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 const activitiesWithIndex = activities.map((activity) => {
