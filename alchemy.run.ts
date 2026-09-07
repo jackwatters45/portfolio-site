@@ -11,7 +11,7 @@ export default Alchemy.Stack(
   Effect.gen(function* () {
     const stage = yield* Alchemy.Stage;
 
-    return yield* Cloudflare.Website.StaticSite('site', {
+    const site = yield* Cloudflare.Website.StaticSite('site', {
       command: 'bun run build',
       outdir: 'dist',
       dev: {
@@ -23,5 +23,16 @@ export default Alchemy.Stack(
           ? ['jackwatters.dev', 'www.jackwatters.dev']
           : undefined,
     });
+
+    const tacos = yield* Cloudflare.Website.StaticSite('tacos', {
+      command: 'bun run build:tacos',
+      outdir: 'sites/tacos/dist',
+      dev: { command: 'bun run dev:tacos' },
+      url: true,
+      domain: stage === 'prod' ? 'tacos.jackwatters.dev' : undefined,
+      assets: { notFoundHandling: '404-page' },
+    });
+
+    return { site: site.url, tacos: tacos.url };
   }),
 );

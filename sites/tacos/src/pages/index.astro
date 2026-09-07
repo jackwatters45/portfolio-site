@@ -1,0 +1,62 @@
+---
+import Layout from '../layouts/layout.astro';
+import { getRestaurants } from '../lib/restaurants';
+
+const restaurants = await getRestaurants();
+const date = new Intl.DateTimeFormat('en-AU', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+<Layout title="Melbourne tacos">
+  {restaurants.length === 0 ? (
+    <p>No reviews yet. <a href="https://www.jackwatters.dev/">Visit Jack’s site</a>.</p>
+  ) : (
+    <>
+      <ol aria-label="Restaurants, highest average score first">
+        {restaurants.map(({ id, data }) => (
+          <li>
+            <a class="restaurant-entry" href={`/restaurants/${id}/`}>
+              <div class="entry-details">
+                <div class="entry-meta">
+                  <span>{data.suburb}</span>
+                  {data.visited && <time datetime={data.visited}>{date.format(new Date(data.visited))}</time>}
+                </div>
+                <h2>{data.name}</h2>
+                {data.items.some((item) => item.name) && <p class="entry-dishes">{data.items.filter((item) => item.name).map((item) => item.name).join(' · ')}</p>}
+              </div>
+              <div class="entry-end">
+                {(['meg', 'jack'] as const).filter((person) => data.ratings[person].score !== null).map((person) => (
+                  <div class="entry-rating">
+                    <span>{person === 'meg' ? 'Meg' : 'Jack'}</span>
+                    <div><strong>{data.ratings[person].score}</strong><span class="out-of">/10</span></div>
+                  </div>
+                ))}
+                <svg class="entry-arrow" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </>
+  )}
+</Layout>
+
+<style>
+  ol { list-style: none; padding: 0; margin: 24px 0 0; border-top: 3px double var(--rule); }
+  li { border-bottom: 1px solid var(--rule); }
+  .restaurant-entry { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; padding: 28px 0; color: var(--ink); text-decoration: none; }
+  .entry-details { flex: 1 1 240px; min-width: 0; }
+  .entry-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; color: #57534e; font-family: Helvetica, sans-serif; font-size: 12px; }
+  h2 { margin: 8px 0 0; color: var(--chile); font-size: 26px; }
+  .entry-dishes { margin: 8px 0 0; font-size: 13px; font-style: italic; }
+  .entry-end { display: flex; align-items: center; gap: 24px; margin-left: auto; }
+  .entry-rating { display: flex; flex-direction: column; gap: 4px; font-family: Helvetica, sans-serif; font-size: 12px; }
+  .entry-rating strong { font-family: 'Newsreader', Georgia, serif; font-size: 28px; font-weight: 400; font-variant-numeric: tabular-nums; color: var(--chile); }
+  .out-of { padding-left: 2px; color: #57534e; font-size: 11px; }
+  .entry-arrow { color: var(--chile); }
+  .restaurant-entry:hover h2, .restaurant-entry:focus-visible h2 { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+</style>

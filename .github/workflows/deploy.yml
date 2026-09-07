@@ -26,6 +26,9 @@ jobs:
       - name: Check
         run: bunx astro check
 
+      - name: Build taco site
+        run: bun run build:tacos
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Deploy

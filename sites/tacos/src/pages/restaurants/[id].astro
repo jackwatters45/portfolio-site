@@ -1,0 +1,67 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import Reviews from '../../components/reviews.astro';
+import Layout from '../../layouts/layout.astro';
+import { getRestaurants } from '../../lib/restaurants';
+
+export async function getStaticPaths() {
+  return (await getRestaurants()).map((restaurant) => ({
+    params: { id: restaurant.id },
+    props: { restaurant },
+  }));
+}
+
+interface Props {
+  restaurant: CollectionEntry<'restaurants'>;
+}
+const { restaurant } = Astro.props;
+const { data } = restaurant;
+const hasOverall = Object.values(data.ratings).some(
+  ({ score, review }) => score !== null || review,
+);
+const items = data.items.filter((item) => item.name);
+const { Content } = await render(restaurant);
+const visited =
+  data.visited &&
+  new Intl.DateTimeFormat('en-AU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(data.visited));
+const currency = new Intl.NumberFormat('en-AU', {
+  style: 'currency',
+  currency: 'AUD',
+});
+---
+
+<Layout title={data.name} description={`${data.name}, ${data.suburb}. Restaurant and menu item reviews by Meg and Jack.`}>
+  <div class="restaurant-heading">
+    <h1>{data.name}</h1>
+    <div class="meta restaurant-details">
+      {data.mapsUrl ? <a href={data.mapsUrl}>{data.address || data.suburb}</a> : <span>{data.address || data.suburb}</span>}
+      {visited && <time datetime={data.visited}>{visited}</time>}
+    </div>
+  </div>
+  <div class="visit-notes"><Content /></div>
+  {hasOverall && <section class="section" aria-labelledby="overall">
+    <h2 id="overall">Overall</h2>
+    <Reviews ratings={data.ratings} />
+  </section>}
+  {items.length > 0 && <section class="section" aria-labelledby="menu">
+    <h2 id="menu">What we ate</h2>
+    {items.map((item) => (
+      <article>
+        <div class="menu-line">
+          <h3>{item.name}</h3>
+          {item.price !== null && <>
+            <span class="menu-leader" aria-hidden="true"></span>
+            <p class="meta menu-price">{currency.format(item.price)} AUD</p>
+          </>}
+        </div>
+        <Reviews ratings={item.ratings} />
+      </article>
+    ))}
+  </section>}
+</Layout>

@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "alchemy dev",
     "build": "astro check && astro build",
+    "dev:tacos": "astro dev --root sites/tacos",
+    "build:tacos": "astro check --root sites/tacos && astro build --root sites/tacos",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
     "preview": "astro preview",

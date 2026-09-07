@@ -1,0 +1,17 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  ratings: CollectionEntry<'restaurants'>['data']['ratings'];
+}
+const { ratings } = Astro.props;
+---
+
+<div class="reviews">
+  {(['meg', 'jack'] as const).filter((person) => ratings[person].score !== null || ratings[person].review).map((person) => (
+    <section aria-label={`${person === 'meg' ? 'Meg' : 'Jack'}’s review`}>
+      <div class="scores"><strong>{person === 'meg' ? 'Meg' : 'Jack'}{ratings[person].score !== null && ` · ${ratings[person].score}/10`}</strong></div>
+      {ratings[person].review && <p>{ratings[person].review}</p>}
+    </section>
+  ))}
+</div>
