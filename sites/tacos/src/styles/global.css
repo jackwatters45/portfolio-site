@@ -139,13 +139,29 @@ a:hover {
   font-weight: 400;
 }
 .reviews {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
 }
 .reviews > section {
-  flex: 1 1 240px;
   min-width: 0;
+  grid-row: 1;
+}
+.reviews > [data-person="meg"] {
+  grid-column: 1;
+}
+.reviews > [data-person="jack"] {
+  grid-column: 2;
+}
+.solo-reviews .reviews {
+  display: block;
+}
+@media (max-width: 480px) {
+  .reviews {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 .reviews p {
   margin-bottom: 0;
@@ -175,7 +191,10 @@ article {
 }
 .visit-notes {
   font-size: 14px;
-  margin-top: 32px;
+  margin-top: 40px;
+}
+.visit-notes + .section {
+  margin-top: 44px;
 }
 @media (max-width: 480px) {
   .restaurant-details {

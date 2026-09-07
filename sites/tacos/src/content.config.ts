@@ -34,6 +34,8 @@ const restaurants = defineCollection({
             .nullish()
             .transform((value) => value ?? ''),
           price: z.number().nonnegative().nullable().default(null),
+          shared: z.boolean().optional(),
+          note: z.string().trim().optional(),
           ratings,
         }),
       )

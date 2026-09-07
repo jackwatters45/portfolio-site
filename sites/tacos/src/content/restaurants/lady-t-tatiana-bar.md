@@ -14,32 +14,66 @@ items:
     ratings:
       meg:
         score: 8
-      jack: {}
+        review: 'Must have had gluten in it. This taco was delicious, and an 8 is preposterous.'
+      jack:
+        score: 9.1
+        review: 'Maybe the best vegetarian taco in Melbourne? Certainly the best taco at Lady T and the one I would go back for.'
   - name: Chicken taco
     ratings:
       meg:
         score: 8.2
-      jack: {}
+        review: 'The best taco of the night. Did it deserve better than an 8.2? Yes.'
+      jack:
+        score: 8.9
+        review: "The sauce. Something about the damn sauce. Normally not a huge fan of chicken in tacos, but this one rocked my world."
   - name: Pork taco
     ratings:
       meg:
         score: 7.8
-      jack: {}
+        review: "Did I even eat the pork taco? I think she was too busy spilling her drink on herself."
+      jack:
+        score: 8.2
+        review: 'Decent, nothing to write home about. Would have preferred something more interesting, like al pastor.'
+  - name: Fish taco
+    ratings:
+      meg: {}
+      jack:
+        score: 8.1
+        review: 'Decent, but nothing to write home about. Yet to find a great fish taco in Melbourne.'
   - name: Chips and guacamole
     ratings:
       meg:
         score: 8.7
-      jack: {}
+        review: "Curiously always Meg's highest scoring dish.."
+      jack:
+        score: 8.5
+        review: 'Pretty good guac and a nice red salsa. Great warm-up.'
+  - name: Margarita
+    ratings:
+      meg: {}
+      jack:
+        score: 7.5
+        review: 'Marg. Ahorita.'
+  - name: Spicy margarita
+    ratings:
+      meg: {}
+      jack:
+        score: 8.7
+        review: 'Really, really good before it ended up on the floor. Damn earthquake.'
   - name: Paloma
     ratings:
       meg:
         score: 7.6
+        review: 'Tequila? Not totally disgusting? Could be good.'
       jack: {}
   - name: Hugo spritz
     ratings:
       meg:
         score: 3
+        review: 'Worst Hugo spritz Meg has ever had. Too sweet? Sticking to the Mount Erica.'
       jack: {}
 ---
 
-Visited before the Dice concert.
+Visited before the DICE concert. Lady T was a great precursor to the concert. Fun little diner-like restaurant in the front that opens up into a bar out the back through a fake vending machine. Tacos were solid. Bar was pretty cool. Wouldn't mind revisiting, maybe before the next DICE concert.
+
+2 drinks were spilled. 1 by Meg, the other by a freak earthquake no one could have prevented.
