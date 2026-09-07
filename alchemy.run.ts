@@ -12,15 +12,19 @@ export default Alchemy.Stack(
     const stage = yield* Alchemy.Stage;
 
     const site = yield* Cloudflare.Website.StaticSite('site', {
+      // Preserve the live Worker name when recovering the pre-upgrade state.
+      name:
+        stage === 'prod'
+          ? 'portfolio-site-worker-prod-pajru7f2ajoqabdc'
+          : undefined,
       command: 'bun run build',
       outdir: 'dist',
       dev: {
         command: 'bun astro dev',
       },
-      url: true,
       domain:
         stage === 'prod'
-          ? ['jackwatters.dev', 'www.jackwatters.dev']
+          ? { name: 'jackwatters.dev', aliases: ['www.jackwatters.dev'] }
           : undefined,
     });
 
@@ -28,7 +32,6 @@ export default Alchemy.Stack(
       command: 'bun run build:tacos',
       outdir: 'sites/tacos/dist',
       dev: { command: 'bun run dev:tacos' },
-      url: true,
       domain: stage === 'prod' ? 'tacos.jackwatters.dev' : undefined,
       assets: { notFoundHandling: '404-page' },
     });
