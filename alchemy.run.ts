@@ -32,7 +32,13 @@ export default Alchemy.Stack(
       command: 'bun run build:tacos',
       outdir: 'sites/tacos/dist',
       dev: { command: 'bun run dev:tacos' },
-      domain: stage === 'prod' ? 'tacos.jackwatters.dev' : undefined,
+      domain:
+        stage === 'prod'
+          ? {
+              name: 'tacos.jackwatters.dev',
+              redirects: ['www.tacos.jackwatters.dev'],
+            }
+          : undefined,
       assets: { notFoundHandling: '404-page' },
     });
 
