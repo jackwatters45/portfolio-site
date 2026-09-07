@@ -1,0 +1,194 @@
+:root {
+  --paper: #fbf3e3;
+  --ink: #352b25;
+  --chile: #963d2e;
+  --rule: #d9c6aa;
+  color-scheme: light;
+  font-family: Georgia, serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  max-width: 672px;
+  margin: 0 auto;
+  padding: 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../../../public/fonts/Newsreader.ttf") format("truetype");
+}
+header {
+  padding: 64px 0 48px;
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+header a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--chile);
+  text-decoration: none;
+}
+header a::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 1px solid currentColor;
+  box-shadow:
+    inset 0 0 0 3px var(--paper),
+    inset 0 0 0 6px currentColor;
+  transform: rotate(45deg);
+}
+@media (min-width: 768px) {
+  header {
+    padding-top: 96px;
+  }
+}
+main {
+  padding: 0 0 64px;
+  min-height: 60dvh;
+}
+h1,
+h2,
+h3 {
+  font-family: "Newsreader", Georgia, serif;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+h1 {
+  color: var(--chile);
+  font-size: clamp(28px, 5vw, 36px);
+  margin: 8px 0 16px;
+  font-weight: 400;
+}
+h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+  font-weight: 400;
+}
+h3 {
+  font-size: 19px;
+  margin: 0;
+  font-weight: 400;
+}
+p {
+  text-wrap: pretty;
+}
+a {
+  color: var(--chile);
+  text-underline-offset: 4px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 2px solid var(--chile);
+  outline-offset: 4px;
+}
+.skip {
+  position: absolute;
+  top: 8px;
+  transform: translateY(-200%);
+  background: var(--paper);
+  padding: 8px;
+}
+.skip:focus {
+  transform: translateY(0);
+}
+.meta {
+  color: #57534e;
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+}
+.scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-family: Helvetica, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.reviews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.reviews > section {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.reviews p {
+  margin-bottom: 0;
+  white-space: pre-line;
+}
+article {
+  padding: 24px 0;
+  border-top: 1px solid var(--rule);
+  overflow-wrap: anywhere;
+}
+.restaurant-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+}
+.restaurant-heading h1 {
+  flex: 1 1 240px;
+  margin: 0;
+}
+.restaurant-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.visit-notes {
+  font-size: 14px;
+  margin-top: 32px;
+}
+@media (max-width: 480px) {
+  .restaurant-details {
+    align-items: flex-start;
+  }
+}
+.section {
+  margin-top: 36px;
+}
+.section > h2 {
+  padding-bottom: 10px;
+  border-bottom: 3px double var(--rule);
+  color: var(--chile);
+  font-style: italic;
+}
+.section > article {
+  border-top: 0;
+  padding: 16px 0 24px;
+}
+.menu-line {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.menu-line h3 {
+  min-width: 0;
+}
+.menu-leader {
+  flex: 1;
+  min-width: 16px;
+  border-bottom: 1px dotted var(--rule);
+}
+.menu-price {
+  flex-shrink: 0;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
