@@ -12,6 +12,9 @@
   box-sizing: border-box;
 }
 body {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
   max-width: 672px;
   margin: 0 auto;
   padding: 0 24px;

@@ -1,0 +1,64 @@
+---
+const prints = [
+  'lime',
+  'paloma',
+  'chilli',
+  'chips',
+  'avocado',
+  'margarita',
+  'guacamole',
+];
+// Stable per page: different arrangements without jumping on reload.
+const offset =
+  Array.from(Astro.url.pathname).reduce(
+    (sum, char) => sum + char.charCodeAt(0),
+    0,
+  ) % prints.length;
+---
+
+<div class="background-prints" aria-hidden="true">
+  {prints.map((_, index) => (
+    <img
+      src={`/prints/${prints[(index + offset) % prints.length]}.svg`}
+      alt=""
+      width="160"
+      height="160"
+      decoding="async"
+      draggable="false"
+    />
+  ))}
+</div>
+
+<style>
+  .background-prints {
+    position: absolute;
+    inset: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
+    overflow: clip;
+    pointer-events: none;
+    user-select: none;
+    z-index: -1;
+  }
+  img {
+    position: absolute;
+    width: clamp(100px, 12vw, 180px);
+    height: auto;
+    opacity: 0.42;
+  }
+  img:nth-child(1) { top: 36px; right: calc(50% + 350px); transform: rotate(-19deg); }
+  img:nth-child(2) { top: 12%; left: calc(50% + 370px); transform: rotate(14deg); }
+  img:nth-child(3) { top: 34%; right: calc(50% + 410px); transform: rotate(-28deg); width: 110px; }
+  img:nth-child(4) { top: 47%; left: calc(50% + 345px); transform: rotate(-12deg); }
+  img:nth-child(5) { top: 65%; right: calc(50% + 345px); transform: rotate(21deg); }
+  img:nth-child(6) { top: 78%; left: calc(50% + 400px); transform: rotate(17deg); width: 120px; }
+  img:nth-child(7) { bottom: 12px; right: calc(50% + 440px); transform: rotate(-8deg); width: 125px; }
+
+  /* Keep the reading column clear when there is no room for margins. */
+  @media (max-width: 899px) {
+    .background-prints { display: none; }
+  }
+  @media print {
+    .background-prints { display: none; }
+  }
+</style>

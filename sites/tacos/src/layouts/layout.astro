@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import BackgroundPrints from '../components/background-prints.astro';
 
 interface Props {
   title: string;
@@ -29,6 +30,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:url" content={canonical} />
   </head>
   <body class:list={{ 'map-page': map }}>
+    {!map && <BackgroundPrints />}
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <a class="site-title" href="/">tacos of melbourne</a>
