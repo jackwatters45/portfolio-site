@@ -7,10 +7,7 @@ export async function getRestaurants() {
   );
   return restaurants.sort(
     (a, b) =>
-      (b.data.ratings.meg.score ?? -10) +
-        (b.data.ratings.jack.score ?? -10) -
-        ((a.data.ratings.meg.score ?? -10) +
-          (a.data.ratings.jack.score ?? -10)) ||
+      (b.data.visited ?? '').localeCompare(a.data.visited ?? '') ||
       a.data.name.localeCompare(b.data.name, 'en-AU'),
   );
 }
