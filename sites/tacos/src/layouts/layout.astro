@@ -32,7 +32,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <a class="site-title" href="/">tacos of melbourne</a>
-      {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map <span aria-hidden="true">↗</span></a>}
+      {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map</a>}
     </header>
     <main id="main"><slot /></main>
   </body>

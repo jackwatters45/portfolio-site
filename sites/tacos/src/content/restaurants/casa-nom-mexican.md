@@ -4,7 +4,7 @@ suburb: Prahran
 address: 110 Greville St, Prahran
 coordinates: [-37.849348, 144.9909989]
 mapsUrl: 'https://www.google.com/maps/place/Casa+NOM+Mexican/data=!4m2!3m1!1s0x0:0x51903ae7f9dfc842'
-draft: true
+draft: false
 visited: '2026-08-26'
 ratings:
   meg: {}
