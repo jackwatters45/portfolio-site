@@ -37,7 +37,7 @@ const locations = restaurants.flatMap(({ id, data }) =>
   const status = document.querySelector<HTMLElement>('#map-status')!;
   const locations: { name: string; address: string; coordinates: [number, number]; scores: { meg: number | null; jack: number | null }; url: string }[] = JSON.parse(container.dataset.locations!);
 
-  const map = L.map(container, { zoomControl: true, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).setView([-37.8136, 144.9631], 12);
+  const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).setView([-37.8136, 144.9631], 12);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -73,12 +73,33 @@ const locations = restaurants.flatMap(({ id, data }) =>
       icon: L.divIcon({
         className: 'restaurant-pin',
         html: '<span class="taco-tag" aria-hidden="true"><svg width="30" height="26" viewBox="0 0 32 28" fill="none"><path d="M4 19C1 12 6 4 13 5c3-5 9-2 10 1 6-1 9 5 6 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 22a13 13 0 0 1 26 0Z" fill="currentColor"/><path d="m9 18 2-2m5 3 1-3m5 3 1 1" stroke="#fbf3e3" stroke-width="2" stroke-linecap="round"/></svg></span>',
-        iconSize: [48, 58], iconAnchor: [24, 58], popupAnchor: [0, -52],
+        iconSize: [72, 82], iconAnchor: [36, 70], popupAnchor: [0, -52],
       }),
     }).addTo(map).bindPopup(popup, { className: 'taco-preview', minWidth: 220, maxWidth: 260 });
-    marker.on('mouseover click', () => marker.openPopup());
-    marker.getElement()?.setAttribute('aria-label', location.name);
-    marker.getElement()?.addEventListener('focus', () => marker.openPopup());
+    const pin = marker.getElement()!;
+    const closeIfOutside = (event: PointerEvent | FocusEvent) => {
+      if (event instanceof PointerEvent && event.pointerType !== 'mouse') return;
+      const preview = marker.getPopup()?.getElement();
+      const next = event.relatedTarget;
+      if (next instanceof Node && (pin.contains(next) || preview?.contains(next))) return;
+      if (!pin.matches(':hover, :focus-visible') && !preview?.matches(':hover, :focus-within')) {
+        marker.closePopup();
+      }
+    };
+    pin.setAttribute('aria-label', location.name);
+    pin.addEventListener('pointerenter', (event) => {
+      if (event.pointerType === 'mouse') marker.openPopup();
+    });
+    pin.addEventListener('pointerleave', closeIfOutside);
+    pin.addEventListener('focus', () => {
+      if (pin.matches(':focus-visible')) marker.openPopup();
+    });
+    pin.addEventListener('blur', closeIfOutside);
+    marker.on('popupopen', () => {
+      const preview = marker.getPopup()!.getElement()!;
+      preview.onpointerleave = closeIfOutside;
+      preview.addEventListener('focusout', closeIfOutside);
+    });
   }
 
   if (locations.length > 0) {
