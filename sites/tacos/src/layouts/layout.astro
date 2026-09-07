@@ -4,7 +4,7 @@ import { Agentation } from 'agentation';
 import BackgroundPrints from '../components/background-prints.astro';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
   map?: boolean;
 }
@@ -15,6 +15,9 @@ const {
   description = 'Melbourne taco reviews by Meg and Jack. Two scores for every restaurant and menu item.',
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const pageTitle = title
+  ? `${title} · tacos of melbourne`
+  : 'tacos of melbourne';
 ---
 
 <!doctype html>
@@ -22,12 +25,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>{title} · tacos of melbourne</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={`${title} · tacos of melbourne`} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
   </head>
