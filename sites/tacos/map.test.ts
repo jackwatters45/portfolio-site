@@ -64,3 +64,16 @@ test('map pins link to listed restaurants and contain valid coordinates', async 
   }
   if (links.length === 0) expect(locations).toEqual([]);
 });
+
+test('published partial reviews appear on the list, map, and restaurant pages', async () => {
+  const index = await (await page('/')).text();
+  const map = await (await page('/map/')).text();
+  for (const id of ['casa-nom-mexican', 'lady-t-tatiana-bar']) {
+    const path = `/restaurants/${id}/`;
+    expect(index).toContain(path);
+    expect(map).toContain(path);
+    const review = await (await page(path)).text();
+    expect(review).toContain('Meg ·');
+    expect(review).not.toContain('Not rated');
+  }
+});
