@@ -12,7 +12,13 @@ async function page(path: string) {
 
 test('map pins link to listed restaurants and contain valid coordinates', async () => {
   const links: string[] = [];
+  const dates: string[] = [];
   await new HTMLRewriter()
+    .on('.entry-meta time', {
+      element: (element) => {
+        dates.push(element.getAttribute('datetime')!);
+      },
+    })
     .on('a.restaurant-entry', {
       element: (element) => {
         links.push(element.getAttribute('href')!);
@@ -47,6 +53,7 @@ test('map pins link to listed restaurants and contain valid coordinates', async 
     .transform(await page('/map/'))
     .text();
 
+  expect(dates).toEqual([...dates].sort().reverse());
   expect(locations).toBeDefined();
   for (const location of locations!) {
     expect(links).toContain(location.url);
@@ -74,6 +81,7 @@ test('published partial reviews appear on the list, map, and restaurant pages', 
     expect(map).toContain(path);
     const review = await (await page(path)).text();
     expect(review).toContain('Meg ·');
+    expect(review).toContain('id="menu">Menu</h2>');
     expect(review).not.toContain('Not rated');
   }
 });
