@@ -132,6 +132,12 @@ a:hover {
   font-family: Helvetica, sans-serif;
   font-variant-numeric: tabular-nums;
 }
+.scores strong {
+  color: var(--chile);
+  font-family: "Newsreader", Georgia, serif;
+  font-size: 18px;
+  font-weight: 400;
+}
 .reviews {
   display: flex;
   flex-wrap: wrap;

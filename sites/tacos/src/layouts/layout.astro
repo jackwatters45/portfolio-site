@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { Agentation } from 'agentation';
 import BackgroundPrints from '../components/background-prints.astro';
 
 interface Props {
@@ -37,5 +38,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map</a>}
     </header>
     <main id="main"><slot /></main>
+    {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
   </body>
 </html>
