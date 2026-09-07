@@ -4,10 +4,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  map?: boolean;
 }
 
 const {
   title,
+  map = false,
   description = 'Melbourne taco reviews by Meg and Jack. Two scores for every restaurant and menu item.',
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -26,9 +28,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
   </head>
-  <body>
+  <body class:list={{ 'map-page': map }}>
     <a class="skip" href="#main">Skip to content</a>
-    <header><a href="/">tacos of melbourne</a></header>
+    <header>
+      <a class="site-title" href="/">tacos of melbourne</a>
+      {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map <span aria-hidden="true">↗</span></a>}
+    </header>
     <main id="main"><slot /></main>
   </body>
 </html>

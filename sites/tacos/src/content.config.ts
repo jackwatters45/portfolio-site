@@ -20,6 +20,9 @@ const restaurants = defineCollection({
       suburb: z.string().trim().min(1),
       address: z.string().trim().optional(),
       mapsUrl: z.string().url().startsWith('https://').optional(),
+      coordinates: z
+        .tuple([z.number().min(-90).max(90), z.number().min(-180).max(180)])
+        .optional(),
       visited: z.string().date().optional(),
       draft: z.boolean().default(true),
       ratings,
