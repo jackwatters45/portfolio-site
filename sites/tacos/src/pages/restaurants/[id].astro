@@ -20,7 +20,20 @@ const { data } = restaurant;
 const hasOverall = Object.values(data.ratings).some(
   ({ score, review }) => score !== null || review,
 );
-const items = data.items.filter((item) => item.name);
+const groups = [
+  { id: 'shared', title: 'Shared dishes', items: [] as typeof data.items },
+  { id: 'meg-extras', title: 'Meg’s extras', items: [] as typeof data.items },
+  { id: 'jack-extras', title: 'Jack’s extras', items: [] as typeof data.items },
+  { id: 'unrated', title: 'Not yet rated', items: [] as typeof data.items },
+];
+for (const item of data.items.filter((item) => item.name)) {
+  const meg =
+    item.ratings.meg.score !== null || Boolean(item.ratings.meg.review);
+  const jack =
+    item.ratings.jack.score !== null || Boolean(item.ratings.jack.review);
+  const group = item.shared || (meg && jack) ? 0 : meg ? 1 : jack ? 2 : 3;
+  groups[group].items.push(item);
+}
 const { Content } = await render(restaurant);
 const visited =
   data.visited &&
@@ -49,9 +62,9 @@ const currency = new Intl.NumberFormat('en-AU', {
     <h2 id="overall">Overall</h2>
     <Reviews ratings={data.ratings} />
   </section>}
-  {items.length > 0 && <section class="section" aria-labelledby="menu">
-    <h2 id="menu">Menu</h2>
-    {items.map((item) => (
+  {groups.filter((group) => group.items.length > 0).map((group) => <section class:list={['section', { 'solo-reviews': group.id !== 'shared' }]} aria-labelledby={group.id}>
+    <h2 id={group.id}>{group.title}</h2>
+    {group.items.map((item) => (
       <article>
         <div class="menu-line">
           <h3>{item.name}</h3>
@@ -60,8 +73,9 @@ const currency = new Intl.NumberFormat('en-AU', {
             <p class="meta menu-price">{currency.format(item.price)} AUD</p>
           </>}
         </div>
+        {item.note && <p>{item.note}</p>}
         <Reviews ratings={item.ratings} />
       </article>
     ))}
-  </section>}
+  </section>)}
 </Layout>
