@@ -30,7 +30,7 @@ items:
     ratings:
       meg:
         score: 7.8
-        review: "Did I even eat the pork taco? I think she was too busy spilling her drink on herself."
+        review: "Did Meg even eat the pork taco? Think she was too busy spilling her drink on herself."
       jack:
         score: 8.2
         review: 'Decent, nothing to write home about. Would have preferred something more interesting, like al pastor.'
