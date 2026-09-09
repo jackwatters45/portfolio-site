@@ -1,0 +1,11 @@
+node_modules
+dist
+data
+.alchemy
+.env
+.env.*
+!.env.example
+.pi-subagents
+.auto/
+.DS_Store
+*.local
