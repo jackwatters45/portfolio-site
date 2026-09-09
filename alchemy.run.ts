@@ -17,10 +17,10 @@ export default Alchemy.Stack(
         stage === 'prod'
           ? 'portfolio-site-worker-prod-pajru7f2ajoqabdc'
           : undefined,
-      command: 'bun run build',
-      outdir: 'dist',
+      command: 'bun run build --filter=@personal-sites/portfolio',
+      outdir: 'packages/portfolio/dist',
       dev: {
-        command: 'bun astro dev',
+        command: 'bun run dev --filter=@personal-sites/portfolio',
       },
       domain:
         stage === 'prod'
@@ -29,9 +29,9 @@ export default Alchemy.Stack(
     });
 
     const tacos = yield* Cloudflare.Website.StaticSite('tacos', {
-      command: 'bun run build:tacos',
-      outdir: 'sites/tacos/dist',
-      dev: { command: 'bun run dev:tacos' },
+      command: 'bun run build --filter=@personal-sites/tacos',
+      outdir: 'packages/tacos/dist',
+      dev: { command: 'bun run dev --filter=@personal-sites/tacos' },
       domain:
         stage === 'prod'
           ? {

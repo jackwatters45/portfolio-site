@@ -1,8 +1,9 @@
 # build output
 dist/
 
-# generated types
+# generated types and task cache
 .astro/
+.turbo/
 
 # dependencies
 node_modules/

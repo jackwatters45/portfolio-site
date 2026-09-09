@@ -1,22 +1,16 @@
 ---
-const prints = [
-  'lime',
-  'paloma',
-  'chilli',
-  'chips',
-  'avocado',
-  'margarita',
-  'guacamole',
-];
+import site from '@site/site';
+
+const { prints } = site;
 // Stable per page: different arrangements without jumping on reload.
 const offset =
   Array.from(Astro.url.pathname).reduce(
     (sum, char) => sum + char.charCodeAt(0),
     0,
-  ) % prints.length;
+  ) % (prints.length || 1);
 ---
 
-<div class="background-prints" aria-hidden="true">
+{prints.length > 0 && <div class="background-prints" aria-hidden="true">
   {prints.map((_, index) => (
     <img
       src={`/prints/${prints[(index + offset) % prints.length]}.svg`}
@@ -27,7 +21,7 @@ const offset =
       draggable="false"
     />
   ))}
-</div>
+</div>}
 
 <style>
   .background-prints {

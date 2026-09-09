@@ -8,4 +8,6 @@ Keep focused tests for complex behavior with real failure risks. The map tests a
 
 ## Styles
 
-Keep taco site styles in `sites/tacos/src/styles/global.css`. Scope page-specific selectors so they do not affect other pages.
+Keep shared review-site styles in `packages/reviews/src/styles/global.css`. Put site colors in each site's `theme.css`. Scope page-specific selectors so they do not affect other pages.
+
+Keep map tests manual. Do not add tests to the CI/CD pipeline.

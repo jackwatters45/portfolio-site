@@ -1,5 +1,6 @@
 ---
 import 'leaflet/dist/leaflet.css';
+import site from '@site/site';
 import Layout from '../layouts/layout.astro';
 import { getRestaurants } from '../lib/restaurants';
 
@@ -22,9 +23,9 @@ const locations = restaurants.flatMap(({ id, data }) =>
 );
 ---
 
-<Layout title="Melbourne taco map" description="Find our reviewed taco restaurants on a map of Melbourne." map>
+<Layout title={site.mapTitle} description={site.mapDescription} map>
   <div class="map-container">
-    <div id="restaurant-map" aria-label="Melbourne taco restaurants" data-locations={JSON.stringify(locations)}></div>
+    <div id="restaurant-map" aria-label={site.mapTitle} data-locations={JSON.stringify(locations)}></div>
     <p id="map-status" role="status">Loading map… <a href="/">View restaurant list</a></p>
     <noscript><p class="map-notice">Enable JavaScript to use the map. <a href="/">View restaurant list</a></p></noscript>
   </div>
@@ -32,6 +33,7 @@ const locations = restaurants.flatMap(({ id, data }) =>
 
 <script>
   import L from 'leaflet';
+  import site from '@site/site';
 
   const container = document.querySelector<HTMLElement>('#restaurant-map')!;
   const status = document.querySelector<HTMLElement>('#map-status')!;
@@ -72,10 +74,10 @@ const locations = restaurants.flatMap(({ id, data }) =>
       riseOnHover: true,
       icon: L.divIcon({
         className: 'restaurant-pin',
-        html: '<span class="taco-tag" aria-hidden="true"><svg width="30" height="26" viewBox="0 0 32 28" fill="none"><path d="M4 19C1 12 6 4 13 5c3-5 9-2 10 1 6-1 9 5 6 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 22a13 13 0 0 1 26 0Z" fill="currentColor"/><path d="m9 18 2-2m5 3 1-3m5 3 1 1" stroke="#fbf3e3" stroke-width="2" stroke-linecap="round"/></svg></span>',
+        html: `<span class="restaurant-tag" aria-hidden="true">${site.markerIcon}</span>`,
         iconSize: [72, 82], iconAnchor: [36, 70], popupAnchor: [0, -52],
       }),
-    }).addTo(map).bindPopup(popup, { className: 'taco-preview', minWidth: 220, maxWidth: 260 });
+    }).addTo(map).bindPopup(popup, { className: 'restaurant-popup', minWidth: 220, maxWidth: 260 });
     const pin = marker.getElement()!;
     const closeIfOutside = (event: PointerEvent | FocusEvent) => {
       if (event instanceof PointerEvent && event.pointerType !== 'mouse') return;
