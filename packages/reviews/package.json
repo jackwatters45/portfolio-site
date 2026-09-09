@@ -1,0 +1,23 @@
+{
+  "name": "@personal-sites/reviews",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./config": "./astro.config.mjs",
+    "./site": "./src/site.ts"
+  },
+  "dependencies": {
+    "agentation": "^3.0.2",
+    "leaflet": "^1.9.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "astro": "5.16.4",
+    "@astrojs/react": "4.4.2",
+    "@astrojs/sitemap": "^3.7.3"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3"
+  }
+}

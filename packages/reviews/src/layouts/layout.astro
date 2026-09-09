@@ -1,5 +1,7 @@
 ---
 import '../styles/global.css';
+import '@site/theme.css';
+import site from '@site/site';
 import { Agentation } from 'agentation';
 import BackgroundPrints from '../components/background-prints.astro';
 
@@ -9,15 +11,9 @@ interface Props {
   map?: boolean;
 }
 
-const {
-  title,
-  map = false,
-  description = 'Melbourne taco reviews by Meg and Jack. Two scores for every restaurant and menu item.',
-} = Astro.props;
+const { title, map = false, description = site.description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const pageTitle = title
-  ? `${title} · tacos of melbourne`
-  : 'tacos of melbourne';
+const pageTitle = title ? `${title} · ${site.name}` : site.name;
 ---
 
 <!doctype html>
@@ -38,7 +34,7 @@ const pageTitle = title
     {!map && <BackgroundPrints />}
     <a class="skip" href="#main">Skip to content</a>
     <header>
-      <a class="site-title" href="/">tacos of melbourne</a>
+      <a class="site-title" href="/">{site.name}</a>
       {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map</a>}
     </header>
     <main id="main"><slot /></main>

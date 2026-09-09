@@ -13,7 +13,7 @@ const review = z.object({
 const ratings = z.object({ meg: review, jack: review });
 
 const restaurants = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/restaurants' }),
+  loader: glob({ pattern: '*.md', base: './content/restaurants' }),
   schema: z.object({
     name: z.string().trim().min(1),
     suburb: z.string().trim().min(1),
