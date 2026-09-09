@@ -35,7 +35,10 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <a class="site-title" href="/">{site.name}</a>
-      {Astro.url.pathname === '/' && <a class="map-link" href="/map/">Map</a>}
+      {Astro.url.pathname === '/' && <nav class="site-links" aria-label="Explore">
+        <a class="map-link" href="/map/">Map</a>
+        <a class="map-link" href={import.meta.env.DEV ? site.otherSite.devHref : site.otherSite.href}>{site.otherSite.name}</a>
+      </nav>}
     </header>
     <main id="main"><slot /></main>
     {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}

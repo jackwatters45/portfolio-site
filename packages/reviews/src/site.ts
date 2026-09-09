@@ -5,4 +5,5 @@ export interface ReviewSite {
   mapDescription: string;
   markerIcon: string;
   prints: string[];
+  otherSite: { name: string; href: string; devHref: string };
 }

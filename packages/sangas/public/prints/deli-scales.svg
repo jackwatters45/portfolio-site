@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" fill="none">
+  <g stroke="#234e9b" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M65 58h190l-16 26H81Z" fill="#fff5d6" stroke-width="1.6"/>
+    <path d="M80 84h160m-91 0v23h22V84" stroke-width="1.1"/>
+    <path d="M96 258h128l-11-67H107Z" fill="#fff5d6" stroke-width="1.4"/>
+    <path d="M84 258h152l8 16H76Z" fill="#fff5d6" stroke-width="1.6"/>
+    <circle cx="160" cy="165" r="65" fill="#fff5d6" stroke-width="1.8"/>
+    <circle cx="160" cy="165" r="58" stroke-width=".65"/>
+    <path d="M118 190a49 49 0 1 1 84 0" stroke-width=".75"/>
+    <g stroke-width="1.1"><path d="M160 118v8m-23-2 4 7m-22 10 7 4m-14 20h8m-2 23 7-4m58-60-4 7m22 10-7 4m14 20h-8m2 23-7-4"/></g>
+    <g stroke-width=".5"><path d="m148 119 1 4m-23 9 3 4m-15 16 4 1m-6 26 4-1m56-59-1 4m23 9-3 4m15 16-4 1m6 26-4-1"/></g>
+    <path d="m160 165 29-28-22 36Z" fill="#234e9b" stroke-width=".8"/>
+    <circle cx="160" cy="165" r="5" fill="#fff5d6" stroke-width="1"/>
+    <path d="M142 191h36v15h-36Z" stroke-width=".6"/>
+    <text x="160" y="202" text-anchor="middle" fill="#234e9b" stroke="none" font-family="Georgia, serif" font-size="10">oz.</text>
+    <path d="m114 230-3 21m9-17-2 17m8-14-2 14m78-20 3 20m-10-17 2 17m-10-14 2 14M88 265h145" stroke-width=".6"/>
+    <path d="m82 64 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 8 13m4-13 6 10" stroke-width=".45"/>
+  </g>
+</svg>

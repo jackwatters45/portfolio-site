@@ -11,7 +11,7 @@ const offset =
 ---
 
 {prints.length > 0 && <div class="background-prints" aria-hidden="true">
-  {prints.map((_, index) => (
+  {prints.slice(0, 7).map((_, index) => (
     <img
       src={`/prints/${prints[(index + offset) % prints.length]}.svg`}
       alt=""

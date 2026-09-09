@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" fill="none">
+  <g stroke="#234e9b" stroke-linecap="round" stroke-linejoin="round" transform="rotate(11 160 160)">
+    <path d="m148 38 23 1 6 51h-35Z" fill="#fff5d6" stroke-width="1.6"/>
+    <path d="m155 39 1 43m11-42 2 42M145 91h31v18h-31Z" stroke-width=".75"/>
+    <path d="M144 108c-2 13-16 24-21 38-6 15-7 37-8 61l-2 43c-1 18 10 26 47 26 37 0 48-8 47-26l-2-43c-1-24-2-46-8-61-5-14-19-25-21-38Z" fill="#fff5d6" stroke-width="1.7"/>
+    <path d="M135 139c-9 16-12 41-12 69l-1 37m64-106c10 25 12 51 12 86m-70 36c20 6 45 6 65-1" stroke-width=".7"/>
+    <path d="M117 172c28-8 58-8 86 0l3 62c-29 8-62 8-92 0Z" fill="#fff5d6" stroke-width="1"/>
+    <path d="M125 179c23-6 46-6 70 0l2 46c-24 6-49 6-74 0Z" stroke-width=".55"/>
+    <text x="160" y="204" text-anchor="middle" fill="#234e9b" stroke="none" font-family="Georgia, serif" font-size="12" letter-spacing="1">MUSTARD</text>
+    <path d="M143 212h34m-20 7h6" stroke-width=".65"/>
+    <g stroke-width=".55"><path d="m131 146-3 15m8-18-2 17m8-21-2 17m43-9 3 12m-63 85 1 11m6-10 1 12m7-11 1 13m8-12 1 13m8-12 1 13m8-12 1 13m8-13v12m8-14v12m7-14v11"/></g>
+    <path d="M142 91h34m-32 5h30m-29 6h29" stroke-width="1.1"/>
+  </g>
+</svg>

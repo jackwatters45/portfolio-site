@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" fill="none">
+  <g stroke="#234e9b" stroke-linecap="round" stroke-linejoin="round" transform="rotate(14 160 160)">
+    <path d="M94 131L100 77C104 52 122 41 153 40C184 38 208 55 213 79L220 132Z" fill="#fff5d6" stroke-width="1.7"/>
+
+    <path d="M106 88C134 70 180 72 207 90M117 62L121 64M146 50L150 52M174 54L177 57M194 68L197 70" stroke-width=".7"/>
+    <path d="M102 105L115 97L129 109L143 98L159 111L174 101L190 113L209 103" stroke-width="1.4"/>
+    <path d="M102 116C115 108 131 123 147 114C161 107 176 123 190 117L212 113" stroke-width="1.8"/>
+    <path d="M81 126L100 118L155 142L213 121L235 132L220 259L169 281L111 265Z" fill="#fff5d6" stroke-width="1.6"/>
+    <path d="M81 126L155 167L235 132M155 167L169 281M100 138L118 253L158 270M222 145L209 251L179 266" stroke-width=".75"/>
+    <path d="M90 160L114 173M96 184L120 197M102 209L126 222M108 234L133 247M104 141L111 184M119 151L126 209M135 160L141 231M146 189L113 171M149 215L120 199M153 241L128 226" stroke-width=".45"/>
+    <ellipse cx="169" cy="201" rx="31" ry="24" transform="rotate(-9 169 201)" fill="#fff5d6" stroke-width="1"/>
+    <ellipse cx="169" cy="201" rx="25" ry="18" transform="rotate(-9 169 201)" stroke-width=".6"/>
+    <path d="M157 203L178 199M164 195L173 194M166 209L174 208" stroke-width="1.4"/>
+    <path d="M191 230L199 244M201 219L208 229M181 248L187 260M121 78L119 85M188 82L187 88" stroke-width=".6"/>
+  </g>
+</svg>

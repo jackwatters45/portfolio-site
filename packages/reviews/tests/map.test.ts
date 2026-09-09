@@ -7,7 +7,7 @@ function page(site: string, path: string) {
   );
 }
 
-for (const site of ['tacos']) {
+for (const site of ['tacos', 'sangas']) {
   test(`${site}: map pins link to listed restaurants and contain valid coordinates`, async () => {
     const links: string[] = [];
     const dates: string[] = [];

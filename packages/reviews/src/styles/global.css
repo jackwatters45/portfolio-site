@@ -53,6 +53,11 @@ header {
   justify-content: space-between;
   gap: 24px;
 }
+.site-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 .map-link:hover,
 .map-link:focus-visible {
   text-decoration: underline;
