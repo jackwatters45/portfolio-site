@@ -42,6 +42,20 @@ export default Alchemy.Stack(
       assets: { notFoundHandling: '404-page' },
     });
 
-    return { site: site.url, tacos: tacos.url };
+    const sangas = yield* Cloudflare.Website.StaticSite('sangas', {
+      command: 'bun run build --filter=@personal-sites/sangas',
+      outdir: 'packages/sangas/dist',
+      dev: { command: 'bun run dev --filter=@personal-sites/sangas' },
+      domain:
+        stage === 'prod'
+          ? {
+              name: 'sangas.jackwatters.dev',
+              redirects: ['www.sangas.jackwatters.dev'],
+            }
+          : undefined,
+      assets: { notFoundHandling: '404-page' },
+    });
+
+    return { site: site.url, tacos: tacos.url, sangas: sangas.url };
   }),
 );

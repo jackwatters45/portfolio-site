@@ -2,6 +2,11 @@ import type { ReviewSite } from '@personal-sites/reviews/site';
 
 export default {
   name: 'tacos of melbourne',
+  otherSite: {
+    name: 'Sangas',
+    href: 'https://sangas.jackwatters.dev',
+    devHref: 'http://localhost:4324',
+  },
   description: 'Melbourne taco reviews by Meg and Jack.',
   mapTitle: 'Melbourne taco map',
   mapDescription: 'Find our reviewed taco restaurants on a map of Melbourne.',

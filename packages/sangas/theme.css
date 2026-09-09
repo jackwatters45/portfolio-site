@@ -1,0 +1,53 @@
+:root {
+  --paper: #fff5d6;
+  --ink: #252d41;
+  --accent: #234e9b;
+  --rule: #cfbea0;
+}
+.restaurant-list {
+  border-top-color: var(--accent);
+}
+.restaurant-list > li {
+  border-bottom-style: dashed;
+}
+.section > h2 {
+  border-bottom: 1px solid var(--accent);
+  font-size: 20px;
+  font-style: normal;
+}
+.menu-leader {
+  border-bottom-style: dashed;
+}
+.meta,
+.entry-meta,
+.out-of {
+  color: #626579;
+}
+.restaurant-tag {
+  height: 52px;
+  padding-bottom: 0;
+  border: 3px double var(--paper);
+  border-radius: 15px 15px 5px 5px;
+  clip-path: none;
+  transform: rotate(-5deg);
+}
+.restaurant-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 var(--rule);
+}
+.leaflet-bar {
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: none;
+  overflow: hidden;
+}
+.leaflet-bar a,
+.leaflet-control-attribution {
+  background: var(--paper);
+  color: var(--accent);
+}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus-visible {
+  background: #f3e4b9;
+  color: var(--accent);
+}

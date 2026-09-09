@@ -63,6 +63,16 @@
         "@types/react-dom": "^19.2.3",
       },
     },
+    "packages/sangas": {
+      "name": "@personal-sites/sangas",
+      "dependencies": {
+        "@personal-sites/reviews": "workspace:*",
+        "astro": "5.16.4",
+      },
+      "devDependencies": {
+        "@astrojs/check": "0.9.6",
+      },
+    },
     "packages/tacos": {
       "name": "@personal-sites/tacos",
       "dependencies": {
@@ -496,6 +506,8 @@
     "@personal-sites/portfolio": ["@personal-sites/portfolio@workspace:packages/portfolio"],
 
     "@personal-sites/reviews": ["@personal-sites/reviews@workspace:packages/reviews"],
+
+    "@personal-sites/sangas": ["@personal-sites/sangas@workspace:packages/sangas"],
 
     "@personal-sites/tacos": ["@personal-sites/tacos@workspace:packages/tacos"],
 
