@@ -20,10 +20,15 @@ const { data } = restaurant;
 const hasOverall = Object.values(data.ratings).some(
   ({ score, review }) => score !== null || review,
 );
+const hasBreadRating =
+  data.glutenFreeBread &&
+  Object.values(data.glutenFreeBread).some(
+    ({ score, review }) => score !== null || review,
+  );
 const groups = [
   { id: 'shared', title: 'Shared dishes', items: [] as typeof data.items },
-  { id: 'meg-extras', title: 'Meg’s extras', items: [] as typeof data.items },
-  { id: 'jack-extras', title: 'Jack’s extras', items: [] as typeof data.items },
+  { id: 'meg-extras', title: 'Meg', items: [] as typeof data.items },
+  { id: 'jack-extras', title: 'Jack', items: [] as typeof data.items },
   { id: 'unrated', title: 'Not yet rated', items: [] as typeof data.items },
 ];
 for (const item of data.items.filter((item) => item.name)) {
@@ -74,8 +79,12 @@ const currency = new Intl.NumberFormat('en-AU', {
           </>}
         </div>
         {item.note && <p>{item.note}</p>}
-        <Reviews ratings={item.ratings} />
+        <Reviews ratings={item.ratings} showNames={group.id !== 'meg-extras' && group.id !== 'jack-extras'} />
       </article>
     ))}
   </section>)}
+  {hasBreadRating && data.glutenFreeBread && <section class="section" aria-labelledby="gluten-free-bread">
+    <h2 id="gluten-free-bread">Gluten-free bread</h2>
+    <Reviews ratings={data.glutenFreeBread} showNames={false} />
+  </section>}
 </Layout>

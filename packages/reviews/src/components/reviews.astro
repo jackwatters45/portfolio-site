@@ -3,14 +3,15 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   ratings: CollectionEntry<'restaurants'>['data']['ratings'];
+  showNames?: boolean;
 }
-const { ratings } = Astro.props;
+const { ratings, showNames = true } = Astro.props;
 ---
 
 <div class="reviews">
   {(['meg', 'jack'] as const).filter((person) => ratings[person].score !== null || ratings[person].review).map((person) => (
     <section data-person={person} aria-label={`${person === 'meg' ? 'Meg' : 'Jack'}’s review`}>
-      <div class="scores"><strong>{person === 'meg' ? 'Meg' : 'Jack'}{ratings[person].score !== null && ` · ${ratings[person].score}/10`}</strong></div>
+      {(showNames || ratings[person].score !== null) && <div class="scores"><strong>{showNames && (person === 'meg' ? 'Meg' : 'Jack')}{ratings[person].score !== null && `${showNames ? ' · ' : ''}${ratings[person].score}/10`}</strong></div>}
       {ratings[person].review && <p>{ratings[person].review}</p>}
     </section>
   ))}

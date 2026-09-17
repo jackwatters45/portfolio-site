@@ -9,12 +9,16 @@ draft: false
 ratings:
   meg: {}
   jack: {}
+glutenFreeBread:
+  meg:
+    score: 8.6
+  jack: {}
 items:
   - name: Chopped cheese
     shared: true
     ratings:
       meg:
-        score: 10
+        score: 8.3
         review: 'Surprisingly, the gluten-free bread was okay. "Basically a hamburger." Jalapeños were soooo spicy. May have slipped the second half to Maisy under the table.'
       jack:
         score: 8.8
@@ -23,7 +27,7 @@ items:
     shared: true
     ratings:
       meg:
-        score: 10
+        score: 5.2
         review: "Don't know if Meg ate any, but we'll pretend she thought they were great."
       jack:
         score: 8
