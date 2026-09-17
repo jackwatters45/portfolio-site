@@ -1,5 +1,5 @@
 ---
-name: JUJU’S DELI
+name: Juju’s Deli
 suburb: Thornbury
 address: 750 High St, Thornbury
 coordinates: [-37.7558208, 145.0013214]
@@ -9,12 +9,16 @@ visited: '2026-08-22'
 ratings:
   meg: {}
   jack: {}
+glutenFreeBread:
+  meg:
+    score: 9
+  jack: {}
 items:
-  - name: Prosciutto sanga
+  - name: Prosciutto
     shared: true
     ratings:
       meg:
-        score: 5 # Placeholder until Meg adds her rating.
+        score: 8.6
         review: "Think Meg liked it? Don't know I was sorta dying so didn't see her reaction."
       jack:
         score: 8.3

@@ -25,6 +25,7 @@ const restaurants = defineCollection({
     visited: z.string().date().optional(),
     draft: z.boolean().default(true),
     ratings,
+    glutenFreeBread: ratings.optional(),
     items: z
       .array(
         z.object({
