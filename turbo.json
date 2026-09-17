@@ -23,6 +23,15 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "@personal-sites/mood-board#build": {
+      "dependsOn": ["^build", "typecheck"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_RPC_TRANSPORT", "VITE_RPC_URL"]
+    },
+    "@personal-sites/mood-board#typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": ["node_modules/.tmp/*.tsbuildinfo"]
     }
   }
 }

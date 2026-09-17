@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import", "unicorn", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "rules": {
+    "no-console": "off",
+    "no-inline-comments": "off",
+    "no-magic-numbers": "off",
+    "max-lines": "off",
+    "max-lines-per-function": "off",
+    "max-classes-per-file": "off",
+    "require-yield": "off",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-non-null-assertion": "warn",
+    "typescript/consistent-type-imports": "error",
+    "import/no-cycle": "error",
+    "import/no-duplicates": "error",
+    "import/max-dependencies": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "no-warning-comments": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/server/**/*.ts",
+        "src/cloudflare/**/*.ts",
+        "scripts/**/*.ts",
+        "tests/server/**/*.ts",
+        "tests/cloudflare/**/*.ts",
+        "tests/e2e/**/*.ts",
+        "src/client/board-sync.ts",
+        "src/client/board-catalog.ts"
+      ],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["node_modules/**", "dist/**", ".alchemy/**", "src/cloudflare/d1-migrations/**"]
+}

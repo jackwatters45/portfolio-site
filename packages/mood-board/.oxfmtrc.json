@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": false,
+  "semi": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 100,
+  "endOfLine": "lf",
+  "sortImports": true,
+  "ignorePatterns": [
+    "**/*.md",
+    "node_modules/**",
+    "dist/**",
+    ".alchemy/**",
+    "src/cloudflare/d1-migrations/**",
+    "package-lock.json",
+    "src/routeTree.gen.ts"
+  ]
+}
