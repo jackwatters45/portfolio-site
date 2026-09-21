@@ -154,6 +154,10 @@ a:hover {
 .reviews > [data-person="jack"] {
   grid-column: 2;
 }
+.guest-reviews > section {
+  grid-row: auto;
+  grid-column: auto;
+}
 .solo-reviews .reviews {
   display: block;
 }

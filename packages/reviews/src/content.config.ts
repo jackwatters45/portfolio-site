@@ -10,7 +10,7 @@ const review = z.object({
     .transform((value) => value ?? ''),
 });
 
-const ratings = z.object({ meg: review, jack: review });
+const ratings = z.object({ meg: review, jack: review }).catchall(review);
 
 const restaurants = defineCollection({
   loader: glob({ pattern: '*.md', base: './content/restaurants' }),
