@@ -9,7 +9,7 @@ import {
   CommentError,
   type CommentSubmission,
   type ThreadSubmission,
-} from '../src/lib/comments-schema';
+} from '../lib/comments-schema';
 import { GitHubClient } from './github-client';
 import {
   GitHubComment,
@@ -19,7 +19,7 @@ import {
   formatMessage,
   message,
   thread,
-} from '../src/lib/github-comments';
+} from '../lib/github-comments';
 
 export class Comments extends Context.Service<Comments>()(
   "nz/Comments",

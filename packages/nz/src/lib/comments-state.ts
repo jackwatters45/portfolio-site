@@ -1,4 +1,4 @@
-import type { CommentTarget, CommentThread, ThreadDetail } from '../../lib/comments-schema';
+import type { CommentTarget, CommentThread, ThreadDetail } from './comments-schema';
 
 export type View = 'list' | 'thread' | 'new' | 'name';
 

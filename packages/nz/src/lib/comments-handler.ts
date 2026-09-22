@@ -5,8 +5,8 @@ import * as Match from 'effect/Match';
 import * as Redacted from 'effect/Redacted';
 import * as Schema from 'effect/Schema';
 import * as Stream from 'effect/Stream';
-import { Comments } from '../../services/comments';
-import { CommentError, CommentSubmission, ThreadSubmission } from '../lib/comments-schema';
+import { Comments } from '../services/comments';
+import { CommentError, CommentSubmission, ThreadSubmission } from './comments-schema';
 
 interface RateLimit {
   limit(options: { key: string }): Promise<{ success: boolean }>;

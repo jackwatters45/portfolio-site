@@ -1,5 +1,5 @@
 ---
-import { COMMENT_LIMIT } from '../../lib/comments-schema';
+import { COMMENT_LIMIT } from '../lib/comments-schema';
 ---
 <nz-comment-thread hidden>
   <button class="nz-comment-context" type="button" data-action="context" hidden></button>
@@ -23,9 +23,9 @@ import { COMMENT_LIMIT } from '../../lib/comments-schema';
   </template>
 </nz-comment-thread>
 <script>
-  import type { CommentMessage } from '../../lib/comments-schema';
-  import { cloneTemplate, element } from '../../scripts/comments/dom';
-  import { currentThread, draftKey, type CommentsState } from '../../scripts/comments/state';
+  import type { CommentMessage } from '../lib/comments-schema';
+  import { cloneTemplate, element } from '../lib/comments-dom';
+  import { currentThread, draftKey, type CommentsState } from '../lib/comments-state';
 
   class CommentThread extends HTMLElement {
     private previous?: CommentsState;

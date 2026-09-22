@@ -1,9 +1,9 @@
 import * as Effect from 'effect/Effect';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
-import { loadCommentName, saveCommentName } from '../../lib/comment-name';
-import { validName } from '../../lib/comments-schema';
-import { CommentsApi } from '../../services/comments-api';
-import { currentThread, draftKey, type CommentsState } from './state';
+import { loadCommentName, saveCommentName } from './comment-name';
+import { validName } from './comments-schema';
+import { CommentsApi } from '../services/comments-api';
+import { currentThread, draftKey, type CommentsState } from './comments-state';
 
 // Browser boundary: owns request cancellation and the service runtime lifecycle.
 export function commentData(get: () => CommentsState, update: (value: Partial<CommentsState>) => void) {

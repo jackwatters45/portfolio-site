@@ -1,8 +1,8 @@
 ---
-import CommentList from './comments/comment-list.astro';
-import CommentNameForm from './comments/comment-name-form.astro';
-import CommentThread from './comments/comment-thread.astro';
-import CommentPins from './comments/comment-pins.astro';
+import CommentList from './comment-list.astro';
+import CommentNameForm from './comment-name-form.astro';
+import CommentThread from './comment-thread.astro';
+import CommentPins from './comment-pins.astro';
 import '../styles/comments.css';
 ---
 <nz-comments class="nz-feedback-ui" data-feedback-ui hidden>
@@ -41,9 +41,9 @@ import '../styles/comments.css';
 </nz-comments>
 <script>
   import { GENERAL_COMMENT_TARGET, validName, type CommentTarget, type CommentThread } from '../lib/comments-schema';
-  import { commentData } from '../scripts/comments/data';
-  import { element } from '../scripts/comments/dom';
-  import { initialState, currentThread, draftKey, type CommentsState, type View } from '../scripts/comments/state';
+  import { commentData } from '../lib/comments-data';
+  import { element } from '../lib/comments-dom';
+  import { initialState, currentThread, draftKey, type CommentsState, type View } from '../lib/comments-state';
 
   type ViewElement = HTMLElement & { render(state: CommentsState, hasContext?: boolean): void };
   type PinsElement = ViewElement & {

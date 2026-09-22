@@ -7,8 +7,8 @@ import * as Schema from 'effect/Schema';
 import * as HttpClient from 'effect/unstable/http/HttpClient';
 import * as HttpClientRequest from 'effect/unstable/http/HttpClientRequest';
 import * as HttpClientResponse from 'effect/unstable/http/HttpClientResponse';
-import { CommentError } from '../src/lib/comments-schema';
-import { OWNER } from '../src/lib/github-comments';
+import { CommentError } from '../lib/comments-schema';
+import { OWNER } from '../lib/github-comments';
 
 const API = `https://api.github.com/repos/${OWNER}/portfolio-site`;
 

@@ -3,7 +3,7 @@ import type { AstroIntegration } from 'astro';
 import * as Effect from 'effect/Effect';
 import * as Redacted from 'effect/Redacted';
 import { loadEnv } from 'vite';
-import { GitHubAuth } from '../services/github-auth';
+import { GitHubAuth } from './src/services/github-auth';
 
 export function localComments(): AstroIntegration {
   return {
@@ -14,7 +14,7 @@ export function localComments(): AstroIntegration {
         const variables = {
           ...loadEnv(
             'development',
-            fileURLToPath(new URL('../../..', import.meta.url)),
+            fileURLToPath(new URL('../..', import.meta.url)),
             'NZ_FEEDBACK_',
           ),
           ...process.env,

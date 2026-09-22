@@ -1,5 +1,5 @@
 ---
-import { NAME_LIMIT } from '../../lib/comments-schema';
+import { NAME_LIMIT } from '../lib/comments-schema';
 ---
 <nz-comment-name-form hidden>
   <form class="nz-comment-form" data-name-form>
@@ -10,9 +10,9 @@ import { NAME_LIMIT } from '../../lib/comments-schema';
   </form>
 </nz-comment-name-form>
 <script>
-  import { validName } from '../../lib/comments-schema';
-  import { element } from '../../scripts/comments/dom';
-  import type { CommentsState } from '../../scripts/comments/state';
+  import { validName } from '../lib/comments-schema';
+  import { element } from '../lib/comments-dom';
+  import type { CommentsState } from '../lib/comments-state';
 
   class CommentNameForm extends HTMLElement {
     render(state: CommentsState) {

@@ -17,8 +17,8 @@
   </template>
 </nz-comment-list>
 <script>
-  import { cloneTemplate, element } from '../../scripts/comments/dom';
-  import type { CommentsState } from '../../scripts/comments/state';
+  import { cloneTemplate, element } from '../lib/comments-dom';
+  import type { CommentsState } from '../lib/comments-state';
 
   class CommentList extends HTMLElement {
     private previous?: CommentsState;

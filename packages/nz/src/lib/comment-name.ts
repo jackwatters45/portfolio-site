@@ -1,6 +1,6 @@
 import * as Effect from 'effect/Effect';
 import * as KeyValueStore from 'effect/unstable/persistence/KeyValueStore';
-import { NAME_STORAGE_KEY } from '../domain/comments';
+import { NAME_STORAGE_KEY } from './comments-schema';
 
 const browserStorage = KeyValueStore.layerStorage(() => window.localStorage);
 

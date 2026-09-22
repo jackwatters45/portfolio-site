@@ -5,7 +5,7 @@ import * as Config from 'effect/Config';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Redacted from 'effect/Redacted';
-import { GitHubAuth } from './packages/nz/services/github-auth';
+import { GitHubAuth } from './packages/nz/src/services/github-auth';
 
 export default Alchemy.Stack(
   'portfolio-site',

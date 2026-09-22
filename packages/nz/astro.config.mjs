@@ -1,7 +1,7 @@
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
 import { defineConfig } from 'astro/config';
-import { localComments } from './integrations/local-comments';
+import { localComments } from './local-comments';
 
 export default defineConfig({
   site: 'https://nz.jackwatters.dev',

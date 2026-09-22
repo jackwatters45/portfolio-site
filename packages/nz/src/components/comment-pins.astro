@@ -4,9 +4,9 @@
   </template>
 </nz-comment-pins>
 <script>
-  import { QUOTE_LIMIT, type CommentTarget } from '../../lib/comments-schema';
-  import { cloneTemplate } from '../../scripts/comments/dom';
-  import { currentThread, type CommentsState } from '../../scripts/comments/state';
+  import { QUOTE_LIMIT, type CommentTarget } from '../lib/comments-schema';
+  import { cloneTemplate } from '../lib/comments-dom';
+  import { currentThread, type CommentsState } from '../lib/comments-state';
 
   class CommentPins extends HTMLElement {
     private events?: AbortController;
