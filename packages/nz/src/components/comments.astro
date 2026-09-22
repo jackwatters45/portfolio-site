@@ -1,0 +1,232 @@
+---
+import CommentList from './comments/comment-list.astro';
+import CommentNameForm from './comments/comment-name-form.astro';
+import CommentThread from './comments/comment-thread.astro';
+import CommentPins from './comments/comment-pins.astro';
+import '../styles/comments.css';
+---
+<nz-comments class="nz-feedback-ui" data-feedback-ui hidden>
+  <button type="button" class="nz-comment-launcher" data-action="toggle" aria-expanded="false" aria-controls="nz-comments-panel">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20 11.5a8 8 0 0 1-8 8H4l1.7-4A8 8 0 1 1 20 11.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+      <path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+    </svg>
+    Comments <span class="nz-comment-count" data-count hidden></span>
+  </button>
+  <div class="nz-comment-picker" data-picker aria-live="polite" hidden>
+    <span>Choose a marked plan</span>
+    <button type="button" data-action="cancel-pick">Cancel</button>
+  </div>
+  <dialog id="nz-comments-panel" class="nz-comments-panel" aria-labelledby="nz-comments-title">
+    <header class="nz-comments-header">
+      <button type="button" class="nz-comment-icon" data-action="back" aria-label="Back to comments" hidden>←</button>
+      <h2 id="nz-comments-title" tabindex="-1">Comments</h2>
+      <button type="button" class="nz-comment-icon" data-action="refresh" aria-label="Refresh comments">↻</button>
+      <button type="button" class="nz-comment-icon" data-action="close" aria-label="Close comments">×</button>
+    </header>
+    <div class="nz-comments-content">
+      <CommentNameForm />
+      <CommentList />
+      <CommentThread />
+    </div>
+    <footer class="nz-comments-footer" data-footer>
+      <div class="nz-comment-actions" data-actions>
+        <button type="button" class="nz-comment-primary" data-action="pick">Inline comment</button>
+        <button type="button" class="nz-comment-secondary" data-action="general">General comment</button>
+      </div>
+      <button type="button" class="nz-comment-name-button" data-action="change-name" hidden></button>
+    </footer>
+  </dialog>
+  <CommentPins />
+</nz-comments>
+<script>
+  import { GENERAL_COMMENT_TARGET, validName, type CommentTarget, type CommentThread } from '../lib/comments-schema';
+  import { commentData } from '../scripts/comments/data';
+  import { element } from '../scripts/comments/dom';
+  import { initialState, currentThread, draftKey, type CommentsState, type View } from '../scripts/comments/state';
+
+  type ViewElement = HTMLElement & { render(state: CommentsState, hasContext?: boolean): void };
+  type PinsElement = ViewElement & {
+    find(anchor: string | undefined): (CommentTarget & { element: HTMLElement }) | undefined;
+    scrollToAnchor(anchor: string | undefined): void;
+  };
+
+  class Comments extends HTMLElement {
+    private state = initialState();
+    private events?: AbortController;
+    private data?: ReturnType<typeof commentData>;
+    private returnView: View | 'pick' = 'list';
+
+    private get pins() { return element<PinsElement>(this, 'nz-comment-pins'); }
+    private button(action: string) { return element<HTMLButtonElement>(this, `[data-action="${action}"]`); }
+
+    async connectedCallback() {
+      this.events?.abort();
+      const events = new AbortController();
+      this.events = events;
+      await Promise.all(['nz-comment-list', 'nz-comment-name-form', 'nz-comment-thread', 'nz-comment-pins'].map((name) => customElements.whenDefined(name)));
+      if (!this.isConnected || events.signal.aborted) return;
+      this.data = commentData(() => this.state, (patch) => this.update(patch));
+      this.addEventListener('click', (event) => this.click(event), { signal: events.signal });
+      this.addEventListener('input', (event) => this.input(event), { signal: events.signal });
+      this.addEventListener('submit', (event) => this.submit(event), { signal: events.signal });
+      this.addEventListener('comment-target', (event) => {
+        const { thread, target } = (event as CustomEvent<{ thread?: CommentThread; target: CommentTarget }>).detail;
+        if (thread) this.openThread(thread);
+        else this.chooseTarget(target);
+      }, { signal: events.signal });
+      window.addEventListener('hashchange', () => this.fromHash(), { signal: events.signal });
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && (this.state.panel || this.state.picking)) this.close();
+      }, { signal: events.signal });
+      this.render();
+      this.hidden = false;
+      this.fromHash();
+      this.data.refresh();
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+      this.data?.dispose();
+      this.data = undefined;
+    }
+
+    private update(patch: Partial<CommentsState>) {
+      const previous = this.state;
+      this.state = { ...previous, ...patch };
+      this.render();
+      const changed = previous.panel !== this.state.panel || previous.view !== this.state.view || previous.threadId !== this.state.threadId;
+      if (changed) {
+        if (this.state.panel) {
+          const selector = this.state.view === 'name' ? '#nz-comment-name' : this.state.view === 'new' ? '#nz-comment-body' : '#nz-comments-title';
+          element<HTMLElement>(this, selector).focus();
+        }
+        this.data?.loadThread();
+      }
+    }
+
+    private openThread(thread: CommentThread) {
+      this.update({ threadId: thread.id, view: 'thread', panel: true, picking: false, sendError: '' });
+    }
+
+    private chooseTarget(target: CommentTarget) {
+      const existing = this.state.threads.find((thread) => thread.anchor === target.anchor && !thread.closed && !thread.locked);
+      if (existing) this.openThread(existing);
+      else this.update({ target, view: 'new', panel: true, picking: false, sendError: '' });
+    }
+
+    private askName(next: View | 'pick') {
+      this.returnView = next;
+      this.update({ nameInput: this.state.name, view: 'name', panel: true, sendError: '' });
+    }
+
+    private close() {
+      if (this.state.sending) return;
+      this.update({ panel: false, picking: false });
+      this.button('toggle').focus();
+    }
+
+    private fromHash() {
+      const anchor = new URLSearchParams(location.hash.slice(1)).get('comment');
+      if (anchor === GENERAL_COMMENT_TARGET.anchor) this.update({ panel: true, view: 'list' });
+      else {
+        const target = this.pins.find(anchor ?? undefined);
+        if (target) {
+          this.pins.scrollToAnchor(target.anchor);
+          this.update({ target, panel: true, view: 'list' });
+        }
+      }
+    }
+
+    private input(event: Event) {
+      const input = event.target;
+      if (input instanceof HTMLInputElement && input.id === 'nz-comment-name') this.update({ nameInput: input.value });
+      if (input instanceof HTMLTextAreaElement && input.id === 'nz-comment-body') {
+        this.update({ drafts: { ...this.state.drafts, [draftKey(this.state)]: input.value } });
+      }
+    }
+
+    private submit(event: Event) {
+      if (!(event.target instanceof HTMLFormElement)) return;
+      event.preventDefault();
+      if (event.target.hasAttribute('data-name-form')) {
+        const name = this.state.nameInput.trim();
+        if (!validName(name)) return;
+        this.data?.saveName(name);
+        this.update({ name, view: this.returnView === 'pick' ? 'list' : this.returnView,
+          panel: this.returnView !== 'pick', picking: this.returnView === 'pick' });
+      } else if (event.target.hasAttribute('data-comment-form')) this.data?.submit();
+    }
+
+    private click(event: MouseEvent) {
+      const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button[data-action]') : null;
+      if (!button || button.disabled || this.state.sending) return;
+      switch (button.dataset.action) {
+        case 'toggle':
+          if (this.state.panel) this.close();
+          else { this.update({ panel: true }); this.data?.refresh(); }
+          break;
+        case 'close': this.close(); break;
+        case 'back': this.update({ view: 'list', sendError: '' }); break;
+        case 'cancel-pick': this.update({ picking: false, panel: true, view: 'list' }); break;
+        case 'refresh': this.data?.refresh(); break;
+        case 'open-tab': this.update({ resolved: false }); break;
+        case 'resolved-tab': this.update({ resolved: true }); break;
+        case 'pick':
+          if (!this.state.name) this.askName('pick');
+          else this.update({ panel: false, picking: true, sendError: '' });
+          break;
+        case 'general':
+          this.update({ target: GENERAL_COMMENT_TARGET, picking: false, panel: true, view: 'new', sendError: '' });
+          if (!this.state.name) this.askName('new');
+          break;
+        case 'ask-name': case 'change-name': this.askName(this.state.view); break;
+        case 'thread': {
+          const thread = this.state.threads.find((value) => value.id === Number(button.dataset.threadId));
+          if (thread) this.openThread(thread);
+          break;
+        }
+        case 'context': {
+          const context = this.state.view === 'thread' ? currentThread(this.state) : this.state.target;
+          this.close();
+          this.pins.scrollToAnchor(context?.anchor);
+          break;
+        }
+      }
+    }
+
+    private render() {
+      const state = this.state;
+      const current = currentThread(state);
+      const context = state.view === 'thread' ? current : state.target;
+      const count = state.threads.filter((thread) => !thread.closed).length;
+      const launcher = this.button('toggle');
+      launcher.hidden = state.picking;
+      launcher.setAttribute('aria-expanded', String(state.panel));
+      element(this, '[data-count]').hidden = !count;
+      element(this, '[data-count]').textContent = String(count);
+      element(this, '[data-picker]').hidden = !state.picking;
+      element<HTMLDialogElement>(this, 'dialog').open = state.panel;
+      element(this, '#nz-comments-title').textContent = state.view === 'name' ? 'Your name' : state.view === 'new'
+        ? state.target?.anchor === GENERAL_COMMENT_TARGET.anchor ? 'General comment' : 'New comment' : 'Comments';
+      this.button('back').hidden = state.view === 'list';
+      this.button('back').disabled = state.sending;
+      this.button('close').disabled = state.sending;
+      this.button('refresh').hidden = state.view !== 'list' && state.view !== 'thread';
+      this.button('refresh').disabled = state.sending || state.loading || (state.view === 'thread' && state.loadingThread);
+      element(this, '[data-footer]').hidden = state.view === 'name' || (state.view !== 'list' && !state.name);
+      element(this, '[data-actions]').hidden = state.view !== 'list';
+      this.button('pick').disabled = this.button('general').disabled = !!state.loadError || state.loading;
+      const name = this.button('change-name');
+      name.hidden = !state.name;
+      name.disabled = state.sending;
+      name.textContent = `${state.name} · Change name`;
+      name.setAttribute('aria-label', `Change name, currently ${state.name}`);
+      element<ViewElement>(this, 'nz-comment-list').render(state);
+      element<ViewElement>(this, 'nz-comment-name-form').render(state);
+      element<ViewElement>(this, 'nz-comment-thread').render(state, !!this.pins.find(context?.anchor));
+      this.pins.render(state);
+    }
+  }
+  customElements.define('nz-comments', Comments);
+</script>

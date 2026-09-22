@@ -1,0 +1,58 @@
+<nz-comment-list>
+  <div class="nz-comment-tabs">
+    <button type="button" data-action="open-tab" aria-pressed="true">Open</button>
+    <button type="button" data-action="resolved-tab" aria-pressed="false">Resolved</button>
+  </div>
+  <p class="nz-comment-error" data-load-error role="alert" hidden></p>
+  <output data-list-loading>Loading comments…</output>
+  <p class="nz-comment-empty" data-list-empty hidden></p>
+  <div data-threads></div>
+  <template data-thread-template>
+    <button type="button" class="nz-comment-thread" data-action="thread">
+      <span class="nz-comment-quote" data-quote></span>
+      <strong data-author></strong>
+      <span class="nz-comment-preview" data-body></span>
+      <span class="nz-comment-replies" data-replies hidden></span>
+    </button>
+  </template>
+</nz-comment-list>
+<script>
+  import { cloneTemplate, element } from '../../scripts/comments/dom';
+  import type { CommentsState } from '../../scripts/comments/state';
+
+  class CommentList extends HTMLElement {
+    private previous?: CommentsState;
+
+    render(state: CommentsState) {
+      this.hidden = state.view !== 'list';
+      const previous = this.previous;
+      this.previous = state;
+      // Keep keyboard focus on existing cards when unrelated state changes.
+      if (previous?.threads === state.threads && previous.resolved === state.resolved &&
+        previous.loading === state.loading && previous.loadError === state.loadError) return;
+      element(this, '[data-action="open-tab"]').setAttribute('aria-pressed', String(!state.resolved));
+      element(this, '[data-action="resolved-tab"]').setAttribute('aria-pressed', String(state.resolved));
+      const error = element(this, '[data-load-error]');
+      error.hidden = !state.loadError;
+      error.textContent = state.loadError;
+      element(this, '[data-list-loading]').hidden = !!state.loadError || !state.loading || !!state.threads.length;
+      const visible = state.threads.filter((thread) => thread.closed === state.resolved);
+      const empty = element(this, '[data-list-empty]');
+      empty.hidden = !!state.loadError || (state.loading && !state.threads.length) || !!visible.length;
+      empty.textContent = state.resolved ? 'No resolved comments.' : 'No comments yet.';
+      const cards = visible.map((thread) => {
+        const card = cloneTemplate(this, '[data-thread-template]');
+        card.dataset.threadId = String(thread.id);
+        element(card, '[data-quote]').textContent = thread.quote;
+        element(card, '[data-author]').textContent = thread.message.name;
+        element(card, '[data-body]').textContent = thread.message.body;
+        const replies = element(card, '[data-replies]');
+        replies.hidden = !thread.replyCount;
+        replies.textContent = `${thread.replyCount} ${thread.replyCount === 1 ? 'reply' : 'replies'}`;
+        return card;
+      });
+      element(this, '[data-threads]').replaceChildren(...cards);
+    }
+  }
+  customElements.define('nz-comment-list', CommentList);
+</script>

@@ -1,0 +1,81 @@
+<nz-comment-pins>
+  <template data-pin-template>
+    <button type="button" class="nz-comment-pin" data-feedback-ui hidden></button>
+  </template>
+</nz-comment-pins>
+<script>
+  import { QUOTE_LIMIT, type CommentTarget } from '../../lib/comments-schema';
+  import { cloneTemplate } from '../../scripts/comments/dom';
+  import { currentThread, type CommentsState } from '../../scripts/comments/state';
+
+  class CommentPins extends HTMLElement {
+    private events?: AbortController;
+    private state?: CommentsState;
+    private anchors: Array<CommentTarget & { element: HTMLElement; pin: HTMLButtonElement }> = [];
+
+    connectedCallback() {
+      this.events = new AbortController();
+      this.anchors = Array.from(document.querySelectorAll<HTMLElement>('[data-comment-anchor]')).map((element) => {
+        const target = {
+          anchor: element.dataset.commentAnchor ?? '',
+          quote: (element.querySelector('h3, dt, figcaption')?.textContent ?? element.textContent ?? '')
+            .replace(/\s+/g, ' ').trim().slice(0, QUOTE_LIMIT),
+        };
+        const pin = cloneTemplate(this, '[data-pin-template]') as HTMLButtonElement;
+        pin.addEventListener('click', () => {
+          if (this.state?.sending) return;
+          const thread = this.state?.threads.find((value) => value.anchor === target.anchor && !value.closed);
+          this.dispatchEvent(new CustomEvent('comment-target', { bubbles: true, detail: { target, thread } }));
+        }, { signal: this.events?.signal });
+        element.append(pin);
+        return { ...target, element, pin };
+      });
+      document.addEventListener('click', (event) => {
+        if (!this.state?.picking || this.state.sending || !(event.target instanceof Element) || event.target.closest('[data-feedback-ui]')) return;
+        const target = event.target.closest('[data-comment-anchor]');
+        const found = this.anchors.find((anchor) => anchor.element === target);
+        if (!found) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this.dispatchEvent(new CustomEvent('comment-target', { bubbles: true, detail: { target: found } }));
+      }, { capture: true, signal: this.events.signal });
+    }
+
+    find(anchor: string | undefined) {
+      return this.anchors.find((value) => value.anchor === anchor);
+    }
+
+    scrollToAnchor(anchor: string | undefined) {
+      const found = this.find(anchor);
+      found?.element.closest('details')?.setAttribute('open', '');
+      found?.element.scrollIntoView({ block: 'center' });
+    }
+
+    render(state: CommentsState) {
+      this.state = state;
+      document.body.classList.toggle('nz-comments-picking', state.picking);
+      const selected = state.panel
+        ? state.view === 'thread' ? currentThread(state)?.anchor : state.view === 'new' ? state.target?.anchor : null
+        : null;
+      for (const anchor of this.anchors) {
+        const matches = state.threads.filter((thread) => thread.anchor === anchor.anchor && !thread.closed);
+        anchor.pin.hidden = !state.picking && !matches.length;
+        anchor.pin.disabled = state.sending;
+        anchor.pin.textContent = matches.length ? String(matches.reduce((sum, thread) => sum + 1 + thread.replyCount, 0)) : '+';
+        anchor.pin.setAttribute('aria-label', `${matches.length ? 'Read comments on' : 'Comment on'} ${anchor.quote}`);
+        anchor.element.classList.toggle('nz-comment-selected', selected === anchor.anchor);
+      }
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+      document.body.classList.remove('nz-comments-picking');
+      for (const anchor of this.anchors) {
+        anchor.pin.remove();
+        anchor.element.classList.remove('nz-comment-selected');
+      }
+      this.anchors = [];
+    }
+  }
+  customElements.define('nz-comment-pins', CommentPins);
+</script>

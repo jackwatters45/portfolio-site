@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import * as Effect from 'effect/Effect';
 import * as FetchHttpClient from 'effect/unstable/http/FetchHttpClient';
-import { handleComments } from '../../../../server/comments';
+import { handleComments } from '../../../server/comments-handler';
 
 export const prerender = false;
 
