@@ -9,7 +9,7 @@ export function localComments(): AstroIntegration {
   return {
     name: 'local-comments-credentials',
     hooks: {
-      'astro:config:setup': async ({ command }) => {
+      'astro:config:setup': async ({ command, updateConfig }) => {
         if (command !== 'dev') return;
         const variables = {
           ...loadEnv(
@@ -22,7 +22,25 @@ export function localComments(): AstroIntegration {
         const { token } = await Effect.runPromise(
           GitHubAuth.pipe(Effect.provide(GitHubAuth.localLayer(variables))),
         );
-        process.env.NZ_FEEDBACK_GITHUB_TOKEN = Redacted.value(token);
+        updateConfig({
+          vite: {
+            plugins: [
+              {
+                name: 'local-comments-token',
+                configEnvironment(name) {
+                  if (name !== 'ssr') return;
+                  return {
+                    define: {
+                      'process.env.NZ_FEEDBACK_GITHUB_TOKEN': JSON.stringify(
+                        Redacted.value(token),
+                      ),
+                    },
+                  };
+                },
+              },
+            ],
+          },
+        });
       },
     },
   };

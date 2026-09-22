@@ -87,8 +87,8 @@ export default Alchemy.Stack(
 
     const nz = yield* Cloudflare.Website.StaticSite('nz', {
       command: 'bun run build --filter=@personal-sites/nz',
-      outdir: 'packages/nz/dist',
-      main: './packages/nz/dist/_worker.js/index.js',
+      outdir: 'packages/nz/dist/client',
+      main: './packages/nz/dist/server/entry.mjs',
       env: {
         NZ_FEEDBACK_GITHUB_TOKEN: token,
         COMMENT_READ_LIMIT: Cloudflare.RateLimit('NZ_COMMENT_READ_LIMIT', {

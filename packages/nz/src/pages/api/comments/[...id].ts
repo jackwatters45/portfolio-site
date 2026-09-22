@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:workers';
 import type { APIRoute } from 'astro';
 import * as Effect from 'effect/Effect';
 import * as FetchHttpClient from 'effect/unstable/http/FetchHttpClient';
@@ -6,7 +7,7 @@ import { CommentsHandler } from '../../../services/comments-handler';
 
 export const prerender = false;
 
-const route: APIRoute = ({ request, params, locals }) =>
+const route: APIRoute = ({ request, params }) =>
   Effect.runPromise(
     Effect.flatMap(CommentsHandler, (handler) =>
       handler.handle(request, params.id),
@@ -43,7 +44,9 @@ const route: APIRoute = ({ request, params, locals }) =>
       ),
       Effect.provide(
         CommentsHandler.layer(
-          import.meta.env.DEV ? process.env : locals.runtime.env,
+          import.meta.env.DEV
+            ? { NZ_FEEDBACK_GITHUB_TOKEN: process.env.NZ_FEEDBACK_GITHUB_TOKEN }
+            : env,
         ),
       ),
       Effect.provide(FetchHttpClient.layer),

@@ -27,14 +27,16 @@
     "@effect/platform-node": "4.0.0-rc.117",
     "@types/node": "^22.20.1",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "baseline-browser-mapping": "2.11.25",
     "lefthook": "^1.13.6",
     "oxfmt": "0.70.0",
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2002",
     "turbo": "^2.8.16",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "8.3.0"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=22.12.0 <23"
   }
 }
