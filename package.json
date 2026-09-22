@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "typecheck": "tsc --noEmit && turbo typecheck",
+    "typecheck": "tsgo --noEmit && turbo typecheck",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
     "format": "oxfmt --write",
@@ -26,12 +26,13 @@
     "@effect/platform-bun": "4.0.0-rc.112",
     "@effect/platform-node": "4.0.0-rc.112",
     "@types/node": "^22.20.1",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "lefthook": "^1.13.6",
     "oxfmt": "0.70.0",
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "7.0.2002",
-    "typescript": "^5.9.3",
-    "turbo": "^2.8.16"
+    "turbo": "^2.8.16",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": "22.x"
