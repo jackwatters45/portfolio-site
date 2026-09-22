@@ -33,7 +33,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Check deployment configuration
-        run: bunx tsc --noEmit
+        run: bunx tsgo --noEmit
 
       - name: Build sites
         run: bun run build
