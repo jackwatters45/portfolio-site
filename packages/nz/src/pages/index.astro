@@ -1,0 +1,435 @@
+---
+import '../styles/global.css';
+import '../../theme.css';
+import { Agentation } from 'agentation';
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Queenstown Trip — New Zealand</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="page" id="top">
+      <a class="skip" href="#main">Skip to content</a>
+      <header class="site-header">
+        <a class="site-title" href="/">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="0.7" />
+            <path d="M12 1L14 10L23 12L14 14L12 23L10 14L1 12L10 10Z" fill="currentColor" />
+            <circle cx="12" cy="12" r="1.7" fill="var(--paper)" />
+          </svg>
+          New Zealand
+        </a>
+        <span class="edition">October 2026</span>
+      </header>
+
+      <div class="hero">
+        <div>
+          <p class="eyebrow">South Island, New Zealand</p>
+          <h1>Queenstown</h1>
+          <p class="hero-date">11–18 October 2026</p>
+        </div>
+        <img
+          class="locator"
+          src="/new-zealand.svg"
+          width="256"
+          height="312"
+          alt="New Zealand, with Queenstown marked on the South Island."
+        />
+      </div>
+
+      <nav class="jump-nav" aria-label="Trip sections">
+        <a href="#overview">The trip</a>
+        <a href="#accommodation">Stay</a>
+        <a href="#major-activities">Activities</a>
+        <a href="#schedule">The week</a>
+        <a href="#to-confirm">Still to plan</a>
+      </nav>
+
+      <main id="main">
+        <section class="chapter" aria-labelledby="overview">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">01</span>
+            <h2 id="overview">The Trip</h2>
+          </div>
+          <dl class="trip-facts">
+            <div>
+              <dt>Base</dt>
+              <dd>Queenstown</dd>
+            </div>
+            <div>
+              <dt>Flying from</dt>
+              <dd>Melbourne, Australia</dd>
+            </div>
+            <div>
+              <dt>The group</dt>
+              <dd>7 people</dd>
+            </div>
+          </dl>
+          <p>A few planned activities, two hikes, and plenty of time for pubs, food, and doing nothing. No car except for the Glenorchy road-trip day.</p>
+          <div class="flight-notes">
+            <p>
+              <strong>Sunday 11 October · Jetstar JQ219</strong><br />
+              Melbourne Tullamarine <time datetime="2026-10-11T14:50:00+11:00">2:50 PM</time>
+              → Queenstown <time datetime="2026-10-11T20:00:00+13:00">8:00 PM</time>
+            </p>
+            <p>
+              <strong>Sunday 18 October · Jetstar JQ220</strong><br />
+              Queenstown <time datetime="2026-10-18T12:10:00+13:00">12:10 PM</time>
+              → Melbourne Tullamarine <time datetime="2026-10-18T13:35:00+11:00">1:35 PM</time>
+            </p>
+            <p class="note">All times local. Melbourne flights use T2 International.</p>
+          </div>
+        </section>
+
+        <section class="chapter" aria-labelledby="accommodation">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">02</span>
+            <h2 id="accommodation">Accommodation</h2>
+          </div>
+          <p class="activity-meta">Booked · 7 nights</p>
+          <h3><a href="https://www.airbnb.com.au/rooms/1248805245374389085">Modern Spacious Family Holiday Home</a></h3>
+          <p class="note">Entire home · Hosted by Hello Queenstown</p>
+          <p><a href="https://www.google.com/maps/search/?api=1&amp;query=3%20Saint%20Peters%20Place%2C%20Queenstown%2C%20Otago%209300%2C%20New%20Zealand">3 Saint Peters Place, Queenstown, Otago 9300, New Zealand</a></p>
+          <dl class="trip-facts">
+            <div>
+              <dt>Check-in</dt>
+              <dd><time datetime="2026-10-11T15:00:00+13:00">11 Oct, from 3:00 PM</time></dd>
+            </div>
+            <div>
+              <dt>Checkout</dt>
+              <dd><time datetime="2026-10-18T10:00:00+13:00">18 Oct, by 10:00 AM</time></dd>
+            </div>
+            <div>
+              <dt>Rooms</dt>
+              <dd>4 bedrooms<br />5 beds</dd>
+            </div>
+          </dl>
+          <p>Self check-in with a key safe. Wi-Fi, kitchen, washer, dryer, and free garage parking.</p>
+          <p class="note">Send the bedroom 3 setup choice to Hello Queenstown by 8 October. Changes after arrival cost NZ$100 per bed plus a NZ$10 call-out fee.</p>
+          <p class="note">Non-refundable booking.</p>
+        </section>
+
+        <section class="chapter" aria-labelledby="rough-plan">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">03</span>
+            <h2 id="rough-plan">The Rough Plan</h2>
+          </div>
+          <ul class="rough-list">
+            <li>2–3 larger activities</li>
+            <li>2 local hikes</li>
+            <li>1 wine half-day</li>
+            <li>Onsen / hot pools</li>
+          </ul>
+        </section>
+
+        <section class="chapter" aria-labelledby="major-activities">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">04</span>
+            <h2 id="major-activities">Major Activity Ideas</h2>
+          </div>
+
+          <article class="activity" id="glenorchy">
+            <p class="activity-meta">Full day</p>
+            <h3>Glenorchy Road Trip</h3>
+            <p>Aim for Saturday 17 October. Monday 12 or Friday 16 are alternatives if the weather is better.</p>
+            <p><strong>One-day rental:</strong> <a href="https://www.gorentals.co.nz/vehicles/van-or-people-carriers/">GO Rentals Kia Carnival Hybrid</a>, eight seats.</p>
+            <ul>
+              <li><strong>NZ$302 total with Basic cover:</strong> NZ$7,000 excess and a NZ$3,000 bond.</li>
+              <li><strong>NZ$369 total with Peace of Mind:</strong> NZ$1,500 excess and no bond. This is not zero-excess cover.</li>
+              <li>Collect at <a href="https://www.gorentals.co.nz/rental-car-locations/queenstown/">Queenstown Airport</a> at 8 AM; return at 6 PM. Arrange the after-hours return in advance.</li>
+            </ul>
+            <p class="note">Quote checked 22 September for 17 October only; not held. Includes location and road-care fees. Fuel, optional extras and any payment fees are additional.</p>
+            <p class="route">
+              <strong>Base route:</strong> Queenstown → Bob’s Cove → Bennett’s Bluff → Glenorchy → Queenstown.
+            </p>
+            <dl class="option-list">
+              <div>
+                <dt><a href="https://www.doc.govt.nz/parks-and-recreation/places-to-go/otago/places/queenstown-area/things-to-do/bobs-cove-track-and-nature-walk/">Bob’s Cove &amp; Picnic Point</a></dt>
+                <dd class="option-meta">Allow 1–1.5 hours</dd>
+                <dd class="option-detail">Native bush, a lakeside cove and a short, steep climb to the viewpoint. The car park is 14 km from town. Use the marked track; the old bridle track is closed.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.queenstownnz.co.nz/stories/post/scenic-drives-from-queenstown-explore-more-at-your-own-pace/">Bennett’s Bluff</a></dt>
+                <dd class="option-meta">10–15 minutes</dd>
+                <dd class="option-detail">Lake and mountain views, about 25 km from Queenstown. Use the signed lookout car park, not the roadside.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.doc.govt.nz/parks-and-recreation/places-to-go/otago/places/glenorchy-area/things-to-do/glenorchy-walkway/">Glenorchy &amp; Lagoon Walkway</a></dt>
+                <dd class="option-meta">Walk: 1–2 hours</dd>
+                <dd class="option-detail">Stop at the red shed and jetty, then follow the wetland boardwalks. Enter from Mull Street, not Glenorchy–Paradise Road. Skip flooded sections. Have lunch in town or bring a picnic.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.doc.govt.nz/parks-and-recreation/places-to-go/otago/places/mount-aspiring-national-park/things-to-do/tracks/routeburn-nature-walk/">Routeburn Nature Walk</a></dt>
+                <dd class="option-meta">Optional · 40 min–1 hour</dd>
+                <dd class="option-detail">An easy beech-forest loop from Routeburn Shelter. Add 35 minutes’ driving each way from Glenorchy, partly on narrow gravel road. Get rental approval first. Choose this instead of the full lagoon walk, not as another compulsory stop.</dd>
+              </div>
+            </dl>
+            <p class="note">Queenstown–Glenorchy is about 45 km / 45 minutes each way without stops. Leave Glenorchy around 4 PM for refuelling and the 6 PM vehicle return.</p>
+            <details class="booking-notes">
+              <summary>Road restrictions, conditions &amp; cancellation</summary>
+              <ul>
+                <li><strong>Roads:</strong> the base drive uses the sealed Queenstown–Glenorchy Road. <a href="https://www.gorentals.co.nz/terms/">GO’s terms</a> exclude cover on Skippers Road, the road to Macetown, unformed tracks and for water-crossing damage. Public gravel roads are not all excluded, but get written approval for the exact extension and vehicle.</li>
+                <li><strong>Paradise:</strong> <a href="https://accessglenorchy.co.nz/paradise/">20 km beyond Glenorchy</a>, with the last 12 km unsealed. Keep it optional, avoid fords, and do not add it on top of Routeburn by default.</li>
+                <li><strong>Conditions:</strong> check <a href="https://www.qldc.govt.nz/services/transport-and-parking/winter-road-reports">QLDC road updates</a> and the linked DOC track alerts before departure. October conditions are not yet known. Change the route for flooding, snow, ice or closures.</li>
+                <li><strong>Cancellation:</strong> more than 24 hours ahead costs 10% of the rental, plus refund administration fees. Less than 24 hours costs 100%. Online cancellation needs at least 48 hours’ notice and adds a 2% refund fee. This is not a fully refundable weather-backup booking.</li>
+              </ul>
+            </details>
+          </article>
+
+          <article class="activity" id="adventures">
+            <h3>Adventure Day</h3>
+            <p>Choose your own activity — the group can split up.</p>
+            <p class="note">NZ$ per adult, checked 22 September 2026. Card fees and optional extras are additional.</p>
+            <dl class="option-list">
+              <div>
+                <dt><a href="https://www.shotoverjet.com/prices/individual/">Shotover Jet</a></dt>
+                <dd class="option-meta">NZ$199</dd>
+                <dd class="option-detail">25-minute canyon ride with spins, no jump. Allow 1 hour 45 minutes with the free town shuttle.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.ziptrek.co.nz/tours/moa/">Ziptrek Moa</a> / <a href="https://www.ziptrek.co.nz/tours/kea/">Kea</a></dt>
+                <dd class="option-meta">NZ$238 / 288</dd>
+                <dd class="option-detail">Moa: 4 lines, 1.5–2 hours. Kea: 6 lines, 2.5–3 hours. Totals include October tour rates plus the separate <a href="https://queenstown.skyline.co.nz/things-to-do/queenstown-gondola/gondola-prices/">NZ$69 gondola ticket</a>. Allow extra time to reach the top.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.bungy.co.nz/queenstown/kawarau-bungy-centre/kawarau-bridge-bungy/">Kawarau Bridge Bungy</a></dt>
+                <dd class="option-meta">From NZ$320</dd>
+                <dd class="option-detail">43 m jump. Allow 2.5 hours with the free town bus. Photos and video included; spectators are free.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.bungy.co.nz/queenstown/nevis/nevis-bungy/">Nevis Bungy</a></dt>
+                <dd class="option-meta">From NZ$395</dd>
+                <dd class="option-detail">134 m jump. Allow 4 hours. Bus, photos, and video included; spectators cost NZ$50.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.nzoneskydive.co.nz/prices-deals/">NZONE Skydive</a></dt>
+                <dd class="option-meta">From NZ$379</dd>
+                <dd class="option-detail">9,000 ft: NZ$379; 12,000 ft: NZ$469; 15,000 ft: NZ$575. Allow about 3.5 hours, with room for delays. Town transport is included; <a href="https://www.nzoneskydive.co.nz/photo-video-packages/">photos/video</a> start at NZ$220 extra.</dd>
+              </div>
+            </dl>
+            <p class="note">For skydiving, aim for an early-trip morning and keep a backup day for weather.</p>
+            <details class="booking-notes">
+              <summary>Cancellation &amp; participation rules</summary>
+              <ul>
+                <li><a href="https://www.shotoverjet.com/experience/faqs/">Shotover Jet</a>: 24-hour cancellation policy. Operator weather cancellations offer a refund or reschedule.</li>
+                <li><a href="https://www.ziptrek.co.nz/faqs/">Ziptrek</a>: free cancellation up to 24 hours before the tour. Maximum weight 125 kg; closed-toe shoes required. Gondola tickets have separate terms.</li>
+                <li><a href="https://www.bungy.co.nz/legal/">Bungy</a>: cancel more than 48 hours ahead for a refund, excluding the card fee. Read the weight and health limits for your chosen jump.</li>
+                <li><a href="https://www.nzoneskydive.co.nz/terms-conditions/">NZONE</a>: cancel up to 24 hours ahead without a fee. Weather cancellations are rescheduled, or refunded if that is not possible. Harness-fit and health restrictions apply.</li>
+              </ul>
+            </details>
+          </article>
+
+          <article class="activity" id="onsen">
+            <h3>Onsen / Hot Pools</h3>
+            <p><a href="https://www.onsen.co.nz/experiences/original-onsen-soak-only/">Original Onsen</a> — 60 minutes, including changing time.</p>
+            <ul>
+              <li><strong>Cost:</strong> two private pools, split 4 + 3. NZ$260 + NZ$225 = <strong>NZ$485 total</strong>, about NZ$69 each if split evenly.</li>
+              <li><strong>Transport:</strong> free shuttle from 43 Camp Street. Request it when booking.</li>
+              <li><strong>Times seen on 22 September:</strong> Tuesday 13 October at 8:45 PM; Wednesday 14 October at 2:30 PM or 8:45 PM. Two pools and shuttle seats were available together.</li>
+              <li><strong>Cancellation:</strong> at least 24 hours’ notice for this two-pool booking. <a href="https://www.onsen.co.nz/about/faqs/">Terms &amp; shuttle details</a>.</li>
+            </ul>
+            <p class="note">Times are local and slots are not held. Towels and water included; bring swimwear.</p>
+            <p><a href="https://book.onsen.co.nz/hire/selection?filter=prodgroup-original&amp;workingDate=13-Oct-2026">Check times &amp; book</a></p>
+          </article>
+        </section>
+
+        <section class="chapter" aria-labelledby="wine">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">05</span>
+            <h2 id="wine">Wine Tasting</h2>
+          </div>
+          <p>A Gibbston afternoon with two tastings and lunch. Use a winery bus so nobody needs to drive.</p>
+          <p class="note">NZ$ per adult, checked 22 September 2026.</p>
+
+          <article class="activity">
+            <h3>Transport</h3>
+            <dl class="option-list">
+              <div>
+                <dt><a href="https://hoponhopoffwinetours.com/products/afternoon-run-queenstown-hop-on-hop-off/">Hop On Hop Off</a></dt>
+                <dd class="option-meta">NZ$99.50</dd>
+                <dd class="option-detail">Sunday–Friday: leaves the Station Building on Camp Street at 12:10 PM; the last bus returns around 5:30 PM. Follow the <a href="https://hoponhopoffwinetours.com/maps/queenstown-wine-tour/">timetable</a> between stops. Tastings and lunch are extra.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.winehopperbus.co.nz/">Wine Hopper Bus</a></dt>
+                <dd class="option-meta">From NZ$99</dd>
+                <dd class="option-detail">Leaves at noon from 48 Camp Street. The driver arranges pickups between wineries rather than following a fixed loop. Agree your return time on the day. Tastings and lunch are extra.</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="activity">
+            <h3>Winery Shortlist</h3>
+            <dl class="option-list">
+              <div>
+                <dt><a href="https://www.gibbstonvalley.com/experiences/tours/cave-tour/">Gibbston Valley</a></dt>
+                <dd class="option-meta">From NZ$30</dd>
+                <dd class="option-detail">Classic Cave tour: 30 minutes, three wine tastings, and a visit to the wine cave and historic vines. Choose a scheduled tour that fits the bus.</dd>
+              </div>
+              <div>
+                <dt><a href="https://kinross.nz/pages/wine-tasting-experiences">Kinross</a></dt>
+                <dd class="option-meta">NZ$30</dd>
+                <dd class="option-detail">Classic Experience: 45 minutes and five local wines. The cellar door represents five Central Otago producers. A good lunch stop: the bistro serves lunch 11 AM–3 PM; book dining separately from the tasting.</dd>
+              </div>
+              <div>
+                <dt><a href="https://www.brennanwines.com/Visit">Brennan Wines</a></dt>
+                <dd class="option-meta">From NZ$45</dd>
+                <dd class="option-detail">A vineyard stop with Pinot Noir and less common local varieties. Self-guided flights include three wines. The NZ$65 hosted tasting lasts an hour and includes five wines and appetisers. Open daily, 11 AM–5 PM; book ahead.</dd>
+              </div>
+            </dl>
+            <p><strong>Suggested plan:</strong> Gibbston Valley’s cave tour, then Kinross for lunch and a tasting. Swap in Brennan if you prefer another vineyard stop.</p>
+            <p class="note">Allow about NZ$160 each for the half-day bus plus the Gibbston and Kinross tastings. Lunch and bottles are extra. A bus ticket does not reserve tasting or dining places.</p>
+          </article>
+        </section>
+
+        <section class="chapter" aria-labelledby="hiking">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">06</span>
+            <h2 id="hiking">Hiking</h2>
+          </div>
+          <p>Suggested pair: Queenstown Hill and Sawpit Gully. Sunshine Bay is the gentler alternative; Tiki Trail is the steeper option.</p>
+          <p class="note">Walking times start at the track entrance and exclude travel there. All four options are car-free.</p>
+          <dl class="option-list">
+            <div>
+              <dt><a href="https://www.queenstownnz.co.nz/stories/post/queenstown-hill-time-walk/">Queenstown Hill</a></dt>
+              <dd class="option-meta">2–3 hours return</dd>
+              <dd class="option-detail"><strong>Moderate · about 4 km return.</strong> A forest climb to the Basket of Dreams lookout, with views over the lake and mountains. Continue to the summit for a wider view.</dd>
+              <dd class="option-detail"><strong>Getting there:</strong> walk uphill from town via Ballarat Street and Kerry Drive to the <a href="https://www.google.com/maps/search/?api=1&amp;query=Queenstown%20Hill%20Walking%20Track%20Belfast%20Terrace">Belfast Terrace entrance</a>.</dd>
+            </div>
+            <div>
+              <dt><a href="https://www.queenstownnz.co.nz/listing/sawpit-gully-trail/2040/">Sawpit Gully, Arrowtown</a></dt>
+              <dd class="option-meta">2–3 hours loop</dd>
+              <dd class="option-detail"><strong>Moderate · 7.9 km loop.</strong> River, forest, old mining remains, and views towards Lake Hayes. Steep sections and creek crossings make this better after dry weather. Leave time for lunch in Arrowtown.</dd>
+              <dd class="option-detail"><strong>Getting there:</strong> <a href="https://www.orc.govt.nz/orbus/queenstown-buses/check-your-timetables/4-jacks-point-to-arrowtown-via-queenstown">bus 4 from central Queenstown to Arrowtown</a>, then walk to the track near the <a href="https://www.google.com/maps/search/?api=1&amp;query=Arrowtown%20Chinese%20Settlement">Chinese Settlement</a>. Allow extra time for both bus journeys.</dd>
+            </div>
+            <div>
+              <dt><a href="https://www.queenstownnz.co.nz/stories/post/10-beautiful-walks-in-queenstown/">Sunshine Bay Track</a></dt>
+              <dd class="option-meta">About 2 hours return</dd>
+              <dd class="option-detail"><strong>Easy–moderate · 4 km return.</strong> An undulating bush track beside the lake, ending at Sunshine Bay’s beach and jetty. A good slower-day option without a summit climb.</dd>
+              <dd class="option-detail"><strong>Getting there:</strong> start near the <a href="https://www.google.com/maps/search/?api=1&amp;query=Sunshine%20Bay%20Track%20Queenstown">Fernhill roundabout</a>, about a 20-minute walk from central Queenstown. Add that approach in both directions.</dd>
+            </div>
+            <div>
+              <dt><a href="https://www.queenstownnz.co.nz/listing/tiki-trail/9099/">Tiki Trail / Skyline</a></dt>
+              <dd class="option-meta">Allow 2–3 hours return</dd>
+              <dd class="option-detail"><strong>Steep · 4.2 km return, about 480 m climb.</strong> A rocky forest track to Skyline’s lake viewpoint. Allow about an hour uphill, plus stops and the descent. Walk down for free, or buy a one-way gondola ticket at the top.</dd>
+              <dd class="option-detail"><strong>Getting there:</strong> walk to <a href="https://www.google.com/maps/search/?api=1&amp;query=Tiki%20Trail%20Queenstown%20Cemetery%20Road">Cemetery Road, off Brecon Street</a>. The track starts beside the gondola base.</dd>
+            </div>
+          </dl>
+          <p class="note">Wear grippy shoes and carry warm, waterproof layers. Check the <a href="https://www.metservice.com/towns-cities/regions/southern-lakes/locations/queenstown">forecast</a> and local track notices before setting off.</p>
+        </section>
+
+        <section class="chapter" aria-labelledby="unplanned-time">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">07</span>
+            <h2 id="unplanned-time">Around Queenstown</h2>
+          </div>
+          <p>Lakefront walks, pubs, restaurants, slow mornings, and whatever comes up.</p>
+        </section>
+
+        <section class="chapter" aria-labelledby="budget">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">08</span>
+            <h2 id="budget">Activity Budget</h2>
+          </div>
+          <div class="budget-summary">
+            <p class="budget-amount"><strong>A$1,000</strong><span>per person · approximate maximum</span></p>
+            <p>For vehicle rental, adventure activities, Onsen, and wine. A limit, not a target.</p>
+          </div>
+          <p class="note">Food, drinks, groceries, and daily spending are separate. Operator prices above are in NZ dollars; this budget is in Australian dollars.</p>
+        </section>
+
+        <section class="chapter" aria-labelledby="schedule">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">09</span>
+            <h2 id="schedule">Loose Weekly Plan</h2>
+          </div>
+          <p>Tentative — dates depend on weather and bookings.</p>
+
+          <ol class="week" role="list">
+            <li>
+              <time class="day-date" datetime="2026-10-11"><span>Sun</span><strong>11</strong><span>Oct</span></time>
+              <div>
+                <h3>Arrival</h3>
+                <p>Land in Queenstown at 8:00 PM, then check in.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-12"><span>Mon</span><strong>12</strong><span>Oct</span></time>
+              <div>
+                <h3>Possible Road Trip</h3>
+                <p>Glenorchy if the forecast is good. Otherwise, a local hike or town.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-13"><span>Tue</span><strong>13</strong><span>Oct</span></time>
+              <div>
+                <h3>Flexible Activity</h3>
+                <p>A hike, Onsen, or time in town.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-14"><span>Wed</span><strong>14</strong><span>Oct</span></time>
+              <div>
+                <h3>Relaxed Day</h3>
+                <p>Wine half-day, a hike, or Onsen.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-15"><span>Thu</span><strong>15</strong><span>Oct</span></time>
+              <div>
+                <h3>Open Day</h3>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-16"><span>Fri</span><strong>16</strong><span>Oct</span></time>
+              <div>
+                <h3>Possible Bigger Activity</h3>
+                <p>Another option for Glenorchy or an adventure activity.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-17"><span>Sat</span><strong>17</strong><span>Oct</span></time>
+              <div>
+                <h3>Glenorchy / Adventure Day</h3>
+                <p>Preferred road-trip day. If already done, choose an adventure or leave it open.</p>
+              </div>
+            </li>
+            <li>
+              <time class="day-date" datetime="2026-10-18"><span>Sun</span><strong>18</strong><span>Oct</span></time>
+              <div>
+                <h3>Departure</h3>
+                <p>Check out by 10:00 AM. Fly at 12:10 PM; arrive in Melbourne at 1:35 PM.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="chapter" aria-labelledby="to-confirm">
+          <div class="section-heading">
+            <span class="section-number" aria-hidden="true">10</span>
+            <h2 id="to-confirm">Still to Plan</h2>
+          </div>
+          <ul class="planning-list">
+            <li>Choose both hikes</li>
+            <li>Choose adventure activities</li>
+            <li>Choose an Onsen time and book two pools</li>
+            <li>Choose a wine afternoon and book the bus, tastings, and lunch</li>
+            <li>Choose the rental vehicle and cover; confirm any gravel-road extension before booking</li>
+            <li>Choose the Glenorchy day from the forecast; check road and track alerts before departure</li>
+            <li>Check winery cancellation terms before booking</li>
+          </ul>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Queenstown · Spring 2026</span>
+        <a href="#top">Back to top ↑</a>
+      </footer>
+    </div>
+    {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
+  </body>
+</html>

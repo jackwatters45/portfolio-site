@@ -56,6 +56,20 @@ export default Alchemy.Stack(
       assets: { notFoundHandling: '404-page' },
     });
 
-    return { site: site.url, tacos: tacos.url, sangas: sangas.url };
+    const nz = yield* Cloudflare.Website.StaticSite('nz', {
+      command: 'bun run build --filter=@personal-sites/nz',
+      outdir: 'packages/nz/dist',
+      dev: { command: 'bun run dev --filter=@personal-sites/nz' },
+      domain:
+        stage === 'prod'
+          ? {
+              name: 'nz.jackwatters.dev',
+              redirects: ['www.nz.jackwatters.dev'],
+            }
+          : undefined,
+      assets: { notFoundHandling: '404-page' },
+    });
+
+    return { site: site.url, tacos: tacos.url, sangas: sangas.url, nz: nz.url };
   }),
 );
