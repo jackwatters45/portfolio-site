@@ -41,7 +41,12 @@
   "overrides": [
     {
       "files": ["**/*.css"],
-      "options": { "singleQuote": false, "sortTailwindcss": false }
+      "options": {
+        "useTabs": false,
+        "tabWidth": 2,
+        "singleQuote": false,
+        "sortTailwindcss": false
+      }
     }
   ]
 }
