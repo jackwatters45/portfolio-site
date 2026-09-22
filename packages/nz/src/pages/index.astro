@@ -433,6 +433,6 @@ import '@personal-sites/comments/styles.css';
       </footer>
     </div>
     <Comments client:only="react" rootSelector=".page" room="nz-trip" endpoint="/api/comments/nz-trip" />
-    {import.meta.env.DEV && Astro.url.searchParams.has('agentation') && <Agentation client:only="react" endpoint="http://localhost:4747" />}
+    {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
   </body>
 </html>

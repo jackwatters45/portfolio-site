@@ -9,5 +9,9 @@ export default defineConfig({
   adapter: cloudflare({ imageService: 'compile' }),
   integrations: [react()],
   server: { port: 4325 },
-  vite: { ssr: { noExternal: ['@astrojs/react', '@personal-sites/comments'] } },
+  devToolbar: { enabled: false },
+  vite: {
+    ssr: { noExternal: ['@astrojs/react', '@personal-sites/comments'] },
+    optimizeDeps: { include: ['agentation'] },
+  },
 });
