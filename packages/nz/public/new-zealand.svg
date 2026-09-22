@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="312" viewBox="0 0 256 312">
+  <!-- Coastline: Natural Earth 1:110m, public domain. Decorative locator, not for navigation. -->
+  <defs>
+    <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+      <path d="M0 0V5" stroke="#47614f" stroke-width=".5" opacity=".2"/>
+    </pattern>
+  </defs>
+  <g fill="none" stroke="#47614f" opacity=".13" stroke-width=".6">
+    <path d="M16 70H240M16 130H240M16 190H240M16 250H240M58 24V284M118 24V284M178 24V284M238 24V284"/>
+  </g>
+  <g fill="url(#hatch)" stroke="#47614f" stroke-width="1.1" stroke-linejoin="round">
+    <path d="M197.8 152.4 L191.9 163.4 L184.2 177.4 L172.1 185.6 L169.5 180.2 L163.0 177.3 L172.0 160.4 L166.8 149.1 L150.1 140.9 L150.5 133.5 L161.8 126.4 L164.4 110.6 L163.7 97.3 L157.4 83.6 L157.8 80.0 L150.3 71.5 L138.0 53.4 L131.5 38.8 L137.3 37.2 L145.8 48.6 L157.9 53.9 L162.3 72.2 L173.7 93.8 L174.0 79.8 L181.0 85.4 L183.4 100.9 L195.9 107.6 L206.4 109.2 L215.4 101.4 L223.3 103.8 L219.5 121.9 L214.7 133.9 L202.8 133.5 L198.7 139.7 L200.1 148.5 L197.8 152.4 Z"/>
+    <path d="M85.2 223.9 L98.6 213.1 L108.0 202.5 L114.9 187.2 L120.8 182.0 L123.1 170.6 L134.1 161.1 L137.5 169.8 L141.1 178.3 L152.2 170.0 L156.7 178.7 L156.7 187.3 L150.9 196.8 L140.7 211.9 L132.7 220.1 L138.4 230.0 L126.4 230.2 L113.1 238.0 L108.9 251.4 L100.0 272.1 L87.8 281.3 L80.0 287.1 L65.6 286.7 L55.5 279.9 L38.6 278.5 L35.9 271.0 L44.3 255.8 L63.9 235.5 L74.0 231.7 L85.2 223.9 Z"/>
+  </g>
+  <g fill="none" stroke="#47614f" stroke-width=".8">
+    <circle cx="38" cy="62" r="14" opacity=".45"/>
+    <path d="M38 43V81M19 62H57" opacity=".45"/>
+    <path d="M38 46L34 66L38 63L42 66Z" fill="#47614f"/>
+  </g>
+  <text x="38" y="35" text-anchor="middle" fill="#47614f" font-family="Georgia,serif" font-size="10">N</text>
+  <path d="M69.5 254.1L102.5 270.1H218" fill="none" stroke="#976342" stroke-width=".8"/>
+  <circle cx="69.5" cy="254.1" r="7" fill="#f5f0e2" stroke="#976342" stroke-width=".8"/>
+  <circle cx="69.5" cy="254.1" r="2.5" fill="#976342"/>
+  <text x="128" y="265.1" fill="#745037" font-family="Georgia,serif" font-size="13" font-style="italic">Queenstown</text>
+</svg>
