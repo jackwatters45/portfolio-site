@@ -5,7 +5,7 @@ import * as Config from 'effect/Config';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Redacted from 'effect/Redacted';
-import { gitHubToken } from './packages/nz/server/github-auth';
+import { GitHubAuth } from './packages/nz/src/services/github-auth';
 
 export default Alchemy.Stack(
   'portfolio-site',
@@ -28,7 +28,7 @@ export default Alchemy.Stack(
         );
       }
     }
-    const token = yield* gitHubToken;
+    const { token } = yield* GitHubAuth.pipe(Effect.provide(GitHubAuth.layer));
 
     if (stage === 'prod') {
       // Keep the persistent credential available to future CI deployments.

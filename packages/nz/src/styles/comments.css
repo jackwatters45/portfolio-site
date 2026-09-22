@@ -1,4 +1,10 @@
-/* This sheet belongs to the NZ comments island, not the static trip layout. */
+/* This sheet belongs to NZ comments, not the static trip layout. */
+.nz-feedback-ui[hidden],
+.nz-feedback-ui [hidden],
+.nz-comment-pin[hidden] {
+  display: none !important;
+}
+
 .nz-feedback-ui,
 .nz-comment-pin {
   font-family: Helvetica, Arial, sans-serif;

@@ -4,6 +4,10 @@
 
 Tests require an explicit request. Do not write or add to tests unless the user explicitly requests them. If a test is necessary, suggest it and wait for approval.
 
+## Compatibility
+
+Do not preserve legacy formats, APIs, or implementations. Replace them directly. Do not add compatibility layers, fallback readers, or dual-format support.
+
 ## Local checks
 
 Use `bunx turbo run typecheck` for cached, parallel workspace type checks. Run `bunx tsgo --noEmit` for the root deployment configuration.
