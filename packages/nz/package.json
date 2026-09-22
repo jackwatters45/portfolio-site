@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "12.6.13",
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-query": "^5.103.2",
     "astro": "5.16.4",
     "react": "^19.2.8",

@@ -1,3 +1,4 @@
+import { useForm } from '@tanstack/react-form';
 import {
   skipToken,
   useMutation,
@@ -6,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import * as Effect from 'effect/Effect';
 import type * as ManagedRuntime from 'effect/ManagedRuntime';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import {
   COMMENT_LIMIT,
   GENERAL_COMMENT_TARGET,
@@ -46,12 +47,10 @@ export function CommentThread({
 }: Props) {
   const id = useId();
   const input = useRef<HTMLTextAreaElement>(null);
-  const posting = useRef(false);
   const key =
     view.kind === 'thread'
       ? `thread-${view.thread.id}`
       : `new-${view.target.anchor}`;
-  const [draft, setDraft] = useState(() => drafts.get(key) ?? '');
   const client = useQueryClient();
   const detail = useQuery({
     queryKey: [
@@ -97,7 +96,6 @@ export function CommentThread({
     onMutate: () => client.cancelQueries({ queryKey: ['comments'] }),
     onSuccess: (result) => {
       drafts.delete(key);
-      setDraft('');
       if (result.kind === 'reply' && view.kind === 'thread') {
         client.setQueryData<ThreadDetail>(
           ['comments', 'thread', view.thread.id],
@@ -124,15 +122,8 @@ export function CommentThread({
         onCreated(result.thread);
       }
     },
-    onSettled: () => {
-      posting.current = false;
-      return client.invalidateQueries({ queryKey: ['comments'] });
-    },
+    onSettled: () => client.invalidateQueries({ queryKey: ['comments'] }),
   });
-
-  useEffect(() => {
-    if (view.kind === 'new') input.current?.focus();
-  }, [view.kind]);
 
   const messages = current
     ? [current.message, ...(detail.data?.replies ?? [])]
@@ -140,6 +131,19 @@ export function CommentThread({
   const waiting =
     view.kind === 'thread' &&
     (detail.isPending || detail.isFetching || !!detail.error);
+  const form = useForm({
+    defaultValues: { body: drafts.get(key) ?? '' },
+    onSubmit: async ({ value, formApi }) => {
+      if (sending || waiting || blocked || !name) return;
+      await post.mutateAsync(value.body.trim());
+      formApi.reset({ body: '' });
+    },
+  });
+
+  useEffect(() => {
+    if (active && name && !blocked && view.kind === 'new')
+      input.current?.focus();
+  }, [active, name, blocked, view.kind]);
 
   return (
     <>
@@ -204,43 +208,80 @@ export function CommentThread({
           className="nz-comment-form"
           onSubmit={(event) => {
             event.preventDefault();
-            if (posting.current || sending || !draft.trim() || waiting) return;
-            posting.current = true;
-            post.mutate(draft.trim());
+            void form.handleSubmit().catch(() => {
+              // TanStack Query retains the request error for display below.
+            });
           }}
         >
-          <label htmlFor={id}>
-            {view.kind === 'thread' ? 'Reply' : 'Comment'}
-          </label>
-          <textarea
-            ref={input}
-            id={id}
-            rows={3}
-            maxLength={COMMENT_LIMIT}
-            required
-            value={draft}
-            disabled={sending}
-            onChange={(event) => {
-              setDraft(event.target.value);
-              drafts.set(key, event.target.value);
+          <form.Field
+            name="body"
+            validators={{
+              onChange: ({ value }) =>
+                !value.trim()
+                  ? 'Enter a comment.'
+                  : value.trim().length > COMMENT_LIMIT
+                    ? `Use ${COMMENT_LIMIT} characters or less.`
+                    : undefined,
             }}
-          />
+            listeners={{
+              onChange: ({ value }) => drafts.set(key, value),
+            }}
+          >
+            {(field) => (
+              <>
+                <label htmlFor={id}>
+                  {view.kind === 'thread' ? 'Reply' : 'Comment'}
+                </label>
+                <textarea
+                  ref={input}
+                  id={id}
+                  name={field.name}
+                  rows={3}
+                  maxLength={COMMENT_LIMIT}
+                  required
+                  value={field.state.value}
+                  disabled={sending}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
+                  aria-invalid={!field.state.meta.isValid}
+                  aria-describedby={
+                    field.state.meta.isValid ? undefined : `${id}-error`
+                  }
+                />
+                {!field.state.meta.isValid && (
+                  <p
+                    id={`${id}-error`}
+                    className="nz-comment-error"
+                    role="alert"
+                  >
+                    {field.state.meta.errors.join(' ')}
+                  </p>
+                )}
+              </>
+            )}
+          </form.Field>
           {post.error && (
             <p className="nz-comment-error" role="alert">
               {post.error.message}
             </p>
           )}
-          <button
-            type="submit"
-            className="nz-comment-primary"
-            disabled={sending || !draft.trim() || waiting}
+          <form.Subscribe
+            selector={(state) => state.canSubmit && !!state.values.body.trim()}
           >
-            {post.isPending
-              ? 'Posting…'
-              : view.kind === 'thread'
-                ? 'Reply'
-                : 'Post comment'}
-          </button>
+            {(canSubmit) => (
+              <button
+                type="submit"
+                className="nz-comment-primary"
+                disabled={!canSubmit || sending || waiting}
+              >
+                {post.isPending
+                  ? 'Posting…'
+                  : view.kind === 'thread'
+                    ? 'Reply'
+                    : 'Post comment'}
+              </button>
+            )}
+          </form.Subscribe>
         </form>
       )}
     </>
