@@ -3,6 +3,8 @@ import type { CommentsEnv } from '../server/comments';
 
 declare global {
   namespace App {
-    interface Locals extends Runtime<CommentsEnv> {}
+    interface Locals {
+      runtime: Runtime<CommentsEnv>['runtime'];
+    }
   }
 }

@@ -520,7 +520,7 @@ export default function Comments() {
                 <input
                   ref={nameField}
                   id={`${id}-name`}
-                  autoComplete="given-name"
+                  autoComplete="name"
                   maxLength={NAME_LIMIT}
                   value={nameInput}
                   onChange={(event) => setNameInput(event.target.value)}

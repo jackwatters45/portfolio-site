@@ -1,5 +1,4 @@
-// biome-ignore-all lint/correctness/useExhaustiveDependencies: <not my component - trusted source (https://devouringdetails.com/)>
-// biome-ignore-all lint/suspicious/noExplicitAny: <not my component - trusted source (https://devouringdetails.com/)>
+/* oxlint-disable react-hooks/exhaustive-deps, typescript/no-explicit-any -- Trusted source: https://devouringdetails.com/ */
 
 import { type RefObject, useEffect } from 'react';
 
