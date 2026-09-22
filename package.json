@@ -12,18 +12,24 @@
     "typecheck": "tsc --noEmit && turbo typecheck",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
-    "check": "biome check --fix ."
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "check": "bun run lint:fix && bun run format"
   },
   "dependencies": {
     "alchemy": "2.0.0-beta.76",
     "effect": "4.0.0-rc.112"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.5",
     "@effect/platform-bun": "4.0.0-rc.112",
     "@effect/platform-node": "4.0.0-rc.112",
     "@types/node": "^22.20.1",
     "lefthook": "^1.13.6",
+    "oxfmt": "0.70.0",
+    "oxlint": "1.85.0",
+    "oxlint-tsgolint": "7.0.2002",
     "typescript": "^5.9.3",
     "turbo": "^2.8.16"
   },
