@@ -1,127 +1,115 @@
+import * as Config from 'effect/Config';
 import * as ConfigProvider from 'effect/ConfigProvider';
 import * as Effect from 'effect/Effect';
+import * as Option from 'effect/Option';
 import * as Redacted from 'effect/Redacted';
+import * as Schema from 'effect/Schema';
+import * as Stream from 'effect/Stream';
+import * as HttpClient from 'effect/unstable/http/HttpClient';
+import * as HttpClientRequest from 'effect/unstable/http/HttpClientRequest';
+import * as HttpClientResponse from 'effect/unstable/http/HttpClientResponse';
 import {
-  COMMENT_LIMIT,
+  CommentError,
   type CommentMessage,
-  type CommentTarget,
+  CommentName,
+  CommentSubmission,
+  CommentTarget,
   type CommentThread,
-  isRecord,
-  validName,
-  validTarget,
+  ThreadSubmission,
 } from '../src/lib/comments';
-import { commentToken } from './token';
 
-const REPOSITORY = 'jackwatters45/portfolio-site';
 const OWNER = 'jackwatters45';
 const LABEL = 'nz-feedback';
+const API = `https://api.github.com/repos/${OWNER}/portfolio-site`;
 const SITE = 'https://nz.jackwatters.dev';
-const MARKER = 'nz-feedback:v1';
-const MAX_REQUEST_BYTES = 16_384;
+const NameMetadata = Schema.Struct({ name: CommentName });
+const ThreadMetadata = Schema.Struct({
+  ...NameMetadata.fields,
+  ...CommentTarget.fields,
+});
+const GitHubComment = Schema.Struct({
+  id: Schema.Number,
+  body: Schema.NullOr(Schema.String),
+  created_at: Schema.String,
+  user: Schema.NullOr(Schema.Struct({ login: Schema.String })),
+});
+const GitHubIssue = Schema.Struct({
+  ...GitHubComment.fields,
+  number: Schema.Number,
+  state: Schema.String,
+  locked: Schema.Boolean,
+  comments: Schema.Number,
+  labels: Schema.Array(Schema.Struct({ name: Schema.String })),
+  pull_request: Schema.optionalKey(Schema.Unknown),
+});
 
 interface RateLimit {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
-
 export interface CommentsEnv {
-  NZ_FEEDBACK_GITHUB_TOKEN: string;
-  COMMENT_READ_LIMIT: RateLimit;
-  COMMENT_WRITE_LIMIT: RateLimit;
+  NZ_FEEDBACK_GITHUB_TOKEN?: string;
+  COMMENT_READ_LIMIT?: RateLimit;
+  COMMENT_WRITE_LIMIT?: RateLimit;
 }
 
-interface GitHubComment {
-  id: number;
-  body: string | null;
-  created_at: string;
-  user: { login: string } | null;
-}
+const error = (status: number, message: string) =>
+  new CommentError({ status, message });
 
-interface GitHubIssue extends GitHubComment {
-  number: number;
-  state: string;
-  locked: boolean;
-  comments: number;
-  labels: { name: string }[];
-  pull_request?: unknown;
-}
-
-class HttpError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
-
-function json(value: unknown, status = 200) {
-  return Response.json(value, {
-    status,
-    headers: {
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-      ...(status === 429 ? { 'Retry-After': '60' } : {}),
-    },
-  });
-}
-
-// Keep visitor text inside a code block so mentions, HTML and issue commands
-// are not interpreted by GitHub. The header holds only thread/name metadata.
-function formatMessage(name: string, body: string, target?: CommentTarget) {
-  const metadata = encodeURIComponent(JSON.stringify({ name, ...target }));
-  const runs = [...body.matchAll(/`+/g)].map((match) => match[0].length);
-  const fence = '`'.repeat(Math.max(3, ...runs.map((length) => length + 1)));
-  const nameFence = '`'.repeat(
+// Existing issues keep their metadata and fences. Visitor text cannot activate
+// GitHub mentions, HTML, or issue commands, including when it contains backticks.
+const fence = (value: string, minimum: number) =>
+  '`'.repeat(
     Math.max(
-      1,
-      ...[...name.matchAll(/`+/g)].map((match) => match[0].length + 1),
+      minimum,
+      ...[...value.matchAll(/`+/g)].map(([run]) => run.length + 1),
     ),
   );
+
+function formatMessage(name: string, body: string, target?: CommentTarget) {
+  const metadata = encodeURIComponent(JSON.stringify({ name, ...target }));
+  const code = fence(body, 3);
+  const inline = fence(name, 1);
   return [
-    `<!-- ${MARKER} ${metadata} -->`,
-    `**From:** ${nameFence} ${name} ${nameFence}`,
-    `${fence}text\n${body}\n${fence}`,
+    `<!-- nz-feedback:v1 ${metadata} -->`,
+    `**From:** ${inline} ${name} ${inline}`,
+    `${code}text\n${body}\n${code}`,
     ...(target
       ? [`[View on the trip page](${SITE}/#comment=${target.anchor})`]
       : []),
   ].join('\n\n');
 }
 
-function metadata(body: string | null): Record<string, unknown> | null {
-  const match = body?.match(/^<!-- nz-feedback:v1 (\S+) -->\n/);
-  if (!match) return null;
-  try {
-    const value: unknown = JSON.parse(decodeURIComponent(match[1]));
-    return isRecord(value) ? value : null;
-  } catch {
-    return null;
-  }
+function metadata<A>(schema: Schema.Codec<A, unknown>, body: string | null) {
+  return Option.fromNullishOr(
+    body?.match(/^<!-- nz-feedback:v1 (\S+) -->\n/)?.[1],
+  ).pipe(
+    Option.flatMap(Option.liftThrowable(decodeURIComponent)),
+    Option.flatMap(Schema.decodeUnknownOption(Schema.fromJsonString(schema))),
+    Option.getOrUndefined,
+  );
 }
 
-function message(comment: GitHubComment): CommentMessage {
-  const meta = metadata(comment.body);
-  const stored = comment.body?.match(/\n\n(`{3,})text\n([\s\S]*?)\n\1(?:\n|$)/);
-  // Replies written directly in GitHub still appear on the site.
-  const ours = comment.user?.login === OWNER && validName(meta?.name) && stored;
+function message(value: typeof GitHubComment.Type): CommentMessage {
+  const meta = metadata(NameMetadata, value.body);
+  const stored = value.body?.match(/\n\n(`{3,})text\n([\s\S]*?)\n\1(?:\n|$)/);
+  const ours = value.user?.login === OWNER && meta && stored;
   return {
-    id: comment.id,
-    name: ours ? (meta.name as string) : (comment.user?.login ?? 'GitHub'),
-    body: ours ? stored[2] : (comment.body ?? ''),
-    createdAt: comment.created_at,
+    id: value.id,
+    name: ours ? meta.name : (value.user?.login ?? 'GitHub'),
+    body: ours ? stored[2] : (value.body ?? ''),
+    createdAt: value.created_at,
   };
 }
 
-function thread(issue: GitHubIssue): CommentThread | null {
-  const meta = metadata(issue.body);
+function thread(issue: typeof GitHubIssue.Type): CommentThread | undefined {
+  const meta = metadata(ThreadMetadata, issue.body);
   if (
+    !meta ||
     issue.pull_request ||
     issue.user?.login !== OWNER ||
-    !issue.labels.some((label) => label.name === LABEL) ||
-    !validTarget(meta) ||
-    !validName(meta.name)
-  ) {
-    return null;
-  }
+    !issue.labels.some((label) => label.name === LABEL)
+  )
+    return undefined;
   return {
     id: issue.number,
     anchor: meta.anchor,
@@ -133,234 +121,203 @@ function thread(issue: GitHubIssue): CommentThread | null {
   };
 }
 
-async function github<T>(
+const github = Effect.fn('comments.github')(function* <A>(
   token: Redacted.Redacted<string>,
+  schema: Schema.Codec<A, unknown>,
   path: string,
-  body?: Record<string, unknown>,
-): Promise<{ data: T; more: boolean }> {
-  let response: Response;
-  try {
-    response = await fetch(
-      `https://api.github.com/repos/${REPOSITORY}${path}`,
-      {
-        method: body ? 'POST' : 'GET',
-        headers: {
-          Authorization: `Bearer ${Redacted.value(token)}`,
-          Accept: 'application/vnd.github+json',
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'User-Agent': 'nz-trip-comments',
-        },
-        body: body ? JSON.stringify(body) : undefined,
-        signal: AbortSignal.timeout(12_000),
-      },
-    );
-  } catch {
-    throw new HttpError(
+  body?: Schema.Json,
+) {
+  const unavailable = () =>
+    error(
       502,
       body
         ? 'Could not confirm the comment was saved. Refresh before trying again.'
         : 'Could not load comments. Please try again.',
     );
-  }
-  if (!response.ok) {
-    // Never return upstream bodies, repository data, or credentials to visitors.
-    if (
-      response.status === 429 ||
-      response.headers.get('x-ratelimit-remaining') === '0'
-    ) {
-      throw new HttpError(
-        429,
-        'Comments are busy. Please try again in a minute.',
-      );
-    }
-    if (response.status === 404) {
-      throw new HttpError(
-        404,
-        'Comment thread not found, or GitHub is not configured.',
-      );
-    }
-    throw new HttpError(
-      502,
-      'GitHub comments are unavailable. Please try again later.',
+  const request = HttpClientRequest.make(body ? 'POST' : 'GET')(
+    `${API}${path}`,
+  ).pipe(
+    HttpClientRequest.bearerToken(token),
+    HttpClientRequest.setHeaders({
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'nz-trip-comments',
+    }),
+  );
+  const response = yield* HttpClient.execute(
+    body ? HttpClientRequest.bodyJsonUnsafe(request, body) : request,
+  ).pipe(Effect.timeout('12 seconds'), Effect.mapError(unavailable));
+  if (
+    response.status === 429 ||
+    response.headers['x-ratelimit-remaining'] === '0'
+  ) {
+    return yield* error(
+      429,
+      'Comments are busy. Please try again in a minute.',
     );
   }
-  return {
-    data: (await response.json()) as T,
-    more: response.headers.get('link')?.includes('rel="next"') ?? false,
-  };
-}
+  if (response.status === 404)
+    return yield* error(404, 'Comment thread not found.');
+  if (response.status < 200 || response.status >= 300)
+    return yield* unavailable();
+  const data = yield* HttpClientResponse.schemaBodyJson(schema)(response).pipe(
+    Effect.timeout('12 seconds'),
+    Effect.mapError(unavailable),
+  );
+  return { data, more: response.headers.link?.includes('rel="next"') ?? false };
+});
 
-async function listAll<T>(
+const listAll = Effect.fn('comments.pages')(function* <A>(
   token: Redacted.Redacted<string>,
+  schema: Schema.Codec<A, unknown>,
   path: string,
-): Promise<T[]> {
-  const values: T[] = [];
-  // Follow pagination; fail explicitly rather than silently losing old threads.
+) {
+  const values: A[] = [];
   for (let page = 1; page <= 20; page++) {
-    const { data, more } = await github<T[]>(
+    const { data, more } = yield* github(
       token,
+      Schema.Array(schema),
       `${path}${path.includes('?') ? '&' : '?'}per_page=100&page=${page}`,
     );
     values.push(...data);
     if (!more) return values;
   }
-  throw new HttpError(
+  return yield* error(
     503,
     'There are too many comments to load. Please contact Jack.',
   );
-}
+});
 
-async function submission(request: Request) {
+const submission = Effect.fn('comments.submission')(function* <A>(
+  request: Request,
+  schema: Schema.Codec<A, unknown>,
+) {
   if (
     request.headers.get('content-type')?.split(';')[0].trim() !==
     'application/json'
   ) {
-    throw new HttpError(415, 'Send comments as JSON.');
+    return yield* error(415, 'Send comments as JSON.');
   }
-  // Count streamed bytes too: Content-Length alone can be omitted or forged.
-  const reader = request.body?.getReader();
-  if (!reader) throw new HttpError(400, 'A comment is required.');
-  const chunks: Uint8Array[] = [];
+  const body = request.body;
+  if (!body) return yield* error(400, 'A comment is required.');
   let size = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > MAX_REQUEST_BYTES) {
-      await reader.cancel();
-      throw new HttpError(413, 'This comment is too long.');
-    }
-    chunks.push(value);
-  }
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  let value: unknown;
-  try {
-    value = JSON.parse(new TextDecoder().decode(bytes));
-  } catch {
-    throw new HttpError(400, 'Invalid comment.');
-  }
-  if (
-    !isRecord(value) ||
-    !validName(value.name) ||
-    typeof value.body !== 'string' ||
-    !value.body.trim() ||
-    value.body.length > COMMENT_LIMIT
-  ) {
-    throw new HttpError(
-      400,
-      'Add your name and a comment of 2,000 characters or less.',
-    );
-  }
-  return {
-    name: value.name.trim(),
-    body: value.body.trim(),
-    target: value.target,
-  };
-}
-
-export async function handleComments(request: Request, env: CommentsEnv) {
-  try {
-    const url = new URL(request.url);
-    const match = url.pathname.match(/^\/api\/comments(?:\/([1-9]\d{0,8}))?$/);
-    if (!match) throw new HttpError(404, 'Not found.');
-    if (!['GET', 'POST'].includes(request.method)) {
-      return new Response(null, {
-        status: 405,
-        headers: { Allow: 'GET, POST' },
-      });
-    }
-    const write = request.method === 'POST';
-    if (
-      request.headers.get('sec-fetch-site') === 'cross-site' ||
-      (write && request.headers.get('origin') !== url.origin)
-    ) {
-      throw new HttpError(403, 'Use the comment form on the trip page.');
-    }
-    const token = await Effect.runPromise(
-      commentToken.pipe(
-        Effect.provide(ConfigProvider.layer(ConfigProvider.fromUnknown(env))),
+  const text = yield* Stream.fromReadableStream({
+    evaluate: () => body,
+    onError: () => error(400, 'Could not read this comment.'),
+  }).pipe(
+    Stream.tap((chunk) => {
+      size += chunk.byteLength;
+      return size > 16_384
+        ? error(413, 'This comment is too long.')
+        : Effect.void;
+    }),
+    Stream.decodeText(),
+    Stream.mkString,
+  );
+  return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(schema))(
+    text,
+  ).pipe(
+    Effect.mapError(() =>
+      error(
+        400,
+        'Add your name, a valid target, and a comment of 2,000 characters or less.',
       ),
-    );
-    if (!Redacted.value(token).trim()) {
-      throw new HttpError(503, 'Comments are not connected to GitHub yet.');
-    }
-    const limiter = write ? env.COMMENT_WRITE_LIMIT : env.COMMENT_READ_LIMIT;
-    const { success } = await limiter.limit({
-      key: request.headers.get('cf-connecting-ip') ?? 'local',
+    ),
+  );
+});
+
+export const handleComments = Effect.fn('comments.route')(function* (
+  request: Request,
+  id: string | undefined,
+  env: CommentsEnv,
+) {
+  if (id && !/^[1-9]\d{0,8}$/.test(id))
+    return yield* error(404, 'Comment thread not found.');
+  const write = request.method === 'POST';
+  if (
+    request.headers.get('sec-fetch-site') === 'cross-site' ||
+    (write && request.headers.get('origin') !== new URL(request.url).origin)
+  ) {
+    return yield* error(403, 'Use the comment form on the trip page.');
+  }
+  const token = yield* Config.Redacted('NZ_FEEDBACK_GITHUB_TOKEN').pipe(
+    Effect.provide(ConfigProvider.layer(ConfigProvider.fromUnknown(env))),
+    Effect.mapError(() =>
+      error(503, 'Comments are not connected to GitHub yet.'),
+    ),
+  );
+  if (!Redacted.value(token).trim())
+    return yield* error(503, 'Comments are not connected to GitHub yet.');
+  const limiter = write ? env.COMMENT_WRITE_LIMIT : env.COMMENT_READ_LIMIT;
+  if (limiter) {
+    const { success } = yield* Effect.tryPromise({
+      try: () =>
+        limiter.limit({
+          key: request.headers.get('cf-connecting-ip') ?? 'local',
+        }),
+      catch: () =>
+        error(503, 'Comments are unavailable. Please try again later.'),
     });
-    if (!success) {
-      throw new HttpError(429, 'Too many requests. Please wait a minute.');
-    }
-
-    const id = match[1];
-    if (!id && !write) {
-      const issues = await listAll<GitHubIssue>(
-        token,
-        `/issues?state=all&creator=${OWNER}&labels=${LABEL}&sort=created&direction=asc`,
-      );
-      return json({
-        threads: issues.map(thread).filter((value) => value !== null),
-      });
-    }
-
-    if (!id) {
-      const value = await submission(request);
-      if (!validTarget(value.target)) {
-        throw new HttpError(400, 'Choose something on the page to comment on.');
-      }
-      const { data } = await github<GitHubIssue>(token, '/issues', {
-        title: `[NZ feedback] ${value.target.quote.replace(/\s+/g, ' ').slice(0, 100)}`,
-        body: formatMessage(value.name, value.body, value.target),
-        labels: [LABEL],
-      });
-      const created = thread(data);
-      if (!created) {
-        throw new HttpError(
-          502,
-          'The issue was saved, but its feedback label is missing. Please contact Jack.',
-        );
-      }
-      return json({ thread: created }, 201);
-    }
-
-    const { data: issue } = await github<GitHubIssue>(token, `/issues/${id}`);
-    const current = thread(issue);
-    // The public API must never expose or add replies to unrelated repo issues.
-    if (!current) throw new HttpError(404, 'Comment thread not found.');
-    if (!write) {
-      const replies = await listAll<GitHubComment>(
-        token,
-        `/issues/${id}/comments`,
-      );
-      return json({ thread: current, replies: replies.map(message) });
-    }
-    if (current.closed || current.locked) {
-      throw new HttpError(
-        409,
-        'This thread is closed. Start a new comment instead.',
-      );
-    }
-    const value = await submission(request);
-    const { data: reply } = await github<GitHubComment>(
-      token,
-      `/issues/${id}/comments`,
-      {
-        body: formatMessage(value.name, value.body),
-      },
-    );
-    return json({ message: message(reply) }, 201);
-  } catch (error) {
-    if (error instanceof HttpError)
-      return json({ error: error.message }, error.status);
-    return json(
-      { error: 'Comments are unavailable. Please try again later.' },
-      500,
+    if (!success)
+      return yield* error(429, 'Too many requests. Please wait a minute.');
+  } else if (import.meta.env.PROD) {
+    return yield* error(
+      503,
+      'Comments are not configured. Please contact Jack.',
     );
   }
-}
+
+  if (!id && !write) {
+    const issues = yield* listAll(
+      token,
+      GitHubIssue,
+      `/issues?state=all&creator=${OWNER}&labels=${LABEL}&sort=created&direction=asc`,
+    );
+    return {
+      threads: issues.map(thread).filter((value) => value !== undefined),
+    };
+  }
+  if (!id) {
+    const value = yield* submission(request, ThreadSubmission);
+    const { data } = yield* github(token, GitHubIssue, '/issues', {
+      title: `[NZ feedback] ${value.target.quote.replace(/\s+/g, ' ').slice(0, 100)}`,
+      body: formatMessage(value.name.trim(), value.body.trim(), value.target),
+      labels: [LABEL],
+    });
+    const created = thread(data);
+    if (!created)
+      return yield* error(
+        502,
+        'The issue was saved, but its feedback label is missing. Please contact Jack.',
+      );
+    return { thread: created };
+  }
+
+  const { data } = yield* github(token, GitHubIssue, `/issues/${id}`);
+  const current = thread(data);
+  // Never expose or write to unrelated repository issues.
+  if (!current) return yield* error(404, 'Comment thread not found.');
+  if (!write) {
+    const replies = yield* listAll(
+      token,
+      GitHubComment,
+      `/issues/${id}/comments`,
+    );
+    return { thread: current, replies: replies.map(message) };
+  }
+  if (current.closed || current.locked)
+    return yield* error(
+      409,
+      'This thread is closed. Start a new comment instead.',
+    );
+  const value = yield* submission(request, CommentSubmission);
+  const { data: reply } = yield* github(
+    token,
+    GitHubComment,
+    `/issues/${id}/comments`,
+    {
+      body: formatMessage(value.name.trim(), value.body.trim()),
+    },
+  );
+  return { message: message(reply) };
+});

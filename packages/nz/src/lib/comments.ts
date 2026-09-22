@@ -1,62 +1,73 @@
+import * as Schema from 'effect/Schema';
+
 export const NAME_LIMIT = 60;
 export const COMMENT_LIMIT = 2000;
 export const QUOTE_LIMIT = 180;
 export const NAME_STORAGE_KEY = 'nz-comment-name';
 
-export interface CommentTarget {
-  anchor: string;
-  quote: string;
-}
+const text = (limit: number) =>
+  Schema.String.check(Schema.isMaxLength(limit), Schema.isPattern(/\S/));
 
-// General threads use the same API without attaching to a page element.
+export const CommentName = text(NAME_LIMIT).check(
+  Schema.isPattern(/^\P{Cc}+$/u),
+);
+export const validName = Schema.is(CommentName);
+
+export class CommentTarget extends Schema.Class<CommentTarget>('CommentTarget')(
+  {
+    anchor: Schema.String.check(Schema.isPattern(/^[a-z][a-z0-9-]{0,79}$/)),
+    quote: text(QUOTE_LIMIT),
+  },
+) {}
+
 export const GENERAL_COMMENT_TARGET: CommentTarget = {
   anchor: 'general',
   quote: 'General comment',
 };
 
-export interface CommentMessage {
-  id: number;
-  name: string;
-  body: string;
-  createdAt: string;
-}
+export class CommentMessage extends Schema.Class<CommentMessage>(
+  'CommentMessage',
+)({
+  id: Schema.Number,
+  name: Schema.String,
+  body: Schema.String,
+  createdAt: Schema.String,
+}) {}
 
-export interface CommentThread extends CommentTarget {
-  id: number;
-  closed: boolean;
-  locked: boolean;
-  replyCount: number;
-  message: CommentMessage;
-}
+export class CommentThread extends Schema.Class<CommentThread>('CommentThread')(
+  {
+    ...CommentTarget.fields,
+    id: Schema.Number,
+    closed: Schema.Boolean,
+    locked: Schema.Boolean,
+    replyCount: Schema.Number,
+    message: CommentMessage,
+  },
+) {}
 
-export interface ThreadDetail {
-  thread: CommentThread;
-  replies: CommentMessage[];
-}
+export class ThreadDetail extends Schema.Class<ThreadDetail>('ThreadDetail')({
+  thread: CommentThread,
+  replies: Schema.Array(CommentMessage),
+}) {}
 
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+export const CommentSubmission = Schema.Struct({
+  name: CommentName,
+  body: text(COMMENT_LIMIT),
+});
+export const ThreadSubmission = Schema.Struct({
+  ...CommentSubmission.fields,
+  target: CommentTarget,
+});
+export const ThreadList = Schema.Struct({
+  threads: Schema.Array(CommentThread),
+});
+export const CreatedThread = Schema.Struct({ thread: CommentThread });
+export const CreatedReply = Schema.Struct({ message: CommentMessage });
 
-export function validName(value: unknown): value is string {
-  return (
-    typeof value === 'string' &&
-    value.trim().length > 0 &&
-    value.length <= NAME_LIMIT &&
-    [...value].every(
-      (character) =>
-        character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127,
-    )
-  );
-}
-
-export function validTarget(value: unknown): value is CommentTarget {
-  return (
-    isRecord(value) &&
-    typeof value.anchor === 'string' &&
-    /^[a-z][a-z0-9-]{0,79}$/.test(value.anchor) &&
-    typeof value.quote === 'string' &&
-    value.quote.trim().length > 0 &&
-    value.quote.length <= QUOTE_LIMIT
-  );
-}
+export class CommentError extends Schema.TaggedError<CommentError>()(
+  'CommentError',
+  {
+    status: Schema.Number,
+    message: Schema.String,
+  },
+) {}

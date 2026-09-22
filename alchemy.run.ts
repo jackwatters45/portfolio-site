@@ -15,9 +15,9 @@ export default Alchemy.Stack(
   },
   Effect.gen(function* () {
     const stage = yield* Alchemy.Stage;
-    const ci = yield* Config.boolean('CI').pipe(Config.withDefault(false));
+    const ci = yield* Config.Boolean('CI').pipe(Config.withDefault(false));
     if (ci) {
-      const token = yield* Config.redacted('GITHUB_ACCESS_TOKEN').pipe(
+      const token = yield* Config.Redacted('GITHUB_ACCESS_TOKEN').pipe(
         Config.withDefault(Redacted.make('')),
       );
       if (!Redacted.value(token).trim()) {
@@ -88,7 +88,7 @@ export default Alchemy.Stack(
     const nz = yield* Cloudflare.Website.StaticSite('nz', {
       command: 'bun run build --filter=@personal-sites/nz',
       outdir: 'packages/nz/dist',
-      main: './packages/nz/server/worker.ts',
+      main: './packages/nz/dist/_worker.js/index.js',
       env: {
         NZ_FEEDBACK_GITHUB_TOKEN: token,
         COMMENT_READ_LIMIT: Cloudflare.RateLimit('NZ_COMMENT_READ_LIMIT', {

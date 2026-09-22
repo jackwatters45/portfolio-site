@@ -1,3 +1,4 @@
+import * as Effect from 'effect/Effect';
 import {
   type SubmitEvent,
   useCallback,
@@ -19,22 +20,16 @@ import {
   type ThreadDetail,
   validName,
 } from '../lib/comments';
+import {
+  createReply,
+  createThread,
+  listComments,
+  readThread,
+} from '../lib/comments-api';
 import '../styles/comments.css';
 
 type View = 'list' | 'thread' | 'new' | 'name';
 type Anchor = CommentTarget & { element: HTMLElement };
-
-async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/comments${path}`, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-  });
-  const value = await response.json().catch(() => {
-    throw new Error('Comments are unavailable. Please try again later.');
-  });
-  if (!response.ok) throw new Error(value.error ?? 'Could not load comments.');
-  return value as T;
-}
 
 function Bubble() {
   return (
@@ -82,7 +77,7 @@ function Message({ value }: { value: CommentMessage }) {
 export default function Comments() {
   const id = useId();
   const [anchors, setAnchors] = useState<Anchor[]>([]);
-  const [threads, setThreads] = useState<CommentThread[]>([]);
+  const [threads, setThreads] = useState<ReadonlyArray<CommentThread>>([]);
   const [detail, setDetail] = useState<ThreadDetail | null>(null);
   const [threadId, setThreadId] = useState<number | null>(null);
   const [target, setTarget] = useState<CommentTarget | null>(null);
@@ -160,9 +155,16 @@ export default function Comments() {
         .slice(0, QUOTE_LIMIT),
     }));
     setAnchors(values);
-    void loadCommentName().then((saved) => {
-      if (validName(saved)) setName((currentName) => currentName || saved);
-    });
+    const nameFiber = Effect.runFork(
+      loadCommentName.pipe(
+        Effect.tap((saved) =>
+          Effect.sync(() => {
+            if (validName(saved))
+              setName((currentName) => currentName || saved);
+          }),
+        ),
+      ),
+    );
     const fromHash = () => {
       const anchor = new URLSearchParams(location.hash.slice(1)).get('comment');
       if (anchor === GENERAL_COMMENT_TARGET.anchor) {
@@ -181,59 +183,70 @@ export default function Comments() {
     };
     fromHash();
     window.addEventListener('hashchange', fromHash);
-    return () => window.removeEventListener('hashchange', fromHash);
+    return () => {
+      nameFiber.interruptUnsafe();
+      window.removeEventListener('hashchange', fromHash);
+    };
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: The refresh counter explicitly reloads server data.
   useEffect(() => {
     if (sending) return;
-    const controller = new AbortController();
     setLoading(true);
-    api<{ threads: CommentThread[] }>('', { signal: controller.signal })
-      .then((value) => {
-        setThreads(value.threads);
-        setLoadError('');
-      })
-      .catch((error: Error) => {
-        if (!controller.signal.aborted) setLoadError(error.message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
+    const fiber = Effect.runFork(
+      listComments.pipe(
+        Effect.match({
+          onSuccess: (value) => {
+            setThreads(value.threads);
+            setLoadError('');
+            setLoading(false);
+          },
+          onFailure: (error) => {
+            setLoadError(error.message);
+            setLoading(false);
+          },
+        }),
+      ),
+    );
+    return () => fiber.interruptUnsafe();
   }, [refresh, sending]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: The refresh counter explicitly reloads server data.
   useEffect(() => {
     if (!panel || view !== 'thread' || !threadId || sending) return;
-    const controller = new AbortController();
     setLoadingThread(true);
     setThreadError('');
-    api<ThreadDetail>(`/${threadId}`, { signal: controller.signal })
-      .then((value) => {
-        setDetail(value);
-        setThreads((items) =>
-          items.map((item) =>
-            item.id === value.thread.id ? value.thread : item,
-          ),
-        );
-      })
-      .catch((error: Error) => {
-        if (!controller.signal.aborted) setThreadError(error.message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoadingThread(false);
-      });
-    return () => controller.abort();
+    const fiber = Effect.runFork(
+      readThread(threadId).pipe(
+        Effect.match({
+          onSuccess: (value) => {
+            setDetail(value);
+            setThreads((items) =>
+              items.map((item) =>
+                item.id === value.thread.id ? value.thread : item,
+              ),
+            );
+            setLoadingThread(false);
+          },
+          onFailure: (error) => {
+            setThreadError(error.message);
+            setLoadingThread(false);
+          },
+        }),
+      ),
+    );
+    return () => fiber.interruptUnsafe();
   }, [panel, view, threadId, refresh, sending]);
 
   useEffect(() => {
     if (!panel || sending || (view !== 'thread' && view !== 'list')) return;
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible')
-        setRefresh((value) => value + 1);
-    }, 45_000);
-    return () => window.clearInterval(timer);
+    const fiber = Effect.runFork(
+      Effect.sync(() => {
+        if (document.visibilityState === 'visible')
+          setRefresh((value) => value + 1);
+      }).pipe(Effect.delay('45 seconds'), Effect.forever),
+    );
+    return () => fiber.interruptUnsafe();
   }, [panel, view, sending]);
 
   useEffect(() => {
@@ -319,59 +332,58 @@ export default function Comments() {
     const value = nameInput.trim();
     if (!validName(value)) return;
     setName(value);
-    void saveCommentName(value);
+    Effect.runFork(saveCommentName(value));
     if (returnView.current === 'pick') startPicking();
     else setView(returnView.current);
   }
 
-  async function submit(event: SubmitEvent<HTMLFormElement>) {
+  function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft.trim() || !validName(name) || sendingRef.current) return;
     sendingRef.current = true;
     setSending(true);
     setSendError('');
-    try {
-      if (view === 'thread' && current) {
-        const { message } = await api<{ message: CommentMessage }>(
-          `/${current.id}`,
-          {
-            method: 'POST',
-            body: JSON.stringify({ name, body: draft.trim() }),
-          },
-        );
-        setDetail((value) =>
-          value
-            ? {
-                thread: {
-                  ...value.thread,
-                  replyCount: value.thread.replyCount + 1,
-                },
-                replies: [...value.replies, message],
-              }
-            : value,
-        );
-      } else if (target) {
-        const { thread } = await api<{ thread: CommentThread }>('', {
-          method: 'POST',
-          body: JSON.stringify({
+    Effect.runFork(
+      Effect.gen(function* () {
+        if (view === 'thread' && current) {
+          const { message } = yield* createReply(current.id, {
+            name,
+            body: draft.trim(),
+          });
+          setDetail((value) =>
+            value
+              ? {
+                  thread: {
+                    ...value.thread,
+                    replyCount: value.thread.replyCount + 1,
+                  },
+                  replies: [...value.replies, message],
+                }
+              : value,
+          );
+        } else if (target) {
+          const { thread } = yield* createThread({
             name,
             body: draft.trim(),
             target: { anchor: target.anchor, quote: target.quote },
+          });
+          setThreads((items) => [...items, thread]);
+          setDetail({ thread, replies: [] });
+          openThread(thread);
+        }
+        setDrafts((values) => ({ ...values, [draftKey]: '' }));
+      }).pipe(
+        Effect.catchTag('CommentError', (error) =>
+          Effect.sync(() => setSendError(error.message)),
+        ),
+        Effect.ensuring(
+          Effect.sync(() => {
+            sendingRef.current = false;
+            setSending(false);
           }),
-        });
-        setThreads((items) => [...items, thread]);
-        setDetail({ thread, replies: [] });
-        openThread(thread);
-      }
-      setDrafts((values) => ({ ...values, [draftKey]: '' }));
-    } catch (error) {
-      setSendError(
-        error instanceof Error ? error.message : 'Could not save your comment.',
-      );
-    } finally {
-      sendingRef.current = false;
-      setSending(false);
-    }
+        ),
+      ),
+    );
   }
 
   function close() {
