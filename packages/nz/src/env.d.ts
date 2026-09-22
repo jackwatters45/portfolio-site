@@ -1,10 +1,10 @@
-import type { Runtime } from '@astrojs/cloudflare';
+/// <reference types="@cloudflare/workers-types" />
+
 import type { CommentsEnv } from './services/comments-handler';
 
 declare global {
-  namespace App {
-    interface Locals {
-      runtime: Runtime<CommentsEnv>['runtime'];
-    }
+  namespace Cloudflare {
+    // oxlint-disable-next-line typescript/no-empty-interface -- Workers bindings require interface augmentation.
+    interface Env extends CommentsEnv {}
   }
 }

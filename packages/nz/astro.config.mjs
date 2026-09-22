@@ -6,7 +6,8 @@ import { localComments } from './local-comments';
 export default defineConfig({
   site: 'https://nz.jackwatters.dev',
   output: 'static',
-  adapter: cloudflare({ platformProxy: { enabled: false } }),
+  compressHTML: true,
+  adapter: cloudflare({ imageService: 'compile' }),
   integrations: [react(), localComments()],
   server: { port: 4325 },
   vite: { ssr: { noExternal: ['@astrojs/react'] } },
