@@ -1,4 +1,4 @@
-// biome-ignore-all lint/correctness/useExhaustiveDependencies: <not my component - trusted source (https://devouringdetails.com/)>
+/* oxlint-disable react-hooks/exhaustive-deps -- Trusted source: https://devouringdetails.com/ */
 //
 import { useEffect, useState } from 'react';
 import useSound_ from 'use-sound';

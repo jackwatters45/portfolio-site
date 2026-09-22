@@ -1,5 +1,4 @@
-// biome-ignore-all lint/correctness/useExhaustiveDependencies: <not my component - trusted source (https://devouringdetails.com/)>
-// biome-ignore-all lint/suspicious/noArrayIndexKey: <not my component - trusted source (https://devouringdetails.com/)>
+/* oxlint-disable react-hooks/exhaustive-deps, react/no-array-index-key -- Trusted source: https://devouringdetails.com/ */
 
 import { cx } from 'class-variance-authority';
 import {
@@ -323,8 +322,7 @@ export function Lines({
   }: React.PointerEvent<HTMLDivElement>) {
     if (pointerType === 'touch') return;
     if (rubberband.current) {
-      movementY = movementY / 4;
-      const newY = y.get() + movementY;
+      const newY = y.get() + movementY / 4;
       y.jump(newY);
     }
   }
@@ -512,7 +510,7 @@ export function Meta({ activity }: { activity: StravaActivityWithIndex }) {
   }, [activity]);
 
   return (
-    <div className="flex items-center justify-center gap-2 text-gray12">
+    <div className="text-gray12 flex items-center justify-center gap-2">
       {icon}
       <div className="select-none whitespace-nowrap font-mono text-sm">
         {title}
