@@ -1,39 +1,49 @@
 import type { APIRoute } from 'astro';
 import * as Effect from 'effect/Effect';
 import * as FetchHttpClient from 'effect/unstable/http/FetchHttpClient';
-import { handleComments } from '../../../lib/comments-handler';
+import * as HttpServerResponse from 'effect/unstable/http/HttpServerResponse';
+import { CommentsHandler } from '../../../services/comments-handler';
 
 export const prerender = false;
 
-function json(value: unknown, status: number) {
-  return Response.json(value, {
-    status,
-    headers: {
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-      ...(status === 429 ? { 'Retry-After': '60' } : {}),
-    },
-  });
-}
-
 const route: APIRoute = ({ request, params, locals }) =>
   Effect.runPromise(
-    handleComments(
-      request,
-      params.id,
-      import.meta.env.DEV ? process.env : locals.runtime.env,
+    Effect.flatMap(CommentsHandler, (handler) =>
+      handler.handle(request, params.id),
     ).pipe(
-      Effect.map((value) => json(value, request.method === 'POST' ? 201 : 200)),
+      Effect.flatMap((value) =>
+        HttpServerResponse.json(value, {
+          status: request.method === 'POST' ? 201 : 200,
+        }),
+      ),
       Effect.catchTag('CommentError', (error) =>
-        Effect.succeed(json({ error: error.message }, error.status)),
+        HttpServerResponse.json(
+          { error: error.message },
+          { status: error.status },
+        ),
       ),
       // Do not expose upstream responses or credential errors to visitors.
       Effect.catchCause(() =>
         Effect.succeed(
-          json(
+          HttpServerResponse.jsonUnsafe(
             { error: 'Comments are unavailable. Please try again later.' },
-            500,
+            { status: 500 },
           ),
+        ),
+      ),
+      Effect.map((response) =>
+        response.pipe(
+          HttpServerResponse.setHeaders({
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff',
+            ...(response.status === 429 ? { 'Retry-After': '60' } : {}),
+          }),
+          HttpServerResponse.toWeb,
+        ),
+      ),
+      Effect.provide(
+        CommentsHandler.layer(
+          import.meta.env.DEV ? process.env : locals.runtime.env,
         ),
       ),
       Effect.provide(FetchHttpClient.layer),
@@ -44,4 +54,7 @@ const route: APIRoute = ({ request, params, locals }) =>
 export const GET = route;
 export const POST = route;
 export const ALL: APIRoute = () =>
-  new Response(null, { status: 405, headers: { Allow: 'GET, POST' } });
+  HttpServerResponse.empty({
+    status: 405,
+    headers: { Allow: 'GET, POST' },
+  }).pipe(HttpServerResponse.toWeb);

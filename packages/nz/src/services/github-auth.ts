@@ -19,20 +19,25 @@ export class GitHubAuth extends Context.Service<GitHubAuth>()('nz/GitHubAuth', {
   static readonly layer = Layer.effect(this, this.make);
 
   static localLayer(variables: Record<string, string | undefined>) {
-    return Layer.effect(this, Effect.gen(function* () {
-      const token = yield* Config.Redacted('NZ_FEEDBACK_GITHUB_TOKEN').pipe(
-        Config.withDefault(Redacted.make('')),
-      );
-      return yield* Match.value(Redacted.value(token).trim()).pipe(
-        Match.when('', () => GitHubAuth.make),
-        Match.orElse(() => Effect.succeed({ token })),
-      );
-    }).pipe(
-      Effect.provideService(Auth.AuthProviders, {}),
-      Effect.provide(NodeServices.layer),
-      Effect.provide(ConfigProvider.layer(ConfigProvider.fromUnknown(variables))),
-      // Missing local credentials must not prevent static pages from running.
-      Effect.catchCause(() => Effect.succeed({ token: Redacted.make('') })),
-    ));
+    return Layer.effect(
+      this,
+      Effect.gen(function* () {
+        const token = yield* Config.Redacted('NZ_FEEDBACK_GITHUB_TOKEN').pipe(
+          Config.withDefault(Redacted.make('')),
+        );
+        return yield* Match.value(Redacted.value(token).trim()).pipe(
+          Match.when('', () => GitHubAuth.make),
+          Match.orElse(() => Effect.succeed({ token })),
+        );
+      }).pipe(
+        Effect.provideService(Auth.AuthProviders, {}),
+        Effect.provide(NodeServices.layer),
+        Effect.provide(
+          ConfigProvider.layer(ConfigProvider.fromUnknown(variables)),
+        ),
+        // Missing local credentials must not prevent static pages from running.
+        Effect.catchCause(() => Effect.succeed({ token: Redacted.make('') })),
+      ),
+    );
   }
 }

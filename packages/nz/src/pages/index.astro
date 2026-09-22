@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import '../../theme.css';
 import { Agentation } from 'agentation';
-import Comments from '../components/comments.astro';
+import Comments from '../components/comments/comments';
 ---
 
 <!doctype html>
@@ -431,7 +431,7 @@ import Comments from '../components/comments.astro';
         <a href="#top">Back to top ↑</a>
       </footer>
     </div>
-    <Comments />
+    <Comments client:idle />
     {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
   </body>
 </html>

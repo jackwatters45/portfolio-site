@@ -1,5 +1,5 @@
 import type { Runtime } from '@astrojs/cloudflare';
-import type { CommentsEnv } from './lib/comments-handler';
+import type { CommentsEnv } from './services/comments-handler';
 
 declare global {
   namespace App {
