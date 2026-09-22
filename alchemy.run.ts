@@ -1,15 +1,11 @@
 import * as Alchemy from 'alchemy';
 import * as Cloudflare from 'alchemy/Cloudflare';
-import * as GitHub from 'alchemy/GitHub';
 import * as Effect from 'effect/Effect';
-import * as Layer from 'effect/Layer';
 
 export default Alchemy.Stack(
   'portfolio-site',
   {
-    // Alchemy needs this provider to delete the old GitHub secret from deployed state.
-    // Comments have no GitHub runtime dependency.
-    providers: Layer.mergeAll(Cloudflare.providers(), GitHub.providers()),
+    providers: Cloudflare.providers(),
     state: Cloudflare.state(),
   },
   Effect.gen(function* () {
