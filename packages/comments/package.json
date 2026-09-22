@@ -1,0 +1,30 @@
+{
+  "name": "@personal-sites/comments",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/comments.tsx",
+    "./styles.css": "./src/styles.css",
+    "./worker": "./src/worker.ts"
+  },
+  "scripts": {
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@effect/atom-react": "4.0.0-rc.117",
+    "@effect/platform-browser": "4.0.0-rc.117",
+    "@effect/sql-sqlite-do": "4.0.0-rc.117",
+    "@floating-ui/react": "^0.27.20",
+    "@tanstack/react-form": "^1.33.5",
+    "effect": "4.0.0-rc.117"
+  },
+  "peerDependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260922.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3"
+  }
+}

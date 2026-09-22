@@ -1,0 +1,604 @@
+import { RegistryContext } from '@effect/atom-react';
+import { useContext, useEffect, useId, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { Composer } from './composer';
+import { FloatingPanel, PanelHeading } from './floating-panel';
+import { Icon } from './icons';
+import {
+  GENERAL_TARGET,
+  validName,
+  type Mutation,
+  type Target,
+  type Thread,
+} from './protocol';
+import { NameForm, Settings } from './settings';
+import {
+  pageTargets,
+  pointFor,
+  reveal,
+  targetElement,
+  targetFor,
+} from './targets';
+import { ThreadCard } from './thread-card';
+import { Toolbar } from './toolbar';
+import { useCommentUi } from './ui-state';
+import { usePageEvents } from './use-page-events';
+import { draftStore, usePreferences } from './use-preferences';
+import { useRoom } from './use-room';
+
+export interface CommentsProps {
+  endpoint: string;
+  rootSelector: string;
+  room: string;
+}
+
+export default function Comments({
+  endpoint,
+  rootSelector,
+  room,
+}: CommentsProps) {
+  const id = useId();
+  const registry = useContext(RegistryContext);
+  const ui = useCommentUi();
+  const {
+    mounted,
+    active,
+    picking,
+    showCards,
+    settings,
+    welcome,
+    keyboardPicker,
+    selected,
+    hover,
+    notice,
+    layout,
+    keyboardTarget,
+    presenceNow,
+    setMounted,
+    setActive,
+    setPicking,
+    setShowCards,
+    setSettings,
+    setWelcome,
+    setKeyboardPicker,
+    setSelected,
+    setHover,
+    setNotice,
+    setLayout,
+    setKeyboardTarget,
+  } = ui;
+  const { preferences, update, storageError } = usePreferences();
+  const live = useRoom(
+    endpoint,
+    active && !welcome && validName(preferences.name),
+    preferences,
+  );
+  const store = useMemo(() => draftStore(room, registry), [room, registry]);
+  const launcher = useRef<HTMLButtonElement>(null);
+  const toolbar = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLElement | null>(null);
+  const activeThread =
+    selected?.kind === 'thread'
+      ? live.threads.find((thread) => thread.id === selected.id)
+      : undefined;
+  const target =
+    selected?.kind === 'new' ? selected.target : activeThread?.target;
+  const draftKey =
+    selected?.kind === 'thread' ? selected.id : `new:${target?.selector ?? ''}`;
+  const typingPeers = live.peers.filter(
+    (peer) => peer.typing === draftKey && presenceNow - peer.updatedAt < 6000,
+  );
+  const canPick =
+    active &&
+    !welcome &&
+    picking &&
+    !selected &&
+    !settings &&
+    !keyboardPicker &&
+    !showCards;
+  const targets = useMemo(
+    () => (mounted && root.current ? pageTargets(root.current) : []),
+    [mounted],
+  );
+  const sending = live.sending;
+  const stopTyping = () => live.updatePresence({ typing: null });
+  const closeCard = () => {
+    if (sending) return;
+    setSelected(null);
+    stopTyping();
+  };
+  const clearPanels = () => {
+    setSelected(null);
+    setSettings(false);
+    setKeyboardPicker(false);
+    setShowCards(false);
+    setHover(null);
+    stopTyping();
+  };
+  const choose = (value: Target) => {
+    if (sending) return;
+    clearPanels();
+    setSelected({ kind: 'new', target: value });
+  };
+  const openThread = (thread: Thread, locate = true) => {
+    if (sending) return;
+    clearPanels();
+    setSelected({ kind: 'thread', id: thread.id });
+    if (locate) reveal(thread.target, root.current);
+  };
+  const close = () => {
+    if (sending) return;
+    clearPanels();
+    setActive(false);
+    setWelcome(false);
+    launcher.current?.focus({ preventScroll: true });
+  };
+  const copyLink = (thread: Thread) => {
+    const url = new URL(location.href);
+    url.hash = `comment=${thread.id}`;
+    ui.copyLink(url.href);
+  };
+  const submit = async (body: string, previous?: Mutation) => {
+    if (!selected || !target) return;
+    const threadId = await live.submit({
+      body,
+      previous,
+      target,
+      threadId: selected.kind === 'thread' ? selected.id : undefined,
+      draft: store.atom(draftKey),
+    });
+    setSelected({ kind: 'thread', id: threadId });
+    setShowCards(false);
+    setNotice(selected.kind === 'new' ? 'Comment added' : 'Reply added');
+  };
+  const hash = () => {
+    const comment = new URLSearchParams(location.hash.slice(1)).get('comment');
+    if (!comment) return;
+    setActive(true);
+    setWelcome(!validName(preferences.name));
+    setSelected({ kind: 'thread', id: comment });
+  };
+  usePageEvents({
+    rootSelector,
+    active: active && !welcome,
+    picking: canPick,
+    root: (element) => {
+      root.current = element;
+      setMounted(true);
+      hash();
+    },
+    layout: () => setLayout((value) => value + 1),
+    hash,
+    pointer: (event) => {
+      if (!active || !root.current || !(event.target instanceof Element))
+        return;
+      const element = targetElement(event.target, root.current);
+      if (!element) {
+        setHover(null);
+        live.updatePresence({ cursor: null });
+        return;
+      }
+      const value = targetFor(element, root.current, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      if (canPick)
+        setHover((previous) =>
+          previous?.selector === value.selector ? previous : value,
+        );
+      if (preferences.cursors)
+        live.updatePresence({
+          cursor: { selector: value.selector, x: value.x, y: value.y },
+        });
+    },
+    leave: () => {
+      setHover(null);
+      live.updatePresence({ cursor: null });
+    },
+    click: (event) => {
+      if (!root.current || !(event.target instanceof Element)) return;
+      const element = targetElement(event.target, root.current);
+      if (!element) return;
+      event.preventDefault();
+      event.stopPropagation();
+      choose(
+        targetFor(
+          element,
+          root.current,
+          event.detail ? { x: event.clientX, y: event.clientY } : undefined,
+        ),
+      );
+    },
+    key: (event) => {
+      if (event.key !== 'Escape' || event.defaultPrevented || sending) return;
+      event.preventDefault();
+      if (settings) setSettings(false);
+      else if (keyboardPicker) setKeyboardPicker(false);
+      else if (showCards) setShowCards(false);
+      else if (selected) closeCard();
+      else close();
+    },
+  });
+  const hashRevealed = useRef('');
+  useEffect(() => {
+    if (
+      activeThread &&
+      location.hash === `#comment=${activeThread.id}` &&
+      hashRevealed.current !== activeThread.id
+    ) {
+      hashRevealed.current = activeThread.id;
+      reveal(activeThread.target, root.current);
+    }
+  }, [activeThread]);
+  const anchor = useMemo(() => {
+    if (!target?.selector || !mounted) return null;
+    return {
+      contextElement: root.current ?? undefined,
+      getBoundingClientRect: () => {
+        const point = pointFor(target, root.current);
+        const right = root.current?.getBoundingClientRect().right ?? 0;
+        const inMargin =
+          selected?.kind === 'thread' && window.innerWidth - right >= 310;
+        return new DOMRect(
+          inMargin ? right + 4 : (point?.x ?? 16),
+          inMargin ? (point?.y ?? 80) : (point?.rect.top ?? 80),
+          0,
+          inMargin ? 0 : (point?.rect.height ?? 0),
+        );
+      },
+    };
+  }, [mounted, target, selected?.kind]);
+  if (!mounted) return null;
+  const selectedPoint = target ? pointFor(target, root.current) : null;
+  const previewPoint = hover && canPick ? pointFor(hover, root.current) : null;
+  const highlight = selectedPoint ?? previewPoint;
+  const composer = (
+    <Composer
+      key={draftKey}
+      draftKey={draftKey}
+      store={store}
+      author={preferences}
+      connection={live.connection}
+      reply={selected?.kind === 'thread'}
+      focusInput={selected?.kind === 'new'}
+      sending={sending}
+      onSubmit={submit}
+      onCancel={closeCard}
+      onTyping={(typing) =>
+        live.updatePresence({ typing: typing ? draftKey : null })
+      }
+    />
+  );
+  const typing = !!typingPeers.length && (
+    <output className="pc-typing">
+      <span className="pc-typing-dots">
+        <i />
+        <i />
+        <i />
+      </span>
+      {typingPeers.map((peer) => peer.name).join(', ')}{' '}
+      {typingPeers.length === 1 ? 'is' : 'are'} typing…
+    </output>
+  );
+  return createPortal(
+    <div
+      data-comments-ui=""
+      data-theme={preferences.theme}
+      className="pc-root"
+      data-layout={layout}
+    >
+      {highlight && !welcome && (
+        <div
+          className={`pc-highlight ${selectedPoint ? 'pc-highlight-selected' : ''}`}
+          style={{
+            left: highlight.rect.left - 3,
+            top: highlight.rect.top - 3,
+            width: highlight.rect.width + 6,
+            height: highlight.rect.height + 6,
+          }}
+        >
+          {previewPoint && !selectedPoint && (
+            <span className="pc-target-label">{hover?.quote.slice(0, 50)}</span>
+          )}
+        </div>
+      )}
+      {active &&
+        !welcome &&
+        preferences.markers &&
+        live.threads.map((thread, index) => {
+          const point = pointFor(thread.target, root.current);
+          return point && point.y > 0 && point.y < window.innerHeight ? (
+            <button
+              key={thread.id}
+              type="button"
+              className={`pc-pin ${activeThread?.id === thread.id ? 'pc-pin-active' : ''}`}
+              style={{ left: point.x, top: point.y }}
+              aria-label={`Comment ${index + 1}: ${thread.target.quote}`}
+              aria-pressed={activeThread?.id === thread.id}
+              disabled={sending}
+              onClick={() => openThread(thread, false)}
+            >
+              {index + 1}
+            </button>
+          ) : null;
+        })}
+      {active &&
+        !welcome &&
+        preferences.cursors &&
+        live.peers.map((peer) => {
+          const point =
+            peer.cursor && presenceNow - peer.updatedAt < 10_000
+              ? pointFor(peer.cursor, root.current)
+              : null;
+          return point && point.y >= 0 && point.y <= window.innerHeight ? (
+            <div
+              key={peer.id}
+              className="pc-cursor"
+              style={{
+                transform: `translate3d(${point.x}px, ${point.y}px, 0)`,
+                color: peer.color,
+              }}
+              aria-hidden="true"
+            >
+              <svg width="18" height="23" viewBox="0 0 18 23">
+                <path
+                  d="M1 1v18l5-5 5 8 3-2-5-8h8Z"
+                  fill="currentColor"
+                  stroke="white"
+                  strokeWidth="1.5"
+                />
+              </svg>
+              <span style={{ background: peer.color }}>{peer.name}</span>
+            </div>
+          ) : null;
+        })}
+      {active && welcome && (
+        <FloatingPanel
+          anchor={toolbar.current}
+          label="Join comments"
+          onClose={close}
+        >
+          <PanelHeading title="Join comments" onClose={close} />
+          <NameForm
+            name={preferences.name}
+            welcome
+            onSave={async (name) => {
+              await update({ name });
+              setWelcome(false);
+              setPicking(true);
+            }}
+          />
+        </FloatingPanel>
+      )}
+      {active && !welcome && selected?.kind === 'new' && (
+        <FloatingPanel
+          anchor={anchor ?? toolbar.current}
+          target={!!anchor}
+          label="New comment"
+          className="pc-new-comment"
+          onClose={closeCard}
+        >
+          <PanelHeading
+            title={target?.quote ?? 'Page comment'}
+            onClose={closeCard}
+          />
+          {composer}
+          {typing}
+        </FloatingPanel>
+      )}
+      {active && !welcome && activeThread && (
+        <FloatingPanel
+          anchor={anchor ?? toolbar.current}
+          target={!!anchor}
+          label="Comment thread"
+          focusIndex={0}
+          className="pc-thread-panel"
+          onClose={closeCard}
+        >
+          <ThreadCard
+            thread={activeThread}
+            active
+            onOpen={() => openThread(activeThread)}
+            onClose={closeCard}
+            onLocate={() => reveal(activeThread.target, root.current)}
+            onCopy={() => copyLink(activeThread)}
+          >
+            {composer}
+            {typing}
+          </ThreadCard>
+        </FloatingPanel>
+      )}
+      {active && !welcome && showCards && (
+        <FloatingPanel
+          anchor={toolbar.current}
+          label="Page comments"
+          className="pc-list-panel"
+          onClose={() => setShowCards(false)}
+        >
+          <PanelHeading
+            title={`Comments${live.threads.length ? ` · ${live.threads.length}` : ''}`}
+            onClose={() => setShowCards(false)}
+          />
+          <div className="pc-thread-list">
+            {live.threads.length ? (
+              live.threads.map((thread) => (
+                <ThreadCard
+                  key={thread.id}
+                  thread={thread}
+                  active={false}
+                  onOpen={() => openThread(thread)}
+                  onClose={closeCard}
+                  onLocate={() => openThread(thread)}
+                  onCopy={() => copyLink(thread)}
+                />
+              ))
+            ) : (
+              <div className="pc-empty-list">
+                <span>
+                  {live.connection === 'live'
+                    ? 'No comments yet'
+                    : 'Connecting…'}
+                </span>
+                <button
+                  className="pc-text-button"
+                  type="button"
+                  onClick={() => {
+                    setShowCards(false);
+                    setPicking(true);
+                  }}
+                >
+                  Select an element
+                </button>
+              </div>
+            )}
+          </div>
+        </FloatingPanel>
+      )}
+      {active &&
+        !welcome &&
+        selected?.kind === 'thread' &&
+        !activeThread &&
+        live.connection === 'live' && (
+          <FloatingPanel
+            anchor={toolbar.current}
+            label="Comment not found"
+            focusIndex={0}
+            onClose={closeCard}
+          >
+            <PanelHeading title="Comment not found" onClose={closeCard} />
+          </FloatingPanel>
+        )}
+      {active && !welcome && settings && (
+        <FloatingPanel
+          anchor={toolbar.current}
+          label="Comment settings"
+          onClose={() => setSettings(false)}
+        >
+          <PanelHeading title="Settings" onClose={() => setSettings(false)} />
+          <Settings preferences={preferences} update={update} />
+        </FloatingPanel>
+      )}
+      {active && !welcome && keyboardPicker && (
+        <FloatingPanel
+          anchor={toolbar.current}
+          label="Choose a page location"
+          onClose={() => setKeyboardPicker(false)}
+        >
+          <PanelHeading
+            title="Page location"
+            onClose={() => setKeyboardPicker(false)}
+          />
+          <div className="pc-location-picker">
+            <label htmlFor={`${id}-location`}>
+              Element
+              <select
+                id={`${id}-location`}
+                value={keyboardTarget}
+                onChange={(event) => {
+                  setKeyboardTarget(event.target.value);
+                  const target = targets.find(
+                    (value) => value.selector === event.target.value,
+                  );
+                  if (target) reveal(target, root.current);
+                }}
+              >
+                <option value="">Choose an element</option>
+                {targets.map((target) => (
+                  <option key={target.selector} value={target.selector}>
+                    {target.quote.slice(0, 85)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="pc-primary"
+              disabled={!keyboardTarget}
+              onClick={() => {
+                const target = targets.find(
+                  (value) => value.selector === keyboardTarget,
+                );
+                if (target) choose(target);
+              }}
+            >
+              Comment here
+              <Icon name="plus" size={14} />
+            </button>
+          </div>
+        </FloatingPanel>
+      )}
+      {canPick && (
+        <div className="pc-hint">
+          <span>Select an element</span>
+          <button
+            type="button"
+            aria-label="Choose a location with keyboard"
+            title="Choose a location with keyboard"
+            onClick={() => setKeyboardPicker(true)}
+          >
+            <Icon name="keyboard" size={15} />
+          </button>
+          <kbd>esc</kbd>
+        </div>
+      )}
+      {active &&
+        !welcome &&
+        (live.error || (!selected && live.connection === 'offline')) && (
+          <output className="pc-connection-error pc-surface">
+            {live.error || 'Offline. You can keep writing.'}
+          </output>
+        )}
+      {active && storageError && (
+        <output className="pc-connection-error pc-surface">
+          Device storage is unavailable. Keep this page open to retain drafts.
+        </output>
+      )}
+      {notice && <output className="pc-notice pc-surface">{notice}</output>}
+      <Toolbar
+        active={active}
+        welcome={welcome}
+        picking={canPick}
+        showCards={showCards}
+        cursors={preferences.cursors}
+        settings={settings}
+        pageComment={selected?.kind === 'new' && !selected.target.selector}
+        count={live.threads.length}
+        peers={live.peers}
+        connection={live.connection}
+        disabled={sending}
+        toolbar={toolbar}
+        launcher={launcher}
+        onToggle={() => {
+          if (active) close();
+          else {
+            setWelcome(!validName(preferences.name));
+            setActive(true);
+            setPicking(true);
+          }
+        }}
+        onPick={() => {
+          const next = !canPick;
+          clearPanels();
+          setPicking(next);
+        }}
+        onList={() => {
+          const next = !showCards;
+          clearPanels();
+          setPicking(false);
+          setShowCards(next);
+        }}
+        onPage={() => choose(GENERAL_TARGET)}
+        onCursors={() => {
+          update({ cursors: !preferences.cursors });
+          live.updatePresence({ cursor: null });
+        }}
+        onSettings={() => {
+          const next = !settings;
+          clearPanels();
+          setSettings(next);
+        }}
+      />
+    </div>,
+    document.body,
+  );
+}

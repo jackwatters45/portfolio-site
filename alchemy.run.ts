@@ -1,44 +1,38 @@
 import * as Alchemy from 'alchemy';
 import * as Cloudflare from 'alchemy/Cloudflare';
 import * as GitHub from 'alchemy/GitHub';
-import * as Config from 'effect/Config';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
-import * as Redacted from 'effect/Redacted';
-import { GitHubAuth } from './packages/nz/src/services/github-auth';
 
 export default Alchemy.Stack(
   'portfolio-site',
   {
+    // Alchemy needs this provider to delete the old GitHub secret from deployed state.
+    // Comments have no GitHub runtime dependency.
     providers: Layer.mergeAll(Cloudflare.providers(), GitHub.providers()),
     state: Cloudflare.state(),
   },
   Effect.gen(function* () {
     const stage = yield* Alchemy.Stage;
-    const ci = yield* Config.Boolean('CI').pipe(Config.withDefault(false));
-    if (ci) {
-      const token = yield* Config.Redacted('GITHUB_ACCESS_TOKEN').pipe(
-        Config.withDefault(Redacted.make('')),
-      );
-      if (!Redacted.value(token).trim()) {
-        return yield* Effect.die(
-          new Error(
-            'Set the NZ_FEEDBACK_GITHUB_TOKEN Actions secret from your gh login. The temporary Actions GITHUB_TOKEN cannot authenticate the deployed comments Worker.',
-          ),
-        );
-      }
-    }
-    const { token } = yield* GitHubAuth.pipe(Effect.provide(GitHubAuth.layer));
-
-    if (stage === 'prod') {
-      // Keep the persistent credential available to future CI deployments.
-      yield* GitHub.Secret('nz-feedback-github-token', {
-        owner: 'jackwatters45',
-        repository: 'portfolio-site',
-        name: 'NZ_FEEDBACK_GITHUB_TOKEN',
-        value: token,
-      });
-    }
+    const commentsPort = 4340;
+    const comments = yield* Cloudflare.Worker('comments', {
+      main: './packages/comments/src/worker.ts',
+      compatibility: { date: '2026-01-14' },
+      dev: { port: commentsPort, strictPort: true },
+      workersDev: false,
+      env: {
+        COMMENT_ROOMS: 'nz-trip',
+        COMMENT_ORIGINS:
+          stage === 'prod'
+            ? 'https://nz.jackwatters.dev'
+            : 'http://localhost:4325,http://localhost:4326,http://localhost:4335,http://127.0.0.1:4325',
+        COMMENT_ROOMS_STORE: Cloudflare.DurableObject('CommentRoom'),
+        COMMENT_CONNECT_LIMIT: Cloudflare.RateLimit('COMMENT_CONNECT_LIMIT', {
+          namespaceId: 1001,
+          simple: { limit: 30, period: 60 },
+        }),
+      },
+    });
 
     const site = yield* Cloudflare.Website.StaticSite('site', {
       // Preserve the live Worker name when recovering the pre-upgrade state.
@@ -49,7 +43,8 @@ export default Alchemy.Stack(
       command: 'bun run build --filter=@personal-sites/portfolio',
       outdir: 'packages/portfolio/dist',
       dev: {
-        command: 'bun run dev --filter=@personal-sites/portfolio',
+        command: 'bun run dev',
+        cwd: 'packages/portfolio',
       },
       domain:
         stage === 'prod'
@@ -60,7 +55,7 @@ export default Alchemy.Stack(
     const tacos = yield* Cloudflare.Website.StaticSite('tacos', {
       command: 'bun run build --filter=@personal-sites/tacos',
       outdir: 'packages/tacos/dist',
-      dev: { command: 'bun run dev --filter=@personal-sites/tacos' },
+      dev: { command: 'bun run dev', cwd: 'packages/tacos' },
       domain:
         stage === 'prod'
           ? {
@@ -74,7 +69,7 @@ export default Alchemy.Stack(
     const sangas = yield* Cloudflare.Website.StaticSite('sangas', {
       command: 'bun run build --filter=@personal-sites/sangas',
       outdir: 'packages/sangas/dist',
-      dev: { command: 'bun run dev --filter=@personal-sites/sangas' },
+      dev: { command: 'bun run dev', cwd: 'packages/sangas' },
       domain:
         stage === 'prod'
           ? {
@@ -89,18 +84,17 @@ export default Alchemy.Stack(
       command: 'bun run build --filter=@personal-sites/nz',
       outdir: 'packages/nz/dist/client',
       main: './packages/nz/dist/server/entry.mjs',
-      env: {
-        NZ_FEEDBACK_GITHUB_TOKEN: token,
-        COMMENT_READ_LIMIT: Cloudflare.RateLimit('NZ_COMMENT_READ_LIMIT', {
-          namespaceId: 1001,
-          simple: { limit: 60, period: 60 },
-        }),
-        COMMENT_WRITE_LIMIT: Cloudflare.RateLimit('NZ_COMMENT_WRITE_LIMIT', {
-          namespaceId: 1002,
-          simple: { limit: 6, period: 60 },
-        }),
+      env: { COMMENTS: comments },
+      dev: {
+        command: 'bun run dev',
+        cwd: 'packages/nz',
+        // Astro must retain dev mode when Alchemy starts the subprocess.
+        env: {
+          NODE_ENV: 'development',
+          COMMENTS_DEV_URL: `http://localhost:${commentsPort}`,
+        },
+        url: 'http://localhost:4325',
       },
-      dev: { command: 'bun run dev --filter=@personal-sites/nz' },
       domain:
         stage === 'prod'
           ? {
