@@ -20,7 +20,7 @@ const paths: Record<IconName, string> = {
   list: 'M4 5h16v14H4Z M10 5v14 M13 9h4 M13 13h4',
   cursor: 'M5 3l14 9-6 1-3 6Z',
   settings:
-    'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z M9 3h6l.6 2.3 2 .9L20 5.6l3 5.2-1.8 1.7v2l1.8 1.7-3 5.2-2.4-.6-2 .9L15 24H9l-.6-2.3-2-.9-2.4.6-3-5.2 1.8-1.7v-2L1 10.8l3-5.2 2.4.6 2-.9Z',
+    'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z M9 1.5h6l.6 2.3 2 .9L20 4.1l3 5.2-1.8 1.7v2l1.8 1.7-3 5.2-2.4-.6-2 .9L15 22.5H9l-.6-2.3-2-.9-2.4.6-3-5.2 1.8-1.7v-2L1 9.3l3-5.2 2.4.6 2-.9Z',
   close: 'M6 6l12 12 M18 6 6 18',
   plus: 'M12 5v14 M5 12h14',
   arrow: 'M7 17 17 7 M7 7h10v10',
@@ -41,7 +41,7 @@ export function Icon({
     <svg
       width={size}
       height={size}
-      viewBox={name === 'settings' ? '0 0 24 27' : '0 0 24 24'}
+      viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.7"

@@ -77,6 +77,21 @@ export function targetFor(
   };
 }
 
+export function cursorFor(
+  element: Element,
+  root: Element,
+  point: { x: number; y: number },
+): Cursor | null {
+  if (!root.contains(element) || element.closest(UI_SELECTOR)) return null;
+  const rect = element.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  return {
+    selector: selectorFor(element, root),
+    x: clamp((point.x - rect.left) / rect.width, 0, 1),
+    y: clamp((point.y - rect.top) / rect.height, 0, 1),
+  };
+}
+
 export function pointFor(cursor: Cursor, root: Element | null) {
   const element = findElement(cursor.selector, root);
   if (!element) return null;

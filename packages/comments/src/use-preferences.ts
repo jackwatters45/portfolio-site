@@ -20,7 +20,6 @@ class PreferencesSchema extends Schema.Class<PreferencesSchema>(
 )({
   ...Author.fields,
   name: Schema.String.check(Schema.isMaxLength(NAME_LIMIT)),
-  theme: Schema.Literals(['site', 'light', 'dark']),
   cursors: Schema.Boolean,
   markers: Schema.Boolean,
 }) {}
@@ -75,7 +74,6 @@ export const preferencesAtom = Atom.kvs({
       id: 'pending',
       name: '',
       color: COLORS[0],
-      theme: 'site',
       cursors: true,
       markers: true,
     }),

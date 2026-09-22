@@ -184,15 +184,6 @@ export class RoomClient extends Context.Service<
               ),
               Effect.forkScoped,
             );
-            yield* BrowserStream.fromEventListenerDocument(
-              'visibilitychange',
-            ).pipe(
-              Stream.filter(() => document.hidden),
-              Stream.runForEach(() =>
-                updatePresence({ cursor: null, typing: null }, author()),
-              ),
-              Effect.forkScoped,
-            );
             const cycle = Effect.gen(function* () {
               if (!navigator.onLine) {
                 yield* set({ connection: 'offline', peers: [] });

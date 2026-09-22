@@ -124,25 +124,6 @@ export function Settings({
           ))}
         </div>
       </fieldset>
-      <fieldset className="pc-settings-field">
-        <legend>Appearance</legend>
-        <div className="pc-segment">
-          {(['site', 'light', 'dark'] as const).map((theme) => (
-            <button
-              key={theme}
-              type="button"
-              aria-pressed={preferences.theme === theme}
-              onClick={() => update({ theme })}
-            >
-              {theme === 'site'
-                ? 'Match page'
-                : theme === 'light'
-                  ? 'Light'
-                  : 'Dark'}
-            </button>
-          ))}
-        </div>
-      </fieldset>
       <label className="pc-setting-toggle">
         <span>Comment markers</span>
         <input

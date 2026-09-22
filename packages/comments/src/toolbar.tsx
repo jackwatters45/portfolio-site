@@ -1,7 +1,6 @@
 import type { RefObject } from 'react';
 import { Icon, type IconName } from './icons';
 import type { Peer } from './protocol';
-import type { Connection } from './room-client';
 
 function Tool({
   label,
@@ -52,7 +51,6 @@ interface Props {
   pageComment: boolean;
   count: number;
   peers: readonly Peer[];
-  connection: Connection;
   disabled: boolean;
   toolbar: RefObject<HTMLDivElement | null>;
   launcher: RefObject<HTMLButtonElement | null>;
@@ -65,12 +63,6 @@ interface Props {
 }
 export function Toolbar(props: Props) {
   const expanded = props.active && !props.welcome;
-  const status =
-    props.connection === 'live'
-      ? 'Live'
-      : props.connection === 'offline'
-        ? 'Offline'
-        : 'Connecting';
   return (
     <div
       ref={props.toolbar}
@@ -123,11 +115,6 @@ export function Toolbar(props: Props) {
       </button>
       {expanded && (
         <div className="pc-toolbar-tools">
-          <output
-            className={`pc-connection pc-connection-${props.connection}`}
-            aria-label={`Comments: ${status}`}
-            title={status}
-          />
           <Tool
             label="Select an element"
             icon="select"

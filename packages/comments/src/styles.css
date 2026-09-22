@@ -13,7 +13,7 @@
   pointer-events: none;
   overflow: clip;
   color: var(--pc-text);
-  color-scheme: light;
+  color-scheme: inherit;
   font:
     400 12px/1.5 -apple-system,
     BlinkMacSystemFont,
@@ -22,24 +22,6 @@
   letter-spacing: 0;
   text-align: left;
   -webkit-font-smoothing: antialiased;
-}
-.pc-root[data-theme="light"] {
-  --pc-surface: #fff;
-  --pc-input: #f7f7f8;
-  --pc-text: #242428;
-  --pc-muted: #71717a;
-  --pc-border: #e4e4e7;
-}
-.pc-root[data-theme="dark"] {
-  --pc-surface: #222722;
-  --pc-input: #2b312c;
-  --pc-text: #f2f2ec;
-  --pc-muted: #aeb5ac;
-  --pc-border: #40493e;
-  --pc-accent: #91b8a0;
-  --pc-error: #f7a7a2;
-  --pc-shadow: 0 6px 24px #0004;
-  color-scheme: dark;
 }
 .pc-root *,
 .pc-root *::before,
@@ -143,10 +125,10 @@
   transition: width 180ms ease;
 }
 .pc-root .pc-toolbar-open {
-  width: 228px;
+  width: 212px;
 }
 .pc-root .pc-toolbar-open:has(.pc-online-count) {
-  width: 278px;
+  width: 262px;
 }
 .pc-root .pc-launcher {
   position: relative;
@@ -229,20 +211,6 @@
 .pc-root :is(button:hover, button:focus-visible) > .pc-tooltip {
   visibility: visible;
   opacity: 1;
-}
-.pc-root .pc-connection {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  margin-inline: 4px;
-  border-radius: 50%;
-  background: #b78947;
-}
-.pc-root .pc-connection-live {
-  background: #47825b;
-}
-.pc-root .pc-connection-offline {
-  background: var(--pc-error);
 }
 .pc-root .pc-online-count {
   flex: 0 0 auto;
@@ -455,25 +423,6 @@
 .pc-root .pc-colors button[aria-pressed="true"] {
   outline: 1px solid var(--pc-muted);
   outline-offset: 3px;
-}
-.pc-root .pc-segment {
-  display: flex;
-  padding: 2px;
-  border: 1px solid var(--pc-border);
-  border-radius: 7px;
-  background: var(--pc-input);
-}
-.pc-root .pc-segment button {
-  flex: 1;
-  min-height: 25px;
-  border-radius: 5px;
-  color: var(--pc-muted);
-  font-size: 10px;
-}
-.pc-root .pc-segment button[aria-pressed="true"] {
-  background: var(--pc-surface);
-  color: var(--pc-text);
-  box-shadow: 0 1px 3px #0001;
 }
 .pc-root .pc-setting-toggle {
   display: flex;
@@ -780,7 +729,7 @@
   }
   .pc-root .pc-toolbar-open,
   .pc-root .pc-toolbar-open:has(.pc-online-count) {
-    width: 266px;
+    width: 250px;
   }
   .pc-root .pc-tool {
     width: 36px;

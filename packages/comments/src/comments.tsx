@@ -13,6 +13,7 @@ import {
 } from './protocol';
 import { NameForm, Settings } from './settings';
 import {
+  cursorFor,
   pageTargets,
   pointFor,
   reveal,
@@ -173,28 +174,20 @@ export default function Comments({
       if (!active || !root.current || !(event.target instanceof Element))
         return;
       const element = targetElement(event.target, root.current);
-      if (!element) {
-        setHover(null);
-        live.updatePresence({ cursor: null });
-        return;
-      }
-      const value = targetFor(element, root.current, {
-        x: event.clientX,
-        y: event.clientY,
-      });
-      if (canPick)
+      const point = { x: event.clientX, y: event.clientY };
+      if (canPick) {
+        const value = element ? targetFor(element, root.current, point) : null;
         setHover((previous) =>
-          previous?.selector === value.selector ? previous : value,
+          previous?.selector === value?.selector ? previous : value,
         );
-      if (preferences.cursors)
-        live.updatePresence({
-          cursor: { selector: value.selector, x: value.x, y: value.y },
-        });
+      }
+      if (preferences.cursors) {
+        const cursor = cursorFor(element ?? event.target, root.current, point);
+        if (cursor) live.updatePresence({ cursor });
+      }
     },
-    leave: () => {
-      setHover(null);
-      live.updatePresence({ cursor: null });
-    },
+    // The presence lease expires the last cursor; leaving the page only clears selection.
+    leave: () => setHover(null),
     click: (event) => {
       if (!root.current || !(event.target instanceof Element)) return;
       const element = targetElement(event.target, root.current);
@@ -281,12 +274,7 @@ export default function Comments({
     </output>
   );
   return createPortal(
-    <div
-      data-comments-ui=""
-      data-theme={preferences.theme}
-      className="pc-root"
-      data-layout={layout}
-    >
+    <div data-comments-ui="" className="pc-root" data-layout={layout}>
       {highlight && !welcome && (
         <div
           className={`pc-highlight ${selectedPoint ? 'pc-highlight-selected' : ''}`}
@@ -564,7 +552,6 @@ export default function Comments({
         pageComment={selected?.kind === 'new' && !selected.target.selector}
         count={live.threads.length}
         peers={live.peers}
-        connection={live.connection}
         disabled={sending}
         toolbar={toolbar}
         launcher={launcher}
