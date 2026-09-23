@@ -1,13 +1,13 @@
 import { ImageSquare, SpinnerGap } from '@phosphor-icons/react';
 import { useRef, type FormEvent } from 'react';
 
-import type { BoardBackgroundDraft } from '../client/board/board-background';
 import {
   BOARD_BACKGROUNDS,
   formatHexColorInput,
   normalizeHexColor,
-} from '../client/board/board-utils';
-import { IMAGE_FILE_ACCEPT } from '../client/media/image-preflight';
+  type BoardBackgroundDraft,
+} from '../client/board/board-background';
+import { IMAGE_FILE_ACCEPT } from '../client/media/image-processing';
 import { CanvasBackground } from './canvas-background';
 
 type Props = {

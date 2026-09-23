@@ -5,8 +5,12 @@ import type { RpcClientError } from 'effect/unstable/rpc/RpcClientError';
 import type * as RpcGroup from 'effect/unstable/rpc/RpcGroup';
 import * as RpcSerialization from 'effect/unstable/rpc/RpcSerialization';
 
-import { BoardRpcs, ClientIdSchema, MutationIdSchema } from '../lib/board-rpc';
-import { signalAuthenticationRequired } from './auth-client';
+import {
+  BoardRpcs,
+  ClientIdSchema,
+  MutationIdSchema,
+} from '../../lib/board-rpc';
+import { signalAuthenticationRequired } from '../auth-client';
 
 const authenticatedFetch = (async (input, init) => {
   const response = await globalThis.fetch(input, {

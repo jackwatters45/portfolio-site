@@ -34,12 +34,6 @@ export interface BunWorkspaceConfig {
   readonly mediaLimits: MediaQuotaLimits;
 }
 
-export interface BunLegacyWorkspaceConfig {
-  readonly databasePath: string;
-  readonly mediaPath: string;
-  readonly mediaLimits: MediaQuotaLimits;
-}
-
 export const workspaceDirectoryName = (accountId: AccountId): string =>
   createHash('sha256').update(accountId).digest('hex');
 
@@ -79,46 +73,6 @@ export const makeBunWorkspaceHandler = (
   const publicServer = PublicHandlers.pipe(
     Layer.provide(PublishingService.layer),
     Layer.provide(database),
-  );
-  const maintenance = MediaMaintenanceScheduler.pipe(
-    Layer.provide(mediaService),
-  );
-  const web = HttpRouter.toWebHandler(
-    Layer.mergeAll(rpcServer, publicServer, mediaServer, maintenance),
-    { disableLogger: true },
-  );
-  return { fetch: web.handler, dispose: web.dispose };
-};
-
-export const makeBunLegacyWorkspaceHandler = (
-  config: BunLegacyWorkspaceConfig,
-): BunWorkspaceHandler => {
-  const database = makeDatabaseLayer(config.databasePath);
-  const websitePreviews = WebsitePreviewService.layer.pipe(
-    Layer.provide(BunWebsitePreviewFetcher),
-  );
-  const handlers = BoardHandlers.pipe(
-    Layer.provide(BoardService.layer),
-    Layer.provide(websitePreviews),
-    Layer.provide(database),
-  );
-  const rpcServer = RpcServer.layerHttp({
-    group: BoardRpcs,
-    path: '/rpc',
-    protocol: 'http',
-    disableFatalDefects: true,
-  }).pipe(Layer.provide(handlers), Layer.provide(RpcSerialization.layerNdjson));
-  const mediaService = MediaService.layerWith(config.mediaLimits).pipe(
-    Layer.provide(makeBunMediaObjectStore(config.mediaPath)),
-    Layer.provide(database),
-  );
-  const publicServer = PublicHandlers.pipe(
-    Layer.provide(PublishingService.layer),
-    Layer.provide(database),
-  );
-  const mediaServer = MediaHandlers.pipe(
-    Layer.provide(mediaService),
-    Layer.provide(MediaClientIdentity.bun),
   );
   const maintenance = MediaMaintenanceScheduler.pipe(
     Layer.provide(mediaService),

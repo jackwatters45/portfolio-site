@@ -10,14 +10,14 @@ import {
   type MediaKind,
   type MediaMimeType,
   type MediaUploadResponse,
-} from '../lib/media';
-import { HttpStatusCodeSchema, type HttpStatusCode } from '../lib/schema';
-import { signalAuthenticationRequired } from './auth-client';
-import { mediaUrl } from './media-url';
+} from '../../lib/media';
+import { HttpStatusCodeSchema, type HttpStatusCode } from '../../lib/schema';
+import { signalAuthenticationRequired } from '../auth-client';
 import {
   RemoteClientErrorFields,
   RemoteClientFailureReasonSchema,
-} from './remote-client-error';
+} from '../remote-client-error';
+import { mediaUrl } from './media-url';
 
 const MediaErrorResponseSchema = Schema.Struct({ error: Schema.String });
 const decodeMediaErrorResponse = Schema.decodeUnknownOption(

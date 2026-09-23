@@ -203,8 +203,8 @@
         "packages/mood-board/src/server/**/*.ts",
         "packages/mood-board/src/cloudflare/**/*.ts",
         "packages/mood-board/scripts/**/*.ts",
-        "packages/mood-board/src/client/board-sync.ts",
-        "packages/mood-board/src/client/board-catalog.ts"
+        "packages/mood-board/src/client/board/board-sync.ts",
+        "packages/mood-board/src/client/board/board-catalog.ts"
       ],
       "rules": {
         "react/rules-of-hooks": "off"

@@ -41,43 +41,36 @@ import {
 } from 'react';
 
 import { authClient } from '../client/auth-client';
-import { createBoardCatalog, type BoardCatalog } from '../client/board-catalog';
 import { boardPath } from '../client/board-route';
+import {
+  createBoardArchive,
+  importBoardFile,
+} from '../client/board/board-archive';
+import {
+  accessibleFieldColors,
+  DEFAULT_BOARD_BACKGROUND,
+  DEFAULT_CUSTOM_COLOR,
+  formatHexColorInput,
+  normalizeHexColor,
+  reconcileRemoteBackgroundDraft,
+  SWATCHES,
+  type BoardBackgroundDraft,
+} from '../client/board/board-background';
+import {
+  createBoardCatalog,
+  type BoardCatalog,
+} from '../client/board/board-catalog';
+import {
+  createDemoBoard,
+  createEmptyBoard,
+  createId,
+} from '../client/board/board-factory';
+import { shuffleBoardItems } from '../client/board/board-shuffle';
 import {
   startBoardSync,
   type BoardSync,
   type CloudSyncState,
-} from '../client/board-sync';
-import {
-  createBoardArchive,
-  importBoardFile,
-  MAX_LEGACY_JSON_BYTES,
-} from '../client/board/board-archive';
-import {
-  reconcileRemoteBackgroundDraft,
-  type BoardBackgroundDraft,
-} from '../client/board/board-background';
-import { normalizeImportedBoard } from '../client/board/board-import';
-import { shuffleBoardItems } from '../client/board/board-shuffle';
-import {
-  accessibleFieldColors,
-  blobToDataUrl,
-  createDemoBoard,
-  createEmptyBoard,
-  createId,
-  DEFAULT_BOARD_BACKGROUND,
-  DEFAULT_CUSTOM_COLOR,
-  fitCamera,
-  formatHexColorInput,
-  ingestImageFile,
-  inspectImageUrl,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  normalizeHexColor,
-  screenToWorld,
-  SWATCHES,
-  zoomCamera,
-} from '../client/board/board-utils';
+} from '../client/board/board-sync';
 import {
   collectDroppedImageFiles,
   estimateItemBytes,
@@ -91,14 +84,26 @@ import {
   placeLayoutWithoutOverlap,
 } from '../client/board/bulk-layout';
 import {
+  fitCamera,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  screenToWorld,
+  zoomCamera,
+} from '../client/board/camera';
+import {
   deleteLocalBoard,
   loadDocument,
   saveDocument,
 } from '../client/board/storage';
 import type { Board, BoardItem, Camera } from '../client/board/types';
-import { uploadMedia } from '../client/media-client';
 import { AudioPlaybackCoordinator } from '../client/media/audio-playback';
-import { IMAGE_FILE_ACCEPT } from '../client/media/image-preflight';
+import {
+  blobToDataUrl,
+  IMAGE_FILE_ACCEPT,
+  ingestImageFile,
+  inspectImageUrl,
+} from '../client/media/image-processing';
+import { uploadMedia } from '../client/media/media-client';
 import { MAX_X_POST_CARD_WIDTH } from '../client/media/x-post-measurement';
 import type { AccountId } from '../lib/account';
 import {
@@ -1008,11 +1013,15 @@ function BoardWorkspace({
       .then((document) => {
         if (cancelled) return;
         if (document?.board) {
-          const normalized = normalizeImportedBoard(document, {
-            allowManagedMedia: !localOnly,
-          });
-          setBoard(normalized.board);
-          setCamera(normalized.camera ?? fitCamera(normalized.board.items));
+          if (
+            localOnly &&
+            (document.board.backgroundMediaId !== undefined ||
+              document.board.items.some((item) => item.mediaId !== undefined))
+          ) {
+            throw new Error('The guest demo cannot load managed media.');
+          }
+          setBoard(document.board);
+          setCamera(document.camera);
         } else {
           setCamera(fitCamera(initialBoard.items));
         }
@@ -2633,30 +2642,10 @@ function BoardWorkspace({
     archiveOperationRef.current = controller;
     beginWorking();
     try {
-      const blob = hasManagedMedia
-        ? await createBoardArchive(current, cameraRef.current, {
-            signal: controller.signal,
-          })
-        : new Blob(
-            [
-              JSON.stringify(
-                {
-                  format: 'moodboard',
-                  board: current,
-                  camera: cameraRef.current,
-                },
-                null,
-                2,
-              ),
-            ],
-            { type: 'application/json' },
-          );
+      const blob = await createBoardArchive(current, cameraRef.current, {
+        signal: controller.signal,
+      });
       if (controller.signal.aborted) return;
-      if (!hasManagedMedia && blob.size > MAX_LEGACY_JSON_BYTES) {
-        throw new Error(
-          'This legacy JSON board is larger than 50 MB. Remove some embedded images first.',
-        );
-      }
       const slug =
         current.title
           .toLowerCase()
@@ -2664,14 +2653,10 @@ function BoardWorkspace({
           .replace(/^-|-$/g, '') || 'mood';
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `${slug}${hasManagedMedia ? '.moodboard' : '.moodboard.json'}`;
+      link.download = `${slug}.moodboard`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-      showToast(
-        hasManagedMedia
-          ? 'Portable board archive downloaded'
-          : 'Board file downloaded',
-      );
+      showToast('Portable board archive downloaded');
     } catch (error) {
       if (!controller.signal.aborted) {
         showToast(
@@ -2695,18 +2680,10 @@ function BoardWorkspace({
     try {
       const imported = await importBoardFile(file, {
         signal: controller.signal,
-        ...(localOnly
-          ? {
-              upload: async () => {
-                throw new Error(
-                  'The guest demo imports JSON boards only. Sign in to import managed media archives.',
-                );
-              },
-            }
-          : {}),
+        localOnly,
       });
       if (controller.signal.aborted) return;
-      const nextCamera = imported.camera ?? fitCamera(imported.board.items);
+      const nextCamera = imported.camera;
       setPersistenceEnabled(true);
       replaceDocument(imported.board, nextCamera);
       setPanel(null);
@@ -3215,8 +3192,8 @@ function BoardWorkspace({
                     <strong>Import board file</strong>
                     <small>
                       {localOnly
-                        ? 'Open a JSON board saved without managed media'
-                        : 'Open a .moodboard archive or legacy JSON file'}
+                        ? 'Open a browser-only .moodboard archive'
+                        : 'Open a .moodboard archive'}
                     </small>
                   </span>
                 </button>
@@ -4117,11 +4094,7 @@ function BoardWorkspace({
         ref={importInputRef}
         className="visually-hidden"
         type="file"
-        accept={
-          localOnly
-            ? '.moodboard.json,.json,application/json'
-            : '.moodboard,.moodboard.json,.json,application/json,application/zip,application/vnd.moodboard+zip'
-        }
+        accept=".moodboard,application/zip,application/vnd.moodboard+zip"
         tabIndex={-1}
         aria-hidden="true"
         onChange={(event) => {

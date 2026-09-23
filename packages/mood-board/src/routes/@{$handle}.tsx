@@ -3,8 +3,8 @@ import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import { useEffect, useState, type CSSProperties } from 'react';
 
 import { parseProfileHandle, profilePath } from '../client/board-route';
-import { accessibleFieldColors } from '../client/board/board-utils';
-import { publicMediaUrl } from '../client/media-url';
+import { accessibleFieldColors } from '../client/board/board-background';
+import { publicMediaUrl } from '../client/media/media-url';
 import { loadPublicProfile, PublicApiError } from '../client/public-api-client';
 import type { PublicProfile } from '../lib/public-api';
 

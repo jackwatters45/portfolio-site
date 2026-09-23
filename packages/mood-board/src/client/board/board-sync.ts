@@ -1,6 +1,6 @@
 import { Deferred, Effect, Fiber, Schedule, Schema, Stream } from 'effect';
 
-import type { AccountId } from '../lib/account';
+import type { AccountId } from '../../lib/account';
 import {
   BoardIdSchema,
   ClientIdSchema,
@@ -10,10 +10,10 @@ import {
   type BoardSnapshot,
   type ClientId,
   type MutationId,
-} from '../lib/board-rpc';
-import { OptionalErrorCauseSchema } from '../lib/schema';
-import type { WebsitePreview } from '../lib/website-preview';
-import type { XPostPreview } from '../lib/x-post';
+} from '../../lib/board-rpc';
+import { OptionalErrorCauseSchema } from '../../lib/schema';
+import type { WebsitePreview } from '../../lib/website-preview';
+import type { XPostPreview } from '../../lib/x-post';
 import {
   BoardRpcClient,
   makeBoardRpcRuntime,
@@ -30,8 +30,8 @@ import {
   appendPendingMutations,
   loadPendingMutations,
   removePendingMutations,
-} from './board/storage';
-import type { Board, BoardMutation, PendingBoardMutation } from './board/types';
+} from './storage';
+import type { Board, BoardMutation, PendingBoardMutation } from './types';
 
 export type CloudSyncState = 'connecting' | 'live' | 'local' | 'error';
 

@@ -16,17 +16,17 @@ import {
 } from 'react';
 
 import { parsePublicId } from '../client/board-route';
+import { accessibleFieldColors } from '../client/board/board-background';
 import {
-  accessibleFieldColors,
   fitCamera,
   MAX_ZOOM,
   MIN_ZOOM,
   screenToWorld,
   zoomCamera,
-} from '../client/board/board-utils';
+} from '../client/board/camera';
 import type { BoardItem, Camera } from '../client/board/types';
-import { publicMediaUrl } from '../client/media-url';
 import { AudioPlaybackCoordinator } from '../client/media/audio-playback';
+import { publicMediaUrl } from '../client/media/media-url';
 import { loadPublicBoard, PublicApiError } from '../client/public-api-client';
 import { BoardItemView } from '../components/board-item-view';
 import { CanvasBackground } from '../components/canvas-background';

@@ -9,11 +9,6 @@ import {
 } from 'react';
 
 import {
-  blobToDataUrl,
-  ingestImageFile,
-  inspectImageFile,
-} from '../client/board/board-utils';
-import {
   BULK_CONCURRENCY,
   type BulkImageEntry,
   type BulkLayoutKind,
@@ -27,8 +22,13 @@ import {
   toggleBulkSelection,
   type TraversalFailure,
 } from '../client/board/bulk-image-import';
-import { uploadMedia } from '../client/media-client';
-import { IMAGE_FILE_ACCEPT } from '../client/media/image-preflight';
+import {
+  blobToDataUrl,
+  ingestImageFile,
+  inspectImageFile,
+  IMAGE_FILE_ACCEPT,
+} from '../client/media/image-processing';
+import { uploadMedia } from '../client/media/media-client';
 
 type Props = {
   readonly initialFiles: ReadonlyArray<File>;

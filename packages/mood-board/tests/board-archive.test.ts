@@ -188,14 +188,14 @@ describe('portable mood-board archives', () => {
     expect(upload).not.toHaveBeenCalled();
   });
 
-  it('converts and deduplicates legacy embedded images in a mixed archive', async () => {
+  it('converts and deduplicates embedded images in a mixed archive', async () => {
     const embeddedSource = `data:image/png;base64,${btoa(String.fromCharCode(...png))}`;
     const mixed = makeBoard({
       ...board,
       items: [
         ...board.items,
         {
-          id: 'legacy-a',
+          id: 'embedded-a',
           kind: 'image',
           src: embeddedSource,
           x: 0,
@@ -206,7 +206,7 @@ describe('portable mood-board archives', () => {
           order: 3,
         },
         {
-          id: 'legacy-b',
+          id: 'embedded-b',
           kind: 'image',
           src: embeddedSource,
           x: 320,
@@ -295,37 +295,5 @@ describe('portable mood-board archives', () => {
         },
       }),
     ).rejects.toThrow('upload offline');
-  });
-
-  it('keeps legacy JSON import for boards without managed media', async () => {
-    const legacy = {
-      format: 'moodboard',
-      board: {
-        version: 1,
-        title: 'Legacy',
-        updatedAt: 1,
-        items: [
-          {
-            id: 'legacy-image',
-            kind: 'image',
-            src: 'data:image/png;base64,iVBORw0KGgo=',
-            x: 0,
-            y: 0,
-            width: 100,
-            height: 100,
-            rotation: 0,
-            order: 1,
-          },
-        ],
-      },
-      camera,
-    };
-    const imported = await importBoardFile(
-      new File([JSON.stringify(legacy)], 'legacy.moodboard.json', {
-        type: 'application/json',
-      }),
-    );
-    expect(imported.board.items[0]?.src).toMatch(/^data:image\/png/);
-    expect(imported.board.items[0]?.mediaId).toBeUndefined();
   });
 });

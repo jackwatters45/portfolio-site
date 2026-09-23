@@ -6,12 +6,10 @@ import {
   BoardMutationPayloadSchema,
   BoardSchema,
   ClientIdSchema,
-  DEFAULT_BOARD_ID,
   MutationIdSchema,
   type BoardId,
   type MutationId,
 } from '../../lib/board-rpc';
-import { isRecord } from '../../lib/type-guards';
 import { CameraSchema } from './camera';
 import type {
   BoardMutation,
@@ -22,8 +20,6 @@ import type {
 const DATABASE = 'moodboard-studio';
 const DOCUMENT_STORE = 'documents';
 const SYNC_STORE = 'sync';
-const LEGACY_ACTIVE_DOCUMENT = 'active';
-const LEGACY_OUTBOX = 'outbox';
 
 const documentKey = (accountId: AccountId, boardId: BoardId) =>
   `account:${accountId}:board:${boardId}`;
@@ -99,50 +95,12 @@ function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DATABASE, 3);
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = () => {
       const database = request.result;
-      const transaction = request.transaction;
-      if (transaction === null) return;
-
-      const documents = database.objectStoreNames.contains(DOCUMENT_STORE)
-        ? transaction.objectStore(DOCUMENT_STORE)
-        : database.createObjectStore(DOCUMENT_STORE);
-      const sync = database.objectStoreNames.contains(SYNC_STORE)
-        ? transaction.objectStore(SYNC_STORE)
-        : database.createObjectStore(SYNC_STORE);
-
-      if (event.oldVersion < 3) {
-        const legacyDocument = documents.get(LEGACY_ACTIVE_DOCUMENT);
-        legacyDocument.onsuccess = () => {
-          if (legacyDocument.result !== undefined) {
-            documents.put(
-              legacyDocument.result,
-              `legacy:board:${DEFAULT_BOARD_ID}`,
-            );
-            documents.delete(LEGACY_ACTIVE_DOCUMENT);
-          }
-        };
-
-        const legacyOutbox = sync.get(LEGACY_OUTBOX);
-        legacyOutbox.onsuccess = () => {
-          const rawEntries = Array.isArray(legacyOutbox.result)
-            ? legacyOutbox.result
-            : [];
-          const entries = rawEntries.flatMap((entry) => {
-            if (!isRecord(entry)) return [];
-            const decoded = decodePendingMutation({
-              ...entry,
-              boardId: DEFAULT_BOARD_ID,
-            });
-            return Option.isSome(decoded)
-              ? [toPendingMutation(decoded.value)]
-              : [];
-          });
-          if (entries.length > 0) {
-            sync.put(entries, `legacy:outbox:${DEFAULT_BOARD_ID}`);
-          }
-          sync.delete(LEGACY_OUTBOX);
-        };
+      for (const store of [DOCUMENT_STORE, SYNC_STORE]) {
+        if (!database.objectStoreNames.contains(store)) {
+          database.createObjectStore(store);
+        }
       }
     };
 

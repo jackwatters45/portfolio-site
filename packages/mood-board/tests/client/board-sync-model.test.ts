@@ -5,7 +5,7 @@ import {
   applyBoardChange,
   applyBoardMutation,
   diffBoards,
-} from '../../src/client/board-sync-model';
+} from '../../src/client/board/board-sync-model';
 import type { Board, BoardItem } from '../../src/client/board/types';
 import {
   BoardChangeSchema,

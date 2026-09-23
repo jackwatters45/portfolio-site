@@ -22,8 +22,7 @@ const r2Promise = <A>(
 
 export const makeR2MediaObjectStore = (
   bucket: R2Bucket,
-  workspacePrefix = 'legacy',
-  allowLegacyFallback = false,
+  workspacePrefix: string,
 ) => {
   const storageKey = (key: MediaId) => `${workspacePrefix}/${key}`;
 
@@ -46,14 +45,9 @@ export const makeR2MediaObjectStore = (
     range?: MediaObjectRange,
   ) {
     const options = range === undefined ? undefined : { range };
-    const primary = yield* r2Promise('read', () =>
+    const object = yield* r2Promise('read', () =>
       bucket.get(storageKey(key), options),
     );
-    const object =
-      primary ??
-      (allowLegacyFallback
-        ? yield* r2Promise('read', () => bucket.get(key, options))
-        : null);
     if (object === null) return null;
     const buffer = yield* r2Promise('read', () => object.arrayBuffer());
     return { bytes: new Uint8Array(buffer) };
@@ -63,8 +57,6 @@ export const makeR2MediaObjectStore = (
     key: MediaId,
   ) {
     yield* r2Promise('delete', () => bucket.delete(storageKey(key)));
-    if (allowLegacyFallback)
-      yield* r2Promise('delete', () => bucket.delete(key));
   });
 
   return Layer.succeed(

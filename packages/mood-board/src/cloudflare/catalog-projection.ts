@@ -10,8 +10,6 @@ import {
   type BoardSummary,
 } from '../lib/board-rpc';
 
-export const DEFAULT_WORKSPACE_ID = 'public-preview';
-
 interface DirectoryRow {
   readonly board_id: unknown;
   readonly title: unknown;
@@ -134,6 +132,4 @@ export class CatalogProjection extends Context.Service<
       }),
     );
   }
-
-  static readonly layer = this.layerFor(DEFAULT_WORKSPACE_ID);
 }

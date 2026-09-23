@@ -25,19 +25,14 @@ const authDatabasePath =
   process.env.AUTH_DB_PATH ?? 'data/mood-board-auth.sqlite';
 const workspaceRoot =
   process.env.WORKSPACE_PATH ?? 'data/mood-board.sqlite.workspaces';
-const legacyWorkspaceOwnerId = decodeAccountId(
-  process.env.LEGACY_WORKSPACE_OWNER_ID?.trim(),
-);
 const databasePath =
   accountId === null
     ? ''
-    : accountId === legacyWorkspaceOwnerId
-      ? (process.env.DB_PATH ?? 'data/mood-board.sqlite')
-      : join(
-          workspaceRoot,
-          workspaceDirectoryName(accountId),
-          'workspace.sqlite',
-        );
+    : join(
+        workspaceRoot,
+        workspaceDirectoryName(accountId),
+        'workspace.sqlite',
+      );
 
 const usage = () => {
   console.error(`Usage:

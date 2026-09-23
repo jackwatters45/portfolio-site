@@ -52,12 +52,13 @@ describe('Cloudflare asset security', () => {
 });
 
 describe('Cloudflare media maintenance schedule', () => {
-  it('targets the singleton private Durable Object maintenance route', async () => {
+  it('targets the account Durable Object maintenance route', async () => {
     let forwarded: Request | undefined;
     await runScheduledMediaMaintenance(
       workspaceEnv(204, (request) => {
         forwarded = request;
       }),
+      ['account:test'],
     );
     expect(forwarded?.method).toBe('POST');
     expect(new URL(forwarded?.url ?? 'https://invalid').pathname).toBe(
@@ -70,7 +71,10 @@ describe('Cloudflare media maintenance schedule', () => {
 
   it('rejects unsuccessful maintenance dispatches', async () => {
     await expect(
-      runScheduledMediaMaintenance(workspaceEnv(503, () => undefined)),
+      runScheduledMediaMaintenance(
+        workspaceEnv(503, () => undefined),
+        ['account:test'],
+      ),
     ).rejects.toThrow(/status 503/);
   });
 });

@@ -1,7 +1,11 @@
 import { Option, Schema } from 'effect';
 import { unzip, zip, type UnzipOptions } from 'fflate';
 
-import { BoardTimestampSchema } from '../../lib/board-rpc';
+import {
+  BoardSchema,
+  BoardTimestampSchema,
+  MAX_REMOTE_BOARD_BYTES,
+} from '../../lib/board-rpc';
 import {
   hasValidMediaMagic,
   MAX_AUDIO_UPLOAD_BYTES,
@@ -19,20 +23,19 @@ import {
   type MediaUploadResponse,
 } from '../../lib/media';
 import { NonNegativeIntegerSchema } from '../../lib/schema';
+import { blobToDataUrl } from '../media/image-processing';
 import {
   downloadMedia,
   uploadMedia,
   type DownloadedMedia,
-} from '../media-client';
-import { normalizeImportedBoard } from './board-import';
+} from '../media/media-client';
+import { CameraSchema } from './camera';
 import type { Board, Camera } from './types';
 
 export const MOODBOARD_ARCHIVE_EXTENSION = '.moodboard';
 export const MAX_ARCHIVE_BYTES: MediaByteLength = MediaByteLengthSchema.make(
   50 * 1024 * 1024,
 );
-export const MAX_LEGACY_JSON_BYTES: MediaByteLength =
-  MediaByteLengthSchema.make(50 * 1024 * 1024);
 export const MAX_ARCHIVE_MEDIA = 500;
 const MAX_MANIFEST_BYTES: MediaByteLength = MediaByteLengthSchema.make(
   2 * 1024 * 1024,
@@ -91,8 +94,14 @@ type ManifestMedia = typeof ManifestMediaSchema.Type;
 const ArchiveManifestEnvelopeSchema = Schema.Struct({
   format: Schema.Literal('moodboard-archive'),
   version: Schema.Literal(1),
-  board: Schema.Unknown,
-  camera: Schema.Unknown,
+  board: BoardSchema.check(
+    Schema.makeFilter((board) =>
+      new Set(board.items.map((item) => item.id)).size === board.items.length
+        ? undefined
+        : 'Board item IDs must be unique',
+    ),
+  ),
+  camera: CameraSchema,
   media: Schema.Array(ManifestMediaSchema).check(
     Schema.isMaxLength(MAX_ARCHIVE_MEDIA),
   ),
@@ -103,7 +112,7 @@ const decodeArchiveManifestEnvelope = Schema.decodeUnknownOption(
 
 export type PortableBoard = {
   readonly board: Board;
-  readonly camera?: Camera;
+  readonly camera: Camera;
 };
 
 type ArchiveManifest = {
@@ -155,20 +164,20 @@ const sha256 = async (bytes: Uint8Array): Promise<MediaEtag> => {
 const decodeEmbeddedImage = (source: string): DownloadedMedia => {
   const match =
     /^data:image\/(png|jpe?g|gif|webp);base64,([a-z0-9+/=\s]+)$/i.exec(source);
-  if (match === null) throw new Error('A legacy embedded image is malformed.');
+  if (match === null) throw new Error('An embedded image is malformed.');
   const subtype = match[1]?.toLowerCase();
   const mimeType = normalizeMediaMimeType(
     'image',
     subtype === 'jpg' ? 'image/jpeg' : `image/${subtype}`,
   );
   if (mimeType === null)
-    throw new Error('A legacy embedded image has an unsupported media type.');
+    throw new Error('An embedded image has an unsupported media type.');
   const encoded = match[2]?.replace(/\s/g, '') ?? '';
   let decoded: string;
   try {
     decoded = atob(encoded);
   } catch {
-    throw new Error('A legacy embedded image is not valid base64.');
+    throw new Error('An embedded image is not valid base64.');
   }
   const bytes = Uint8Array.from(decoded, (character) =>
     character.charCodeAt(0),
@@ -177,7 +186,7 @@ const decodeEmbeddedImage = (source: string): DownloadedMedia => {
     bytes.byteLength > mediaByteLimit('image') ||
     !hasValidMediaMagic('image', mimeType, bytes)
   ) {
-    throw new Error('A legacy embedded image is invalid or too large.');
+    throw new Error('An embedded image is invalid or too large.');
   }
   return {
     blob: new Blob([bytes], { type: mimeType }),
@@ -321,11 +330,6 @@ export async function createBoardArchive(
   const references = [...mediaReferences(portable.board).entries()].sort(
     ([left], [right]) => left.localeCompare(right),
   );
-  if (references.length === 0) {
-    throw new Error(
-      'A binary archive is only needed for boards with managed or embedded media.',
-    );
-  }
   if (references.length > MAX_ARCHIVE_MEDIA)
     throw new Error('That board uses too many media files to export.');
   const download = options.download ?? downloadMedia;
@@ -403,18 +407,13 @@ const parseManifest = (bytes: Uint8Array): ArchiveManifest => {
   const decoded = Option.getOrNull(decodeArchiveManifestEnvelope(value));
   if (decoded === null)
     throw new Error('That mood-board archive version is not supported.');
-  const normalized = normalizeImportedBoard(
-    { board: decoded.board, camera: decoded.camera },
-    { allowManagedMedia: true },
-  );
-  if (normalized.camera === undefined)
-    throw new Error('The archive camera is missing.');
   return {
-    format: 'moodboard-archive',
-    version: 1,
-    board: normalized.board,
-    camera: normalized.camera,
-    media: decoded.media,
+    ...decoded,
+    board: {
+      ...decoded.board,
+      items: decoded.board.items.map((item) => ({ ...item })),
+    },
+    camera: { ...decoded.camera },
   };
 };
 
@@ -486,27 +485,20 @@ const isZip = (bytes: Uint8Array): boolean =>
 
 export async function importBoardFile(
   file: File,
-  options: { readonly upload?: Upload; readonly signal?: AbortSignal } = {},
+  options: {
+    readonly upload?: Upload;
+    readonly signal?: AbortSignal;
+    readonly localOnly?: boolean;
+  } = {},
 ): Promise<PortableBoard> {
   if (file.size === 0) throw new Error('That board file is empty.');
   if (file.size > MAX_ARCHIVE_BYTES)
     throw new Error('That board file is larger than 50 MB.');
   const bytes = new Uint8Array(await file.arrayBuffer());
   if (!isZip(bytes)) {
-    if (file.size > MAX_LEGACY_JSON_BYTES) {
-      throw new Error('That legacy JSON board is larger than 50 MB.');
-    }
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(
-        new TextDecoder('utf-8', { fatal: true }).decode(bytes),
-      );
-    } catch {
-      throw new Error(
-        'That file is neither a mood-board archive nor valid JSON.',
-      );
-    }
-    return normalizeImportedBoard(parsed);
+    throw new Error(
+      'Choose a .moodboard archive. JSON board files are not supported.',
+    );
   }
 
   const files = await unzipArchive(bytes, options.signal);
@@ -550,6 +542,51 @@ export async function importBoardFile(
   const expectedPaths = new Set([MANIFEST_PATH, ...paths]);
   if (Object.keys(files).some((path) => !expectedPaths.has(path))) {
     throw new Error('The archive contains undeclared files.');
+  }
+
+  if (options.localOnly) {
+    if (
+      manifest.board.backgroundMediaId !== undefined ||
+      manifest.media.some((entry) => entry.kind !== 'image')
+    ) {
+      throw new Error('Sign in to import board backgrounds or uploaded audio.');
+    }
+    const sources = await mapBounded(
+      manifest.media,
+      (entry, _index, signal) => {
+        const bytes = files[entry.path];
+        if (bytes === undefined)
+          throw new Error('An archived image is missing.');
+        return blobToDataUrl(
+          new Blob([copyBytes(bytes)], { type: entry.mimeType }),
+          signal,
+        );
+      },
+      options.signal,
+    );
+    const embedded = new Map(
+      manifest.media.map((entry, index) => [entry.mediaId, sources[index]]),
+    );
+    const board: Board = {
+      ...manifest.board,
+      items: manifest.board.items.map((item) => {
+        if (item.mediaId === undefined) return item;
+        const src = embedded.get(item.mediaId);
+        if (src === undefined) throw new Error('An imported image is missing.');
+        return { ...item, mediaId: undefined, src };
+      }),
+      updatedAt: BoardTimestampSchema.make(Date.now()),
+    };
+    if (
+      Option.isNone(Schema.decodeUnknownOption(BoardSchema)(board)) ||
+      new TextEncoder().encode(JSON.stringify(board)).byteLength >
+        MAX_REMOTE_BOARD_BYTES
+    ) {
+      throw new Error(
+        'That archive is too large for the guest demo. Sign in to import it.',
+      );
+    }
+    return { board, camera: manifest.camera };
   }
 
   const upload = options.upload ?? uploadMedia;
@@ -598,8 +635,5 @@ export async function importBoardFile(
     ),
     updatedAt: BoardTimestampSchema.make(Date.now()),
   };
-  return normalizeImportedBoard(
-    { board: remappedBoard, camera: manifest.camera },
-    { allowManagedMedia: true },
-  );
+  return { board: remappedBoard, camera: manifest.camera };
 }

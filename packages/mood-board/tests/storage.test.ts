@@ -22,7 +22,6 @@ import {
   BoardItemSchema,
   BoardSchema,
   ClientIdSchema,
-  DEFAULT_BOARD_ID,
   MutationIdSchema,
 } from '../src/lib/board-rpc';
 
@@ -125,46 +124,9 @@ const pending = (
   },
 });
 
-const createVersionTwoDatabase = (
-  legacyDocument: SavedDocument,
-  legacyPending: Omit<PendingBoardMutation, 'boardId'>,
-) =>
-  new Promise<void>((resolve, reject) => {
-    const request = indexedDB.open('moodboard-studio', 2);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore('documents');
-      request.result.createObjectStore('sync');
-    };
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const database = request.result;
-      const transaction = database.transaction(
-        ['documents', 'sync'],
-        'readwrite',
-      );
-      transaction.objectStore('documents').put(legacyDocument, 'active');
-      transaction.objectStore('sync').put([legacyPending], 'outbox');
-      transaction.oncomplete = () => {
-        database.close();
-        resolve();
-      };
-      transaction.onerror = () => reject(transaction.error);
-    };
-  });
-
 describe('account-scoped browser storage', () => {
   beforeEach(() => {
     globalThis.indexedDB = new IDBFactory();
-  });
-
-  it('does not silently assign anonymous legacy data to an account', async () => {
-    const legacy = pending('default', 'legacy-mutation');
-    const { boardId: _boardId, ...legacyWithoutBoard } = legacy;
-    void _boardId;
-    await createVersionTwoDatabase(document, legacyWithoutBoard);
-
-    expect(await loadDocument(accountA, DEFAULT_BOARD_ID)).toBeNull();
-    expect(await loadPendingMutations(accountA, DEFAULT_BOARD_ID)).toEqual([]);
   });
 
   it('isolates documents and outboxes by account and board', async () => {
