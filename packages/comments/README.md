@@ -49,6 +49,12 @@ NZ runs at http://localhost:4325/. The comments Worker uses port 4340.
 ## Limits
 
 - Display names are not authentication. Private use needs host access control.
-- No edit, delete, resolve, or moderation controls.
+- Authors can edit or delete their own comments and replies from the original browser. There are no moderation controls.
+- The browser creates a private, random 256-bit key per endpoint. It stores the key locally. The server stores only its SHA-256 fingerprint and checks it for each edit or deletion. Names and public author IDs do not grant access.
+- Private browsing works until its storage is cleared. Another device, a different browser, or cleared storage cannot recover ownership. There is no account or recovery flow.
+- Historical comments have no ownership fingerprint and remain read-only. No name-based ownership migration is performed.
+- Editing preserves the author and creation time. Concurrent edits must match the saved body; stale edits are rejected.
+- Deleting a root leaves a deleted placeholder while replies remain. Deleting the final reply removes an otherwise empty thread. Deleted messages cannot receive likes or be edited.
+- Mutations retain request records for safe retries. Deletion removes the live content, not the historical request payloads.
 - Drafts stay local. Sending requires a live connection.
 - 2,000 characters per message; 250 threads and 1,000 messages per room.

@@ -17,6 +17,7 @@ interface Props {
   author: Author;
   connection: Connection;
   reply?: boolean;
+  editing?: boolean;
   focusInput?: boolean;
   onSubmit: (body: string, request?: Mutation) => Promise<void>;
   onCancel: () => void;
@@ -31,6 +32,7 @@ export function Composer({
   author,
   connection,
   reply,
+  editing,
   focusInput,
   onSubmit,
   onCancel,
@@ -52,7 +54,7 @@ export function Composer({
         value.body.trim() ? undefined : 'Write a comment.',
     },
     onSubmit: async ({ value, formApi }) => {
-      if (!connected || !validName(author.name)) return;
+      if (sending || !connected || !validName(author.name)) return;
       onTyping(false);
 
       try {
@@ -88,7 +90,7 @@ export function Composer({
         {(field) => (
           <>
             <label className="pc-sr-only" htmlFor={`${id}-body`}>
-              {reply ? 'Reply' : 'Comment'}
+              {editing ? 'Edit comment' : reply ? 'Reply' : 'Comment'}
             </label>
             <textarea
               ref={input}
@@ -173,7 +175,13 @@ export function Composer({
                 !validName(author.name)
               }
             >
-              {sending || isSubmitting ? 'Saving…' : reply ? 'Reply' : 'Add'}
+              {sending || isSubmitting
+                ? 'Saving…'
+                : editing
+                  ? 'Save'
+                  : reply
+                    ? 'Reply'
+                    : 'Add'}
               <Icon name={reply ? 'arrow' : 'plus'} size={14} />
             </button>
           )}

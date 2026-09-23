@@ -7,7 +7,14 @@ import * as Crypto from 'effect/Crypto';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
 import * as Schema from 'effect/Schema';
-import { Author, Message, Thread, type Mutation } from './protocol';
+import { ownershipId } from './ownership';
+import {
+  Author,
+  GENERAL_TARGET,
+  Message,
+  Thread,
+  type Mutation,
+} from './protocol';
 
 export class CommentRejected extends Schema.TaggedError<CommentRejected>()(
   'CommentRejected',
@@ -100,7 +107,19 @@ export class RoomStore extends Context.Service<
         const write = Effect.fn('RoomStore.write')(
           (event: Mutation, ip: string) =>
             Effect.gen(function* () {
-              const payload = JSON.stringify(event);
+              const ownerId =
+                event.type === 'like'
+                  ? undefined
+                  : yield* ownershipId(event.credential).pipe(
+                      Effect.provideService(Crypto.Crypto, crypto),
+                    );
+
+              // Request records must never retain bearer credentials.
+              const payload = JSON.stringify(
+                event.type === 'like'
+                  ? event
+                  : { ...event, credential: ownerId },
+              );
 
               const previous = (yield* sql<{
                 payload: string;
@@ -118,8 +137,11 @@ export class RoomStore extends Context.Service<
                   (yield* sql<Row>`SELECT id, data FROM threads WHERE id = ${previous.thread_id}`)[0];
 
                 if (!row)
-                  return yield* new CommentStorageError({
-                    cause: 'A saved request references a missing thread.',
+                  return new Thread({
+                    id: previous.thread_id,
+                    target: GENERAL_TARGET,
+                    messages: [],
+                    likes: [],
                   });
 
                 return yield* readThread(row);
@@ -138,7 +160,94 @@ export class RoomStore extends Context.Service<
                 });
               let thread: Thread;
 
-              if (event.type === 'like') {
+              if (event.type === 'edit' || event.type === 'delete') {
+                const row =
+                  (yield* sql<Row>`SELECT id, data FROM threads WHERE id = ${event.threadId}`)[0];
+
+                if (!row)
+                  return yield* new CommentRejected({
+                    message: 'This conversation no longer exists.',
+                  });
+                const existing = yield* readThread(row);
+
+                const message = existing.messages.find(
+                  (item) => item.id === event.messageId,
+                );
+
+                if (!message || message.deletedAt)
+                  return yield* new CommentRejected({
+                    message: 'This comment no longer exists.',
+                  });
+
+                if (!message.ownerId || message.ownerId !== ownerId)
+                  return yield* new CommentRejected({
+                    message:
+                      'Only the original browser can change this comment.',
+                  });
+
+                if (
+                  event.type === 'edit' &&
+                  message.body !== event.expectedBody
+                )
+                  return yield* new CommentRejected({
+                    message:
+                      'This comment changed. Cancel and reopen Edit to use the latest version.',
+                  });
+                const timestamp = new Date(now).toISOString();
+
+                let messages =
+                  event.type === 'edit'
+                    ? existing.messages.map((item) =>
+                        item.id === message.id
+                          ? new Message({
+                              ...item,
+                              body: event.body.trim(),
+                              editedAt: timestamp,
+                            })
+                          : item,
+                      )
+                    : existing.messages.flatMap((item, index) =>
+                        item.id !== message.id
+                          ? [item]
+                          : index === 0
+                            ? [
+                                new Message({
+                                  ...item,
+                                  body: 'Comment deleted',
+                                  deletedAt: timestamp,
+                                }),
+                              ]
+                            : [],
+                      );
+
+                if (messages.every((item) => !!item.deletedAt)) messages = [];
+
+                if (event.type === 'delete')
+                  yield* sql`DELETE FROM likes WHERE thread_id = ${event.threadId} AND message_id = ${event.messageId}`;
+                thread = new Thread({
+                  ...existing,
+                  messages,
+                  likes:
+                    event.type === 'delete'
+                      ? existing.likes.filter(
+                          (like) => like.messageId !== event.messageId,
+                        )
+                      : existing.likes,
+                });
+
+                if (!messages.length) {
+                  yield* sql`DELETE FROM threads WHERE id = ${thread.id}`;
+                  yield* sql`DELETE FROM likes WHERE thread_id = ${thread.id}`;
+                } else {
+                  const document = {
+                    id: thread.id,
+                    target: thread.target,
+                    messages,
+                  };
+
+                  yield* sql`UPDATE threads SET data = ${JSON.stringify(document)} WHERE id = ${thread.id}`;
+                }
+              } else if (event.type === 'like') {
                 const row =
                   (yield* sql<Row>`SELECT id, data FROM threads WHERE id = ${event.threadId}`)[0];
 
@@ -150,7 +259,8 @@ export class RoomStore extends Context.Service<
 
                 if (
                   !existing.messages.some(
-                    (message) => message.id === event.messageId,
+                    (message) =>
+                      message.id === event.messageId && !message.deletedAt,
                   )
                 )
                   return yield* new CommentRejected({
@@ -181,6 +291,7 @@ export class RoomStore extends Context.Service<
                     ...event.author,
                     name: event.author.name.trim(),
                   }),
+                  ownerId,
                   body: event.body.trim(),
                   createdAt: new Date(now).toISOString(),
                 });

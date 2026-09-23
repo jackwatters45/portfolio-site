@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Icon } from './icons';
-import type { Thread } from './protocol';
+import type { Message, Thread } from './protocol';
 
 export function ThreadCard({
   thread,
@@ -12,6 +12,7 @@ export function ThreadCard({
   authorId,
   likesDisabled,
   onLike,
+  actions,
   children,
 }: {
   thread: Thread;
@@ -23,6 +24,7 @@ export function ThreadCard({
   authorId: string;
   likesDisabled: boolean;
   onLike: (messageId: string, liked: boolean) => void;
+  actions?: (message: Message) => ReactNode;
   children?: ReactNode;
 }) {
   const first = thread.messages[0];
@@ -106,24 +108,31 @@ export function ThreadCard({
                   </time>
                 </div>
                 <p>{message.body}</p>
-                <div className="pc-likes">
-                  <button
-                    type="button"
-                    className="pc-like"
-                    aria-label={`${liked ? 'Unlike' : 'Like'} comment by ${message.author.name}, ${likes.length} ${likes.length === 1 ? 'like' : 'likes'}`}
-                    aria-pressed={liked}
-                    disabled={likesDisabled}
-                    onClick={() => onLike(message.id, !liked)}
-                  >
-                    <Icon name="heart" size={14} />
-                    <span>{likes.length || 'Like'}</span>
-                  </button>
-                  {likes.length > 0 && (
-                    <span className="pc-like-names">
-                      Liked by {likes.map((like) => like.authorName).join(', ')}
-                    </span>
-                  )}
-                </div>
+                {message.editedAt && !message.deletedAt && (
+                  <span className="pc-edited">Edited</span>
+                )}
+                {!message.deletedAt && (
+                  <div className="pc-likes">
+                    <button
+                      type="button"
+                      className="pc-like"
+                      aria-label={`${liked ? 'Unlike' : 'Like'} comment by ${message.author.name}, ${likes.length} ${likes.length === 1 ? 'like' : 'likes'}`}
+                      aria-pressed={liked}
+                      disabled={likesDisabled}
+                      onClick={() => onLike(message.id, !liked)}
+                    >
+                      <Icon name="heart" size={14} />
+                      <span>{likes.length || 'Like'}</span>
+                    </button>
+                    {likes.length > 0 && (
+                      <span className="pc-like-names">
+                        Liked by{' '}
+                        {likes.map((like) => like.authorName).join(', ')}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {!message.deletedAt && actions?.(message)}
               </div>
             );
           })}

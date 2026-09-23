@@ -9,7 +9,12 @@ import * as Option from 'effect/Option';
 import type * as PlatformError from 'effect/PlatformError';
 import * as Predicate from 'effect/Predicate';
 import * as Schema from 'effect/Schema';
-import { decodeClient, Peer, type ServerEvent } from './protocol';
+import {
+  Acknowledgement,
+  decodeClient,
+  Peer,
+  type ServerEvent,
+} from './protocol';
 import { RoomStore, type CommentStorageError } from './room-store';
 
 export interface CommentsEnv {
@@ -31,6 +36,12 @@ class Session extends Schema.Class<Session>('CommentSession')({
 }) {}
 
 const decodeSession = Schema.decodeUnknownOption(Session);
+
+const decodeRequest = Schema.decodeUnknownOption(
+  Schema.fromJsonString(
+    Schema.Struct({ requestId: Acknowledgement.fields.requestId }),
+  ),
+);
 
 const SESSION_TTL = 70_000;
 
@@ -283,7 +294,12 @@ export class CommentRoom extends DurableObject<CommentsEnv> {
     const decoded = decodeClient(raw);
 
     if (Option.isNone(decoded)) {
-      this.send(socket, { type: 'error', message: 'Invalid comment data.' });
+      const request = Option.getOrUndefined(decodeRequest(raw));
+      this.send(socket, {
+        type: 'error',
+        requestId: request?.requestId,
+        message: 'Invalid comment data.',
+      });
 
       return;
     }
