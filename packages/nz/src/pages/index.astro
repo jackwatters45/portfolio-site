@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../../theme.css';
 import { Agentation } from 'agentation';
 import Comments from '@personal-sites/comments';
+import PlanSection from '../components/plan-section.astro';
 import '@personal-sites/comments/styles.css';
 ---
 
@@ -53,11 +54,7 @@ import '@personal-sites/comments/styles.css';
       </nav>
 
       <main id="main">
-        <section class="chapter" aria-labelledby="overview">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">01</span>
-            <h2 id="overview">The Trip</h2>
-          </div>
+        <PlanSection number="01" headingId="overview" title="The Trip">
           <dl class="trip-facts">
             <div>
               <dt>Base</dt>
@@ -86,13 +83,9 @@ import '@personal-sites/comments/styles.css';
             </p>
             <p class="note">All times local. Melbourne flights use T2 International.</p>
           </div>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="accommodation">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">02</span>
-            <h2 id="accommodation">Accommodation</h2>
-          </div>
+        <PlanSection number="02" headingId="accommodation" title="Accommodation">
           <p class="activity-meta">Booked · 7 nights</p>
           <h3><a href="https://www.airbnb.com.au/rooms/1248805245374389085">Modern Spacious Family Holiday Home</a></h3>
           <p class="note">Entire home · Hosted by Hello Queenstown</p>
@@ -114,30 +107,21 @@ import '@personal-sites/comments/styles.css';
           <p>Self check-in with a key safe. Wi-Fi, kitchen, washer, dryer, and free garage parking.</p>
           <p class="note" data-comment-anchor="bedroom-setup">Send the bedroom 3 setup choice to Hello Queenstown by 8 October. Changes after arrival cost NZ$100 per bed plus a NZ$10 call-out fee.</p>
           <p class="note">Non-refundable booking.</p>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="rough-plan">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">03</span>
-            <h2 id="rough-plan">The Rough Plan</h2>
-          </div>
+        <PlanSection number="03" headingId="rough-plan" title="The Rough Plan">
           <ul class="rough-list">
             <li>2–3 larger activities</li>
             <li>2 local hikes</li>
             <li>1 wine half-day</li>
             <li>Onsen / hot pools</li>
           </ul>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="major-activities">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">04</span>
-            <h2 id="major-activities">Major Activity Ideas</h2>
-          </div>
+        <PlanSection number="04" headingId="major-activities" title="Major Activity Ideas">
 
-          <article class="activity" id="glenorchy">
-            <p class="activity-meta">Full day</p>
-            <h3 data-comment-anchor="glenorchy">Glenorchy Road Trip</h3>
+          <PlanSection id="glenorchy" headingAnchor="glenorchy" title="Glenorchy Road Trip">
+            <span class="activity-meta" slot="meta">Full day</span>
             <p>Aim for Saturday 17 October. Monday 12 or Friday 16 are alternatives if the weather is better.</p>
             <p><strong>One-day rental:</strong> <a href="https://www.gorentals.co.nz/vehicles/van-or-people-carriers/">GO Rentals Kia Carnival Hybrid</a>, eight seats.</p>
             <ul data-comment-anchor="glenorchy-rental">
@@ -181,10 +165,9 @@ import '@personal-sites/comments/styles.css';
                 <li><strong>Cancellation:</strong> more than 24 hours ahead costs 10% of the rental, plus refund administration fees. Less than 24 hours costs 100%. Online cancellation needs at least 48 hours’ notice and adds a 2% refund fee. This is not a fully refundable weather-backup booking.</li>
               </ul>
             </details>
-          </article>
+          </PlanSection>
 
-          <article class="activity" id="adventures">
-            <h3>Adventure Day</h3>
+          <PlanSection id="adventures" title="Adventure Day">
             <p>Choose your own activity — the group can split up.</p>
             <p class="note">NZ$ per adult, checked 22 September 2026. Card fees and optional extras are additional.</p>
             <dl class="option-list">
@@ -224,10 +207,9 @@ import '@personal-sites/comments/styles.css';
                 <li><a href="https://www.nzoneskydive.co.nz/terms-conditions/">NZONE</a>: cancel up to 24 hours ahead without a fee. Weather cancellations are rescheduled, or refunded if that is not possible. Harness-fit and health restrictions apply.</li>
               </ul>
             </details>
-          </article>
+          </PlanSection>
 
-          <article class="activity" id="onsen" data-comment-anchor="onsen">
-            <h3>Onsen / Hot Pools</h3>
+          <PlanSection id="onsen" anchor="onsen" title="Onsen / Hot Pools">
             <p><a href="https://www.onsen.co.nz/experiences/original-onsen-soak-only/">Original Onsen</a> — 60 minutes, including changing time.</p>
             <ul>
               <li><strong>Cost:</strong> two private pools, split 4 + 3. NZ$260 + NZ$225 = <strong>NZ$485 total</strong>, about NZ$69 each if split evenly.</li>
@@ -237,19 +219,14 @@ import '@personal-sites/comments/styles.css';
             </ul>
             <p class="note">Times are local and slots are not held. Towels and water included; bring swimwear.</p>
             <p><a href="https://book.onsen.co.nz/hire/selection?filter=prodgroup-original&amp;workingDate=13-Oct-2026">Check times &amp; book</a></p>
-          </article>
-        </section>
+          </PlanSection>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="wine">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">05</span>
-            <h2 id="wine">Wine Tasting</h2>
-          </div>
+        <PlanSection number="05" headingId="wine" title="Wine Tasting">
           <p>A Gibbston afternoon with two tastings and lunch. Use a winery bus so nobody needs to drive.</p>
           <p class="note">NZ$ per adult, checked 22 September 2026.</p>
 
-          <article class="activity">
-            <h3>Transport</h3>
+          <PlanSection id="wine-transport" title="Transport">
             <dl class="option-list">
               <div data-comment-anchor="wine-hop-on-hop-off">
                 <dt><a href="https://hoponhopoffwinetours.com/products/afternoon-run-queenstown-hop-on-hop-off/">Hop On Hop Off</a></dt>
@@ -262,10 +239,9 @@ import '@personal-sites/comments/styles.css';
                 <dd class="option-detail">Leaves at noon from 48 Camp Street. The driver arranges pickups between wineries rather than following a fixed loop. Agree your return time on the day. Tastings and lunch are extra.</dd>
               </div>
             </dl>
-          </article>
+          </PlanSection>
 
-          <article class="activity">
-            <h3>Winery Shortlist</h3>
+          <PlanSection id="wineries" title="Winery Shortlist">
             <dl class="option-list">
               <div data-comment-anchor="gibbston-valley-winery">
                 <dt><a href="https://www.gibbstonvalley.com/experiences/tours/cave-tour/">Gibbston Valley</a></dt>
@@ -285,14 +261,10 @@ import '@personal-sites/comments/styles.css';
             </dl>
             <p><strong>Suggested plan:</strong> Gibbston Valley’s cave tour, then Kinross for lunch and a tasting. Swap in Brennan if you prefer another vineyard stop.</p>
             <p class="note">Allow about NZ$160 each for the half-day bus plus the Gibbston and Kinross tastings. Lunch and bottles are extra. A bus ticket does not reserve tasting or dining places.</p>
-          </article>
-        </section>
+          </PlanSection>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="hiking">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">06</span>
-            <h2 id="hiking">Hiking</h2>
-          </div>
+        <PlanSection number="06" headingId="hiking" title="Hiking">
           <p>Suggested pair: Queenstown Hill and Sawpit Gully. Sunshine Bay is the gentler alternative; Tiki Trail is the steeper option.</p>
           <p class="note">Walking times start at the track entrance and exclude travel there. All four options are car-free.</p>
           <dl class="option-list">
@@ -322,33 +294,23 @@ import '@personal-sites/comments/styles.css';
             </div>
           </dl>
           <p class="note">Wear grippy shoes and carry warm, waterproof layers. Check the <a href="https://www.metservice.com/towns-cities/regions/southern-lakes/locations/queenstown">forecast</a> and local track notices before setting off.</p>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="unplanned-time">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">07</span>
-            <h2 id="unplanned-time">Around Queenstown</h2>
-          </div>
+        <PlanSection number="07" headingId="unplanned-time" title="Around Queenstown">
           <p>Lakefront walks, pubs, restaurants, slow mornings, and whatever comes up.</p>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="budget">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">08</span>
-            <h2 id="budget">Activity Budget</h2>
-          </div>
+        {/*
+        <PlanSection number="08" headingId="budget" title="Activity Budget">
           <div class="budget-summary">
             <p class="budget-amount"><strong>A$1,000</strong><span>per person · approximate maximum</span></p>
             <p>For vehicle rental, adventure activities, Onsen, and wine. A limit, not a target.</p>
           </div>
           <p class="note">Food, drinks, groceries, and daily spending are separate. Operator prices above are in NZ dollars; this budget is in Australian dollars.</p>
-        </section>
+        </PlanSection>
+        */}
 
-        <section class="chapter" aria-labelledby="schedule">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">09</span>
-            <h2 id="schedule">Loose Weekly Plan</h2>
-          </div>
+        <PlanSection number="08" headingId="schedule" title="Loose Weekly Plan">
           <p>Tentative — dates depend on weather and bookings.</p>
 
           <ol class="week" role="list">
@@ -408,13 +370,9 @@ import '@personal-sites/comments/styles.css';
               </div>
             </li>
           </ol>
-        </section>
+        </PlanSection>
 
-        <section class="chapter" aria-labelledby="to-confirm">
-          <div class="section-heading">
-            <span class="section-number" aria-hidden="true">10</span>
-            <h2 id="to-confirm">Still to Plan</h2>
-          </div>
+        <PlanSection number="09" headingId="to-confirm" title="Still to Plan">
           <ul class="planning-list">
             <li data-comment-anchor="plan-hikes">Choose both hikes</li>
             <li data-comment-anchor="plan-adventures">Choose adventure activities</li>
@@ -424,7 +382,7 @@ import '@personal-sites/comments/styles.css';
             <li data-comment-anchor="plan-glenorchy">Choose the Glenorchy day from the forecast; check road and track alerts before departure</li>
             <li data-comment-anchor="plan-cancellations">Check winery cancellation terms before booking</li>
           </ul>
-        </section>
+        </PlanSection>
       </main>
 
       <footer class="site-footer">

@@ -267,6 +267,72 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
+.plan-disclosure > .plan-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 4px 12px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.plan-summary::-webkit-details-marker {
+  display: none;
+}
+
+.plan-summary::marker {
+  content: "";
+}
+
+.plan-summary > :is(h2, h3) {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.plan-summary > .activity-meta {
+  flex: none;
+  margin: 0;
+  font-size: 10px;
+}
+
+.plan-chevron {
+  flex: 0 0 10px;
+  align-self: center;
+  color: var(--muted);
+}
+
+.plan-disclosure[open] > .plan-summary .plan-chevron {
+  transform: rotate(90deg);
+}
+
+.plan-disclosure.chapter > .plan-summary .plan-chevron {
+  order: 1;
+}
+
+.plan-disclosure:not([open]) > .plan-summary {
+  margin-bottom: 0;
+}
+
+.plan-disclosure.chapter:not([open]) + .chapter {
+  margin-top: 24px;
+}
+
+.plan-disclosure.activity > .plan-summary {
+  padding-top: 4px;
+  padding-left: 12px;
+}
+
+.plan-disclosure.activity:not([open]) + .activity {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.plan-content > :last-child {
+  margin-bottom: 0;
+}
+
 .trip-facts {
   display: grid;
   grid-template-columns: 1fr 1fr 0.6fr;
@@ -652,6 +718,14 @@ dd {
   .section-heading,
   h3 {
     break-after: avoid;
+  }
+
+  .plan-disclosure::details-content {
+    content-visibility: visible;
+  }
+
+  .plan-chevron {
+    display: none;
   }
 
   .week > li,
