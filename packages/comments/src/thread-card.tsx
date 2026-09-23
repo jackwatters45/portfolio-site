@@ -9,6 +9,9 @@ export function ThreadCard({
   onClose,
   onLocate,
   onCopy,
+  authorId,
+  likesDisabled,
+  onLike,
   children,
 }: {
   thread: Thread;
@@ -17,6 +20,9 @@ export function ThreadCard({
   onClose: () => void;
   onLocate: () => void;
   onCopy: () => void;
+  authorId: string;
+  likesDisabled: boolean;
+  onLike: (messageId: string, liked: boolean) => void;
   children?: ReactNode;
 }) {
   const first = thread.messages[0];
@@ -69,29 +75,53 @@ export function ThreadCard({
                 el.scrollHeight - el.scrollTop - el.clientHeight < 32;
           }}
         >
-          {thread.messages.map((message) => (
-            <div className="pc-message" key={message.id}>
-              <div className="pc-byline">
-                <span
-                  className="pc-avatar"
-                  style={{ background: message.author.color }}
-                >
-                  {message.author.name.slice(0, 1).toUpperCase()}
-                </span>
-                <strong>{message.author.name}</strong>
-                <time
-                  dateTime={message.createdAt}
-                  title={new Date(message.createdAt).toLocaleString()}
-                >
-                  {new Date(message.createdAt).toLocaleTimeString(undefined, {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
-                </time>
+          {thread.messages.map((message) => {
+            const likes = thread.likes.filter(
+              (like) => like.messageId === message.id,
+            );
+            const liked = likes.some((like) => like.authorId === authorId);
+            return (
+              <div className="pc-message" key={message.id}>
+                <div className="pc-byline">
+                  <span
+                    className="pc-avatar"
+                    style={{ background: message.author.color }}
+                  >
+                    {message.author.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <strong>{message.author.name}</strong>
+                  <time
+                    dateTime={message.createdAt}
+                    title={new Date(message.createdAt).toLocaleString()}
+                  >
+                    {new Date(message.createdAt).toLocaleTimeString(undefined, {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </time>
+                </div>
+                <p>{message.body}</p>
+                <div className="pc-likes">
+                  <button
+                    type="button"
+                    className="pc-like"
+                    aria-label={`${liked ? 'Unlike' : 'Like'} comment by ${message.author.name}, ${likes.length} ${likes.length === 1 ? 'like' : 'likes'}`}
+                    aria-pressed={liked}
+                    disabled={likesDisabled}
+                    onClick={() => onLike(message.id, !liked)}
+                  >
+                    <Icon name="heart" size={14} />
+                    <span>{likes.length || 'Like'}</span>
+                  </button>
+                  {likes.length > 0 && (
+                    <span className="pc-like-names">
+                      Liked by {likes.map((like) => like.authorName).join(', ')}
+                    </span>
+                  )}
+                </div>
               </div>
-              <p>{message.body}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <button

@@ -162,6 +162,15 @@ export default function Comments({
     setList(null);
     setNotice(selected.kind === 'new' ? 'Comment added' : 'Reply added');
   };
+  const like = async (threadId: string, messageId: string, liked: boolean) => {
+    try {
+      await live.like({ threadId, messageId, liked });
+    } catch {
+      setNotice(
+        'Could not confirm your like. Check your connection and try again.',
+      );
+    }
+  };
   const hash = () => {
     const comment = new URLSearchParams(location.hash.slice(1)).get('comment');
     if (!comment) return;
@@ -301,11 +310,7 @@ export default function Comments({
             width: highlight.rect.width + 6,
             height: highlight.rect.height + 6,
           }}
-        >
-          {previewPoint && !selectedPoint && (
-            <span className="pc-target-label">{hover?.quote.slice(0, 50)}</span>
-          )}
-        </div>
+        />
       )}
       {identified && preferences.markers && pageThreads.length > 0 && (
         <button
@@ -434,6 +439,11 @@ export default function Comments({
             onClose={closeCard}
             onLocate={() => reveal(activeThread.target, root.current)}
             onCopy={() => copyLink(activeThread)}
+            authorId={preferences.id}
+            likesDisabled={live.connection !== 'live' || live.liking}
+            onLike={(messageId, liked) =>
+              like(activeThread.id, messageId, liked)
+            }
           >
             {composer}
             {typing}
@@ -463,6 +473,11 @@ export default function Comments({
                   onClose={closeCard}
                   onLocate={() => openThread(thread)}
                   onCopy={() => copyLink(thread)}
+                  authorId={preferences.id}
+                  likesDisabled={live.connection !== 'live' || live.liking}
+                  onLike={(messageId, liked) =>
+                    like(thread.id, messageId, liked)
+                  }
                 />
               ))
             ) : (

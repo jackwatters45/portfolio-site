@@ -17,7 +17,16 @@ export class CommentStorageError extends Schema.TaggedError<CommentStorageError>
   'CommentStorageError',
   { cause: Schema.Defect() },
 ) {}
-const decodeThread = Schema.decodeUnknownEffect(Schema.fromJsonString(Thread));
+// Likes live in their own table, not in the stored conversation document.
+const decodeThread = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(
+    Schema.Struct({
+      id: Thread.fields.id,
+      target: Thread.fields.target,
+      messages: Thread.fields.messages,
+    }),
+  ),
+);
 const MAX_THREADS = 250;
 const MAX_MESSAGES = 1000;
 type Row = { id: string; data: string };
@@ -45,11 +54,33 @@ export class RoomStore extends Context.Service<
         yield* sql`CREATE TABLE IF NOT EXISTS threads (id TEXT PRIMARY KEY, data TEXT NOT NULL)`;
         yield* sql`CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, payload TEXT NOT NULL, thread_id TEXT NOT NULL)`;
         yield* sql`CREATE TABLE IF NOT EXISTS budgets (ip TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL)`;
+        yield* Effect.gen(function* () {
+          yield* sql`CREATE TABLE IF NOT EXISTS likes (thread_id TEXT NOT NULL, message_id TEXT NOT NULL, author_id TEXT NOT NULL, author_name TEXT NOT NULL, PRIMARY KEY (thread_id, message_id, author_id))`;
+          const columns = yield* sql<{
+            name: string;
+          }>`PRAGMA table_info(likes)`;
+          if (!columns.some((column) => column.name === 'author_name')) {
+            yield* sql`ALTER TABLE likes ADD COLUMN author_name TEXT NOT NULL DEFAULT ''`;
+            // Recover names for existing likes from their saved requests.
+            yield* sql`UPDATE likes SET author_name = (SELECT trim(json_extract(payload, '$.author.name')) FROM requests WHERE json_extract(payload, '$.author.id') = likes.author_id ORDER BY rowid DESC LIMIT 1)`;
+          }
+        }).pipe(sql.withTransaction);
+        const readThread = Effect.fn('RoomStore.readThread')(function* (
+          row: Row,
+        ) {
+          const thread = yield* decodeThread(row.data);
+          const likes = yield* sql<{
+            messageId: string;
+            authorId: string;
+            authorName: string;
+          }>`SELECT message_id AS messageId, author_id AS authorId, author_name AS authorName FROM likes WHERE thread_id = ${row.id} ORDER BY rowid`;
+          return new Thread({ ...thread, likes });
+        });
         const list = Effect.fn('RoomStore.list')(
           function* () {
             const rows =
               yield* sql<Row>`SELECT id, data FROM threads ORDER BY rowid`;
-            return yield* Effect.forEach(rows, (row) => decodeThread(row.data));
+            return yield* Effect.forEach(rows, readThread);
           },
           Effect.mapError((cause) => new CommentStorageError({ cause })),
         );
@@ -73,7 +104,7 @@ export class RoomStore extends Context.Service<
                   return yield* new CommentStorageError({
                     cause: 'A saved request references a missing thread.',
                   });
-                return yield* decodeThread(row.data);
+                return yield* readThread(row);
               }
               const now = yield* Clock.currentTimeMillis;
               const budget = (yield* sql<{
@@ -82,52 +113,81 @@ export class RoomStore extends Context.Service<
               }>`SELECT window, count FROM budgets WHERE ip = ${ip}`)[0];
               if (budget && now - budget.window < 60_000 && budget.count >= 30)
                 return yield* new CommentRejected({
-                  message: 'Too many comments. Please wait a minute.',
+                  message: 'Too many changes. Please wait a minute.',
                 });
-              const threads = yield* list();
-              if (
-                threads.reduce(
-                  (total, thread) => total + thread.messages.length,
-                  0,
-                ) >= MAX_MESSAGES
-              )
-                return yield* new CommentRejected({
-                  message: 'This room has reached its comment limit.',
-                });
-              const message = new Message({
-                id: event.requestId,
-                author: new Author({
-                  ...event.author,
-                  name: event.author.name.trim(),
-                }),
-                body: event.body.trim(),
-                createdAt: new Date(now).toISOString(),
-              });
               let thread: Thread;
-              if (event.type === 'reply') {
-                const existing = threads.find(
-                  (thread) => thread.id === event.threadId,
-                );
-                if (!existing)
+              if (event.type === 'like') {
+                const row =
+                  (yield* sql<Row>`SELECT id, data FROM threads WHERE id = ${event.threadId}`)[0];
+                if (!row)
                   return yield* new CommentRejected({
                     message: 'This conversation no longer exists.',
                   });
-                thread = new Thread({
-                  ...existing,
-                  messages: [...existing.messages, message],
-                });
-              } else {
-                if (threads.length >= MAX_THREADS)
+                const existing = yield* readThread(row);
+                if (
+                  !existing.messages.some(
+                    (message) => message.id === event.messageId,
+                  )
+                )
                   return yield* new CommentRejected({
-                    message: 'This room has reached its conversation limit.',
+                    message: 'This comment no longer exists.',
                   });
-                thread = new Thread({
-                  id: yield* crypto.randomUUIDv4,
-                  target: event.target,
-                  messages: [message],
+                if (event.liked)
+                  yield* sql`INSERT INTO likes (thread_id, message_id, author_id, author_name) VALUES (${event.threadId}, ${event.messageId}, ${event.author.id}, ${event.author.name.trim()}) ON CONFLICT(thread_id, message_id, author_id) DO UPDATE SET author_name = excluded.author_name`;
+                else
+                  yield* sql`DELETE FROM likes WHERE thread_id = ${event.threadId} AND message_id = ${event.messageId} AND author_id = ${event.author.id}`;
+                thread = yield* readThread(row);
+              } else {
+                const threads = yield* list();
+                if (
+                  threads.reduce(
+                    (total, thread) => total + thread.messages.length,
+                    0,
+                  ) >= MAX_MESSAGES
+                )
+                  return yield* new CommentRejected({
+                    message: 'This room has reached its comment limit.',
+                  });
+                const message = new Message({
+                  id: event.requestId,
+                  author: new Author({
+                    ...event.author,
+                    name: event.author.name.trim(),
+                  }),
+                  body: event.body.trim(),
+                  createdAt: new Date(now).toISOString(),
                 });
+                if (event.type === 'reply') {
+                  const existing = threads.find(
+                    (thread) => thread.id === event.threadId,
+                  );
+                  if (!existing)
+                    return yield* new CommentRejected({
+                      message: 'This conversation no longer exists.',
+                    });
+                  thread = new Thread({
+                    ...existing,
+                    messages: [...existing.messages, message],
+                  });
+                } else {
+                  if (threads.length >= MAX_THREADS)
+                    return yield* new CommentRejected({
+                      message: 'This room has reached its conversation limit.',
+                    });
+                  thread = new Thread({
+                    id: yield* crypto.randomUUIDv4,
+                    target: event.target,
+                    messages: [message],
+                    likes: [],
+                  });
+                }
+                const document = {
+                  id: thread.id,
+                  target: thread.target,
+                  messages: thread.messages,
+                };
+                yield* sql`INSERT INTO threads (id, data) VALUES (${thread.id}, ${JSON.stringify(document)}) ON CONFLICT(id) DO UPDATE SET data = excluded.data`;
               }
-              yield* sql`INSERT INTO threads (id, data) VALUES (${thread.id}, ${JSON.stringify(thread)}) ON CONFLICT(id) DO UPDATE SET data = excluded.data`;
               yield* sql`INSERT INTO requests (id, payload, thread_id) VALUES (${event.requestId}, ${payload}, ${thread.id})`;
               yield* sql`DELETE FROM budgets WHERE window <= ${now - 60_000}`;
               yield* sql`INSERT INTO budgets (ip, window, count) VALUES (${ip}, ${now}, 1) ON CONFLICT(ip) DO UPDATE SET count = count + 1`;

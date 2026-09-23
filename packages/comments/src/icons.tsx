@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 
 export type IconName =
   | 'comment'
+  | 'heart'
   | 'select'
   | 'list'
   | 'cursor'
@@ -13,6 +14,8 @@ export type IconName =
   | 'link'
   | 'keyboard';
 const paths: Record<IconName, string> = {
+  heart:
+    'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z',
   comment:
     'M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.6-4A8.5 8.5 0 1 1 21 11.5Z M8 9h8 M8 13h5',
   select:

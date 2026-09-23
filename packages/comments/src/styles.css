@@ -573,6 +573,43 @@
   font-size: 12px;
   line-height: 1.6;
 }
+.pc-root .pc-likes {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pc-root .pc-like-names {
+  min-width: 0;
+  color: var(--pc-muted);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.pc-root .pc-like {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 5px;
+  min-width: 44px;
+  min-height: 28px;
+  padding: 4px 7px;
+  border: 1px solid var(--pc-border);
+  border-radius: 6px;
+  color: var(--pc-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.pc-root .pc-like:hover:not(:disabled) {
+  background: var(--pc-input);
+}
+.pc-root .pc-like[aria-pressed="true"] {
+  color: var(--pc-accent);
+  border-color: var(--pc-accent);
+}
+.pc-root .pc-like[aria-pressed="true"] svg {
+  fill: currentColor;
+}
 .pc-root .pc-card-active .pc-composer {
   border-top: 1px solid var(--pc-border);
 }
@@ -594,21 +631,6 @@
 }
 .pc-root .pc-highlight-selected {
   border-style: dashed;
-}
-.pc-root .pc-target-label {
-  position: absolute;
-  left: 0;
-  bottom: calc(100% + 5px);
-  max-width: min(300px, 80vw);
-  overflow: hidden;
-  padding: 3px 6px;
-  border-radius: 4px;
-  background: var(--pc-accent);
-  color: var(--pc-surface);
-  font-size: 10px;
-  line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .pc-root .pc-pin {
   position: fixed;

@@ -45,6 +45,9 @@ export class Thread extends Schema.Class<Thread>('CommentThread')({
   id: Id,
   target: Target,
   messages: Schema.Array(Message),
+  likes: Schema.Array(
+    Schema.Struct({ messageId: Id, authorId: Id, authorName: Name }),
+  ),
 }) {}
 export class Cursor extends Schema.Class<Cursor>('CommentCursor')({
   selector: Schema.String.check(Schema.isMaxLength(1000)),
@@ -75,7 +78,15 @@ export class Reply extends Schema.Class<Reply>('Reply')({
   threadId: Id,
   body: text(BODY_LIMIT),
 }) {}
-export const Mutation = Schema.Union([CreateComment, Reply]);
+export class SetLike extends Schema.Class<SetLike>('SetLike')({
+  type: Schema.Literal('like'),
+  requestId: Id,
+  author: Author,
+  threadId: Id,
+  messageId: Id,
+  liked: Schema.Boolean,
+}) {}
+export const Mutation = Schema.Union([CreateComment, Reply, SetLike]);
 export type Mutation = typeof Mutation.Type;
 export class PresenceUpdate extends Schema.Class<PresenceUpdate>(
   'PresenceUpdate',
