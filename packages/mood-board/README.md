@@ -35,11 +35,30 @@ bun run format
 
 The root lint config has mood-board-only exceptions for Effect service `use` methods and existing canvas markup. Formatting follows the unchanged root formatter config, including generated routes.
 
+## Local agent tools
+
+A local Bun CLI and stdio MCP server can create, inspect, edit, arrange, import, preview, and export boards. All existing card types and board backgrounds are supported. Both interfaces use the same Schema-defined Effect actions. They do not call a model, upload media, or access accounts.
+
+Each edit creates a new standard `.moodboard` archive. Saved revisions survive process restarts and provide undo points. Agents can inspect images, add cards, edit metadata, move and resize items, rotate and stack them, duplicate or delete them, and prepare an archive for the existing app.
+
+```bash
+bun install --frozen-lockfile
+bun packages/mood-board/src/local/main.ts create_board \
+  --root /absolute/path/to/input-assets \
+  --output-dir /absolute/path/to/separate-output-folder \
+  --input '{"title":"Coastal textures","output":"coast-01.moodboard"}'
+```
+
+Both folders must exist and cannot contain each other. Follow [Local moodboard authoring](docs/local-agent.md) for MCP configuration, the action reference, revision handling, and limits. The adapter supports macOS and Linux. HEIC support depends on the installed Sharp/libvips codecs.
+
+Local previews show local images, notes, swatches, and backgrounds. Remote images and player cards use static placeholders; no network content is fetched. Open a saved archive with the app's existing importer. These tools do not modify a live browser board or remote account.
+
 ## Code layout
 
 - `src/client/board/`: board creation, camera, colors, archives, local storage, and synchronization.
 - `src/client/media/`: image processing, uploads, media URLs, playback, and embeds.
-- `src/lib/`: definitions shared by browser and server code.
+- `src/lib/`: shared definitions, image preflight, and the portable archive codec.
+- `src/local/`: local authoring, revision, media, and preview services, plus CLI and stdio MCP adapters.
 - `src/server/`: board, media, authentication, and publishing logic.
 - `src/cloudflare/`: Cloudflare adapters and the Worker entry point.
 - `src/components/` and `src/routes/`: React rendering and routes.
