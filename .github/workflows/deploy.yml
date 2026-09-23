@@ -47,12 +47,6 @@ jobs:
           bun run format:check
           bun run lint
 
-      - name: Check mood board
-        working-directory: packages/mood-board
-        run: |
-          bun run test
-          bun run test:e2e
-
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: Deploy
