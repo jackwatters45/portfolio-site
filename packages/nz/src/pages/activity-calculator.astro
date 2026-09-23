@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import '../../theme.css';
+import ActivityCalculator from '../components/activity-calculator';
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activity Cost Calculator — Queenstown</title>
+    <meta name="description" content="Estimate paid activity costs for the Queenstown trip in New Zealand dollars." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="page" id="top">
+      <a class="skip" href="#main">Skip to content</a>
+      <header class="site-header">
+        <a class="site-title" href="/">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="0.7" />
+            <path d="M12 1L14 10L23 12L14 14L12 23L10 14L1 12L10 10Z" fill="currentColor" />
+            <circle cx="12" cy="12" r="1.7" fill="var(--paper)" />
+          </svg>
+          New Zealand
+        </a>
+        <a class="edition" href="/">Back to trip</a>
+      </header>
+
+      <main id="main">
+        <h1>Activity calculator</h1>
+        <ActivityCalculator client:only="react">
+          <p slot="fallback" class="note">The calculator needs JavaScript. <a href="/">View activity prices in the trip plan.</a></p>
+        </ActivityCalculator>
+      </main>
+
+      <footer class="site-footer">
+        <span>Queenstown · Spring 2026</span>
+        <a href="#top">Back to top ↑</a>
+      </footer>
+    </div>
+  </body>
+</html>

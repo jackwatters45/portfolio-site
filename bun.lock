@@ -83,6 +83,7 @@
       "name": "@personal-sites/nz",
       "dependencies": {
         "@astrojs/cloudflare": "14.3.2",
+        "@effect/atom-react": "4.0.0-rc.117",
         "@effect/platform-browser": "4.0.0-rc.117",
         "@personal-sites/comments": "workspace:*",
         "astro": "7.3.3",
