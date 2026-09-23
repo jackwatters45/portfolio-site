@@ -11,6 +11,7 @@
       "devDependencies": {
         "@effect/platform-bun": "4.0.0-rc.117",
         "@effect/platform-node": "4.0.0-rc.117",
+        "@oxlint/plugins": "1.85.0",
         "@types/node": "^22.20.1",
         "@typescript/native-preview": "7.0.0-dev.20260707.2",
         "baseline-browser-mapping": "2.11.25",
@@ -735,6 +736,8 @@
     "@oxlint/binding-win32-ia32-msvc": ["@oxlint/binding-win32-ia32-msvc@1.85.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-eSsIJx9n4yxvOqYTZyPEMyEXRmE60XH7xGAU7i0Qbsn1lf6Za3CWJ9aRd82oSFKXaxhp+sA6/yMJVRIpLpna6A=="],
 
     "@oxlint/binding-win32-x64-msvc": ["@oxlint/binding-win32-x64-msvc@1.85.0", "", { "os": "win32", "cpu": "x64" }, "sha512-pBebIPUpKKhWrhSMWhy8TdAZBewiXnfxmaAGxhzxM1068GagqFaTwgKlU6e+UyJ2sPR+VoHouhXuGJkQjsrDvA=="],
+
+    "@oxlint/plugins": ["@oxlint/plugins@1.85.0", "", {}, "sha512-qqHqML3ME3cxGgFvWJG8wwMnJc9ol5SMdtqkq0k8r7l0USmC+HRXYjzDacME4Dqkx4yqrUsBhj0JYvji8fHxJQ=="],
 
     "@personal-sites/comments": ["@personal-sites/comments@workspace:packages/comments"],
 
