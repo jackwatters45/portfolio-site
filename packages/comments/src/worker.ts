@@ -9,7 +9,7 @@ import * as Option from 'effect/Option';
 import type * as PlatformError from 'effect/PlatformError';
 import * as Predicate from 'effect/Predicate';
 import * as Schema from 'effect/Schema';
-import { COLORS, decodeClient, Peer, type ServerEvent } from './protocol';
+import { decodeClient, Peer, type ServerEvent } from './protocol';
 import { RoomStore, type CommentStorageError } from './room-store';
 
 export interface CommentsEnv {
@@ -22,8 +22,8 @@ export interface CommentsEnv {
 }
 
 class Session extends Schema.Class<Session>('CommentSession')({
-  peer: Peer,
-  identified: Schema.Boolean,
+  id: Peer.fields.id,
+  peer: Schema.NullOr(Peer),
   ip: Schema.String,
   seenAt: Schema.Number,
   window: Schema.Number,
@@ -159,8 +159,9 @@ export class CommentRoom extends DurableObject<CommentsEnv> {
     return this.sockets().flatMap((socket) => {
       const session = this.session(socket);
 
-      if (!session?.identified) return [];
-      const peer = session.peer;
+      const peer = session?.peer;
+
+      if (!peer) return [];
 
       return [
         {
@@ -211,16 +212,9 @@ export class CommentRoom extends DurableObject<CommentsEnv> {
             this.ctx.acceptWebSocket(server);
             server.serializeAttachment(
               new Session({
-                peer: new Peer({
-                  id,
-                  name: 'Guest',
-                  color: COLORS[sockets.length % COLORS.length],
-                  cursor: null,
-                  typing: null,
-                  updatedAt: now,
-                }),
+                id,
+                peer: null,
                 ip,
-                identified: false,
                 seenAt: now,
                 window: now,
                 count: 0,
@@ -284,6 +278,8 @@ export class CommentRoom extends DurableObject<CommentsEnv> {
       return;
     }
 
+    // Every mutation carries an Author with a valid Name. Reading and pings
+    // need neither a name nor presence; a display name is not authentication.
     const decoded = decodeClient(raw);
 
     if (Option.isNone(decoded)) {
@@ -304,9 +300,8 @@ export class CommentRoom extends DurableObject<CommentsEnv> {
     if (event.type === 'presence') {
       const next = new Session({
         ...session,
-        identified: true,
         peer: new Peer({
-          id: session.peer.id,
+          id: session.id,
           name: event.name.trim(),
           color: event.color,
           cursor: event.cursor,

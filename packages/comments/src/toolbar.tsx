@@ -49,6 +49,7 @@ interface Props {
   picking: boolean;
   showCards: boolean;
   cursors: boolean;
+  identified: boolean;
   settings: boolean;
   pageComment: boolean;
   count: number;
@@ -150,6 +151,7 @@ export function Toolbar(props: Props) {
             label="Live cursors"
             icon="cursor"
             pressed={props.cursors}
+            disabled={!props.identified}
             onClick={props.onCursors}
           />
           <Tool
@@ -164,7 +166,7 @@ export function Toolbar(props: Props) {
               className="pc-online-count"
               title={props.peers.map((peer) => peer.name).join(', ')}
             >
-              {props.peers.length + 1} here
+              {props.peers.length + Number(props.identified)} here
             </span>
           )}
         </div>

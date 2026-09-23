@@ -10,6 +10,7 @@ import {
   CommentRequestError,
   Mutation,
   SetLike,
+  validName,
   type Author,
   type Target,
 } from './protocol';
@@ -25,8 +26,6 @@ interface Submission {
   target: Target;
   draft: Atom.Writable<Draft, Draft>;
 }
-
-const inactive = Atom.make(null);
 
 const rooms = Atom.family((endpoint: string) => {
   const runtime = Atom.runtime(
@@ -149,10 +148,10 @@ const rooms = Atom.family((endpoint: string) => {
 });
 
 /** React only subscribes. Effect owns the session and its resource lifetime. */
-export function useRoom(endpoint: string, active: boolean, author: Author) {
+export function useRoom(endpoint: string, author: Author) {
   const atoms = useMemo(() => rooms(endpoint), [endpoint]);
-  useAtomMount(active ? atoms.connection : inactive);
-  useAtomMount(active ? atoms.author : inactive);
+  useAtomMount(atoms.connection);
+  useAtomMount(atoms.author);
   const state = useAtomValue(atoms.state);
   const submission = useAtomValue(atoms.submit);
   const submit = useAtomSet(atoms.submit, { mode: 'promise' });
@@ -168,6 +167,8 @@ export function useRoom(endpoint: string, active: boolean, author: Author) {
     liking: liking.waiting,
     sending: submission.waiting,
     updatePresence: (patch: Partial<Presence>) => {
+      if (!validName(author.name)) return;
+
       if ('typing' in patch) typing({ typing: patch.typing ?? null, author });
 
       if ('cursor' in patch)

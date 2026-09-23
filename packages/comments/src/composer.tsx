@@ -20,6 +20,7 @@ interface Props {
   focusInput?: boolean;
   onSubmit: (body: string, request?: Mutation) => Promise<void>;
   onCancel: () => void;
+  onName: () => void;
   onTyping: (typing: boolean) => void;
   sending: boolean;
 }
@@ -33,6 +34,7 @@ export function Composer({
   focusInput,
   onSubmit,
   onCancel,
+  onName,
   onTyping,
   sending,
 }: Props) {
@@ -132,13 +134,19 @@ export function Composer({
         </output>
       )}
       <div className="pc-composer-footer">
-        <span className="pc-posting-as">
-          <span
-            className="pc-author-dot"
-            style={{ background: author.color }}
-          />
-          {author.name}
-        </span>
+        {validName(author.name) ? (
+          <span className="pc-posting-as">
+            <span
+              className="pc-author-dot"
+              style={{ background: author.color }}
+            />
+            {author.name}
+          </span>
+        ) : (
+          <button className="pc-text-button" type="button" onClick={onName}>
+            Enter name to {reply ? 'reply' : 'comment'}
+          </button>
+        )}
         <button
           className="pc-text-button"
           type="button"
