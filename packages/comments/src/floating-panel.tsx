@@ -22,6 +22,7 @@ interface Props {
   className?: string;
   placement?: Placement;
   focusIndex?: number;
+  layoutVersion?: number;
 }
 
 export function FloatingPanel({
@@ -32,8 +33,9 @@ export function FloatingPanel({
   className = '',
   placement = 'top-start',
   focusIndex = 1,
+  layoutVersion = 0,
 }: Props) {
-  const { refs, floatingStyles, context } = useFloating({
+  const { refs, floatingStyles, context, update } = useFloating({
     open: true,
     onOpenChange: (open) => {
       if (!open) onClose();
@@ -58,6 +60,10 @@ export function FloatingPanel({
   useLayoutEffect(() => {
     refs.setPositionReference(anchor);
   }, [anchor, refs]);
+
+  useLayoutEffect(() => {
+    update();
+  }, [layoutVersion, update]);
 
   const dismiss = useDismiss(context, {
     escapeKey: false,

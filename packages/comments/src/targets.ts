@@ -15,11 +15,14 @@ export function findElement(
   if (!selector || !root) return null;
 
   try {
-    const element = document.querySelector<HTMLElement>(selector);
+    const matches = [
+      ...(root.matches(selector) ? [root] : []),
+      ...root.querySelectorAll(selector),
+    ].filter((element) => !element.closest(UI_SELECTOR));
 
-    return element && root.contains(element) && !element.closest(UI_SELECTOR)
-      ? element
-      : null;
+    const element = matches.length === 1 ? matches[0] : null;
+
+    return element instanceof HTMLElement ? element : null;
   } catch {
     return null;
   }
@@ -32,7 +35,7 @@ export function targetElement(
   if (!root.contains(element) || element.closest(UI_SELECTOR)) return null;
   const target = element.closest<HTMLElement>(ELEMENTS);
 
-  return target && root.contains(target) ? target : null;
+  return target && root.contains(target) && isVisible(target) ? target : null;
 }
 
 function selectorFor(element: Element, root: Element): string {
@@ -109,10 +112,37 @@ export function cursorFor(
   };
 }
 
+// Adapted from Agentation's visibility check. See THIRD_PARTY_NOTICES.md.
+function isVisible(element: HTMLElement): boolean {
+  if (
+    !element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })
+  )
+    return false;
+
+  // Closed details can retain nonzero descendant rectangles. Only their first
+  // summary is rendered; those rectangles must not become pins on other content.
+  for (
+    let parent = element.parentElement;
+    parent;
+    parent = parent.parentElement
+  ) {
+    if (parent instanceof HTMLDetailsElement && !parent.open) {
+      const summary = Array.from(parent.children).find(
+        (child) => child.tagName === 'SUMMARY',
+      );
+
+      if (!summary?.contains(element)) return false;
+    }
+  }
+
+  return true;
+}
+
 export function pointFor(cursor: Cursor, root: Element | null) {
   const element = findElement(cursor.selector, root);
 
-  if (!element) return null;
+  if (!element || !isVisible(element)) return null;
+
   const rect = element.getBoundingClientRect();
 
   if (!rect.width || !rect.height) return null;
@@ -121,6 +151,7 @@ export function pointFor(cursor: Cursor, root: Element | null) {
     x: rect.left + rect.width * cursor.x,
     y: rect.top + rect.height * cursor.y,
     rect,
+    element,
   };
 }
 
