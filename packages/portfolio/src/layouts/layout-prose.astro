@@ -9,7 +9,9 @@ interface Props {
 
 // url should probably do this part but i kinda like the simple path
 const nestedRoutes = ['learning', 'listening', 'reading', 'watching'];
+
 const pathname = Astro.url.pathname;
+
 const homeRoute = nestedRoutes.includes(pathname.split('/')[1])
   ? '/about'
   : '/';

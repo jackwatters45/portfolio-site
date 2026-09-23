@@ -23,21 +23,26 @@ class PreferencesSchema extends Schema.Class<PreferencesSchema>(
   cursors: Schema.Boolean,
   markers: Schema.Boolean,
 }) {}
+
 export type Preferences = PreferencesSchema;
+
 export class DraftSchema extends Schema.Class<DraftSchema>('CommentDraft')({
   body: Schema.String.check(Schema.isMaxLength(BODY_LIMIT)),
   request: Schema.optional(Mutation),
 }) {}
+
 export type Draft = DraftSchema;
 
 class StorageHealth extends Context.Service<
   StorageHealth,
   SubscriptionRef.SubscriptionRef<boolean>
 >()('comments/StorageHealth') {}
+
 const storageLayer = Layer.effectContext(
   Effect.gen(function* () {
     const store = yield* KeyValueStore.KeyValueStore;
     const failed = yield* SubscriptionRef.make(false);
+
     const track = <A>(
       effect: Effect.Effect<A, KeyValueStore.KeyValueStoreError>,
     ) =>
@@ -45,6 +50,7 @@ const storageLayer = Layer.effectContext(
         Effect.tap(() => SubscriptionRef.set(failed, false)),
         Effect.tapError(() => SubscriptionRef.set(failed, true)),
       );
+
     return Context.make(StorageHealth, failed).pipe(
       Context.add(KeyValueStore.KeyValueStore, {
         ...store,
@@ -55,9 +61,11 @@ const storageLayer = Layer.effectContext(
     );
   }),
 ).pipe(Layer.provide(BrowserKeyValueStore.layerLocalStorage));
+
 export const storageRuntime = Atom.runtime(
   Layer.merge(storageLayer, BrowserCrypto.layer),
 );
+
 const storageErrorAtom = storageRuntime
   .subscriptionRef(
     Effect.gen(function* () {
@@ -65,6 +73,7 @@ const storageErrorAtom = storageRuntime
     }),
   )
   .pipe(Atom.map(AsyncResult.getOrElse(() => false)));
+
 export const preferencesAtom = Atom.kvs({
   runtime: storageRuntime,
   key: 'page-comments:preferences',
@@ -78,6 +87,7 @@ export const preferencesAtom = Atom.kvs({
       markers: true,
     }),
 });
+
 const drafts = Atom.family((key: string) =>
   Atom.kvs({
     runtime: storageRuntime,
@@ -91,30 +101,36 @@ const updatePreferences = storageRuntime.fn(
   (patch: Partial<Preferences>, get) =>
     Effect.gen(function* () {
       const previous = get(preferencesAtom);
+
       const id =
         previous.id === 'pending'
           ? yield* Crypto.Crypto.use((crypto) => crypto.randomUUIDv4)
           : previous.id;
+
       const color =
         previous.id === 'pending'
           ? COLORS[Number.parseInt(id.slice(0, 2), 16) % COLORS.length]
           : previous.color;
+
       get.set(
         preferencesAtom,
         new PreferencesSchema({ ...previous, color, ...patch, id }),
       );
     }),
 );
+
 export function usePreferences() {
   const preferences = useAtomValue(preferencesAtom);
   const storageError = useAtomValue(storageErrorAtom);
   const update = useAtomSet(updatePreferences, { mode: 'promise' });
+
   return { preferences, update, storageError };
 }
 
 /** The registry retains the current draft even when the storage service fails. */
 export function draftStore(room: string, registry: AtomRegistry.AtomRegistry) {
   const atom = (target: string) => drafts(`${room}:${target}`);
+
   return {
     atom,
     get: (target: string) => registry.get(atom(target)),

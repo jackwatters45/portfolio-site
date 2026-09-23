@@ -5,6 +5,7 @@ export class AudioPlaybackCoordinator {
 
   register(id: string, pause: PausePlayback): () => void {
     this.#players.set(id, pause);
+
     return () => {
       if (this.#players.get(id) === pause) this.#players.delete(id);
     };

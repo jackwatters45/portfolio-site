@@ -26,8 +26,8 @@ const publicApiError = (
   reason: PublicApiError['reason'],
   status: HttpStatusCode | null,
   cause?: unknown,
-) =>
-  new PublicApiError({
+) => {
+  const fields = {
     reason,
     status,
     message:
@@ -36,14 +36,20 @@ const publicApiError = (
         : reason === 'InvalidPayload'
           ? 'The public board response was invalid.'
           : 'Public boards could not be loaded.',
-    ...(cause === undefined ? {} : { cause }),
-  });
+  };
+
+  return new PublicApiError(
+    cause === undefined ? fields : { ...fields, cause },
+  );
+};
 
 const readJson = Effect.fn('PublicApiClient.readJson')(function* (
   response: Response,
 ) {
   const status = HttpStatusCodeSchema.make(response.status);
+
   if (!response.ok) return yield* publicApiError('Http', status);
+
   return yield* Effect.tryPromise({
     try: () => response.json(),
     catch: (cause) => publicApiError('InvalidPayload', status, cause),
@@ -61,6 +67,7 @@ const requestJson = Effect.fn('PublicApiClient.requestJson')(function* (
       }),
     catch: (cause) => publicApiError('Transport', null, cause),
   });
+
   return yield* readJson(response);
 });
 
@@ -69,6 +76,7 @@ const loadPublicProfileEffect = Effect.fn('PublicApiClient.loadPublicProfile')(
     const value = yield* requestJson(
       `/api/public/profiles/${encodeURIComponent(handle)}`,
     );
+
     return yield* Schema.decodeUnknownEffect(PublicProfileSchema)(value).pipe(
       Effect.mapError((cause) => publicApiError('InvalidPayload', null, cause)),
     );
@@ -80,6 +88,7 @@ const loadPublicBoardEffect = Effect.fn('PublicApiClient.loadPublicBoard')(
     const value = yield* requestJson(
       `/api/public/boards/${encodeURIComponent(publicId)}`,
     );
+
     return yield* Schema.decodeUnknownEffect(PublicBoardSchema)(value).pipe(
       Effect.mapError((cause) => publicApiError('InvalidPayload', null, cause)),
     );

@@ -19,13 +19,21 @@ import * as Icons from './icons';
 import type { StravaActivityWithIndex } from './types';
 
 const CURSOR_SIZE = 44;
+
 const CURSOR_CENTER = CURSOR_SIZE / 2;
+
 const CURSOR_WIDTH = 2;
+
 const CURSOR_LARGE_HEIGHT = 400;
+
 const LINE_GAP = 6;
+
 const LINE_WIDTH = 1;
+
 const LINE_STEP = LINE_GAP + LINE_WIDTH;
+
 const POINTER_SPRING = { stiffness: 500, damping: 40 };
+
 const SOUND_OPTIONS = { volume: 0.3 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,8 +51,16 @@ interface GraphContext {
   isTouch: boolean;
 }
 
-const GraphContext = React.createContext<GraphContext>({} as GraphContext);
-const useGraph = () => React.useContext(GraphContext);
+const GraphContext = React.createContext<GraphContext | null>(null);
+
+const useGraph = () => {
+  const graph = React.useContext(GraphContext);
+
+  if (graph === null)
+    throw new Error('Graph components must be rendered within LineGraph.');
+
+  return graph;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +97,7 @@ export default function LineGraph({
     // Account for possible padding, and ignore (subtract) the scroll position
     const offset = offsetLeft - scrollLeft - LINE_WIDTH;
     const index = Math.floor((x - offset) / LINE_STEP);
+
     return index;
   }
 
@@ -101,9 +118,11 @@ export default function LineGraph({
   function setIndexWithSound(index: number) {
     setActiveIndex((prevIndex) => {
       const hasStopped = y.get() === y.getPrevious();
+
       if (prevIndex !== index && hasStopped && index !== null) {
         tick();
       }
+
       return index;
     });
   }
@@ -123,9 +142,11 @@ export default function LineGraph({
     if (morph) {
       const snappedX = getSnappedX(e.clientX);
       const index = getIndexFromX(snappedX);
+
       if (index < 0) return;
       x.set(snappedX);
       setIndexWithSound(index);
+
       return;
     }
 
@@ -163,13 +184,16 @@ export default function LineGraph({
     if (isTouch) {
       if (latest < 0) {
         x.set(0);
+
         return;
       }
 
       const index = Math.floor(latest / (LINE_GAP + LINE_WIDTH));
       setActiveIndex(index);
+
       return;
     }
+
     if (morph) {
       const index = getIndexFromX(latest);
       setIndexWithSound(index);
@@ -297,6 +321,7 @@ export function Lines({
       if (latest === yCenter) {
         unsubscribe();
         rubberband.current = true;
+
         return;
       }
     });
@@ -321,6 +346,7 @@ export function Lines({
     pointerType,
   }: React.PointerEvent<HTMLDivElement>) {
     if (pointerType === 'touch') return;
+
     if (rubberband.current) {
       const newY = y.get() + movementY / 4;
       y.jump(newY);
@@ -350,6 +376,7 @@ export function Lines({
             isNewMonth = totalDaysPassed === i;
             break;
           }
+
           totalDaysPassed += daysInMonth?.[month] ?? 0;
         }
 
@@ -401,7 +428,9 @@ export function Cursor({
 }) {
   const isHydrated = useIsHydrated();
   const { x, y, idle, morph, pressed, isTouch } = useGraph();
+
   if (!isHydrated) return null;
+
   return (
     <motion.div
       initial={false}
@@ -469,8 +498,10 @@ export function Meta({ activity }: { activity: StravaActivityWithIndex }) {
   const isRun = activity?.type === 'Run';
   const isWalk = activity?.type === 'Walk';
   const isRow = activity?.type === 'Rowing';
+
   const isGym =
     activity?.type === 'Workout' || activity?.type === 'WeightTraining';
+
   const isRide = activity?.type === 'Ride' || activity?.type === 'VirtualRide';
 
   const title = React.useMemo(() => {
@@ -485,26 +516,36 @@ export function Meta({ activity }: { activity: StravaActivityWithIndex }) {
     if (isRide) {
       return `${getAvgSpeedKmh(activity).toFixed(1)}km/h`;
     }
+
     if (isRun || isRow) {
       return convertToPace(activity?.distance, activity?.moving_time);
     }
+
     if (isWalk) {
       return formatTime(activity?.moving_time);
     }
+
     if (isYoga || isGym) {
       return formatTime(activity?.moving_time);
     }
+
     return null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activity]);
 
   const icon = React.useMemo(() => {
     if (isRun) return <Icons.RunIcon />;
+
     if (isRide) return <Icons.RideIcon />;
+
     if (isWalk) return <Icons.WalkIcon />;
+
     if (isYoga) return <Icons.YogaIcon />;
+
     if (isRow) return <Icons.RunIcon />;
+
     if (isGym) return <Icons.GymIcon />;
+
     return <Icons.RestIcon />;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activity]);
@@ -557,7 +598,7 @@ export function Time() {
     return () => clearInterval(id);
   }, []);
 
-  return <>{time}</>;
+  return time;
 }
 
 function getTime() {
@@ -570,7 +611,9 @@ function getTime() {
     minute: 'numeric',
     second: 'numeric',
   });
+
   const [, time] = date.split(', ');
+
   return time;
 }
 
@@ -594,6 +637,7 @@ function formatTime(totalSeconds: number) {
   const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes
     .toString()
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
   return formattedTime;
 }
 
@@ -601,6 +645,7 @@ function convertDistanceToKm(distance: number) {
   if (!distance) {
     return null;
   }
+
   return `${(distance / 1000).toFixed(2)}km`;
 }
 
@@ -608,6 +653,7 @@ const daysInMonth = Array.from({ length: 12 }, (_, month) => {
   if (month === 1) {
     return isLeapYear(new Date().getFullYear()) ? 29 : 28;
   }
+
   return new Date(new Date().getFullYear(), month + 1, 0).getDate();
 });
 
@@ -623,6 +669,7 @@ export function getFormattedDateByIndex(index: number | null) {
   const day = currentDate.getDate();
 
   let suffix: string;
+
   if (day === 1 || day === 21 || day === 31) {
     suffix = 'st';
   } else if (day === 2 || day === 22) {
@@ -642,19 +689,23 @@ function convertToPace(distance: number, movingTime: number) {
   // Convert the pace to minutes and seconds
   const minutes = Math.floor(paceInMinutesPerKm);
   let seconds = Math.floor((paceInMinutesPerKm - minutes) * 60);
+
   // Cap the seconds at 59
   if (seconds >= 60) {
     seconds = 59;
   }
+
   // Keep leading zero for seconds if necessary
   const secondsFormatted = seconds.toString().padStart(2, '0');
   // Format the pace as {x}:{xx} min/km
   const formattedPace = `${minutes.toString()}:${secondsFormatted}m/km`;
+
   // Return the formatted pace
   return formattedPace;
 }
 
 function getAvgSpeedKmh(activity: StravaActivityWithIndex) {
   const KMH_MULTIPLIER = 3.6;
+
   return Math.round(activity.average_speed * KMH_MULTIPLIER);
 }

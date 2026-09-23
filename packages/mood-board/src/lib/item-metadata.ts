@@ -31,9 +31,11 @@ export const itemMetadataIssue = (
   | { readonly path: ReadonlyArray<string>; readonly issue: string }
   | undefined => {
   const qualifier = scope === 'public' ? 'public ' : '';
+
   if (item.kind !== 'note' && item.text !== undefined) {
     return { path: ['text'], issue: `Only ${qualifier}notes may contain text` };
   }
+
   if (item.kind === 'note' && item.text === undefined) {
     return {
       path: ['text'],
@@ -41,12 +43,14 @@ export const itemMetadataIssue = (
         scope === 'public' ? 'Public notes require text' : 'Notes require text',
     };
   }
+
   if (item.kind !== 'swatch' && item.color !== undefined) {
     return {
       path: ['color'],
       issue: `Only ${qualifier}swatches may contain color`,
     };
   }
+
   if (item.kind === 'swatch' && item.color === undefined) {
     return {
       path: ['color'],
@@ -56,6 +60,7 @@ export const itemMetadataIssue = (
           : 'Swatches require color',
     };
   }
+
   if (
     item.kind !== 'swatch' &&
     item.kind !== 'spotify' &&
@@ -68,6 +73,7 @@ export const itemMetadataIssue = (
       issue: `Only ${qualifier}swatches and audio cards may contain labels`,
     };
   }
+
   if (
     item.kind !== 'image' &&
     item.kind !== 'spotify' &&
@@ -81,6 +87,7 @@ export const itemMetadataIssue = (
       issue: `This ${qualifier}item kind cannot contain a source`,
     };
   }
+
   if (
     item.kind !== 'image' &&
     item.kind !== 'audio' &&
@@ -91,6 +98,7 @@ export const itemMetadataIssue = (
       issue: `Only ${qualifier}images and audio cards may contain managed media`,
     };
   }
+
   if (
     item.kind !== 'image' &&
     (item.annotationTitle !== undefined ||
@@ -110,6 +118,7 @@ export const itemMetadataIssue = (
     item.xAuthorHandle !== undefined ||
     item.xPostText !== undefined ||
     item.xPostDate !== undefined;
+
   if (item.kind !== 'x' && hasXMetadata) {
     return {
       path: ['xDisplay'],
@@ -123,6 +132,7 @@ export const itemMetadataIssue = (
     item.websiteTitle !== undefined ||
     item.websiteDescription !== undefined ||
     item.websiteSiteLabel !== undefined;
+
   if (item.kind !== 'website' && hasWebsiteMetadata) {
     return {
       path: ['websiteUrl'],
@@ -136,5 +146,6 @@ export const itemMetadataIssue = (
       issue: `Only ${qualifier}images may have an external link`,
     };
   }
+
   return undefined;
 };

@@ -1,4 +1,4 @@
-import { Effect } from 'effect';
+import { Effect, ManagedRuntime } from 'effect';
 
 import {
   BoardIdSchema,
@@ -6,7 +6,7 @@ import {
   type BoardId,
   type BoardSummary,
 } from '../../lib/board-rpc';
-import { BoardRpcClient, makeBoardRpcRuntime } from './board-rpc-client';
+import { BoardRpcClient } from './board-rpc-client';
 
 export interface BoardCatalog {
   readonly list: () => Promise<ReadonlyArray<BoardSummary>>;
@@ -23,7 +23,7 @@ const newBoardId = (): BoardId =>
   BoardIdSchema.make(globalThis.crypto.randomUUID());
 
 export const createBoardCatalog = (): BoardCatalog => {
-  const runtime = makeBoardRpcRuntime();
+  const runtime = ManagedRuntime.make(BoardRpcClient.layer);
 
   return {
     list: () =>
@@ -34,6 +34,7 @@ export const createBoardCatalog = (): BoardCatalog => {
       ),
     create: (title) => {
       const boardId = newBoardId();
+
       return runtime.runPromise(
         BoardRpcClient.use((client) =>
           client.CreateBoard({ boardId, title }),
@@ -42,6 +43,7 @@ export const createBoardCatalog = (): BoardCatalog => {
     },
     duplicate: (sourceBoardId, title) => {
       const boardId = newBoardId();
+
       return runtime.runPromise(
         BoardRpcClient.use((client) =>
           client.DuplicateBoard({

@@ -10,6 +10,7 @@ import { DraftSchema, type draftStore } from './use-preferences';
 const CommentForm = Schema.Struct({
   body: Schema.String.check(Schema.isMaxLength(BODY_LIMIT)),
 });
+
 interface Props {
   draftKey: string;
   store: ReturnType<typeof draftStore>;
@@ -22,6 +23,7 @@ interface Props {
   onTyping: (typing: boolean) => void;
   sending: boolean;
 }
+
 export function Composer({
   draftKey,
   store,
@@ -39,6 +41,7 @@ export function Composer({
   const [draft, setDraft] = useAtom(store.atom(draftKey));
   const input = useRef<HTMLTextAreaElement>(null);
   const typing = useEffectEvent(onTyping);
+
   const form = useForm({
     defaultValues: { body: draft.body },
     validators: {
@@ -49,6 +52,7 @@ export function Composer({
     onSubmit: async ({ value, formApi }) => {
       if (!connected || !validName(author.name)) return;
       onTyping(false);
+
       try {
         await onSubmit(value.body.trim(), store.get(draftKey).request);
         formApi.reset({ body: '' });
@@ -62,10 +66,13 @@ export function Composer({
       }
     },
   });
+
   useEffect(() => {
     if (focusInput) input.current?.focus({ preventScroll: true });
+
     return () => typing(false);
   }, [focusInput]);
+
   return (
     <form
       className="pc-composer"

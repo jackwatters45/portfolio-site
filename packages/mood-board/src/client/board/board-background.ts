@@ -2,6 +2,7 @@ import type { MediaId } from '../../lib/media';
 import type { Board } from './types';
 
 export const DEFAULT_CUSTOM_COLOR = '#C85A3D';
+
 export const DEFAULT_BOARD_BACKGROUND = '#EDEDED';
 
 export const BOARD_BACKGROUNDS = [
@@ -29,6 +30,7 @@ export function formatHexColorInput(value: string): string {
 
 export function normalizeHexColor(value: string): string | null {
   const formatted = formatHexColorInput(value);
+
   return /^#[0-9A-F]{6}$/.test(formatted) ? formatted : null;
 }
 
@@ -43,10 +45,12 @@ const hexToRgb = (value: string): RgbColor => [
 const relativeLuminance = ([red, green, blue]: RgbColor): number => {
   const channel = (value: number) => {
     const normalized = value / 255;
+
     return normalized <= 0.04045
       ? normalized / 12.92
       : ((normalized + 0.055) / 1.055) ** 2.4;
   };
+
   return (
     channel(red) * 0.2126 + channel(green) * 0.7152 + channel(blue) * 0.0722
   );
@@ -55,11 +59,13 @@ const relativeLuminance = ([red, green, blue]: RgbColor): number => {
 export function contrastRatio(left: string, right: string): number {
   const leftColor = normalizeHexColor(left);
   const rightColor = normalizeHexColor(right);
+
   if (leftColor === null || rightColor === null) return 1;
   const leftLuminance = relativeLuminance(hexToRgb(leftColor));
   const rightLuminance = relativeLuminance(hexToRgb(rightColor));
   const lighter = Math.max(leftLuminance, rightLuminance);
   const darker = Math.min(leftLuminance, rightLuminance);
+
   return (lighter + 0.05) / (darker + 0.05);
 }
 
@@ -70,27 +76,33 @@ const blendHex = (
 ): string => {
   const foregroundRgb = hexToRgb(foreground);
   const backgroundRgb = hexToRgb(background);
+
   const channel = (index: 0 | 1 | 2) =>
     Math.round(
       foregroundRgb[index] * weight + backgroundRgb[index] * (1 - weight),
     )
       .toString(16)
       .padStart(2, '0');
+
   return `#${channel(0)}${channel(1)}${channel(2)}`.toUpperCase();
 };
 
-export function accessibleFieldColors(background: string): {
+interface FieldColors {
   readonly foreground: string;
   readonly muted: string;
   readonly selection: string;
-} {
+}
+
+export function accessibleFieldColors(background: string): FieldColors {
   const normalized = normalizeHexColor(background) ?? DEFAULT_BOARD_BACKGROUND;
   const dark = '#171717';
   const light = '#F8F7F3';
+
   let foreground =
     contrastRatio(normalized, dark) >= contrastRatio(normalized, light)
       ? dark
       : light;
+
   if (contrastRatio(normalized, foreground) < 4.5) {
     foreground =
       contrastRatio(normalized, '#000000') >=
@@ -98,14 +110,18 @@ export function accessibleFieldColors(background: string): {
         ? '#000000'
         : '#FFFFFF';
   }
+
   let muted = foreground;
+
   for (let weight = 0.55; weight <= 1; weight += 0.05) {
     const candidate = blendHex(foreground, normalized, weight);
+
     if (contrastRatio(normalized, candidate) >= 4.5) {
       muted = candidate;
       break;
     }
   }
+
   return { foreground, muted, selection: foreground };
 }
 
@@ -119,24 +135,27 @@ export const backgroundDraftFromBoard = (
   board: Board,
 ): BoardBackgroundDraft => {
   const hex = board.background ?? DEFAULT_BOARD_BACKGROUND;
-  return {
-    hex,
-    lastValidHex: hex,
-    ...(board.backgroundMediaId === undefined
-      ? {}
-      : { mediaId: board.backgroundMediaId }),
-  };
+
+  return board.backgroundMediaId === undefined
+    ? { hex, lastValidHex: hex }
+    : { hex, lastValidHex: hex, mediaId: board.backgroundMediaId };
 };
+
+interface BackgroundReconciliation {
+  readonly draft?: BoardBackgroundDraft;
+  readonly conflict: boolean;
+}
 
 export const reconcileRemoteBackgroundDraft = (
   previous: Board,
   next: Board,
   locallyTouched: boolean,
   existingConflict = false,
-): { readonly draft?: BoardBackgroundDraft; readonly conflict: boolean } => {
+): BackgroundReconciliation => {
   const changed =
     previous.background !== next.background ||
     previous.backgroundMediaId !== next.backgroundMediaId;
+
   return locallyTouched
     ? { conflict: existingConflict || changed }
     : { draft: backgroundDraftFromBoard(next), conflict: false };

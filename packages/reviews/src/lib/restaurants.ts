@@ -5,6 +5,7 @@ export async function getRestaurants() {
     'restaurants',
     ({ data }) => import.meta.env.DEV || !data.draft,
   );
+
   return restaurants.sort(
     (a, b) =>
       (b.data.visited ?? '').localeCompare(a.data.visited ?? '') ||

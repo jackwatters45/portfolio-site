@@ -41,8 +41,10 @@ export function BoardBackgroundControl({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const chooseImage = () => inputRef.current?.click();
+
   const submit = (event: FormEvent) => {
     event.preventDefault();
+
     if (!dirty || uploading || normalizedHex === null) return;
     onApply();
   };
@@ -140,6 +142,7 @@ export function BoardBackgroundControl({
             aria-hidden="true"
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
+
               if (file !== undefined) onChooseImage(file);
               event.currentTarget.value = '';
             }}

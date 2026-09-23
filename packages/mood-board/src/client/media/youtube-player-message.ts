@@ -1,4 +1,24 @@
+import { Option, Schema } from 'effect';
+
 export const YOUTUBE_PLAYER_ORIGIN = 'https://www.youtube-nocookie.com';
+
+const PlayingMessageSchema = Schema.Union([
+  Schema.Struct({
+    event: Schema.Literal('onStateChange'),
+    info: Schema.Literal(1),
+  }),
+  Schema.Struct({
+    event: Schema.Literal('infoDelivery'),
+    info: Schema.Struct({ playerState: Schema.Literal(1) }),
+  }),
+]);
+
+const decodePlayingMessage = Schema.decodeUnknownOption(
+  Schema.Union([
+    PlayingMessageSchema,
+    Schema.fromJsonString(PlayingMessageSchema),
+  ]),
+);
 
 export const isYouTubePlayingMessage = (
   event: Pick<MessageEvent, 'data' | 'origin' | 'source'>,
@@ -11,26 +31,6 @@ export const isYouTubePlayingMessage = (
   ) {
     return false;
   }
-  let payload: unknown = event.data;
-  if (typeof payload === 'string') {
-    try {
-      payload = JSON.parse(payload);
-    } catch {
-      return false;
-    }
-  }
-  if (payload === null || typeof payload !== 'object') return false;
-  const message = payload as {
-    readonly event?: unknown;
-    readonly info?: unknown;
-  };
-  if (message.event === 'onStateChange') return message.info === 1;
-  if (
-    message.event !== 'infoDelivery' ||
-    message.info === null ||
-    typeof message.info !== 'object'
-  ) {
-    return false;
-  }
-  return (message.info as { readonly playerState?: unknown }).playerState === 1;
+
+  return Option.isSome(decodePlayingMessage(event.data));
 };

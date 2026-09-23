@@ -17,6 +17,7 @@ import { initialRoom, RoomClient, type Presence } from './room-client';
 import { DraftSchema, preferencesAtom, type Draft } from './use-preferences';
 
 export type { Connection } from './room-client';
+
 interface Submission {
   body: string;
   previous?: Mutation;
@@ -24,11 +25,14 @@ interface Submission {
   target: Target;
   draft: Atom.Writable<Draft, Draft>;
 }
+
 const inactive = Atom.make(null);
+
 const rooms = Atom.family((endpoint: string) => {
   const runtime = Atom.runtime(
     Layer.merge(RoomClient.layer, BrowserCrypto.layer),
   );
+
   return {
     connection: runtime
       .atom((get) =>
@@ -46,14 +50,17 @@ const rooms = Atom.family((endpoint: string) => {
     submit: runtime.fn((input: Submission, get) =>
       Effect.gen(function* () {
         const preferences = get(preferencesAtom);
+
         const author = {
           id: preferences.id,
           name: preferences.name,
           color: preferences.color,
         };
+
         const requestId =
           input.previous?.requestId ??
           (yield* Crypto.Crypto.use((crypto) => crypto.randomUUIDv4));
+
         const event = yield* Schema.decodeUnknownEffect(Mutation)(
           input.previous ??
             (input.threadId
@@ -72,12 +79,14 @@ const rooms = Atom.family((endpoint: string) => {
                   body: input.body,
                 }),
         );
+
         get.set(
           input.draft,
           new DraftSchema({ body: input.body, request: event }),
         );
         const threadId = yield* RoomClient.use((room) => room.submit(event));
         get.set(input.draft, new DraftSchema({ body: '' }));
+
         return threadId;
       }).pipe(
         Effect.catchTags({
@@ -94,9 +103,11 @@ const rooms = Atom.family((endpoint: string) => {
       (input: { threadId: string; messageId: string; liked: boolean }, get) =>
         Effect.gen(function* () {
           const preferences = get(preferencesAtom);
+
           const requestId = yield* Crypto.Crypto.use(
             (crypto) => crypto.randomUUIDv4,
           );
+
           return yield* RoomClient.use((room) =>
             room.submit(
               new SetLike({
@@ -127,6 +138,7 @@ const rooms = Atom.family((endpoint: string) => {
         Effect.gen(function* () {
           const room = yield* RoomClient;
           yield* room.presence({ typing }, author);
+
           if (typing) {
             yield* Effect.sleep('3500 millis');
             yield* room.presence({ typing: null }, author);
@@ -148,6 +160,7 @@ export function useRoom(endpoint: string, active: boolean, author: Author) {
   const liking = useAtomValue(atoms.like);
   const presence = useAtomSet(atoms.presence);
   const typing = useAtomSet(atoms.typing);
+
   return {
     ...state,
     submit,
@@ -156,6 +169,7 @@ export function useRoom(endpoint: string, active: boolean, author: Author) {
     sending: submission.waiting,
     updatePresence: (patch: Partial<Presence>) => {
       if ('typing' in patch) typing({ typing: patch.typing ?? null, author });
+
       if ('cursor' in patch)
         presence({ patch: { cursor: patch.cursor }, author });
     },

@@ -4,6 +4,7 @@ export const MAX_IMAGE_LINK_CHARACTERS = 4_096;
 
 export function normalizeImageLink(value: string): string | null {
   const trimmed = value.trim();
+
   if (
     trimmed.length === 0 ||
     trimmed.length > MAX_IMAGE_LINK_CHARACTERS ||
@@ -13,8 +14,11 @@ export function normalizeImageLink(value: string): string | null {
 
   try {
     const url = new URL(trimmed);
+
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+
     if (url.username !== '' || url.password !== '') return null;
+
     return url.href.length <= MAX_IMAGE_LINK_CHARACTERS ? url.href : null;
   } catch {
     return null;

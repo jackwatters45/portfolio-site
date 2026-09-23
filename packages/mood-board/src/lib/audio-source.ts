@@ -9,10 +9,13 @@ export const SPOTIFY_RESOURCE_TYPES = [
   'episode',
   'show',
 ] as const;
+
 export const SpotifyResourceTypeSchema = Schema.Literals(
   SPOTIFY_RESOURCE_TYPES,
 );
+
 export type SpotifyResourceType = typeof SpotifyResourceTypeSchema.Type;
+
 const decodeSpotifyResourceType = Schema.decodeUnknownOption(
   SpotifyResourceTypeSchema,
 );
@@ -20,7 +23,9 @@ const decodeSpotifyResourceType = Schema.decodeUnknownOption(
 export const SpotifyResourceIdSchema = Schema.String.check(
   Schema.isPattern(/^[A-Za-z0-9]{10,64}$/),
 ).pipe(Schema.brand('SpotifyResourceId'));
+
 export type SpotifyResourceId = typeof SpotifyResourceIdSchema.Type;
+
 const decodeSpotifyResourceId = Schema.decodeUnknownOption(
   SpotifyResourceIdSchema,
 );
@@ -28,7 +33,9 @@ const decodeSpotifyResourceId = Schema.decodeUnknownOption(
 export const YouTubeVideoIdSchema = Schema.String.check(
   Schema.isPattern(/^[A-Za-z0-9_-]{11}$/),
 ).pipe(Schema.brand('YouTubeVideoId'));
+
 export type YouTubeVideoId = typeof YouTubeVideoIdSchema.Type;
+
 const decodeYouTubeVideoId = Schema.decodeUnknownOption(YouTubeVideoIdSchema);
 
 export const SpotifyEmbedUrlSchema = Schema.String.check(
@@ -36,6 +43,7 @@ export const SpotifyEmbedUrlSchema = Schema.String.check(
     /^https:\/\/open\.spotify\.com\/embed\/(?:track|album|playlist|episode|show)\/[A-Za-z0-9]{10,64}$/,
   ),
 ).pipe(Schema.brand('SpotifyEmbedUrl'));
+
 export type SpotifyEmbedUrl = typeof SpotifyEmbedUrlSchema.Type;
 
 export const SpotifyUriSchema = Schema.String.check(
@@ -43,6 +51,7 @@ export const SpotifyUriSchema = Schema.String.check(
     /^spotify:(?:track|album|playlist|episode|show):[A-Za-z0-9]{10,64}$/,
   ),
 ).pipe(Schema.brand('SpotifyUri'));
+
 export type SpotifyUri = typeof SpotifyUriSchema.Type;
 
 export const YouTubeEmbedUrlSchema = Schema.String.check(
@@ -50,6 +59,7 @@ export const YouTubeEmbedUrlSchema = Schema.String.check(
     /^https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}\?rel=0&playsinline=1&enablejsapi=1$/,
   ),
 ).pipe(Schema.brand('YouTubeEmbedUrl'));
+
 export type YouTubeEmbedUrl = typeof YouTubeEmbedUrlSchema.Type;
 
 export type SpotifySource = {
@@ -87,11 +97,13 @@ const youtubeHosts = new Set([
   'youtu.be',
   'www.youtube-nocookie.com',
 ]);
+
 const withoutDnsRootDot = (hostname: string): string =>
   hostname.endsWith('.') ? hostname.slice(0, -1) : hostname;
 
 const isYouTubeFamilyHost = (hostname: string) => {
   const normalized = withoutDnsRootDot(hostname);
+
   return (
     normalized === 'youtube.com' ||
     normalized.endsWith('.youtube.com') ||
@@ -104,14 +116,17 @@ const isYouTubeFamilyHost = (hostname: string) => {
 
 function parseSpotifySourceValue(value: string): RawSpotifySource | null {
   const trimmed = value.trim();
+
   if (trimmed.length === 0 || trimmed.length > MAX_AUDIO_SOURCE_CHARACTERS)
     return null;
   let url: URL;
+
   try {
     url = new URL(trimmed);
   } catch {
     return null;
   }
+
   if (
     url.protocol !== 'https:' ||
     url.hostname !== 'open.spotify.com' ||
@@ -122,17 +137,24 @@ function parseSpotifySourceValue(value: string): RawSpotifySource | null {
     return null;
 
   const segments = url.pathname.split('/').filter(Boolean);
+
   if (segments[0]?.toLowerCase().startsWith('intl-')) segments.shift();
+
   if (segments[0]?.toLowerCase() === 'embed') segments.shift();
+
   if (segments.length !== 2) return null;
   const [rawType, rawResourceId] = segments;
+
   const resourceType = Option.getOrNull(
     decodeSpotifyResourceType(rawType?.toLowerCase()),
   );
+
   const resourceId = Option.getOrNull(decodeSpotifyResourceId(rawResourceId));
+
   if (resourceType === null || resourceId === null) return null;
 
   const src = `https://open.spotify.com/${resourceType}/${resourceId}`;
+
   return {
     kind: 'spotify',
     src,
@@ -147,6 +169,7 @@ function parseSpotifySourceValue(value: string): RawSpotifySource | null {
 
 export function parseSpotifySource(value: string): SpotifySource | null {
   const parsed = parseSpotifySourceValue(value);
+
   return parsed === null
     ? null
     : { ...parsed, src: SpotifySourceUrlSchema.make(parsed.src) };
@@ -157,20 +180,25 @@ const normalizeSpotifySourceValue = (value: string): string | null =>
 
 export function normalizeSpotifySource(value: string): SpotifySourceUrl | null {
   const src = normalizeSpotifySourceValue(value);
+
   return src === null ? null : SpotifySourceUrlSchema.make(src);
 }
 
 function parseYouTubeSourceValue(value: string): RawYouTubeSource | null {
   const trimmed = value.trim();
+
   if (trimmed.length === 0 || trimmed.length > MAX_AUDIO_SOURCE_CHARACTERS)
     return null;
   let url: URL;
+
   try {
     url = new URL(trimmed);
   } catch {
     return null;
   }
+
   const hostname = withoutDnsRootDot(url.hostname);
+
   if (
     url.protocol !== 'https:' ||
     !youtubeHosts.has(hostname) ||
@@ -182,6 +210,7 @@ function parseYouTubeSourceValue(value: string): RawYouTubeSource | null {
 
   const segments = url.pathname.split('/').filter(Boolean);
   let rawVideoId: string | null = null;
+
   if (hostname === 'youtu.be' && segments.length === 1) {
     rawVideoId = segments[0] ?? null;
   } else if (
@@ -210,8 +239,11 @@ function parseYouTubeSourceValue(value: string): RawYouTubeSource | null {
   ) {
     rawVideoId = segments[1] ?? null;
   }
+
   const videoId = Option.getOrNull(decodeYouTubeVideoId(rawVideoId));
+
   if (videoId === null) return null;
+
   return {
     kind: 'youtube',
     src: `https://www.youtube.com/watch?v=${videoId}`,
@@ -224,6 +256,7 @@ function parseYouTubeSourceValue(value: string): RawYouTubeSource | null {
 
 export function parseYouTubeSource(value: string): YouTubeSource | null {
   const parsed = parseYouTubeSourceValue(value);
+
   return parsed === null
     ? null
     : { ...parsed, src: YouTubeSourceUrlSchema.make(parsed.src) };
@@ -234,19 +267,23 @@ const normalizeYouTubeSourceValue = (value: string): string | null =>
 
 export function normalizeYouTubeSource(value: string): YouTubeSourceUrl | null {
   const src = normalizeYouTubeSourceValue(value);
+
   return src === null ? null : YouTubeSourceUrlSchema.make(src);
 }
 
 function normalizeDirectAudioSourceValue(value: string): string | null {
   const trimmed = value.trim();
+
   if (
     trimmed.length === 0 ||
     trimmed.length > MAX_AUDIO_SOURCE_CHARACTERS ||
     !/^https:\/\/[^/\\]/i.test(trimmed)
   )
     return null;
+
   try {
     const url = new URL(trimmed);
+
     if (
       url.protocol !== 'https:' ||
       url.username !== '' ||
@@ -256,6 +293,7 @@ function normalizeDirectAudioSourceValue(value: string): string | null {
       isYouTubeFamilyHost(url.hostname)
     )
       return null;
+
     return url.href.length <= MAX_AUDIO_SOURCE_CHARACTERS ? url.href : null;
   } catch {
     return null;
@@ -266,6 +304,7 @@ export function normalizeDirectAudioSource(
   value: string,
 ): DirectAudioSourceUrl | null {
   const src = normalizeDirectAudioSourceValue(value);
+
   return src === null ? null : DirectAudioSourceUrlSchema.make(src);
 }
 
@@ -280,6 +319,7 @@ export const SpotifySourceUrlSchema = Schema.String.check(
     ),
   )
   .pipe(Schema.brand('SpotifySourceUrl'));
+
 export type SpotifySourceUrl = typeof SpotifySourceUrlSchema.Type;
 
 export const YouTubeSourceUrlSchema = Schema.String.check(
@@ -293,6 +333,7 @@ export const YouTubeSourceUrlSchema = Schema.String.check(
     ),
   )
   .pipe(Schema.brand('YouTubeSourceUrl'));
+
 export type YouTubeSourceUrl = typeof YouTubeSourceUrlSchema.Type;
 
 export const DirectAudioSourceUrlSchema = Schema.String.check(
@@ -309,14 +350,18 @@ export const DirectAudioSourceUrlSchema = Schema.String.check(
     ),
   )
   .pipe(Schema.brand('DirectAudioSourceUrl'));
+
 export type DirectAudioSourceUrl = typeof DirectAudioSourceUrlSchema.Type;
 
 export function parseAudioSource(value: string): AudioSource | null {
   const spotify = parseSpotifySource(value);
+
   if (spotify !== null) return spotify;
   const youtube = parseYouTubeSource(value);
+
   if (youtube !== null) return youtube;
   const src = normalizeDirectAudioSource(value);
+
   return src === null ? null : { kind: 'audio', src };
 }
 
@@ -324,7 +369,9 @@ export function isLikelyAudioUrl(value: string): boolean {
   if (parseSpotifySource(value) !== null || parseYouTubeSource(value) !== null)
     return true;
   const src = normalizeDirectAudioSource(value);
+
   if (src === null) return false;
+
   try {
     return /\.(?:mp3|m4a|aac|ogg|oga|wav|flac|opus|webm)(?:$|[?#])/i.test(
       new URL(src).pathname,

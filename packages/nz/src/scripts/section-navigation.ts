@@ -23,6 +23,7 @@ if (
     }
 
     const link = event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+
     if (
       !link ||
       link.hasAttribute('download') ||
@@ -35,6 +36,7 @@ if (
     }
 
     event.preventDefault();
+
     const transition = document.startViewTransition({
       types: ['nz-section-navigation'],
       // Let the browser handle fragment scrolling, history, and the focus target.

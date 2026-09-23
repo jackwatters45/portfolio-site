@@ -1,4 +1,5 @@
 export const MAX_X_POST_CARD_WIDTH = 1_100;
+
 export const MAX_X_POST_VISUAL_SCALE = 2;
 
 export const xPostVisualScale = (
@@ -12,6 +13,7 @@ export const xPostVisualScale = (
     availableWidth <= 0
   )
     return null;
+
   return Math.min(
     MAX_X_POST_VISUAL_SCALE,
     Math.max(1, availableWidth / iframeWidth),
@@ -29,6 +31,7 @@ export const renderedXPostHeight = (
   ) {
     return null;
   }
+
   return Math.min(2_000, Math.max(240, Math.ceil(rootScrollHeight)));
 };
 

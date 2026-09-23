@@ -1,4 +1,4 @@
-import { Option, Schema } from 'effect';
+import { flow, Option, Schema } from 'effect';
 
 import type { AccountId } from '../../lib/account';
 import {
@@ -18,11 +18,14 @@ import type {
 } from './types';
 
 const DATABASE = 'moodboard-studio';
+
 const DOCUMENT_STORE = 'documents';
+
 const SYNC_STORE = 'sync';
 
 const documentKey = (accountId: AccountId, boardId: BoardId) =>
   `account:${accountId}:board:${boardId}`;
+
 const outboxKey = (accountId: AccountId, boardId: BoardId) =>
   `account:${accountId}:outbox:${boardId}`;
 
@@ -32,6 +35,7 @@ const PendingBoardMutationSchema = Schema.Struct({
   mutationId: MutationIdSchema,
   mutation: BoardMutationPayloadSchema,
 });
+
 const SavedDocumentSchema = Schema.Struct({
   board: BoardSchema,
   camera: CameraSchema,
@@ -40,22 +44,27 @@ const SavedDocumentSchema = Schema.Struct({
 const decodePendingMutation = Schema.decodeUnknownOption(
   PendingBoardMutationSchema,
 );
+
 const decodeSavedDocumentValue =
   Schema.decodeUnknownOption(SavedDocumentSchema);
 
 const toBoardMutation = (
   mutation: typeof BoardMutationPayloadSchema.Type,
-): BoardMutation => ({
-  ...(mutation.title === undefined ? {} : { title: mutation.title }),
-  ...(mutation.background === undefined
-    ? {}
-    : { background: mutation.background }),
-  ...(mutation.backgroundMediaId === undefined
-    ? {}
-    : { backgroundMediaId: mutation.backgroundMediaId }),
-  upserts: mutation.upserts.map((item) => ({ ...item })),
-  deletes: [...mutation.deletes],
-});
+): BoardMutation => {
+  const local: BoardMutation = {
+    upserts: mutation.upserts.map((item) => ({ ...item })),
+    deletes: [...mutation.deletes],
+  };
+
+  if (mutation.title !== undefined) local.title = mutation.title;
+
+  if (mutation.background !== undefined) local.background = mutation.background;
+
+  if (mutation.backgroundMediaId !== undefined)
+    local.backgroundMediaId = mutation.backgroundMediaId;
+
+  return local;
+};
 
 const toPendingMutation = (
   value: typeof PendingBoardMutationSchema.Type,
@@ -66,30 +75,33 @@ const toPendingMutation = (
   mutation: toBoardMutation(value.mutation),
 });
 
-const decodePendingMutations = (
-  value: unknown,
-  boardId: BoardId,
-): PendingBoardMutation[] => {
-  if (!Array.isArray(value)) return [];
-  return value.flatMap((entry) => {
-    const decoded = decodePendingMutation(entry);
-    return Option.isSome(decoded) && decoded.value.boardId === boardId
-      ? [toPendingMutation(decoded.value)]
-      : [];
-  });
-};
+const decodePendingValues = flow(
+  Schema.decodeUnknownOption(Schema.Array(Schema.Unknown)),
+  Option.map((values) =>
+    values.flatMap((value) => Option.toArray(decodePendingMutation(value))),
+  ),
+  Option.getOrElse(() => []),
+);
 
-const decodeSavedDocument = (value: unknown): SavedDocument | null => {
-  const decoded = decodeSavedDocumentValue(value);
-  if (Option.isNone(decoded)) return null;
-  return {
+const boardPendingMutations = (
+  entries: ReadonlyArray<typeof PendingBoardMutationSchema.Type>,
+  boardId: BoardId,
+): PendingBoardMutation[] =>
+  entries.flatMap((entry) =>
+    entry.boardId === boardId ? [toPendingMutation(entry)] : [],
+  );
+
+const decodeSavedDocument = flow(
+  decodeSavedDocumentValue,
+  Option.map((value): SavedDocument => ({
     board: {
-      ...decoded.value.board,
-      items: decoded.value.board.items.map((item) => ({ ...item })),
+      ...value.board,
+      items: value.board.items.map((item) => ({ ...item })),
     },
-    camera: { ...decoded.value.camera },
-  };
-};
+    camera: { ...value.camera },
+  })),
+  Option.getOrNull,
+);
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -97,6 +109,7 @@ function openDatabase(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = () => {
       const database = request.result;
+
       for (const store of [DOCUMENT_STORE, SYNC_STORE]) {
         if (!database.objectStoreNames.contains(store)) {
           database.createObjectStore(store);
@@ -117,6 +130,7 @@ export async function loadDocument(
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(DOCUMENT_STORE, 'readonly');
+
     const request = transaction
       .objectStore(DOCUMENT_STORE)
       .get(documentKey(accountId, boardId));
@@ -147,6 +161,7 @@ export async function saveDocument(
       database.close();
       resolve();
     };
+
     transaction.onerror = () => {
       database.close();
       reject(transaction.error);
@@ -162,12 +177,15 @@ export async function loadPendingMutations(
 
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(SYNC_STORE, 'readonly');
+
     const request = transaction
       .objectStore(SYNC_STORE)
       .get(outboxKey(accountId, boardId));
 
     request.onsuccess = () =>
-      resolve(decodePendingMutations(request.result, boardId));
+      resolve(
+        boardPendingMutations(decodePendingValues(request.result), boardId),
+      );
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => database.close();
     transaction.onerror = () => {
@@ -183,9 +201,11 @@ export async function appendPendingMutations(
   entries: ReadonlyArray<PendingBoardMutation>,
 ): Promise<void> {
   if (entries.length === 0) return;
+
   if (entries.some((entry) => entry.boardId !== boardId)) {
     throw new Error('A pending mutation cannot be stored under another board.');
   }
+
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
@@ -195,21 +215,29 @@ export async function appendPendingMutations(
     const request = store.get(key);
 
     request.onsuccess = () => {
-      const current = decodePendingMutations(request.result, boardId);
+      const current = boardPendingMutations(
+        decodePendingValues(request.result),
+        boardId,
+      );
+
       const known = new Set(current.map((entry) => entry.mutationId));
       const additions: PendingBoardMutation[] = [];
+
       for (const entry of entries) {
         if (known.has(entry.mutationId)) continue;
         known.add(entry.mutationId);
         additions.push(entry);
       }
+
       store.put([...current, ...additions], key);
     };
+
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => {
       database.close();
       resolve();
     };
+
     transaction.onerror = () => {
       database.close();
       reject(transaction.error);
@@ -233,17 +261,24 @@ export async function removePendingMutations(
 
     request.onsuccess = () => {
       const removals = new Set(mutationIds);
-      const current = decodePendingMutations(request.result, boardId);
+
+      const current = boardPendingMutations(
+        decodePendingValues(request.result),
+        boardId,
+      );
+
       store.put(
         current.filter((entry) => !removals.has(entry.mutationId)),
         key,
       );
     };
+
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => {
       database.close();
       resolve();
     };
+
     transaction.onerror = () => {
       database.close();
       reject(transaction.error);
@@ -262,6 +297,7 @@ export async function deleteLocalBoard(
       [DOCUMENT_STORE, SYNC_STORE],
       'readwrite',
     );
+
     transaction
       .objectStore(DOCUMENT_STORE)
       .delete(documentKey(accountId, boardId));
@@ -270,6 +306,7 @@ export async function deleteLocalBoard(
       database.close();
       resolve();
     };
+
     transaction.onerror = () => {
       database.close();
       reject(transaction.error);

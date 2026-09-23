@@ -5,7 +5,9 @@ import type { MediaId } from '../lib/media';
 
 function BackgroundImage({ src }: { readonly src: string }) {
   const [failed, setFailed] = useState(false);
+
   if (failed) return null;
+
   return (
     <img
       src={src}
@@ -28,6 +30,7 @@ export function CanvasBackground({
 }) {
   const imageSource =
     src ?? (mediaId === undefined ? undefined : mediaUrl(mediaId));
+
   return (
     <div
       className={`canvas-background${className ? ` ${className}` : ''}`}

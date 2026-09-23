@@ -32,7 +32,9 @@ export function ThreadCard({
     if (active && follow.current && messages.current)
       messages.current.scrollTop = messages.current.scrollHeight;
   }, [thread.messages.length, active]);
+
   if (!first) return null;
+
   return (
     <article
       className={`pc-card ${active ? 'pc-card-active' : ''}`}
@@ -70,6 +72,7 @@ export function ThreadCard({
           ref={messages}
           onScroll={() => {
             const el = messages.current;
+
             if (el)
               follow.current =
                 el.scrollHeight - el.scrollTop - el.clientHeight < 32;
@@ -79,7 +82,9 @@ export function ThreadCard({
             const likes = thread.likes.filter(
               (like) => like.messageId === message.id,
             );
+
             const liked = likes.some((like) => like.authorId === authorId);
+
             return (
               <div className="pc-message" key={message.id}>
                 <div className="pc-byline">

@@ -47,110 +47,157 @@ import {
 } from './x-post';
 
 export const MAX_BOARDS = 100;
+
 export const MAX_REMOTE_ITEMS = 500;
+
 export const MAX_REMOTE_IMAGE_CHARACTERS = 12 * 1024 * 1024;
+
 export const MAX_REMOTE_BOARD_BYTES = 32 * 1024 * 1024;
+
 export const BoardItemCollectionLengthCheck =
   Schema.isMaxLength(MAX_REMOTE_ITEMS);
+
 export const BoardListLengthCheck = Schema.isMaxLength(MAX_BOARDS);
+
 export const BoardVersionSchema = Schema.Literal(1);
+
 export const BOARD_ID_PATTERN =
   /^(?:default|[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
 
 export const BoardIdSchema = Schema.String.check(
   Schema.isPattern(BOARD_ID_PATTERN),
 ).pipe(Schema.brand('BoardId'));
+
 export type BoardId = typeof BoardIdSchema.Type;
+
 export const DEFAULT_BOARD_ID = BoardIdSchema.make('default');
+
 const BoundedIdStringSchema = Schema.String.check(
   Schema.isLengthBetween(1, 120),
 );
+
 export const ItemIdSchema = BoundedIdStringSchema.pipe(Schema.brand('ItemId'));
+
 export type ItemId = typeof ItemIdSchema.Type;
+
 export const ClientIdSchema = BoundedIdStringSchema.pipe(
   Schema.brand('ClientId'),
 );
+
 export type ClientId = typeof ClientIdSchema.Type;
+
 export const MutationIdSchema = BoundedIdStringSchema.pipe(
   Schema.brand('MutationId'),
 );
+
 export type MutationId = typeof MutationIdSchema.Type;
+
 export const MAX_BOARD_TITLE_CHARACTERS = 120;
+
 export const MAX_BOARD_ITEM_TEXT_CHARACTERS = 1_000;
+
 export const MAX_BOARD_ITEM_LABEL_CHARACTERS = 120;
+
 export const BoardTitleSchema = Schema.String.check(
   Schema.isMaxLength(MAX_BOARD_TITLE_CHARACTERS),
 );
+
 export const BoardItemTextSchema = Schema.String.check(
   Schema.isMaxLength(MAX_BOARD_ITEM_TEXT_CHARACTERS),
 );
+
 export const BoardItemLabelSchema = Schema.String.check(
   Schema.isMaxLength(MAX_BOARD_ITEM_LABEL_CHARACTERS),
 );
+
 const ImageSourceSchema = Schema.String.check(
   Schema.isMaxLength(MAX_REMOTE_IMAGE_CHARACTERS),
 );
+
 export const BoardColorSchema = Schema.String.check(
   Schema.isPattern(/^#[0-9a-f]{6}$/i),
 );
+
 export const BoardBackgroundFields = {
   background: Schema.optional(BoardColorSchema),
   backgroundMediaId: Schema.optional(MediaIdSchema),
 };
+
 export const BoardDocumentHeaderFields = {
   version: BoardVersionSchema,
   title: BoardTitleSchema,
   ...BoardBackgroundFields,
 };
+
 const PositionSchema = Schema.Finite;
+
 export const BoardItemSizeSchema = Schema.Finite.check(
   Schema.isBetween({ minimum: 80, maximum: 5_000 }),
 );
+
 const RotationSchema = Schema.Finite.check(
   Schema.isBetween({ minimum: -180, maximum: 180 }),
 );
+
 export const MIN_BOARD_ITEM_ORDER = -10_000;
+
 export const MAX_BOARD_ITEM_ORDER = 10_000;
+
 export const BoardItemOrderSchema = Schema.Int.check(
   Schema.isBetween({
     minimum: MIN_BOARD_ITEM_ORDER,
     maximum: MAX_BOARD_ITEM_ORDER,
   }),
 );
+
 export const BoardTimestampSchema = NonNegativeIntegerSchema.pipe(
   Schema.brand('BoardTimestamp'),
 );
+
 export type BoardTimestamp = typeof BoardTimestampSchema.Type;
+
 export const BoardUpdatedAtFields = {
   updatedAt: BoardTimestampSchema,
 };
+
 export const BoardItemCountSchema = Schema.Int.check(
   Schema.isBetween({ minimum: 0, maximum: MAX_REMOTE_ITEMS }),
 ).pipe(Schema.brand('BoardItemCount'));
+
 export type BoardItemCount = typeof BoardItemCountSchema.Type;
+
 export const BoardCountSchema = Schema.Int.check(
   Schema.isBetween({ minimum: 0, maximum: MAX_BOARDS }),
 ).pipe(Schema.brand('BoardCount'));
+
 export type BoardCount = typeof BoardCountSchema.Type;
+
 export const BoardSummaryFields = {
   title: BoardTitleSchema,
   itemCount: BoardItemCountSchema,
   ...BoardUpdatedAtFields,
 };
+
 export const BoardRevisionSchema = NonNegativeIntegerSchema.pipe(
   Schema.brand('BoardRevision'),
 );
+
 export type BoardRevision = typeof BoardRevisionSchema.Type;
+
 const decodeSpotifySourceUrl = Schema.decodeUnknownOption(
   SpotifySourceUrlSchema,
 );
+
 const decodeYouTubeSourceUrl = Schema.decodeUnknownOption(
   YouTubeSourceUrlSchema,
 );
+
 const decodeDirectAudioSourceUrl = Schema.decodeUnknownOption(
   DirectAudioSourceUrlSchema,
 );
+
 const decodeXPostUrl = Schema.decodeUnknownOption(XPostUrlSchema);
+
 const decodeSupportedImageSource = Schema.decodeUnknownOption(
   SupportedImageSourceSchema,
 );
@@ -199,6 +246,7 @@ const BoardItemPayloadStruct = Schema.Struct({
 const BoardItemPayloadFilter = Schema.makeFilter(
   (item: typeof BoardItemPayloadStruct.Type) => {
     const metadataIssue = itemMetadataIssue(item, 'private');
+
     if (metadataIssue !== undefined) return metadataIssue;
 
     if (item.kind === 'image') {
@@ -208,6 +256,7 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           issue: 'Image items require exactly one media source',
         };
       }
+
       if (
         item.src !== undefined &&
         Option.isNone(decodeSupportedImageSource(item.src))
@@ -218,6 +267,7 @@ const BoardItemPayloadFilter = Schema.makeFilter(
         };
       }
     }
+
     if (item.kind === 'spotify') {
       if (
         item.width < MIN_AUDIO_CARD_WIDTH ||
@@ -228,6 +278,7 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           issue: `Spotify cards require at least ${MIN_AUDIO_CARD_WIDTH} by ${MIN_SPOTIFY_AUDIO_CARD_HEIGHT} pixels`,
         };
       }
+
       if (Option.isNone(decodeSpotifySourceUrl(item.src))) {
         return {
           path: ['src'],
@@ -244,6 +295,7 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           issue: `YouTube cards require a canonical source and at least ${MIN_AUDIO_CARD_WIDTH} by ${MIN_YOUTUBE_AUDIO_CARD_HEIGHT} pixels`,
         };
       }
+
       if (Option.isNone(decodeYouTubeSourceUrl(item.src))) {
         return {
           path: ['src'],
@@ -260,12 +312,14 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           issue: `Audio cards require at least ${MIN_AUDIO_CARD_WIDTH} by ${MIN_NATIVE_AUDIO_CARD_HEIGHT} pixels`,
         };
       }
+
       if ((item.src === undefined) === (item.mediaId === undefined)) {
         return {
           path: ['mediaId'],
           issue: 'Audio cards require exactly one media source',
         };
       }
+
       if (
         item.src !== undefined &&
         Option.isNone(decodeDirectAudioSourceUrl(item.src))
@@ -276,6 +330,7 @@ const BoardItemPayloadFilter = Schema.makeFilter(
         };
       }
     }
+
     if (item.kind === 'x') {
       if (
         item.width < MIN_X_CARD_WIDTH ||
@@ -289,8 +344,10 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           path: ['src'],
           issue: 'X cards require a canonical post source and settings',
         };
+
       return undefined;
     }
+
     if (item.kind === 'website') {
       if (
         item.width < MIN_WEBSITE_CARD_WIDTH ||
@@ -304,8 +361,10 @@ const BoardItemPayloadFilter = Schema.makeFilter(
           issue: 'Website cards require a normalized preview snapshot',
         };
       }
+
       return undefined;
     }
+
     return undefined;
   },
 );
@@ -313,10 +372,12 @@ const BoardItemPayloadFilter = Schema.makeFilter(
 export const BoardItemPayloadSchema = BoardItemPayloadStruct.check(
   BoardItemPayloadFilter,
 );
+
 export const BoardItemSchema = Schema.Struct({
   id: ItemIdSchema,
   ...BoardItemPayloadStruct.fields,
 }).check(BoardItemPayloadFilter);
+
 export const BoardItemArraySchema = Schema.Array(BoardItemSchema).check(
   BoardItemCollectionLengthCheck,
 );
@@ -350,15 +411,18 @@ export const BoardMutationPayloadSchema = Schema.Struct({
   upserts: BoardItemArraySchema,
   deletes: Schema.Array(ItemIdSchema).check(BoardItemCollectionLengthCheck),
 });
+
 export type BoardMutationPayload = typeof BoardMutationPayloadSchema.Type;
 
 const BoardIdentityFields = {
   boardId: BoardIdSchema,
 };
+
 const BoardEventRevisionFields = {
   ...BoardIdentityFields,
   revision: BoardRevisionSchema,
 };
+
 const BoardMutationIdentityFields = {
   clientId: ClientIdSchema,
   mutationId: MutationIdSchema,
@@ -392,6 +456,7 @@ export const BoardEventSchema = Schema.Union([
   BoardChangeSchema,
   BoardDeletedSchema,
 ]);
+
 export type BoardEvent = typeof BoardEventSchema.Type;
 
 export class BoardBackendError extends Schema.Error<BoardBackendError>(
