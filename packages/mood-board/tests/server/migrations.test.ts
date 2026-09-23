@@ -104,6 +104,7 @@ describe('database migrations', () => {
           [12, 'youtube_item_kind'],
           [13, 'image_annotations'],
           [14, 'x_post_item_kind'],
+          [15, 'owner_versions'],
         ]);
 
         const rows = yield* sql<KindRow>`
@@ -266,6 +267,7 @@ describe('database migrations', () => {
           [12, 'youtube_item_kind'],
           [13, 'image_annotations'],
           [14, 'x_post_item_kind'],
+          [15, 'owner_versions'],
         ]);
         expect(yield* sql<MediaRow>`SELECT id, kind, src FROM items`).toEqual([
           {
@@ -424,6 +426,7 @@ describe('database migrations', () => {
           [12, 'youtube_item_kind'],
           [13, 'image_annotations'],
           [14, 'x_post_item_kind'],
+          [15, 'owner_versions'],
         ]);
         const state = yield* sql<{
           readonly managed: number;

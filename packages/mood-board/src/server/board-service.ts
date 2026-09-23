@@ -28,6 +28,7 @@ import {
   type BoardDeleted,
   type BoardEvent,
   type BoardId,
+  type BoardRevision,
   type BoardSnapshot,
   type BoardSummary,
   type RemoteBoardItem,
@@ -110,6 +111,12 @@ const missingBoardError = () =>
 const managementError = (rejection: ManagementRejected) =>
   Match.value(rejection).pipe(
     Match.tagsExhaustive({
+      RevisionConflict: () =>
+        new BoardBackendError({
+          code: 'Conflict',
+          message:
+            'This board changed. Read its current revision before retrying.',
+        }),
       BoardLimit: () =>
         new BoardBackendError({
           code: 'Limit',
@@ -158,9 +165,11 @@ interface BoardOperations {
     sourceBoardId: BoardId,
     boardId: BoardId,
     title: string,
+    expectedRevision: BoardRevision,
   ) => Effect.Effect<BoardSummary, BoardBackendError>;
   readonly delete: (
     boardId: BoardId,
+    expectedRevision: BoardRevision,
   ) => Effect.Effect<BoardDeleted, BoardBackendError>;
   readonly commit: (
     input: CommitInput,
@@ -253,9 +262,12 @@ export class BoardService extends Context.Service<
         sourceBoardId: BoardId,
         boardId: BoardId,
         title: string,
+        expectedRevision: BoardRevision,
       ) {
         const result = yield* recoverPersistence(
-          mutex.withPermit(repo.duplicate(sourceBoardId, boardId, title)),
+          mutex.withPermit(
+            repo.duplicate(sourceBoardId, boardId, title, expectedRevision),
+          ),
         );
 
         if (result === null) return yield* missingBoardError();
@@ -267,12 +279,13 @@ export class BoardService extends Context.Service<
 
       const deleteBoard = Effect.fn('BoardService.delete')(function* (
         boardId: BoardId,
+        expectedRevision: BoardRevision,
       ) {
         return yield* recoverPersistence(
           mutex.withPermit(
             Effect.uninterruptible(
               Effect.gen(function* () {
-                const result = yield* repo.delete(boardId);
+                const result = yield* repo.delete(boardId, expectedRevision);
 
                 if (!Predicate.isTagged(result, 'Deleted')) {
                   return yield* managementError(result);

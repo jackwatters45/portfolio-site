@@ -4,6 +4,8 @@ import { AccountIdSchema } from '../lib/account';
 import { AGENT_USER_CODE } from '../lib/agent-auth';
 import {
   BoardIdSchema,
+  BoardTitleSchema,
+  BoardDeletedSchema,
   BoardMutationPayloadSchema,
   BoardRevisionSchema,
   BoardSnapshotSchema,
@@ -32,6 +34,30 @@ export class AccountError extends Schema.TaggedError<AccountError>()(
       'AccessDenied',
     ]),
     message: Schema.String,
+    diagnostic: Schema.optional(
+      Schema.Struct({
+        category: Schema.Literals([
+          'Timeout',
+          'RpcError',
+          'BoardRejected',
+          'TransportError',
+          'EncodeError',
+          'InvalidUrlError',
+          'StatusCodeError',
+          'DecodeError',
+          'EmptyBodyError',
+          'HttpStatus',
+          'ResponseTooLarge',
+          'ResponseRead',
+          'InvalidResponse',
+          'ResponseTimeout',
+        ]),
+        method: Schema.String,
+        endpoint: Schema.String,
+        status: Schema.optional(Schema.Number),
+        requestId: Schema.optional(Schema.String),
+      }),
+    ),
     boardId: Schema.optional(BoardIdSchema),
     url: Schema.optional(Schema.String),
   },
@@ -109,6 +135,42 @@ export const AccountEditOutput = Schema.Struct({
   boardId: BoardIdSchema,
   revision: BoardRevisionSchema,
   url: Schema.String,
+});
+
+export const AccountCreateInput = Schema.Struct({
+  ...AccountBoardInput.fields,
+  title: BoardTitleSchema,
+  confirm: Schema.Literal(true),
+});
+
+export const AccountCreateOutput = Schema.Struct({
+  account: AccountReference,
+  board: BoardSummarySchema,
+  url: Schema.String,
+  published: Schema.Literal(false),
+});
+
+export const AccountDuplicateInput = Schema.Struct({
+  ...AccountCreateInput.fields,
+  sourceBoardId: BoardIdSchema,
+  expectedRevision: BoardRevisionSchema,
+});
+
+export const AccountDeleteInput = Schema.Struct({
+  ...AccountBoardInput.fields,
+  expectedRevision: BoardRevisionSchema,
+  confirm: Schema.Literal(true),
+});
+
+export const AccountDeleteOutput = Schema.Struct({
+  account: AccountReference,
+  event: BoardDeletedSchema,
+});
+
+export const AccountRenameInput = Schema.Struct({
+  ...AccountDeleteInput.fields,
+  title: BoardTitleSchema,
+  mutationId: MutationIdSchema,
 });
 
 export const AccountSaveInput = Schema.Struct({

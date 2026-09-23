@@ -10,7 +10,7 @@ Use Bun 1.3.14 on macOS or Linux. Run from the repository root:
 
 ```bash
 bun install --frozen-lockfile
-bun packages/mood-board/src/local/main.ts --help
+bun packages/mood-board/src/mcp/main.ts --help
 ```
 
 Keep Sharp's optional native packages enabled. The local tool uses Sharp, not browser canvas or the browser HEIC decoder.
@@ -20,7 +20,7 @@ Approve an input folder and a separate output folder. Both must exist. Use absol
 ```bash
 mkdir -p /absolute/path/to/moodboard-output
 
-bun packages/mood-board/src/local/main.ts create_board \
+bun packages/mood-board/src/mcp/main.ts create_board \
   --root /absolute/path/to/input-assets \
   --output-dir /absolute/path/to/moodboard-output \
   --input '{"title":"Coastal textures","background":"#f5f3ef","output":"coast-01.moodboard"}'
@@ -38,7 +38,7 @@ Add this entry to your client's MCP configuration. Replace every path. Find the 
     "moodboard-local": {
       "command": "/absolute/path/to/bun",
       "args": [
-        "/absolute/path/to/repo/packages/mood-board/src/local/main.ts",
+        "/absolute/path/to/repo/packages/mood-board/src/mcp/main.ts",
         "mcp",
         "--root",
         "/absolute/path/to/input-assets",
@@ -379,16 +379,16 @@ Remote images and embedded providers can make network requests when the app disp
 
 ## Code boundaries
 
-- `src/local/contracts.ts`: action schemas, limits, and expected failures.
-- `src/local/action.ts`, `actions.ts`: shared CLI/MCP validation and action registry.
-- `src/local/account-*.ts`: optional browser-approved account access and transfers.
-- `src/local/moodboards.ts`: board operations and revision creation.
-- `src/local/local-files.ts`: approved paths, bounded reads, writes, and authorized deletion.
-- `src/local/local-media.ts`: source references and image/audio preparation.
-- `src/local/local-archive.ts`: the Effect adapter for shared archive validation and encoding.
-- `src/local/local-images.ts`: scoped Sharp operations.
-- `src/local/board-renderer.ts`: bounded local composition previews.
-- `src/local/main.ts`, `mcp.ts`: process and protocol adapters.
+- `src/mcp/contracts.ts`: action schemas, limits, and expected failures.
+- `src/mcp/action.ts`, `actions.ts`: shared CLI/MCP validation and action registry.
+- `src/mcp/account-*.ts`: optional browser-approved account access and transfers.
+- `src/mcp/moodboards.ts`: board operations and revision creation.
+- `src/mcp/local-files.ts`: approved paths, bounded reads, writes, and authorized deletion.
+- `src/mcp/local-media.ts`: source references and image/audio preparation.
+- `src/mcp/local-archive.ts`: the Effect adapter for shared archive validation and encoding.
+- `src/mcp/local-images.ts`: scoped Sharp operations.
+- `src/mcp/board-renderer.ts`: bounded local composition previews.
+- `src/mcp/main.ts`, `mcp.ts`: process and protocol adapters.
 - `src/lib/board-archive.ts`, `image-preflight.ts`: shared archive and image rules.
 
 Browser upload/download remains in `src/client/board/board-archive.ts`. Existing schemas, media rules, and layout functions remain authoritative. Effect runs only at the process boundary. The MCP adapter registers directly with Effect's server to return real image content.

@@ -817,6 +817,20 @@ const publicPublishing = SqlClient.SqlClient.use((sql) =>
   }),
 );
 
+const ownerVersions = SqlClient.SqlClient.use((sql) =>
+  Effect.gen(function* () {
+    yield* sql`CREATE TABLE owner_profile_version (
+      singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+      version INTEGER NOT NULL DEFAULT 0
+    )`;
+    yield* sql`INSERT INTO owner_profile_version (singleton, version) VALUES (1, 0)`;
+    yield* sql`CREATE TABLE owner_publication_versions (
+      board_id TEXT PRIMARY KEY REFERENCES boards(id) ON DELETE CASCADE,
+      version INTEGER NOT NULL DEFAULT 0
+    )`;
+  }),
+);
+
 export const migrationLoader = Migrator.fromRecord({
   '1_initial_schema': initialSchema,
   '2_board_tombstones': boardTombstones,
@@ -832,4 +846,5 @@ export const migrationLoader = Migrator.fromRecord({
   '12_youtube_item_kind': youtubeItemKind,
   '13_image_annotations': imageAnnotations,
   '14_x_post_item_kind': xPostItemKind,
+  '15_owner_versions': ownerVersions,
 });

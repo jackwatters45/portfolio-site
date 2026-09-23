@@ -1,5 +1,6 @@
 import { Effect, Schema } from 'effect';
 
+import type { AccountArchive } from './account-archive';
 import type { AccountBoards } from './account-boards';
 import type { AccountConnection } from './account-connection';
 import type { AccountError } from './account-contracts';
@@ -10,7 +11,22 @@ import {
 } from './contracts';
 import type { Moodboards } from './moodboards';
 
-export type ActionServices = Moodboards | AccountBoards | AccountConnection;
+import type { AccountClient } from './account-client';
+import type { AccountEditing } from './account-editing';
+import type { AccountMedia } from './account-media';
+import type { AccountMediaPartialError } from './account-media-contracts';
+import type { AccountOwner } from './account-owner';
+import type { BoardCommandError } from './board-command-schema';
+
+export type ActionServices =
+  | Moodboards
+  | AccountBoards
+  | AccountConnection
+  | AccountEditing
+  | AccountMedia
+  | AccountClient
+  | AccountOwner
+  | AccountArchive;
 
 type ActionValue<A> = { readonly value: A; readonly image?: PreviewImage };
 
@@ -26,7 +42,10 @@ type ActionDefinition<P, S> = {
     input: P,
   ) => Effect.Effect<
     ActionValue<S>,
-    LocalBoardError | AccountError,
+    | LocalBoardError
+    | AccountError
+    | BoardCommandError
+    | AccountMediaPartialError,
     ActionServices
   >;
 };

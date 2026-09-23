@@ -3,6 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import authSchema from '../../src/cloudflare/d1-migrations/0002_auth.sql?raw';
+import deviceAuthSchema from '../../src/cloudflare/d1-migrations/0004_agent_device_auth.sql?raw';
 import {
   createAuth,
   validateAuthBaseURL,
@@ -20,6 +21,7 @@ describe('Better Auth', () => {
     const database = new DatabaseSync(':memory:');
     databases.push(database);
     database.exec(authSchema);
+    database.exec(deviceAuthSchema);
     let magicLink = '';
     const auth = createAuth({
       database,

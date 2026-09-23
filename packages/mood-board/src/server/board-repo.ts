@@ -175,6 +175,7 @@ export type CommitRejected =
   | { readonly _tag: 'InvalidMedia' };
 
 export type ManagementRejected =
+  | { readonly _tag: 'RevisionConflict' }
   | { readonly _tag: 'BoardLimit' }
   | { readonly _tag: 'DeletedBoardId' }
   | { readonly _tag: 'ExistingBoardId' }
@@ -377,9 +378,11 @@ interface BoardPersistence {
     sourceBoardId: BoardId,
     boardId: BoardId,
     title: string,
+    expectedRevision: BoardRevision,
   ) => Effect.Effect<BoardSummary | ManagementRejected | null, SqlError>;
   readonly delete: (
     boardId: BoardId,
+    expectedRevision: BoardRevision,
   ) => Effect.Effect<BoardDeleted | ManagementRejected, SqlError>;
   readonly commit: (
     input: CommitInput,
@@ -550,6 +553,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
         sourceBoardId: BoardId,
         boardId: BoardId,
         title: string,
+        expectedRevision: BoardRevision,
       ) {
         if (sourceBoardId === boardId) {
           return ManagementRejection.InvalidOperation();
@@ -559,7 +563,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
           Effect.gen(function* () {
             const existing = yield* getSummary(boardId);
 
-            if (existing !== null) return existing;
+            if (existing !== null) return ManagementRejection.ExistingBoardId();
 
             const tombstones = yield* sql<TombstoneRow>`
               SELECT revision, deleted_at
@@ -574,6 +578,10 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
             const source = yield* getSummary(sourceBoardId);
 
             if (source === null) return null;
+            const snapshot = yield* getSnapshot(sourceBoardId);
+
+            if (snapshot === null || snapshot.revision !== expectedRevision)
+              return ManagementRejection.RevisionConflict();
 
             const counts =
               yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
@@ -624,6 +632,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
 
       const deleteBoard = Effect.fn('BoardRepo.delete')(function* (
         boardId: BoardId,
+        expectedRevision: BoardRevision,
       ) {
         if (boardId === DEFAULT_BOARD_ID) {
           return ManagementRejection.InvalidOperation();
@@ -651,6 +660,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
               if (tombstoneRow !== undefined) {
                 const tombstone = yield* decodeTombstone(tombstoneRow);
 
+                if (tombstone.revision !== expectedRevision + 1)
+                  return ManagementRejection.RevisionConflict();
+
                 return BoardDeletedSchema.make({
                   boardId,
                   revision: tombstone.revision,
@@ -658,21 +670,13 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
                 });
               }
 
-              const revision = BoardRevisionSchema.make(0);
-              const updatedAt = yield* boardNow;
-              yield* sql`
-                INSERT INTO board_tombstones (board_id, revision, deleted_at)
-                VALUES (${boardId}, ${revision}, ${updatedAt})
-              `;
-
-              return BoardDeletedSchema.make({
-                boardId,
-                revision,
-                updatedAt,
-              });
+              return ManagementRejection.RevisionConflict();
             }
 
             const board = yield* decodeBoardRow(boardRow);
+
+            if (board.revision !== expectedRevision)
+              return ManagementRejection.RevisionConflict();
 
             const counts =
               yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;

@@ -44,7 +44,7 @@ type ArchiveCodec = {
 };
 
 export class LocalArchive extends Context.Service<LocalArchive, ArchiveCodec>()(
-  'moodboard/local/LocalArchive',
+  'moodboard/mcp/LocalArchive',
 ) {
   static readonly layer = Layer.sync(LocalArchive, () => {
     const validate = Effect.fn('LocalArchive.validate')(function* (

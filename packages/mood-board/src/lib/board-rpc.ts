@@ -495,13 +495,14 @@ export const BoardRpcs = RpcGroup.make(
   Rpc.make('DuplicateBoard', {
     payload: {
       sourceBoardId: BoardIdSchema,
+      expectedRevision: BoardRevisionSchema,
       ...NewBoardFields,
     },
     success: BoardSummarySchema,
     error: BoardBackendError,
   }),
   Rpc.make('DeleteBoard', {
-    payload: BoardIdentityFields,
+    payload: { ...BoardIdentityFields, expectedRevision: BoardRevisionSchema },
     success: BoardDeletedSchema,
     error: BoardBackendError,
   }),

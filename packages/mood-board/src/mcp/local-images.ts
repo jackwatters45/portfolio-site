@@ -70,7 +70,7 @@ const decode = Effect.fn('LocalImages.decode')(
 );
 
 export class LocalImages extends Context.Service<LocalImages, ImageAdapter>()(
-  'moodboard/local/LocalImages',
+  'moodboard/mcp/LocalImages',
 ) {
   static readonly layer = Layer.effect(
     LocalImages,
