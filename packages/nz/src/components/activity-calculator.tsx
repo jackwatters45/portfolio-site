@@ -143,7 +143,7 @@ export default function ActivityCalculator() {
         </ul>
       </fieldset>
       <p className="note calculator-limits">
-        Based on itinerary research dated 22 September 2026, not held quotes.
+        Based on itinerary research dated 22–23 September 2026, not held quotes.
         “From” prices use the advertised starting rate. No food, accommodation,
         general travel, fuel, card fees, or optional extras. Unpriced
         suggestions are not included. Selections reset when you reload.

@@ -1,4 +1,4 @@
-// NZD estimates from the itinerary and docs/research, dated 22 September 2026.
+// NZD estimates from the itinerary and docs/research, dated 22–23 September 2026.
 // Keep these amounts in sync with the itinerary when its prices change.
 // Amounts are integer cents. No live quotes or currency conversion.
 export interface ActivityOption {
@@ -148,8 +148,15 @@ export const activities: readonly Activity[] = [
     id: 'wine',
     name: 'Wine half-day',
     itinerary: '#wine',
-    note: 'Hop On Hop Off bus (NZ$99.50), Gibbston cave tour (from NZ$30), and Kinross tasting (NZ$30). No lunch or bottles.',
+    note: 'Choose bike or bus, not both. Each estimate includes Gibbston and Kinross tastings (NZ$30 each). Bike uses the advertised package starting rate (NZ$105); the e-bike upgrade is unpriced and excluded. No lunch or bottles. Confirm October prices and availability.',
     options: [
+      {
+        id: 'bike-and-tastings',
+        label: 'Bike + two tastings',
+        cents: 10500 + 3000 + 3000,
+        basis: 'adult',
+        from: true,
+      },
       {
         id: 'bus-and-tastings',
         label: 'Bus + two tastings',

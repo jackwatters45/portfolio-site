@@ -182,7 +182,15 @@ Sources and booking link: [Onsen and adventure research](research/onsen-and-adve
 
 A wine-tasting outing sounds appealing, but it is **not considered one of the major three activities**.
 
-The preferred format is probably a relaxed half-day.
+The preferred format is Around The Basin’s self-guided Bike The Wineries Half Day, with regular mountain bikes or e-bikes. Keep the winery bus as an alternative for weather or non-riders, not a second required outing.
+
+Research checked 23 September 2026: the advertised bike package starts at NZ$105. It includes Queenstown transfers, helmet, map, and briefing. The e-bike upgrade price and seven-person October availability remain unverified. Allow about five hours: published September–April check-in is 11:50 AM, departure noon, riding from The Church in Gibbston around 12:50 PM, and pickup at 4:30 PM before returning to Queenstown. Arrange pickup from the final winery; changes require a call at least 45 minutes before departure.
+
+The local wine trail is rated easy / Grade 2, but requires gravel-riding confidence. Choose the distance to suit the group. Use spittoons while cycling; save drinking for the final pickup stop. Never ride impaired.
+
+Seven riders fall under the operator’s group terms: 10% non-refundable deposit and a seven-day cancellation cutoff. Published refund fees conflict; confirm them in writing before paying or relying on a weather switch to a bus.
+
+Current sources and limits: [Winery bike research](research/winery-bike-tour.md).
 
 Potential area:
 
@@ -205,7 +213,7 @@ Options researched on 22 September 2026:
 - Kinross Classic: NZ$30, 45 minutes, five wines. Book bistro lunch separately; lunch service ends at 3 PM.
 - Brennan: self-guided flights from NZ$45; hosted tasting NZ$65 with five wines and appetisers.
 
-Suggested pair: Gibbston Valley and Kinross, with lunch at Kinross. Allow about NZ$160 per adult for the half-day bus and both tastings, before lunch and bottles. Venue bookings must fit the bus timetable.
+Suggested stops remain Gibbston Valley and Kinross, with lunch at Kinross. Confirm riding time and lunch service before reserving both; choose fewer stops rather than rush. The bike package plus both NZ$30 tastings starts at NZ$165 per adult / NZ$1,155 for seven, excluding any e-bike upgrade. The Hop On Hop Off alternative is NZ$159.50 per adult / NZ$1,116.50 for seven. Lunch and bottles are extra. Choose one transport option per person; arrange final winery pickup.
 
 Sources and a possible bus sequence: [Car-free hikes and wine](research/car-free-hikes-and-wine.md). No dates or places are reserved.
 
@@ -356,7 +364,7 @@ Potential combination:
 
 - 8:00 AM meeting (~30 minutes)
 - Work for a few hours
-- Potential wine half-day, hike, Onsen, or Queenstown afternoon/evening
+- Potential winery bike half-day (bus alternative), hike, Onsen, or Queenstown afternoon/evening
 
 ## Thursday 15 October — Work + Flexible Day
 
@@ -398,7 +406,7 @@ Before the itinerary is finalized:
 1. Select the two local hikes.
 2. Choose Adventure Day activities from the researched options.
 3. Choose an Onsen time and book two pools with the shuttle.
-4. Research wine-tasting options and transportation.
+4. Confirm regular/e-bike prices, seven bikes and shuttle seats, group refund terms, and winery timings. Book the bike half-day or bus alternative, not both.
 5. Choose the rental vehicle and insurance cover from the researched quote.
 6. Get written rental approval for any Routeburn or Paradise extension before booking.
 7. Choose the Glenorchy walks and check road/track alerts before departure.
