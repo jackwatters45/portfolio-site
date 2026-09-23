@@ -40,12 +40,15 @@ export default function Comments({
 }: CommentsProps) {
   const id = useId();
   const registry = useContext(RegistryContext);
-  const ui = useCommentUi();
+  const { preferences, update, storageError } = usePreferences();
+  const identified = validName(preferences.name);
+  const sharingCursors = identified && preferences.cursors;
+  const ui = useCommentUi(sharingCursors);
   const {
     mounted,
     active,
     picking,
-    showCards,
+    list,
     settings,
     welcome,
     keyboardPicker,
@@ -58,7 +61,7 @@ export default function Comments({
     setMounted,
     setActive,
     setPicking,
-    setShowCards,
+    setList,
     setSettings,
     setWelcome,
     setKeyboardPicker,
@@ -68,16 +71,21 @@ export default function Comments({
     setLayout,
     setKeyboardTarget,
   } = ui;
-  const { preferences, update, storageError } = usePreferences();
-  const live = useRoom(
-    endpoint,
-    active && !welcome && validName(preferences.name),
-    preferences,
-  );
+  const live = useRoom(endpoint, identified, preferences);
   const store = useMemo(() => draftStore(room, registry), [room, registry]);
   const launcher = useRef<HTMLButtonElement>(null);
   const toolbar = useRef<HTMLDivElement>(null);
+  const pageMarkers = useRef<HTMLButtonElement>(null);
   const root = useRef<HTMLElement | null>(null);
+  const pageThreads = useMemo(
+    () => live.threads.filter((thread) => !thread.target.selector),
+    [live.threads],
+  );
+  const pageMessageCount = pageThreads.reduce(
+    (count, thread) => count + thread.messages.length,
+    0,
+  );
+  const listedThreads = list === 'page' ? pageThreads : live.threads;
   const activeThread =
     selected?.kind === 'thread'
       ? live.threads.find((thread) => thread.id === selected.id)
@@ -96,7 +104,7 @@ export default function Comments({
     !selected &&
     !settings &&
     !keyboardPicker &&
-    !showCards;
+    !list;
   const targets = useMemo(
     () => (mounted && root.current ? pageTargets(root.current) : []),
     [mounted],
@@ -112,7 +120,7 @@ export default function Comments({
     setSelected(null);
     setSettings(false);
     setKeyboardPicker(false);
-    setShowCards(false);
+    setList(null);
     setHover(null);
     stopTyping();
   };
@@ -124,6 +132,8 @@ export default function Comments({
   const openThread = (thread: Thread, locate = true) => {
     if (sending) return;
     clearPanels();
+    setActive(true);
+    setPicking(false);
     setSelected({ kind: 'thread', id: thread.id });
     if (locate) reveal(thread.target, root.current);
   };
@@ -149,7 +159,7 @@ export default function Comments({
       draft: store.atom(draftKey),
     });
     setSelected({ kind: 'thread', id: threadId });
-    setShowCards(false);
+    setList(null);
     setNotice(selected.kind === 'new' ? 'Comment added' : 'Reply added');
   };
   const hash = () => {
@@ -163,6 +173,7 @@ export default function Comments({
     rootSelector,
     active: active && !welcome,
     picking: canPick,
+    pointerActive: canPick || sharingCursors,
     root: (element) => {
       root.current = element;
       setMounted(true);
@@ -171,8 +182,7 @@ export default function Comments({
     layout: () => setLayout((value) => value + 1),
     hash,
     pointer: (event) => {
-      if (!active || !root.current || !(event.target instanceof Element))
-        return;
+      if (!root.current || !(event.target instanceof Element)) return;
       const element = targetElement(event.target, root.current);
       const point = { x: event.clientX, y: event.clientY };
       if (canPick) {
@@ -181,7 +191,7 @@ export default function Comments({
           previous?.selector === value?.selector ? previous : value,
         );
       }
-      if (preferences.cursors) {
+      if (sharingCursors) {
         const cursor = cursorFor(element ?? event.target, root.current, point);
         if (cursor) live.updatePresence({ cursor });
       }
@@ -207,7 +217,7 @@ export default function Comments({
       event.preventDefault();
       if (settings) setSettings(false);
       else if (keyboardPicker) setKeyboardPicker(false);
-      else if (showCards) setShowCards(false);
+      else if (list) setList(null);
       else if (selected) closeCard();
       else close();
     },
@@ -224,7 +234,14 @@ export default function Comments({
     }
   }, [activeThread]);
   const anchor = useMemo(() => {
-    if (!target?.selector || !mounted) return null;
+    if (!target || !mounted) return null;
+    if (!target.selector)
+      return {
+        contextElement: pageMarkers.current ?? root.current ?? undefined,
+        getBoundingClientRect: () =>
+          pageMarkers.current?.getBoundingClientRect() ??
+          new DOMRect(window.innerWidth - 12, 12, 0, 23),
+      };
     return {
       contextElement: root.current ?? undefined,
       getBoundingClientRect: () => {
@@ -290,10 +307,39 @@ export default function Comments({
           )}
         </div>
       )}
-      {active &&
-        !welcome &&
+      {identified && preferences.markers && pageThreads.length > 0 && (
+        <button
+          ref={pageMarkers}
+          type="button"
+          className={`pc-pin pc-page-comments ${list === 'page' || activeThread?.target.selector === '' ? 'pc-pin-active' : ''}`}
+          aria-label={`Page comments: ${pageMessageCount} ${pageMessageCount === 1 ? 'message' : 'messages'}`}
+          aria-expanded={
+            list === 'page' || activeThread?.target.selector === ''
+          }
+          title="Page comments"
+          disabled={sending}
+          onClick={() => {
+            if (list === 'page' || activeThread?.target.selector === '') {
+              clearPanels();
+              return;
+            }
+            const thread =
+              pageThreads.length === 1 ? pageThreads[0] : undefined;
+            if (thread) openThread(thread, false);
+            else {
+              clearPanels();
+              setActive(true);
+              setPicking(false);
+              setList('page');
+            }
+          }}
+        >
+          {pageMessageCount}
+        </button>
+      )}
+      {identified &&
         preferences.markers &&
-        live.threads.map((thread, index) => {
+        live.threads.map((thread) => {
           const point = pointFor(thread.target, root.current);
           return point && point.y > 0 && point.y < window.innerHeight ? (
             <button
@@ -301,18 +347,16 @@ export default function Comments({
               type="button"
               className={`pc-pin ${activeThread?.id === thread.id ? 'pc-pin-active' : ''}`}
               style={{ left: point.x, top: point.y }}
-              aria-label={`Comment ${index + 1}: ${thread.target.quote}`}
+              aria-label={`${thread.messages.length} ${thread.messages.length === 1 ? 'comment' : 'comments'} on ${thread.target.quote}`}
               aria-pressed={activeThread?.id === thread.id}
               disabled={sending}
               onClick={() => openThread(thread, false)}
             >
-              {index + 1}
+              {thread.messages.length}
             </button>
           ) : null;
         })}
-      {active &&
-        !welcome &&
-        preferences.cursors &&
+      {sharingCursors &&
         live.peers.map((peer) => {
           const point =
             peer.cursor && presenceNow - peer.updatedAt < 10_000
@@ -361,7 +405,7 @@ export default function Comments({
       {active && !welcome && selected?.kind === 'new' && (
         <FloatingPanel
           anchor={anchor ?? toolbar.current}
-          target={!!anchor}
+          placement={target?.selector ? 'bottom-start' : 'bottom-end'}
           label="New comment"
           className="pc-new-comment"
           onClose={closeCard}
@@ -377,7 +421,7 @@ export default function Comments({
       {active && !welcome && activeThread && (
         <FloatingPanel
           anchor={anchor ?? toolbar.current}
-          target={!!anchor}
+          placement={target?.selector ? 'bottom-start' : 'bottom-end'}
           label="Comment thread"
           focusIndex={0}
           className="pc-thread-panel"
@@ -396,20 +440,21 @@ export default function Comments({
           </ThreadCard>
         </FloatingPanel>
       )}
-      {active && !welcome && showCards && (
+      {active && !welcome && list && (
         <FloatingPanel
-          anchor={toolbar.current}
-          label="Page comments"
+          anchor={list === 'page' ? pageMarkers.current : toolbar.current}
+          placement={list === 'page' ? 'bottom-end' : 'top-start'}
+          label={list === 'page' ? 'Page comments' : 'All comments'}
           className="pc-list-panel"
-          onClose={() => setShowCards(false)}
+          onClose={() => setList(null)}
         >
           <PanelHeading
-            title={`Comments${live.threads.length ? ` · ${live.threads.length}` : ''}`}
-            onClose={() => setShowCards(false)}
+            title={list === 'page' ? 'Page comments' : 'Comments'}
+            onClose={() => setList(null)}
           />
           <div className="pc-thread-list">
-            {live.threads.length ? (
-              live.threads.map((thread) => (
+            {listedThreads.length ? (
+              listedThreads.map((thread) => (
                 <ThreadCard
                   key={thread.id}
                   thread={thread}
@@ -431,7 +476,7 @@ export default function Comments({
                   className="pc-text-button"
                   type="button"
                   onClick={() => {
-                    setShowCards(false);
+                    setList(null);
                     setPicking(true);
                   }}
                 >
@@ -546,7 +591,7 @@ export default function Comments({
         active={active}
         welcome={welcome}
         picking={canPick}
-        showCards={showCards}
+        showCards={list === 'all'}
         cursors={preferences.cursors}
         settings={settings}
         pageComment={selected?.kind === 'new' && !selected.target.selector}
@@ -569,10 +614,10 @@ export default function Comments({
           setPicking(next);
         }}
         onList={() => {
-          const next = !showCards;
+          const next = list !== 'all';
           clearPanels();
           setPicking(false);
-          setShowCards(next);
+          setList(next ? 'all' : null);
         }}
         onPage={() => choose(GENERAL_TARGET)}
         onCursors={() => {

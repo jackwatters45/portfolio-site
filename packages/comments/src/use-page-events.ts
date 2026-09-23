@@ -9,6 +9,7 @@ interface Events {
   rootSelector: string;
   active: boolean;
   picking: boolean;
+  pointerActive: boolean;
   root: (element: HTMLElement | null) => void;
   layout: () => void;
   pointer: (event: PointerEvent) => void;
@@ -115,7 +116,7 @@ export function usePageEvents(events: Events) {
   );
   const idle = useMemo(() => Atom.make(null), []);
   useAtomMount(source);
-  useAtomMount(events.active ? pointers : idle);
+  useAtomMount(events.pointerActive ? pointers : idle);
   // This DOM attribute must change before paint, without an atom idle lease.
   useLayoutEffect(() => {
     const root = document.querySelector(events.rootSelector);

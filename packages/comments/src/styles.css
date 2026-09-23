@@ -117,7 +117,7 @@
   padding: 4px;
   gap: 2px;
   border: 1px solid var(--pc-border);
-  border-radius: 12px;
+  border-radius: 999px;
   background: var(--pc-surface);
   color: var(--pc-text);
   box-shadow: var(--pc-shadow);
@@ -126,6 +126,7 @@
 }
 .pc-root .pc-toolbar-open {
   width: 212px;
+  border-radius: 18px;
 }
 .pc-root .pc-toolbar-open:has(.pc-online-count) {
   width: 262px;
@@ -135,7 +136,7 @@
   width: 30px;
   height: 30px;
   flex: 0 0 30px;
-  border-radius: 8px;
+  border-radius: 50%;
   color: var(--pc-accent);
 }
 .pc-root .pc-launcher:hover {
@@ -155,7 +156,7 @@
   width: 30px;
   height: 30px;
   flex: 0 0 30px;
-  border-radius: 7px;
+  border-radius: 10px;
   color: var(--pc-muted);
 }
 .pc-root .pc-tool:hover {
@@ -629,6 +630,11 @@
 .pc-root .pc-pin-active {
   outline: 2px solid var(--pc-accent);
   outline-offset: 2px;
+}
+.pc-root .pc-page-comments {
+  top: 12px;
+  right: 12px;
+  transform: none;
 }
 .pc-root .pc-cursor {
   position: fixed;

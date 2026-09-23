@@ -15,7 +15,7 @@ interface UiState {
   mounted: boolean;
   active: boolean;
   picking: boolean;
-  showCards: boolean;
+  list: 'all' | 'page' | null;
   settings: boolean;
   welcome: boolean;
   keyboardPicker: boolean;
@@ -33,13 +33,13 @@ const clock = Atom.make(
 ).pipe(Atom.map(AsyncResult.getOrElse(() => 0)));
 const idleClock = Atom.make(0);
 
-export function useCommentUi() {
+export function useCommentUi(presenceActive: boolean) {
   const model = useMemo(() => {
     const state = Atom.make<UiState>({
       mounted: false,
       active: false,
       picking: true,
-      showCards: false,
+      list: null,
       settings: false,
       welcome: false,
       keyboardPicker: false,
@@ -69,7 +69,9 @@ export function useCommentUi() {
   const [value, set] = useAtom(model.state);
   const setNotice = useAtomSet(model.notice);
   const copyLink = useAtomSet(model.copy);
-  const presenceNow = useAtomValue(value.active ? clock : idleClock);
+  const presenceNow = useAtomValue(
+    value.active || presenceActive ? clock : idleClock,
+  );
   const actions = useMemo(() => {
     const field =
       <K extends keyof UiState>(key: K) =>
@@ -82,7 +84,7 @@ export function useCommentUi() {
       setMounted: field('mounted'),
       setActive: field('active'),
       setPicking: field('picking'),
-      setShowCards: field('showCards'),
+      setList: field('list'),
       setSettings: field('settings'),
       setWelcome: field('welcome'),
       setKeyboardPicker: field('keyboardPicker'),

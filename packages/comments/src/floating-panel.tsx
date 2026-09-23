@@ -8,6 +8,7 @@ import {
   useDismiss,
   useFloating,
   useInteractions,
+  type Placement,
   type VirtualElement,
 } from '@floating-ui/react';
 import { useLayoutEffect, type ReactNode } from 'react';
@@ -19,7 +20,7 @@ interface Props {
   children: ReactNode;
   onClose: () => void;
   className?: string;
-  target?: boolean;
+  placement?: Placement;
   focusIndex?: number;
 }
 export function FloatingPanel({
@@ -28,7 +29,7 @@ export function FloatingPanel({
   children,
   onClose,
   className = '',
-  target = false,
+  placement = 'top-start',
   focusIndex = 1,
 }: Props) {
   const { refs, floatingStyles, context } = useFloating({
@@ -37,7 +38,7 @@ export function FloatingPanel({
       if (!open) onClose();
     },
     strategy: 'fixed',
-    placement: target ? 'bottom-start' : 'top-start',
+    placement,
     elements: { reference: anchor instanceof Element ? anchor : null },
     whileElementsMounted: autoUpdate,
     middleware: [
@@ -60,7 +61,7 @@ export function FloatingPanel({
     outsidePress: (event) =>
       !(
         event.target instanceof Element &&
-        event.target.closest('[data-comments-toolbar]')
+        event.target.closest('[data-comments-toolbar], .pc-pin')
       ),
   });
   const { getFloatingProps } = useInteractions([dismiss]);

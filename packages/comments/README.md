@@ -22,6 +22,10 @@ Keep the widget outside `rootSelector`. Use a distinct room and endpoint for eac
 Use element IDs or `data-comment-anchor` for stable comment locations.
 Set the `--comments-*` colors in the site's `theme.css` to match the page.
 
+After name entry, cursors stay active until **Live cursors** is turned off.
+Closing the toolbar does not disconnect. The top-right bubble opens page comments.
+Markers show message counts.
+
 ## Infrastructure
 
 Define the Worker, Durable Object, rooms, origins, limits, and bindings in root `alchemy.run.ts`.
