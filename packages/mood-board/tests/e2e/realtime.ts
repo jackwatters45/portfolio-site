@@ -50,8 +50,6 @@ const dataDirectory = await mkdtemp(join(tmpdir(), 'mood-board-realtime-'));
 const origin = `http://127.0.0.1:${port}`;
 const workspaceRoot = join(dataDirectory, 'workspaces');
 const authDatabasePath = join(dataDirectory, 'auth.sqlite');
-const legacyDatabasePath = join(dataDirectory, 'legacy.sqlite');
-const legacyMediaPath = join(dataDirectory, 'legacy-media');
 
 const makeRuntime = (cookie: string) =>
   ManagedRuntime.make(
@@ -83,13 +81,10 @@ const startServer = async () => {
       ...process.env,
       HOST: '127.0.0.1',
       PORT: String(port),
-      DB_PATH: legacyDatabasePath,
       AUTH_DB_PATH: authDatabasePath,
       BETTER_AUTH_URL: origin,
       TRUSTED_ORIGINS: origin,
       WORKSPACE_PATH: workspaceRoot,
-      LEGACY_WORKSPACE_OWNER_ID: firstSession.accountId,
-      MEDIA_PATH: legacyMediaPath,
       MEDIA_UPLOADS_PER_HOUR: '1',
     },
     stdout: 'ignore',
@@ -137,8 +132,6 @@ const runPublisher = async (
         ...process.env,
         AUTH_DB_PATH: authDatabasePath,
         WORKSPACE_PATH: workspaceRoot,
-        LEGACY_WORKSPACE_OWNER_ID: firstSession.accountId,
-        DB_PATH: legacyDatabasePath,
       },
       stdout: 'pipe',
       stderr: 'pipe',

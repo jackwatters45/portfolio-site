@@ -5,7 +5,7 @@ import {
   type BoardDeleted,
   type BoardId,
   type BoardSummary,
-} from '../lib/board-rpc';
+} from '../../lib/board-rpc';
 import { BoardRpcClient, makeBoardRpcRuntime } from './board-rpc-client';
 
 export interface BoardCatalog {

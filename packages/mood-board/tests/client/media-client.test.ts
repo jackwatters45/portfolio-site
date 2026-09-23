@@ -4,8 +4,8 @@ import {
   downloadMedia,
   MediaClientError,
   uploadMedia,
-} from '../../src/client/media-client';
-import { mediaUrl, publicMediaUrl } from '../../src/client/media-url';
+} from '../../src/client/media/media-client';
+import { mediaUrl, publicMediaUrl } from '../../src/client/media/media-url';
 import { MediaIdSchema } from '../../src/lib/media';
 import { PublicIdSchema } from '../../src/lib/public-api';
 

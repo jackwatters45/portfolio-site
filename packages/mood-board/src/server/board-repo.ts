@@ -169,27 +169,16 @@ export type ManagementRejected =
   | { readonly _tag: 'LastBoard' };
 
 const mutationHash = (input: CommitInput) => {
-  const legacyPayload = [
-    input.boardId,
-    input.clientId,
-    input.mutationId,
-    input.title ?? null,
-    input.upserts,
-    input.deletes,
-  ];
-  const metadata =
-    input.background === undefined
-      ? input.backgroundMediaId === undefined
-        ? undefined
-        : { backgroundMediaId: input.backgroundMediaId }
-      : input.backgroundMediaId === undefined
-        ? { background: input.background }
-        : {
-            background: input.background,
-            backgroundMediaId: input.backgroundMediaId,
-          };
-  const payload =
-    metadata === undefined ? legacyPayload : [...legacyPayload, metadata];
+  const payload = {
+    boardId: input.boardId,
+    clientId: input.clientId,
+    mutationId: input.mutationId,
+    title: input.title,
+    background: input.background,
+    backgroundMediaId: input.backgroundMediaId,
+    upserts: input.upserts,
+    deletes: input.deletes,
+  };
   const hash = createHash('sha256')
     .update(JSON.stringify(payload))
     .digest('hex');
@@ -216,87 +205,12 @@ const itemBytes = (item: RemoteBoardItem) =>
   Buffer.byteLength(item.xPostText ?? '', 'utf8') +
   Buffer.byteLength(item.xPostDate ?? '', 'utf8');
 
-const normalizeLegacyItemMetadata = Effect.fn(
-  'BoardRepo.normalizeLegacyItemMetadata',
-)(function* (row: ItemRow) {
-  const storedXHideThread =
-    row.kind === 'x'
-      ? yield* Schema.decodeUnknownEffect(NullableSqliteBooleanSchema)(
-          row.x_hide_thread,
-        ).pipe(Effect.orDie)
-      : null;
-  const hasSource =
-    row.kind === 'image' ||
-    row.kind === 'spotify' ||
-    row.kind === 'youtube' ||
-    row.kind === 'audio' ||
-    row.kind === 'x';
-  const hasLabel =
-    row.kind === 'swatch' ||
-    row.kind === 'spotify' ||
-    row.kind === 'youtube' ||
-    row.kind === 'audio';
-
-  return {
-    ...(hasSource && row.src !== null ? { src: row.src } : {}),
-    ...((row.kind === 'image' || row.kind === 'audio') && row.media_id !== null
-      ? { mediaId: row.media_id }
-      : {}),
-    ...(row.kind === 'image' && row.href !== null ? { href: row.href } : {}),
-    ...(row.kind === 'image' && row.annotation_title !== null
-      ? { annotationTitle: row.annotation_title }
-      : {}),
-    ...(row.kind === 'image' && row.annotation_description !== null
-      ? { annotationDescription: row.annotation_description }
-      : {}),
-    ...(row.kind === 'note' ? { text: row.text === null ? '' : row.text } : {}),
-    ...(row.kind === 'swatch'
-      ? { color: row.color === null ? '#000000' : row.color }
-      : {}),
-    ...(hasLabel && row.label !== null ? { label: row.label } : {}),
-    ...(row.kind === 'website' && row.website_url !== null
-      ? { websiteUrl: row.website_url }
-      : {}),
-    ...(row.kind === 'website' && row.website_image_url !== null
-      ? { websiteImageUrl: row.website_image_url }
-      : {}),
-    ...(row.kind === 'website' && row.website_title !== null
-      ? { websiteTitle: row.website_title }
-      : {}),
-    ...(row.kind === 'website' && row.website_description !== null
-      ? { websiteDescription: row.website_description }
-      : {}),
-    ...(row.kind === 'website' && row.website_site_label !== null
-      ? { websiteSiteLabel: row.website_site_label }
-      : {}),
-    ...(row.kind === 'x' && row.x_display !== null
-      ? { xDisplay: row.x_display }
-      : {}),
-    ...(row.kind === 'x' && row.x_theme !== null
-      ? { xTheme: row.x_theme }
-      : {}),
-    ...(storedXHideThread === null
-      ? {}
-      : { xHideThread: storedXHideThread === 1 }),
-    ...(row.kind === 'x' && row.x_author_name !== null
-      ? { xAuthorName: row.x_author_name }
-      : {}),
-    ...(row.kind === 'x' && row.x_author_handle !== null
-      ? { xAuthorHandle: row.x_author_handle }
-      : {}),
-    ...(row.kind === 'x' && row.x_post_text !== null
-      ? { xPostText: row.x_post_text }
-      : {}),
-    ...(row.kind === 'x' && row.x_post_date !== null
-      ? { xPostDate: row.x_post_date }
-      : {}),
-  };
-});
-
 const decodeItemRow = Effect.fn('BoardRepo.decodeItemRow')(function* (
   row: ItemRow,
 ) {
-  const metadata = yield* normalizeLegacyItemMetadata(row);
+  const xHideThread = yield* Schema.decodeUnknownEffect(
+    NullableSqliteBooleanSchema,
+  )(row.x_hide_thread).pipe(Effect.orDie);
   return yield* Schema.decodeUnknownEffect(BoardItemSchema)({
     id: row.id,
     kind: row.kind,
@@ -306,7 +220,26 @@ const decodeItemRow = Effect.fn('BoardRepo.decodeItemRow')(function* (
     height: row.height,
     rotation: row.rotation,
     order: row.order_index,
-    ...metadata,
+    src: row.src ?? undefined,
+    mediaId: row.media_id ?? undefined,
+    href: row.href ?? undefined,
+    annotationTitle: row.annotation_title ?? undefined,
+    annotationDescription: row.annotation_description ?? undefined,
+    text: row.text ?? undefined,
+    color: row.color ?? undefined,
+    label: row.label ?? undefined,
+    websiteUrl: row.website_url ?? undefined,
+    websiteImageUrl: row.website_image_url ?? undefined,
+    websiteTitle: row.website_title ?? undefined,
+    websiteDescription: row.website_description ?? undefined,
+    websiteSiteLabel: row.website_site_label ?? undefined,
+    xDisplay: row.x_display ?? undefined,
+    xTheme: row.x_theme ?? undefined,
+    xHideThread: xHideThread === null ? undefined : xHideThread === 1,
+    xAuthorName: row.x_author_name ?? undefined,
+    xAuthorHandle: row.x_author_handle ?? undefined,
+    xPostText: row.x_post_text ?? undefined,
+    xPostDate: row.x_post_date ?? undefined,
   }).pipe(Effect.orDie);
 });
 

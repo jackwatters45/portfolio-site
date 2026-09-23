@@ -1,7 +1,6 @@
 import { SqliteClient, SqliteMigrator } from '@effect/sql-sqlite-node';
 import { describe, expect, it } from '@effect/vitest';
 import { Deferred, Effect, Fiber, Layer, Option, Schema, Stream } from 'effect';
-import * as SqlClient from 'effect/unstable/sql/SqlClient';
 
 import {
   BoardIdSchema,
@@ -36,9 +35,6 @@ const DatabaseTest = SqliteMigrator.layer({ loader: migrationLoader }).pipe(
 );
 
 const TestLayer = BoardService.layer.pipe(Layer.provide(DatabaseTest));
-const TestLayerWithSql = BoardService.layer.pipe(
-  Layer.provideMerge(DatabaseTest),
-);
 
 const boardA = BoardIdSchema.make('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
 const boardB = BoardIdSchema.make('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
@@ -168,65 +164,6 @@ describe('BoardService', () => {
       expect(snapshot?.revision).toBe(1);
       expect(snapshot?.board.items).toEqual([note]);
     }).pipe(Effect.provide(TestLayer)),
-  );
-
-  it.effect(
-    'normalizes legacy stored item metadata before canonical decoding',
-    () =>
-      Effect.gen(function* () {
-        const service = yield* BoardService;
-        const sql = yield* SqlClient.SqlClient;
-        yield* service.create(boardA, 'Legacy metadata');
-        yield* sql`
-        INSERT INTO items (
-          board_id, id, kind, x, y, width, height, rotation, order_index,
-          src, text, color, label, website_title
-        ) VALUES
-          (${boardA}, 'legacy-note', 'note', 0, 0, 300, 200, 0, 1,
-            'https://invalid.example/note.png', NULL, '#ffffff', 'Drop me', 'Drop me'),
-          (${boardA}, 'legacy-swatch', 'swatch', 320, 0, 300, 300, 0, 2,
-            'https://invalid.example/swatch.png', 'Drop me', NULL, 'Palette', 'Drop me'),
-          (${boardA}, 'legacy-image', 'image', 640, 0, 300, 200, 0, 3,
-            'https://images.example/chair.jpg', 'Drop me', '#ffffff', 'Drop me', 'Drop me')
-      `;
-
-        expect((yield* service.get(boardA))?.board.items).toEqual([
-          {
-            id: ItemIdSchema.make('legacy-note'),
-            kind: 'note',
-            x: 0,
-            y: 0,
-            width: 300,
-            height: 200,
-            rotation: 0,
-            order: 1,
-            text: '',
-          },
-          {
-            id: ItemIdSchema.make('legacy-swatch'),
-            kind: 'swatch',
-            x: 320,
-            y: 0,
-            width: 300,
-            height: 300,
-            rotation: 0,
-            order: 2,
-            color: '#000000',
-            label: 'Palette',
-          },
-          {
-            id: ItemIdSchema.make('legacy-image'),
-            kind: 'image',
-            x: 640,
-            y: 0,
-            width: 300,
-            height: 200,
-            rotation: 0,
-            order: 3,
-            src: 'https://images.example/chair.jpg',
-          },
-        ]);
-      }).pipe(Effect.provide(TestLayerWithSql)),
   );
 
   it.effect('persists, duplicates, and removes image links', () =>

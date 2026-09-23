@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { mediaUrl } from '../client/media-url';
+import { mediaUrl } from '../client/media/media-url';
 import type { MediaId } from '../lib/media';
 
 function BackgroundImage({ src }: { readonly src: string }) {

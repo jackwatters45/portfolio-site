@@ -20,7 +20,7 @@ bun run dev
 
 Open `http://localhost:8787`. Both root and package dev commands start the root Alchemy stack, including the other sites. Alchemy runs Vite and the Cloudflare services locally, with state under the root `.alchemy` directory. The browser keeps its account-scoped IndexedDB backup. Both survive normal development restarts. Magic links are printed in the Alchemy log during local development.
 
-Signed-out visitors can bypass account creation at `/demo`. The guest demo keeps one example board and locally added images entirely in IndexedDB, never starts private RPC, and cannot call owner media routes. Hosted audio, Spotify, YouTube, direct image URLs, basic website links, X references, notes, and colors remain available. Guest boards are specific to that browser and can disappear when site data is cleared; JSON export is the backup path. Signing in opens the separate server-backed private board library and does not silently claim guest data.
+Signed-out visitors can bypass account creation at `/demo`. The guest demo keeps one example board and locally added images entirely in IndexedDB, never starts private RPC, and cannot call owner media routes. Hosted audio, Spotify, YouTube, direct image URLs, basic website links, X references, notes, and colors remain available. Guest boards are specific to that browser and can disappear when site data is cleared; Archive export is the backup path. Signing in opens the separate server-backed private board library and does not silently claim guest data.
 
 One package `tsconfig.json` checks the browser, Bun server, Cloudflare worker, and tests. It inherits shared settings from the root config. Lint, format, and ignore rules also live at the root; the package has no separate tool configs.
 
@@ -35,6 +35,15 @@ bun run format
 
 The root lint config has mood-board-only exceptions for Effect service `use` methods and existing canvas markup. Formatting follows the unchanged root formatter config, including generated routes.
 
+## Code layout
+
+- `src/client/board/`: board creation, camera, colors, archives, local storage, and synchronization.
+- `src/client/media/`: image processing, uploads, media URLs, playback, and embeds.
+- `src/lib/`: definitions shared by browser and server code.
+- `src/server/`: shared backend logic and the optional Bun adapter.
+- `src/cloudflare/`: Cloudflare adapters and the Worker entry point.
+- `src/components/` and `src/routes/`: React rendering and routes.
+
 ## Optional self-hosted Bun target
 
 The Cloudflare/Alchemy stack is the primary deployment. To run the alternative single-process Bun target, build the React app and start the server directly:
@@ -44,7 +53,7 @@ bun run build
 NODE_ENV=production bun src/server/main.ts
 ```
 
-The server serves `dist/`, stores Better Auth users, sessions, and public-route locators at `data/mood-board-auth.sqlite`, and creates one private workspace under `WORKSPACE_PATH/<sha256-user-id>/` per account. Each workspace contains `workspace.sqlite` plus its managed media. `DB_PATH` and `MEDIA_PATH` remain the explicit legacy-public workspace used only for pre-account publication migration.
+The server serves `dist/`, stores Better Auth users, sessions, and public-route locators at `data/mood-board-auth.sqlite`, and creates one private workspace under `WORKSPACE_PATH/<sha256-user-id>/` per account. Each workspace contains `workspace.sqlite` plus its managed media. All board and media access uses the authenticated account's workspace.
 
 Optional server runtime variables:
 
@@ -52,7 +61,6 @@ Optional server runtime variables:
 PORT=3000 HOST=0.0.0.0 \
   AUTH_DB_PATH=data/mood-board-auth.sqlite \
   WORKSPACE_PATH=data/mood-board.sqlite.workspaces \
-  DB_PATH=data/mood-board.sqlite MEDIA_PATH=data/media \
   NODE_ENV=production bun src/server/main.ts
 # Required in production: BETTER_AUTH_SECRET and the canonical BETTER_AUTH_URL.
 # Optional Google OAuth: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.
@@ -62,9 +70,9 @@ PORT=3000 HOST=0.0.0.0 \
 # MEDIA_STORAGE_BYTES=1073741824 MEDIA_RESERVATION_TTL_MS=600000
 ```
 
-Authenticated RPC is same-origin only. Back up `AUTH_DB_PATH`, the complete `WORKSPACE_PATH` tree, and any configured legacy `DB_PATH`/`MEDIA_PATH`, including SQLite WAL files. Managed-media metadata without its workspace media directory is incomplete. The current real-time design intentionally supports one Bun server process; horizontal replicas would require a distributed event bus and workspace lifecycle coordination.
+Authenticated RPC is same-origin only. Back up `AUTH_DB_PATH` and the complete `WORKSPACE_PATH` tree, including SQLite WAL files. Managed-media metadata without its workspace media directory is incomplete. The current real-time design intentionally supports one Bun server process; horizontal replicas would require a distributed event bus and workspace lifecycle coordination.
 
-Existing pre-account data is never assigned to the first person who signs in. To make one known Better Auth user the explicit owner of the old Bun `DB_PATH`/`MEDIA_PATH` or Cloudflare `public-preview` Durable Object, set `LEGACY_WORKSPACE_OWNER_ID` to that immutable user id before starting/deploying. Back up first and keep the value stable; remove it only after deliberately copying that workspace into the normal per-account location.
+Pre-account workspaces and anonymous browser data are not imported. Public routes require an account entry in the directory. Unknown routes return 404.
 
 Uploaded files that never become board references, including interrupted imports, enter a 30-day grace period. An authenticated operator can reclaim at most 50 eligible or retry-pending objects per call:
 
@@ -121,7 +129,7 @@ Before the first production deployment:
 
 The workflow fails before deployment if required mood board secrets are absent. Stop deploying from the old repository after the switch. Builds and tests do not delete cloud resources or deploy the stack.
 
-New local images and local audio are uploaded as managed media rather than embedded SQLite strings: Cloudflare stores account-prefixed bytes in private R2, while Bun stores them inside the selected account directory below `WORKSPACE_PATH`. Existing hosted URLs and legacy `data:image/*` boards remain readable. Upload metadata uses pending/ready states, and deletion keeps a retryable tombstone until object removal succeeds, so interrupted writes and deletes remain discoverable. Streaming HTTP still keeps the Durable Object active; hibernatable WebSockets can be considered after the protocol boundary is stable.
+New local images and local audio are uploaded as managed media rather than embedded SQLite strings: Cloudflare stores account-prefixed bytes in private R2, while Bun stores them inside the selected account directory below `WORKSPACE_PATH`. Hosted URLs remain supported. The browser-only guest demo stores its local images as embedded image data. Upload metadata uses pending/ready states, and deletion keeps a retryable tombstone until object removal succeeds, so interrupted writes and deletes remain discoverable. Streaming HTTP still keeps the Durable Object active; hibernatable WebSockets can be considered after the protocol boundary is stable.
 
 The Bun SQLite/filesystem deployment and Cloudflare Durable Object/R2 deployment are separate authorities. Building for Cloudflare does not automatically migrate either authority; use the portable `.moodboard` archive flow for boards with managed media.
 
@@ -137,16 +145,16 @@ The Bun SQLite/filesystem deployment and Cloudflare Durable Object/R2 deployment
 - SQLite persistence through a self-hosted Effect v4 server
 - Multiple route-addressable boards with create, switch, duplicate, and delete controls
 - Automatic cross-tab updates through Effect RPC and board-scoped PubSub
-- Portable binary `.moodboard` archives with deduplicated managed media, plus legacy `.moodboard.json` import/export for boards without managed media
+- One portable `.moodboard` archive format for all boards, with deduplicated image and audio assets
 - Minimal presentation mode with hover details and animated, full-image viewing
 - Required Better Auth workspace access with Google or email magic-link sign-in
 - Private-by-default publisher profile and explicitly published read-only boards
 
 ## Managed media and portable files
 
-Single-device images, board background images, and selected bulk images are header-checked before raster decoding, limited to 30 MiB, 10,000 pixels per axis, and 64 megapixels, then resized to at most a 2,200-pixel longest edge and encoded as WebP when appropriate. Signature-confirmed iPhone HEIC/HEIF/HIF photos use the browser's native decoder and have a tighter 50-megapixel ceiling, which admits Apple's typical 12, 24, and 48 MP photos without shipping a memory-heavy software HEVC decoder. Safari on current Apple devices provides the intended HEIC path; browsers without native HEIC support show a conversion message. Background images use viewport cover over the board's fallback color and remain fixed while the infinite canvas pans and zooms. Bulk staging uses a lightweight HEIC placeholder rather than decoding every unselected photo. Failed bulk entries stay visible and do not prevent successful selections from being placed in one board/undo operation. The server accepts only normalized image/audio MIME types, checks byte limits and file signatures, and serves private same-origin media with authenticated range support and no shared caching. Hosted image/audio URLs and older embedded `data:image/*` items remain compatible; audio data/blob URLs are always rejected.
+Single-device images, board background images, and selected bulk images are header-checked before raster decoding, limited to 30 MiB, 10,000 pixels per axis, and 64 megapixels, then resized to at most a 2,200-pixel longest edge and encoded as WebP when appropriate. Signature-confirmed iPhone HEIC/HEIF/HIF photos use the browser's native decoder and have a tighter 50-megapixel ceiling, which admits Apple's typical 12, 24, and 48 MP photos without shipping a memory-heavy software HEVC decoder. Safari on current Apple devices provides the intended HEIC path; browsers without native HEIC support show a conversion message. Background images use viewport cover over the board's fallback color and remain fixed while the infinite canvas pans and zooms. Bulk staging uses a lightweight HEIC placeholder rather than decoding every unselected photo. Failed bulk entries stay visible and do not prevent successful selections from being placed in one board/undo operation. The server accepts only normalized image/audio MIME types, checks byte limits and file signatures, and serves private same-origin media with authenticated range support and no shared caching. Hosted image/audio URLs and guest-demo embedded images are supported; audio data/blob URLs are always rejected.
 
-A board with managed media downloads as a versioned binary `.moodboard` ZIP. Its manifest maps logical media references to deduplicated binary entries instead of treating deployment-specific IDs as portable; legacy embedded images on a mixed board are converted into deduplicated archive entries too. Import validates archive paths, duplicate/missing entries, counts, a 50 MB compressed/expanded envelope, MIME/signature agreement, per-file SHA-256 integrity, and references before uploading each asset once. IDs are remapped to the destination deployment, and the current board is replaced only after every upload succeeds. A board without managed media continues to use human-readable `.moodboard.json`, including legacy embedded images. Keep untrusted archive limits in place rather than extracting these files with general-purpose paths.
+Every board downloads as a versioned binary `.moodboard` ZIP, including boards without uploaded media. Its manifest maps media references to deduplicated binary entries. Guest-demo embedded images become archive entries too. Import validates archive paths, duplicate/missing entries, counts, a 50 MB compressed/expanded envelope, MIME/signature agreement, per-file SHA-256 integrity, and references before uploading each asset once. IDs are remapped to the destination deployment, and the current board is replaced only after every upload succeeds. The guest demo restores archived images to browser-local data without uploading them. Archived background images and uploaded audio require sign-in. JSON board files and older board shapes are not supported. Keep untrusted archive limits in place rather than extracting these files with general-purpose paths.
 
 ## Public publishing scope
 
@@ -168,7 +176,7 @@ The public routes are `/@handle` and `/share/:publicId`. They load only `/api/pu
 
 Cloudflare uses the same per-account publication tables and verifies every public read in the selected account Durable Object. D1's public-route directory is only a locator; stale entries fail closed when the workspace no longer confirms a publication. There is no browser or unauthenticated publishing-administration endpoint. Account display names and public publisher profiles remain separate.
 
-Opaque public ids are unguessable locators, not secret-link authorization: published boards are world-readable. External images and hosted audio can reveal viewer IP addresses to their respective hosts; managed R2/filesystem media stays same-origin. Adding an X card opts that board into loading X’s official widget automatically for viewers; X can receive viewer IP and browser information or set third-party state despite the widget’s DNT option. A stored same-origin snapshot remains visible while the widget loads or when it fails. Legacy embedded-image boards remain supported, though new uploads use managed media. Open Graph board images are deferred rather than faked; honest social covers still require an image-rendering pipeline.
+Opaque public ids are unguessable locators, not secret-link authorization: published boards are world-readable. External images and hosted audio can reveal viewer IP addresses to their respective hosts; managed R2/filesystem media stays same-origin. Adding an X card opts that board into loading X’s official widget automatically for viewers; X can receive viewer IP and browser information or set third-party state despite the widget’s DNT option. A stored same-origin snapshot remains visible while the widget loads or when it fails. Account uploads use managed media; guest-demo images stay browser-local. Open Graph board images are deferred rather than faked; honest social covers still require an image-rendering pipeline.
 
 ## Website card scope
 
@@ -188,7 +196,7 @@ YouTube remains a visible official player rather than an extracted audio stream;
 
 The server is deliberately small: up to 100 boards, one process, and server-ordered last-write-wins changes. Boards have direct `/boards/:id` routes, while the permanent default board remains the safe fallback for stale or deleted links. Item movement and resizing stay local during the gesture and write once on pointer-up. Incoming remote changes clear local undo history rather than risking a whole-board overwrite.
 
-Better Auth is the authorization boundary. Bun selects a hashed per-account filesystem workspace after validating the session; Cloudflare selects a per-account Durable Object after validating the session at the edge. A client cannot choose a workspace id. Private media, RPC, previews, imports, and cleanup remain inside that selected workspace. IndexedDB documents and durable offline outboxes are keyed by both immutable account id and board id, and legacy anonymous browser data is not silently assigned to the first account. Pending mutations are rebased onto that account board's next server snapshot and replayed in order. Same-field conflicts remain server-ordered last-write-wins. Bulk intake stages at most 150 files locally, creates privacy-stripped thumbnails, prepares and uploads selected images three at a time, reads EXIF `DateTimeOriginal`/`CreateDate` for capture sorting, and falls back to file modification time. Content-based duplicate detection, EXIF grouping, smart curation, and AI-assisted selection remain follow-up work.
+Better Auth is the authorization boundary. Bun selects a hashed per-account filesystem workspace after validating the session; Cloudflare selects a per-account Durable Object after validating the session at the edge. A client cannot choose a workspace id. Private media, RPC, previews, imports, and cleanup remain inside that selected workspace. IndexedDB documents and durable offline outboxes are keyed by both immutable account id and board id. Pending mutations are rebased onto that account board's next server snapshot and replayed in order. Same-field conflicts remain server-ordered last-write-wins. Bulk intake stages at most 150 files locally, creates privacy-stripped thumbnails, prepares and uploads selected images three at a time, reads EXIF `DateTimeOriginal`/`CreateDate` for capture sorting, and falls back to file modification time. Content-based duplicate detection, EXIF grouping, smart curation, and AI-assisted selection remain follow-up work.
 
 Run the checks with:
 

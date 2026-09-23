@@ -8,8 +8,8 @@ import {
 } from 'react';
 
 import type { BoardItem } from '../client/board/types';
-import { mediaUrl } from '../client/media-url';
 import type { AudioPlaybackCoordinator } from '../client/media/audio-playback';
+import { mediaUrl } from '../client/media/media-url';
 import {
   loadSpotifyIframeApi,
   type SpotifyEmbedController,

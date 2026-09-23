@@ -7,7 +7,6 @@ import {
   HttpStaticServer,
 } from 'effect/unstable/http';
 
-import { decodeAccountId, type AccountId } from '../lib/account';
 import { MediaIdSchema, MediaQuotaLimitsSchema } from '../lib/media';
 import { ProfileHandleSchema, PublicIdSchema } from '../lib/public-api';
 import { PositiveIntegerSchema } from '../lib/schema';
@@ -17,10 +16,7 @@ import {
   MagicLinkRateLimitTimestampSchema,
 } from './bun-auth-rate-limit';
 import { openBunPublicDirectory } from './bun-public-directory';
-import {
-  BunWorkspaceRegistry,
-  makeBunLegacyWorkspaceHandler,
-} from './bun-workspace';
+import { BunWorkspaceRegistry } from './bun-workspace';
 import { MISSING_MAGIC_LINK_EMAIL, decodeMagicLinkEmail } from './magic-link';
 import { DEFAULT_MEDIA_QUOTA_LIMITS } from './media-service';
 import { publicBoardReferencesMedia } from './public-media';
@@ -33,15 +29,10 @@ import { SECURITY_HEADERS } from './security-headers';
 
 const port = Number(process.env.PORT ?? 3000);
 const hostname = process.env.HOST ?? '127.0.0.1';
-const databasePath = process.env.DB_PATH ?? 'data/mood-board.sqlite';
 const authDatabasePath =
   process.env.AUTH_DB_PATH ?? 'data/mood-board-auth.sqlite';
-const mediaPath = process.env.MEDIA_PATH ?? 'data/media';
 const workspaceRoot =
-  process.env.WORKSPACE_PATH ?? `${databasePath}.workspaces`;
-const legacyWorkspaceOwnerId = decodeAccountId(
-  process.env.LEGACY_WORKSPACE_OWNER_ID?.trim(),
-);
+  process.env.WORKSPACE_PATH ?? 'data/mood-board.sqlite.workspaces';
 const {
   auth,
   googleEnabled,
@@ -85,19 +76,6 @@ const mediaLimits = Schema.decodeUnknownSync(MediaQuotaLimitsSchema)({
 
 const workspaces = new BunWorkspaceRegistry(workspaceRoot, mediaLimits);
 const publicDirectory = openBunPublicDirectory(authDatabasePath);
-const legacyPublicWorkspace = makeBunLegacyWorkspaceHandler({
-  databasePath,
-  mediaPath,
-  mediaLimits,
-});
-const fetchAccountWorkspace = (
-  accountId: AccountId,
-  request: Request,
-): Promise<Response> =>
-  accountId === legacyWorkspaceOwnerId
-    ? legacyPublicWorkspace.fetch(request)
-    : workspaces.fetch(accountId, request);
-
 const noStoreJson = (status: number, error: string) =>
   HttpServerResponse.jsonUnsafe(
     { error },
@@ -182,7 +160,7 @@ const forwardPrivate = Effect.fn('Server.ForwardPrivate')(function* () {
   const account = yield* resolveAuthenticatedAccountEffect(auth, source);
   if (account === null) return unauthorized();
   const response = yield* tryServerBoundary('PrivateWorkspace', () =>
-    fetchAccountWorkspace(account.id, toPrivateWorkspaceRequest(source)),
+    workspaces.fetch(account.id, toPrivateWorkspaceRequest(source)),
   );
   return fromWebResponse(privateResponse(response));
 });
@@ -192,23 +170,17 @@ const forwardPrivateRequest = () =>
     Effect.catchTag('ServerBoundaryError', recoverServerBoundary),
   );
 
-const fetchPublicWorkspace = (
-  accountId: AccountId | null,
-  request: Request,
-): Promise<Response> =>
-  accountId === null
-    ? legacyPublicWorkspace.fetch(request)
-    : fetchAccountWorkspace(accountId, request);
-
 const forwardPublicProfile = Effect.fn('Server.ForwardPublicProfile')(
   function* () {
     const params = yield* HttpRouter.params;
     const handle = Option.getOrNull(decodeProfileHandle(params.handle));
     if (handle === null) return notFound();
+    const accountId = publicDirectory.profileAccount(handle);
+    if (accountId === null) return notFound();
     const request = yield* HttpServerRequest.HttpServerRequest;
     const source = yield* HttpServerRequest.toWeb(request);
     const response = yield* tryServerBoundary('PublicWorkspace', () =>
-      fetchPublicWorkspace(publicDirectory.profileAccount(handle), source),
+      workspaces.fetch(accountId, source),
     );
     return fromWebResponse(response);
   },
@@ -222,10 +194,12 @@ const forwardPublicBoard = Effect.fn('Server.ForwardPublicBoard')(function* () {
   const params = yield* HttpRouter.params;
   const publicId = Option.getOrNull(decodePublicId(params.publicId));
   if (publicId === null) return notFound();
+  const accountId = publicDirectory.boardAccount(publicId);
+  if (accountId === null) return notFound();
   const request = yield* HttpServerRequest.HttpServerRequest;
   const source = yield* HttpServerRequest.toWeb(request);
   const response = yield* tryServerBoundary('PublicWorkspace', () =>
-    fetchPublicWorkspace(publicDirectory.boardAccount(publicId), source),
+    workspaces.fetch(accountId, source),
   );
   return fromWebResponse(response);
 });
@@ -242,11 +216,12 @@ const servePublicMedia = Effect.fn('Server.ServePublicMedia')(function* () {
   const mediaId = Option.getOrNull(decodeMediaId(params.mediaId));
   if (publicId === null || mediaId === null) return notFound();
   const accountId = publicDirectory.boardAccount(publicId);
+  if (accountId === null) return notFound();
   const boardRequest = new Request(
     `http://mood-board.internal/api/public/boards/${encodeURIComponent(publicId)}`,
   );
   const boardResponse = yield* tryServerBoundary('PublicWorkspace', () =>
-    fetchPublicWorkspace(accountId, boardRequest),
+    workspaces.fetch(accountId, boardRequest),
   );
   const publicBoard = yield* tryServerBoundary('PublicBoardJson', () =>
     boardResponse.json(),
@@ -257,7 +232,7 @@ const servePublicMedia = Effect.fn('Server.ServePublicMedia')(function* () {
   const source = yield* HttpServerRequest.toWeb(request);
   const headers = new Headers(source.headers);
   const mediaResponse = yield* tryServerBoundary('PublicWorkspace', () =>
-    fetchPublicWorkspace(
+    workspaces.fetch(
       accountId,
       new Request(`http://mood-board.internal/media/${mediaId}`, {
         method: source.method,
@@ -437,10 +412,7 @@ const SecurityHeaders = HttpRouter.middleware(
 const ResourceLifecycle = Layer.effectDiscard(
   Effect.acquireRelease(Effect.void, () =>
     tryServerBoundary('Shutdown', async () => {
-      await Promise.all([
-        workspaces.dispose(),
-        legacyPublicWorkspace.dispose(),
-      ]);
+      await workspaces.dispose();
       publicDirectory.close();
       closeAuth();
     }).pipe(Effect.orDie),

@@ -11,11 +11,7 @@ import * as HttpRouter from 'effect/unstable/http/HttpRouter';
 import * as RpcSerialization from 'effect/unstable/rpc/RpcSerialization';
 import * as RpcServer from 'effect/unstable/rpc/RpcServer';
 
-import {
-  AccountIdSchema,
-  decodeAccountId,
-  type AccountId,
-} from '../lib/account';
+import { AccountIdSchema, type AccountId } from '../lib/account';
 import { BoardRpcs } from '../lib/board-rpc';
 import { MediaIdSchema, MediaQuotaLimitsSchema } from '../lib/media';
 import {
@@ -39,6 +35,7 @@ import {
   DEFAULT_MEDIA_QUOTA_LIMITS,
   MediaService,
 } from '../server/media-service';
+import { PublicHandlers } from '../server/public-handlers';
 import { publicBoardReferencesMedia } from '../server/public-media';
 import { PublishingService } from '../server/publishing-service';
 import {
@@ -54,9 +51,8 @@ import {
   pruneExpiredCloudflareAuth,
 } from './auth';
 import { CloudflareBoardHandlers } from './board-handlers';
-import { CatalogProjection, DEFAULT_WORKSPACE_ID } from './catalog-projection';
+import { CatalogProjection } from './catalog-projection';
 import { makeDurableDatabaseLayer } from './database';
-import { CloudflarePublicHandlers } from './public-handlers';
 import { makeR2MediaObjectStore } from './r2-media-object-store';
 import { CloudflareWebsitePreviewFetcher } from './website-preview-fetcher';
 
@@ -83,7 +79,6 @@ export interface CloudflareEnv {
   readonly RESEND_API_KEY?: string;
   readonly EMAIL_SENDER?: string;
   readonly IS_LOCAL?: string;
-  readonly LEGACY_WORKSPACE_OWNER_ID?: string;
   readonly MEDIA_UPLOADS_PER_HOUR?: string;
   readonly MEDIA_UPLOAD_BYTES_PER_DAY?: string;
   readonly MEDIA_STORAGE_BYTES?: string;
@@ -97,8 +92,6 @@ export class WorkspaceDurableObject {
 
   constructor(state: DurableObjectState, env: CloudflareEnv) {
     const workspaceId = state.id.toString();
-    const legacyWorkspace =
-      workspaceId === String(env.WORKSPACES.idFromName(DEFAULT_WORKSPACE_ID));
     const database = makeDurableDatabaseLayer(state.storage);
     const projection = CatalogProjection.layerFor(workspaceId).pipe(
       Layer.provide(D1Client.layer({ db: env.CATALOG })),
@@ -120,7 +113,7 @@ export class WorkspaceDurableObject {
       Layer.provide(handlers),
       Layer.provide(RpcSerialization.layerNdjson),
     );
-    const publicServer = CloudflarePublicHandlers.pipe(
+    const publicServer = PublicHandlers.pipe(
       Layer.provide(PublishingService.layer),
       Layer.provide(database),
     );
@@ -153,9 +146,7 @@ export class WorkspaceDurableObject {
         ),
       ),
       Layer.provide(MediaClientIdentity.cloudflareForwarded),
-      Layer.provide(
-        makeR2MediaObjectStore(env.MEDIA, workspaceId, legacyWorkspace),
-      ),
+      Layer.provide(makeR2MediaObjectStore(env.MEDIA, workspaceId)),
       Layer.provide(database),
     );
     const server = Layer.mergeAll(rpcServer, publicServer, mediaServer);
@@ -241,18 +232,6 @@ const privateResponse = (response: Response): Response => {
   );
 };
 
-const workspaceNameForAccount = (
-  env: Pick<CloudflareEnv, 'LEGACY_WORKSPACE_OWNER_ID'>,
-  accountId: AccountId,
-): string => {
-  const legacyWorkspaceOwnerId = decodeAccountId(
-    env.LEGACY_WORKSPACE_OWNER_ID?.trim(),
-  );
-  return legacyWorkspaceOwnerId === accountId
-    ? DEFAULT_WORKSPACE_ID
-    : accountWorkspaceName(accountId);
-};
-
 const forwardPrivateRequest = async (
   request: Request,
   env: CloudflareEnv,
@@ -271,7 +250,7 @@ const forwardPrivateRequest = async (
   }
   const response = await workspaceStub(
     env,
-    workspaceNameForAccount(env, accountId),
+    accountWorkspaceName(accountId),
   ).fetch(workspaceRequest(request, pathname, headers));
   return privateResponse(response);
 };
@@ -289,7 +268,7 @@ type PublicCatalogRoute =
 const publicWorkspaceName = async (
   env: CloudflareEnv,
   route: PublicCatalogRoute,
-): Promise<string> => {
+): Promise<string | null> => {
   const rawRow =
     route.kind === 'profile'
       ? await env.CATALOG.prepare(
@@ -303,9 +282,7 @@ const publicWorkspaceName = async (
           .bind(route.identifier)
           .first<{ readonly userId: unknown }>();
   const userId = decodeCatalogRouteUserId(rawRow);
-  return userId === null
-    ? DEFAULT_WORKSPACE_ID
-    : workspaceNameForAccount(env, userId);
+  return userId === null ? null : accountWorkspaceName(userId);
 };
 
 const servePublicMedia = async (
@@ -322,13 +299,12 @@ const servePublicMedia = async (
   if (decodedPublicId === null || decodedMediaId === null)
     return jsonError(404, 'Not found');
 
-  const workspace = workspaceStub(
-    env,
-    await publicWorkspaceName(env, {
-      kind: 'board',
-      identifier: decodedPublicId,
-    }),
-  );
+  const workspaceName = await publicWorkspaceName(env, {
+    kind: 'board',
+    identifier: decodedPublicId,
+  });
+  if (workspaceName === null) return jsonError(404, 'Not found');
+  const workspace = workspaceStub(env, workspaceName);
   const boardResponse = await workspace.fetch(
     workspaceRequest(
       new Request(request.url, { headers: request.headers }),
@@ -357,7 +333,7 @@ const servePublicMedia = async (
 
 export const runScheduledMediaMaintenance = async (
   env: Pick<CloudflareEnv, 'WORKSPACES'>,
-  workspaceNames: ReadonlyArray<string> = [DEFAULT_WORKSPACE_ID],
+  workspaceNames: ReadonlyArray<string>,
 ): Promise<void> => {
   for (const workspaceName of workspaceNames) {
     const response = await workspaceStub(env, workspaceName).fetch(
@@ -375,7 +351,7 @@ export const runScheduledMediaMaintenance = async (
 };
 
 const listWorkspaceNames = async (
-  env: Pick<CloudflareEnv, 'CATALOG' | 'LEGACY_WORKSPACE_OWNER_ID'>,
+  env: Pick<CloudflareEnv, 'CATALOG'>,
 ): Promise<string[]> => {
   const users = await env.CATALOG.prepare(
     'SELECT id FROM "user" ORDER BY id',
@@ -385,10 +361,10 @@ const listWorkspaceNames = async (
   const workspaceNames = (users.results ?? []).flatMap((user) => {
     const decoded = decodeCatalogUserRow(user);
     return Option.isSome(decoded)
-      ? [workspaceNameForAccount(env, decoded.value.id)]
+      ? [accountWorkspaceName(decoded.value.id)]
       : [];
   });
-  return [...new Set([DEFAULT_WORKSPACE_ID, ...workspaceNames])];
+  return workspaceNames;
 };
 
 export default {
@@ -489,10 +465,11 @@ export default {
         if (publicId !== null) route = { kind: 'board', identifier: publicId };
       }
       if (route === null) return jsonError(404, 'Not found');
-      const response = await workspaceStub(
-        env,
-        await publicWorkspaceName(env, route),
-      ).fetch(workspaceRequest(request, url.pathname));
+      const workspaceName = await publicWorkspaceName(env, route);
+      if (workspaceName === null) return jsonError(404, 'Not found');
+      const response = await workspaceStub(env, workspaceName).fetch(
+        workspaceRequest(request, url.pathname),
+      );
       return withSecurityHeaders(response);
     }
 

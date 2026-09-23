@@ -5,7 +5,7 @@ import {
   preflightImageBytes,
   preflightImageFile,
   validateImageLimits,
-} from '../src/client/media/image-preflight';
+} from '../src/client/media/image-processing';
 
 const u32 = (value: number) => {
   const bytes = new Uint8Array(4);

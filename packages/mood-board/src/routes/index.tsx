@@ -9,8 +9,11 @@ import {
 } from 'react';
 
 import { authClient } from '../client/auth-client';
-import { createBoardCatalog, type BoardCatalog } from '../client/board-catalog';
 import { boardPath } from '../client/board-route';
+import {
+  createBoardCatalog,
+  type BoardCatalog,
+} from '../client/board/board-catalog';
 import { HomeAccountIdentity } from '../components/account-identity';
 import { DEFAULT_BOARD_ID, type BoardSummary } from '../lib/board-rpc';
 
@@ -93,7 +96,7 @@ function HomePage() {
     }
   }, [creating, navigate]);
 
-  const catalogCurrent = user !== undefined && loadedAccountId === user.id;
+  const catalogCurrent = loadedAccountId === user?.id;
   const visibleBoards = catalogCurrent ? boards : [];
   const visibleError = catalogCurrent ? error : '';
   const catalogLoading =

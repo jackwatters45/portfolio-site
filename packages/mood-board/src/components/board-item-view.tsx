@@ -11,8 +11,8 @@ import {
 } from 'react';
 
 import type { BoardItem } from '../client/board/types';
-import { mediaUrl } from '../client/media-url';
 import type { AudioPlaybackCoordinator } from '../client/media/audio-playback';
+import { mediaUrl } from '../client/media/media-url';
 import { MAX_X_POST_CARD_WIDTH } from '../client/media/x-post-measurement';
 import {
   MIN_NATIVE_AUDIO_CARD_HEIGHT,

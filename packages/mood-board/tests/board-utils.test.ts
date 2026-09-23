@@ -6,7 +6,7 @@ import {
   DEFAULT_BOARD_BACKGROUND,
   formatHexColorInput,
   normalizeHexColor,
-} from '../src/client/board/board-utils';
+} from '../src/client/board/board-background';
 
 describe('custom hex colors', () => {
   it('normalizes lowercase six-digit values', () => {

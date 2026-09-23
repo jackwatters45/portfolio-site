@@ -85,8 +85,6 @@ export const moodBoard = Effect.gen(function* () {
       ),
       EMAIL_SENDER: process.env.EMAIL_SENDER ?? '',
       IS_LOCAL: isAlchemyDev ? 'true' : '',
-      LEGACY_WORKSPACE_OWNER_ID:
-        process.env.LEGACY_WORKSPACE_OWNER_ID?.trim() ?? '',
       MEDIA_UPLOADS_PER_HOUR: process.env.MEDIA_UPLOADS_PER_HOUR ?? '180',
       MEDIA_UPLOAD_BYTES_PER_DAY:
         process.env.MEDIA_UPLOAD_BYTES_PER_DAY ?? '268435456',

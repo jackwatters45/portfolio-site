@@ -4,9 +4,9 @@ import type {
   ItemId,
   RemoteBoard,
   RemoteBoardItem,
-} from '../lib/board-rpc';
-import type { MediaId } from '../lib/media';
-import type { Board, BoardItem, BoardMutation } from './board/types';
+} from '../../lib/board-rpc';
+import type { MediaId } from '../../lib/media';
+import type { Board, BoardItem, BoardMutation } from './types';
 
 const MAX_MUTATION_CHARACTERS = 8 * 1024 * 1024;
 
