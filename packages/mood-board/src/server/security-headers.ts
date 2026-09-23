@@ -28,6 +28,7 @@ const VITE_DEVELOPMENT_CONTENT_SECURITY_POLICY =
 
 type SecurityHeaderOptions = {
   readonly allowViteDevelopmentScripts?: boolean;
+  readonly referrerPolicy?: 'no-referrer' | 'same-origin';
 };
 
 export function withSecurityHeaders(
@@ -38,6 +39,10 @@ export function withSecurityHeaders(
 
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     headers.set(name, value);
+  }
+
+  if (options.referrerPolicy !== undefined) {
+    headers.set('Referrer-Policy', options.referrerPolicy);
   }
 
   if (options.allowViteDevelopmentScripts) {

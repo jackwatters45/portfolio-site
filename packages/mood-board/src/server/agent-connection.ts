@@ -46,6 +46,8 @@ const page = (body: string, status = 200) =>
         },
       },
     ),
+    // Native POST forms need a non-null Origin for same-origin validation.
+    { referrerPolicy: 'same-origin' },
   );
 
 const failure = () =>
