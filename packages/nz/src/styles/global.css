@@ -594,6 +594,75 @@ dd {
   text-transform: uppercase;
 }
 
+@keyframes nz-nav-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes nz-nav-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Motion stays opt-in; reduced-motion navigation and disclosures stay instant. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .plan-chevron {
+    transition: transform 200ms ease-out;
+  }
+
+  :root:active-view-transition-type(
+      nz-section-navigation
+    )::view-transition-old(root) {
+    animation: nz-nav-fade-out 160ms ease-out both;
+    mix-blend-mode: normal;
+  }
+
+  :root:active-view-transition-type(
+      nz-section-navigation
+    )::view-transition-new(root) {
+    animation: nz-nav-fade-in 160ms ease-out both;
+    mix-blend-mode: normal;
+  }
+
+  /* Animate intrinsic height only where native details transitions are supported. */
+  @supports (interpolate-size: allow-keywords) and
+    (transition-behavior: allow-discrete) and selector(::details-content) {
+    :is(.plan-disclosure, .booking-notes)::details-content {
+      interpolate-size: allow-keywords;
+      block-size: 0;
+      overflow: clip;
+      overflow-clip-margin: 6px;
+      opacity: 0;
+      transition:
+        block-size 200ms ease-out,
+        opacity 200ms ease-out,
+        content-visibility 200ms allow-discrete;
+    }
+
+    :is(.plan-disclosure, .booking-notes)[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+
+    /* Let the existing compact closed spacing follow the content, not jump. */
+    .plan-disclosure > .plan-summary {
+      transition: margin-bottom 200ms ease-out;
+    }
+
+    .plan-disclosure.chapter + .chapter {
+      transition: margin-top 200ms ease-out;
+    }
+
+    .plan-disclosure.activity + .activity {
+      transition:
+        margin-top 200ms ease-out,
+        padding-top 200ms ease-out;
+    }
+  }
+}
+
 @media (max-width: 600px) {
   .page {
     padding-inline: 24px;
