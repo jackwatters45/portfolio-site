@@ -37,6 +37,9 @@ import { MediaHandlers } from '../../src/server/media-handlers';
 import { MediaObjectStore } from '../../src/server/media-object-store';
 import { MediaService } from '../../src/server/media-service';
 import { migrationLoader } from '../../src/server/migrations';
+import { OwnerHandlers } from '../../src/server/owner-handlers';
+import { OwnerService } from '../../src/server/owner-service';
+import { PublicationRouting } from '../../src/server/publication-routing';
 
 const account = {
   origin: 'https://board.example',
@@ -124,8 +127,18 @@ const fixture = Effect.gen(function* () {
   const web = yield* Effect.acquireRelease(
     Effect.sync(() =>
       HttpRouter.toWebHandler(
-        Layer.merge(
+        Layer.mergeAll(
           mediaServer,
+          OwnerHandlers.pipe(
+            Layer.provide(OwnerService.layer),
+            Layer.provide(
+              Layer.succeed(PublicationRouting, {
+                claim: () => Effect.void,
+                sync: () => Effect.void,
+              }),
+            ),
+            Layer.provide(database),
+          ),
           RpcServer.layerHttp({
             group: BoardRpcs,
             path: '/rpc',

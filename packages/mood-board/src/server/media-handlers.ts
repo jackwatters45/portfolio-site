@@ -478,7 +478,6 @@ export const MediaHandlers = HttpRouter.use((router) =>
       ),
     );
 
-    yield* router.add('*', '/api/owner/*', jsonError(404, 'Not found'));
     yield* router.add(
       '*',
       '/media/:mediaId',
