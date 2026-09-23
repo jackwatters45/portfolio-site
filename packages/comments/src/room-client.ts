@@ -15,6 +15,7 @@ import * as Socket from 'effect/unstable/socket/Socket';
 import {
   CommentRequestError,
   decodeServer,
+  validName,
   type Author,
   type ClientEvent,
   type Cursor,
@@ -102,6 +103,7 @@ export class RoomClient extends Context.Service<
 
       const announce = Effect.fn('RoomClient.announce')((author: Author) =>
         Effect.gen(function* () {
+          if (!validName(author.name)) return;
           const current = yield* Ref.get(presence);
 
           if ((yield* SubscriptionRef.get(state)).connection !== 'live') return;
@@ -130,6 +132,11 @@ export class RoomClient extends Context.Service<
 
       const submit = Effect.fn('RoomClient.submit')((event: Mutation) =>
         Effect.gen(function* () {
+          if (!validName(event.author.name))
+            return yield* new CommentRequestError({
+              message: 'Enter your name before commenting.',
+            });
+
           if ((yield* SubscriptionRef.get(state)).connection !== 'live')
             return yield* new CommentRequestError({
               message: 'You are offline. You can keep writing.',

@@ -73,7 +73,7 @@ export default function Comments({
     setKeyboardTarget,
   } = ui;
 
-  const live = useRoom(endpoint, identified, preferences);
+  const live = useRoom(endpoint, preferences);
   const store = useMemo(() => draftStore(room, registry), [room, registry]);
   const launcher = useRef<HTMLButtonElement>(null);
   const toolbar = useRef<HTMLDivElement>(null);
@@ -131,6 +131,7 @@ export default function Comments({
   };
 
   const clearPanels = () => {
+    setWelcome(false);
     setSelected(null);
     setSettings(false);
     setKeyboardPicker(false);
@@ -143,6 +144,7 @@ export default function Comments({
     if (sending) return;
     clearPanels();
     setSelected({ kind: 'new', target: value });
+    setWelcome(!identified);
   };
 
   const openThread = (thread: Thread, locate = true) => {
@@ -200,13 +202,13 @@ export default function Comments({
 
     if (!comment) return;
     setActive(true);
-    setWelcome(!validName(preferences.name));
+    setWelcome(false);
     setSelected({ kind: 'thread', id: comment });
   };
 
   usePageEvents({
     rootSelector,
-    active: active && !welcome,
+    active,
     picking: canPick,
     pointerActive: canPick || sharingCursors,
     root: (element) => {
@@ -255,7 +257,8 @@ export default function Comments({
       if (event.key !== 'Escape' || event.defaultPrevented || sending) return;
       event.preventDefault();
 
-      if (settings) setSettings(false);
+      if (welcome) setWelcome(false);
+      else if (settings) setSettings(false);
       else if (keyboardPicker) setKeyboardPicker(false);
       else if (list) setList(null);
       else if (selected) closeCard();
@@ -321,6 +324,7 @@ export default function Comments({
       sending={sending}
       onSubmit={submit}
       onCancel={closeCard}
+      onName={() => setWelcome(true)}
       onTyping={(typing) =>
         live.updatePresence({ typing: typing ? draftKey : null })
       }
@@ -352,7 +356,7 @@ export default function Comments({
           }}
         />
       )}
-      {identified && preferences.markers && pageThreads.length > 0 && (
+      {preferences.markers && pageThreads.length > 0 && (
         <button
           ref={pageMarkers}
           type="button"
@@ -385,8 +389,7 @@ export default function Comments({
           {pageMessageCount}
         </button>
       )}
-      {identified &&
-        preferences.markers &&
+      {preferences.markers &&
         live.threads.map((thread) => {
           const point = pointFor(thread.target, root.current);
 
@@ -438,16 +441,18 @@ export default function Comments({
         <FloatingPanel
           anchor={toolbar.current}
           label="Join comments"
-          onClose={close}
+          onClose={() => setWelcome(false)}
         >
-          <PanelHeading title="Join comments" onClose={close} />
+          <PanelHeading
+            title="Join comments"
+            onClose={() => setWelcome(false)}
+          />
           <NameForm
             name={preferences.name}
             welcome
             onSave={async (name) => {
               await update({ name });
               setWelcome(false);
-              setPicking(true);
             }}
           />
         </FloatingPanel>
@@ -485,7 +490,9 @@ export default function Comments({
             onLocate={() => reveal(activeThread.target, root.current)}
             onCopy={() => copyLink(activeThread)}
             authorId={preferences.id}
-            likesDisabled={live.connection !== 'live' || live.liking}
+            likesDisabled={
+              !identified || live.connection !== 'live' || live.liking
+            }
             onLike={(messageId, liked) =>
               like(activeThread.id, messageId, liked)
             }
@@ -519,7 +526,9 @@ export default function Comments({
                   onLocate={() => openThread(thread)}
                   onCopy={() => copyLink(thread)}
                   authorId={preferences.id}
-                  likesDisabled={live.connection !== 'live' || live.liking}
+                  likesDisabled={
+                    !identified || live.connection !== 'live' || live.liking
+                  }
                   onLike={(messageId, liked) =>
                     like(thread.id, messageId, liked)
                   }
@@ -659,7 +668,8 @@ export default function Comments({
         welcome={welcome}
         picking={canPick}
         showCards={list === 'all'}
-        cursors={preferences.cursors}
+        cursors={sharingCursors}
+        identified={identified}
         settings={settings}
         pageComment={selected?.kind === 'new' && !selected.target.selector}
         count={live.threads.length}
@@ -670,9 +680,11 @@ export default function Comments({
         onToggle={() => {
           if (active) close();
           else {
-            setWelcome(!validName(preferences.name));
+            setWelcome(false);
             setActive(true);
-            setPicking(true);
+            setPicking(identified);
+
+            if (!identified) setList('all');
           }
         }}
         onPick={() => {

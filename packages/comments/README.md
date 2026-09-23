@@ -22,8 +22,13 @@ Keep the widget outside `rootSelector`. Use a distinct room and endpoint for eac
 Use element IDs or `data-comment-anchor` for stable comment locations.
 Set the `--comments-*` colors in the site's `theme.css` to match the page.
 
+Visitors can read threads, replies, and live updates without entering a name.
+New comments request a name. Replies have an **Enter name to reply** control.
+Name entry preserves the selected target and draft; it does not submit a comment.
+Reactions also require a valid name.
+
 After name entry, cursors stay active until **Live cursors** is turned off.
-Closing the toolbar does not disconnect. The top-right bubble opens page comments.
+Closing the toolbar does not disconnect, including for anonymous readers. The top-right bubble opens page comments.
 Markers show message counts.
 
 ## Infrastructure
@@ -43,7 +48,7 @@ NZ runs at http://localhost:4325/. The comments Worker uses port 4340.
 
 ## Limits
 
-- Guest names are not authenticated. Private use needs host access control.
+- Display names are not authentication. Private use needs host access control.
 - No edit, delete, resolve, or moderation controls.
 - Drafts stay local. Sending requires a live connection.
 - 2,000 characters per message; 250 threads and 1,000 messages per room.
