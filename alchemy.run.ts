@@ -2,6 +2,7 @@ import * as Alchemy from 'alchemy';
 import * as Cloudflare from 'alchemy/Cloudflare';
 import * as Effect from 'effect/Effect';
 import * as Layer from 'effect/Layer';
+import { moodBoard } from './packages/mood-board/alchemy.run';
 
 export default Alchemy.Stack(
   'portfolio-site',
@@ -81,6 +82,8 @@ export default Alchemy.Stack(
       assets: { notFoundHandling: '404-page' },
     });
 
+    const moodBoardSite = yield* moodBoard;
+
     const nz = yield* Cloudflare.Website.StaticSite('nz', {
       command: 'bun run build --filter=@personal-sites/nz',
       outdir: 'packages/nz/dist/client',
@@ -109,6 +112,12 @@ export default Alchemy.Stack(
       },
     });
 
-    return { site: site.url, tacos: tacos.url, sangas: sangas.url, nz: nz.url };
+    return {
+      site: site.url,
+      tacos: tacos.url,
+      sangas: sangas.url,
+      nz: nz.url,
+      moodBoard: moodBoardSite.url,
+    };
   }),
 );

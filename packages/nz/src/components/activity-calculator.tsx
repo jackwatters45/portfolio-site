@@ -122,7 +122,7 @@ export default function ActivityCalculator() {
                   )}
                   {activity.note && <p>{activity.note}</p>}
                   <a
-                    href={activity.itinerary}
+                    href={`/${activity.itinerary}`}
                     aria-label={`${activity.name}: itinerary details`}
                   >
                     Itinerary details
