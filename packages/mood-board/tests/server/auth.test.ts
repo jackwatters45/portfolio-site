@@ -2,12 +2,12 @@ import { DatabaseSync } from 'node:sqlite';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
+import authSchema from '../../src/cloudflare/d1-migrations/0002_auth.sql?raw';
 import {
   createAuth,
   validateAuthBaseURL,
   validateAuthSecret,
 } from '../../src/server/auth';
-import { AUTH_SCHEMA_SQL } from '../../src/server/auth-schema';
 
 const databases: DatabaseSync[] = [];
 
@@ -19,7 +19,7 @@ describe('Better Auth', () => {
   it('creates a profile and session from a one-use magic link', async () => {
     const database = new DatabaseSync(':memory:');
     databases.push(database);
-    database.exec(AUTH_SCHEMA_SQL);
+    database.exec(authSchema);
     let magicLink = '';
     const auth = createAuth({
       database,
