@@ -14,6 +14,8 @@ Use `bunx turbo run typecheck` for cached, parallel workspace type checks. Run `
 
 Run `bun run format:check` and `bun run lint` for formatting and lint checks. These are not registered as Turbo tasks yet. Do not run builds for formatting or lint changes.
 
+For Markdown-only documentation changes, skip validation commands and separate diff reviews unless the user requests them. `.oxfmtrc.json` excludes `**/*.md` and `**/*.mdx`. This exception does not cover executable MDX or changes to source code or configuration.
+
 ## Vendored lint rules
 
 `tools/oxlint/anti-slop/` contains anti-slop source, not an npm package. Its `UPSTREAM.md` records the exact commit and update procedure. Preserve both upstream licenses and the nested provenance record.
