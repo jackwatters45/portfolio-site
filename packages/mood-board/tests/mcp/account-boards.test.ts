@@ -160,6 +160,19 @@ const fixture = Effect.gen(function* () {
       });
       return HttpClientResponse.fromWeb(request, response);
     }),
+  ).pipe(
+    HttpClient.mapRequestEffect((request) =>
+      Effect.try({
+        try: () => {
+          expect(new URL(request.url).origin).toBe(account.origin);
+          return request;
+        },
+        catch: () =>
+          new HttpClientError.HttpClientError({
+            reason: new HttpClientError.InvalidUrlError({ request }),
+          }),
+      }),
+    ),
   );
   let writesAllowed = true;
   const connection = Layer.succeed(

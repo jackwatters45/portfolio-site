@@ -7,7 +7,7 @@ import {
   Predicate,
   Semaphore,
 } from 'effect';
-import { HttpClient } from 'effect/unstable/http';
+import { HttpClient, HttpClientRequest } from 'effect/unstable/http';
 import {
   RpcClient,
   RpcSerialization,
@@ -93,12 +93,16 @@ const make = Effect.gen(function* () {
     Effect.gen(function* () {
       const session = yield* connection.connected(account);
 
-      const protocol = RpcClient.layerProtocolHttp({
-        url: `${session.reference.origin}/rpc`,
-      }).pipe(
-        Layer.provide(RpcSerialization.layerNdjson),
-        Layer.provide(Layer.succeed(HttpClient.HttpClient, session.http)),
-      );
+      // Resolve the RPC URL before the authenticated client's origin check.
+      const protocol = Layer.effect(
+        RpcClient.Protocol,
+        RpcClient.makeProtocolHttp(
+          HttpClient.mapRequestInput(
+            session.http,
+            HttpClientRequest.prependUrl(`${session.reference.origin}/rpc`),
+          ),
+        ),
+      ).pipe(Layer.provide(RpcSerialization.layerNdjson));
 
       return yield* Effect.scoped(
         Effect.gen(function* () {
