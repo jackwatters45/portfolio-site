@@ -23,6 +23,7 @@ interface Props {
   placement?: Placement;
   focusIndex?: number;
 }
+
 export function FloatingPanel({
   anchor,
   label,
@@ -53,9 +54,11 @@ export function FloatingPanel({
       }),
     ],
   });
+
   useLayoutEffect(() => {
     refs.setPositionReference(anchor);
   }, [anchor, refs]);
+
   const dismiss = useDismiss(context, {
     escapeKey: false,
     outsidePress: (event) =>
@@ -64,7 +67,9 @@ export function FloatingPanel({
         event.target.closest('[data-comments-toolbar], .pc-pin')
       ),
   });
+
   const { getFloatingProps } = useInteractions([dismiss]);
+
   return (
     <FloatingFocusManager
       context={context}
@@ -85,6 +90,7 @@ export function FloatingPanel({
     </FloatingFocusManager>
   );
 }
+
 export function PanelHeading({
   title,
   onClose,

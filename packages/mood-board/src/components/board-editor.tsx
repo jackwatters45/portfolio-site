@@ -26,6 +26,7 @@ import {
   XLogo,
 } from '@phosphor-icons/react';
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router';
+import { Match, Schema } from 'effect';
 import {
   lazy,
   Suspense,
@@ -44,6 +45,7 @@ import { authClient } from '../client/auth-client';
 import { boardPath } from '../client/board-route';
 import {
   accessibleFieldColors,
+  backgroundDraftFromBoard,
   DEFAULT_BOARD_BACKGROUND,
   DEFAULT_CUSTOM_COLOR,
   formatHexColorInput,
@@ -115,6 +117,7 @@ import {
   parseXPostInput,
   type XPostDisplay,
   type XPostTheme,
+  XPostThemeSchema,
   type XPostPreview,
 } from '../lib/x-post';
 import { MenuAccountIdentity } from './account-identity';
@@ -140,17 +143,20 @@ type PanelState =
   | null;
 
 type Point = { x: number; y: number };
+
 type CustomColorDraft = {
   hex: string;
   label: string;
   lastValidHex: string;
 };
+
 type AppStyle = CSSProperties & {
   '--field': string;
   '--field-foreground': string;
   '--field-muted': string;
   '--field-selection': string;
 };
+
 type CanvasGesture = {
   center: Point;
   distance?: number;
@@ -161,6 +167,7 @@ type CanvasGesture = {
   presentationItemId?: string;
   linkHref?: string;
 };
+
 type PresentedItem = {
   readonly itemId: ItemId;
   readonly origin: PresentationItemOrigin;
@@ -168,15 +175,21 @@ type PresentedItem = {
 
 const BulkImageStager = lazy(async () => {
   const module = await import('./bulk-image-stager');
+
   return { default: module.BulkImageStager };
 });
 
 const editorPanelForItem = (item: BoardItem): PanelState => {
   if (item.kind === 'image') return { type: 'imageLink', itemId: item.id };
+
   if (item.kind === 'note') return { type: 'note', itemId: item.id };
+
   if (item.kind === 'swatch') return { type: 'color', itemId: item.id };
+
   if (item.kind === 'website') return { type: 'website', itemId: item.id };
+
   if (item.kind === 'x') return { type: 'x', itemId: item.id };
+
   return { type: 'audio', itemId: item.id };
 };
 
@@ -184,6 +197,7 @@ const localWebsiteMetadata = (url: WebsiteUrl) => {
   const normalizedLabel = new URL(url).hostname
     .replace(/^www\./, '')
     .slice(0, MAX_WEBSITE_SITE_LABEL_CHARACTERS);
+
   return {
     websiteTitle: WebsiteTitleSchema.make(normalizedLabel),
     websiteSiteLabel: WebsiteSiteLabelSchema.make(normalizedLabel),
@@ -219,6 +233,7 @@ function IconButton({
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof Element)) return false;
+
   return (
     (target instanceof HTMLElement && target.isContentEditable) ||
     target.closest(
@@ -263,27 +278,34 @@ function BoardWorkspace({
   const [audioLabel, setAudioLabel] = useState('');
   const [xDisplay, setXDisplay] = useState<XPostDisplay>('post');
   const [xTheme, setXTheme] = useState<XPostTheme>('automatic');
+
   const [customColor, setCustomColor] = useState<CustomColorDraft>({
     hex: DEFAULT_CUSTOM_COLOR,
     label: '',
     lastValidHex: DEFAULT_CUSTOM_COLOR,
   });
+
   const [backgroundDraft, setBackgroundDraft] = useState<BoardBackgroundDraft>({
     hex: DEFAULT_BOARD_BACKGROUND,
     lastValidHex: DEFAULT_BOARD_BACKGROUND,
   });
+
   const [backgroundConflict, setBackgroundConflict] = useState(false);
+
   const [boardSummaries, setBoardSummaries] = useState<
     ReadonlyArray<BoardSummary>
   >([]);
+
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [spacePressed, setSpacePressed] = useState(false);
   const [draggingFiles, setDraggingFiles] = useState(false);
   const [working, setWorking] = useState(false);
   const [toast, setToast] = useState('');
+
   const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(
     null,
   );
+
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   const [shuffleAnimating, setShuffleAnimating] = useState(false);
@@ -298,11 +320,13 @@ function BoardWorkspace({
 
   useEffect(() => {
     onWorkingChange(boardId, false);
+
     return () => onWorkingChange(boardId, false);
   }, [boardId, onWorkingChange]);
 
   useEffect(() => {
     const coordinator = playbackCoordinatorRef.current;
+
     return () => coordinator.pauseAll();
   }, []);
 
@@ -320,6 +344,7 @@ function BoardWorkspace({
     );
     setPanel((current) => {
       if (!current || !('itemId' in current) || !current.itemId) return current;
+
       return nextBoard.items.some((item) => item.id === current.itemId)
         ? current
         : null;
@@ -331,14 +356,17 @@ function BoardWorkspace({
       if (type === 'replace') {
         setSelectedId(null);
         setPanel(null);
+
         return;
       }
+
       if (type === 'remote') {
         const reconciliation = reconcileRemoteBackgroundDraft(
           previous,
           next,
           backgroundDraftTouchedRef.current,
         );
+
         if (reconciliation.draft !== undefined)
           setBackgroundDraft(reconciliation.draft);
         setBackgroundConflict(
@@ -351,17 +379,11 @@ function BoardWorkspace({
             ).conflict,
         );
       } else {
-        const background = next.background ?? DEFAULT_BOARD_BACKGROUND;
-        setBackgroundDraft({
-          hex: background,
-          lastValidHex: background,
-          ...(next.backgroundMediaId === undefined
-            ? {}
-            : { mediaId: next.backgroundMediaId }),
-        });
+        setBackgroundDraft(backgroundDraftFromBoard(next));
         backgroundDraftTouchedRef.current = false;
         setBackgroundConflict(false);
       }
+
       reconcileSelection(next);
     },
     [reconcileSelection],
@@ -410,6 +432,7 @@ function BoardWorkspace({
 
   const endWorking = useCallback(() => {
     workingCountRef.current = Math.max(0, workingCountRef.current - 1);
+
     if (workingCountRef.current === 0) {
       setWorking(false);
       onWorkingChange(boardId, false);
@@ -417,17 +440,21 @@ function BoardWorkspace({
   }, [boardId, onWorkingChange]);
 
   const closePanel = useCallback(() => setPanel(null), []);
+
   const startBackgroundDraft = useCallback(() => {
     backgroundDraftTouchedRef.current = true;
     setPanelError('');
   }, []);
+
   const acceptBackgroundImage = useCallback((mediaId: MediaId) => {
     setBackgroundDraft((current) => ({ ...current, mediaId }));
   }, []);
+
   const pauseAudio = useCallback(
     () => playbackCoordinatorRef.current.pauseAll(),
     [],
   );
+
   const {
     bulkSession,
     collectingDrop,
@@ -471,13 +498,17 @@ function BoardWorkspace({
     cancelArchive();
     setSigningOut(true);
     setSignOutError('');
+
     try {
       const result = await authClient.signOut();
+
       if (result.error) {
         setSignOutError(result.error.message ?? 'You could not be signed out.');
         setSigningOut(false);
+
         return;
       }
+
       await navigateRoute({ to: '/' });
     } catch (cause) {
       setSignOutError(
@@ -496,6 +527,7 @@ function BoardWorkspace({
   const refreshBoards = useCallback(async () => {
     if (localOnly) return;
     setCatalogLoading(true);
+
     try {
       setBoardSummaries(await listBoards());
     } catch {
@@ -508,10 +540,12 @@ function BoardWorkspace({
   const createNewBoard = useCallback(async () => {
     if (localOnly) return;
     beginWorking();
+
     try {
       const summary = await createCatalogBoard(
         panelDraft.trim() || 'Untitled mood',
       );
+
       onNavigate(summary.id, false, true);
     } catch {
       showToast('The new board could not be created.');
@@ -532,12 +566,15 @@ function BoardWorkspace({
     async (summary: BoardSummary) => {
       if (localOnly) return;
       beginWorking();
+
       try {
         const title = `${summary.title} — copy`.slice(0, 120);
+
         const duplicate = await duplicateCatalogBoard({
           id: summary.id,
           title,
         });
+
         onNavigate(duplicate.id, false, true);
       } catch {
         showToast('That board could not be duplicated.');
@@ -558,16 +595,20 @@ function BoardWorkspace({
   const deleteBoard = useCallback(
     async (summary: BoardSummary) => {
       if (summary.id === DEFAULT_BOARD_ID) return;
+
       if (
         !window.confirm(
           `Delete “${summary.title}”? This removes its server and local copies.`,
         )
       )
         return;
+
       if (localOnly) return;
       beginWorking();
+
       try {
         await deleteCatalogBoard(summary.id);
+
         if (summary.id !== boardId) await refreshBoards();
       } catch {
         showToast('That board could not be deleted.');
@@ -595,21 +636,25 @@ function BoardWorkspace({
       window.clearTimeout(shuffleAnimationTimerRef.current);
       shuffleAnimationTimerRef.current = null;
     }
+
     setShuffleAnimating(false);
   }, []);
 
   const shuffleBoard = useCallback(() => {
     const current = boardRef.current;
+
     if (current.items.length < 2) return;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const sidePadding = viewportWidth < 640 ? 34 : 72;
     const bottomPadding = viewportWidth < 640 ? 118 : 126;
+
     try {
       const items = shuffleBoardItems(current.items, Math.random, {
         maxWidth: Math.max(1, viewportWidth - sidePadding * 2) / MIN_ZOOM,
         maxHeight: Math.max(1, viewportHeight - 48 - bottomPadding) / MIN_ZOOM,
       });
+
       stopShuffleAnimation();
       setShuffleAnimating(true);
       replaceDocument({ ...current, items }, fitCamera(items));
@@ -642,17 +687,21 @@ function BoardWorkspace({
   const selectPanel = useCallback(
     (nextPanel: PanelState) => {
       cancelBackgroundUpload();
+
       if (nextPanel !== null) {
         previousFocus.current =
           document.activeElement instanceof HTMLElement
             ? document.activeElement
             : null;
       }
+
       setPanelError('');
+
       if (nextPanel?.type === 'imageLink') {
         const item = boardRef.current.items.find(
           (entry) => entry.id === nextPanel.itemId,
         );
+
         setPanelDraft(item?.kind === 'image' ? (item.href ?? '') : '');
         setAnnotationTitle(
           item?.kind === 'image' ? (item.annotationTitle ?? '') : '',
@@ -666,6 +715,7 @@ function BoardWorkspace({
               (entry) => entry.id === nextPanel.itemId,
             )
           : undefined;
+
         setPanelDraft(
           item?.kind === 'audio' ||
             item?.kind === 'spotify' ||
@@ -686,11 +736,13 @@ function BoardWorkspace({
               (entry) => entry.id === nextPanel.itemId,
             )
           : undefined;
+
         setPanelDraft(item?.kind === 'website' ? (item.websiteUrl ?? '') : '');
       } else if (nextPanel?.type === 'x') {
         const item = boardRef.current.items.find(
           (entry) => entry.id === nextPanel.itemId,
         );
+
         setPanelDraft(item?.kind === 'x' ? (item.src ?? '') : '');
         setXDisplay(item?.kind === 'x' ? (item.xDisplay ?? 'post') : 'post');
         setXTheme(
@@ -707,8 +759,10 @@ function BoardWorkspace({
               (entry) => entry.id === nextPanel.itemId,
             )
           : undefined;
+
         const color =
           normalizeHexColor(item?.color ?? '') ?? DEFAULT_CUSTOM_COLOR;
+
         setCustomColor({
           hex: color,
           label: item?.label ?? '',
@@ -716,26 +770,20 @@ function BoardWorkspace({
         });
         setPanelDraft('');
       } else if (nextPanel?.type === 'menu') {
-        const background =
-          boardRef.current.background ?? DEFAULT_BOARD_BACKGROUND;
-        setBackgroundDraft({
-          hex: background,
-          lastValidHex: background,
-          ...(boardRef.current.backgroundMediaId === undefined
-            ? {}
-            : { mediaId: boardRef.current.backgroundMediaId }),
-        });
+        setBackgroundDraft(backgroundDraftFromBoard(boardRef.current));
         setPanelDraft(boardRef.current.title);
       } else if (nextPanel?.type === 'boards') {
         setPanelDraft('');
         void refreshBoards();
       } else {
         setPanelDraft('');
+
         if (nextPanel?.type === 'url') {
           setXDisplay('post');
           setXTheme('automatic');
         }
       }
+
       setPanel(nextPanel);
     },
     [boardRef, cancelBackgroundUpload, refreshBoards],
@@ -743,15 +791,18 @@ function BoardWorkspace({
 
   useEffect(() => {
     if (!panel) return;
+
     if (previousFocus.current === null) {
       previousFocus.current =
         document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null;
     }
+
     const restoreTarget = previousFocus.current;
     const restoreItemId = 'itemId' in panel ? (panel.itemId ?? null) : null;
     const viewportElement = viewportRef.current;
+
     const frame = window.requestAnimationFrame(() => {
       const focusTarget =
         composerRef.current?.querySelector<HTMLElement>(
@@ -760,10 +811,13 @@ function BoardWorkspace({
         composerRef.current?.querySelector<HTMLElement>(
           'input, textarea, .color-grid button, button:not([disabled])',
         );
+
       focusTarget?.focus();
     });
+
     return () => {
       window.cancelAnimationFrame(frame);
+
       if (restoreTarget?.isConnected) restoreTarget.focus();
       else if (restoreItemId !== null) {
         viewportElement
@@ -772,16 +826,19 @@ function BoardWorkspace({
           )
           ?.focus();
       }
+
       if (previousFocus.current === restoreTarget) previousFocus.current = null;
     };
   }, [panel]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
+
     if (!viewport) return;
 
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+
       if (event.ctrlKey || event.metaKey) {
         setCamera((current) =>
           zoomCamera(
@@ -800,6 +857,7 @@ function BoardWorkspace({
     };
 
     viewport.addEventListener('wheel', onWheel, { passive: false });
+
     return () => viewport.removeEventListener('wheel', onWheel);
   }, [setCamera]);
 
@@ -807,6 +865,7 @@ function BoardWorkspace({
     (id: ItemId) => {
       applyBoard((current) => {
         if (!current.items.some((item) => item.id === id)) return current;
+
         return {
           ...current,
           items: current.items.filter((item) => item.id !== id),
@@ -825,7 +884,9 @@ function BoardWorkspace({
     if (!selectedId) return;
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === selectedId);
+
       if (!source) return current;
+
       const copy: BoardItem = {
         ...source,
         id: createId(),
@@ -833,7 +894,9 @@ function BoardWorkspace({
         y: source.y + 42,
         order: Math.max(0, ...current.items.map((item) => item.order)) + 1,
       };
+
       window.setTimeout(() => setSelectedId(copy.id), 0);
+
       return { ...current, items: [...current.items, copy] };
     });
   }, [applyBoard, selectedId]);
@@ -843,10 +906,12 @@ function BoardWorkspace({
       applyBoard((current) => {
         if (!current.items.some((item) => item.id === id)) return current;
         const orders = current.items.map((item) => item.order);
+
         const order =
           direction === 'front'
             ? Math.max(0, ...orders) + 1
             : Math.min(0, ...orders) - 1;
+
         return {
           ...current,
           items: current.items.map((item) =>
@@ -868,12 +933,15 @@ function BoardWorkspace({
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
       if (bulkSession !== null) return;
+
       if (event.key === 'Escape') {
         setSelectedId(null);
         cancelBackgroundUpload();
         setPanel(null);
+
         return;
       }
+
       if (isTypingTarget(event.target)) return;
       const command = event.metaKey || event.ctrlKey;
 
@@ -909,6 +977,7 @@ function BoardWorkspace({
 
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
+
     return () => {
       window.removeEventListener('keydown', keyDown);
       window.removeEventListener('keyup', keyUp);
@@ -928,6 +997,7 @@ function BoardWorkspace({
   const openImagePicker = useCallback(() => {
     if (working) return;
     const input = imageInputRef.current;
+
     if (input === null) return;
     imageSelectionFolderRef.current = false;
     input.removeAttribute('webkitdirectory');
@@ -937,6 +1007,7 @@ function BoardWorkspace({
   const openFolderPicker = useCallback(() => {
     if (working) return;
     const input = imageInputRef.current;
+
     if (input === null) return;
     imageSelectionFolderRef.current = true;
     input.setAttribute('webkitdirectory', '');
@@ -947,12 +1018,16 @@ function BoardWorkspace({
     const onPaste = (event: ClipboardEvent) => {
       if (bulkSession !== null || isTypingTarget(event.target)) return;
       const files = Array.from(event.clipboardData?.files ?? []);
+
       if (files.length) {
         event.preventDefault();
         addImageSelection(files);
+
         return;
       }
+
       const text = event.clipboardData?.getData('text/plain').trim();
+
       if (text && isLikelyAudioUrl(text)) {
         event.preventDefault();
         setPanelDraft(text);
@@ -966,15 +1041,19 @@ function BoardWorkspace({
         event.preventDefault();
         const xInput = parseXPostInput(text);
         setPanelDraft(text);
+
         if (xInput !== null) {
           setXDisplay(xInput.display);
           setXTheme('automatic');
         }
+
         setPanelError('');
         setPanel({ type: 'url' });
       }
     };
+
     window.addEventListener('paste', onPaste);
+
     return () => window.removeEventListener('paste', onPaste);
   }, [addImageSelection, bulkSession]);
 
@@ -983,12 +1062,14 @@ function BoardWorkspace({
       viewportRef.current?.querySelectorAll<HTMLElement>('[data-item-id]') ??
         [],
     ).find((candidate) => candidate.dataset.itemId === id);
+
     element?.style.setProperty('--item-x', `${point.x}px`);
     element?.style.setProperty('--item-y', `${point.y}px`);
   }
 
   function presentItem(itemId: ItemId, origin?: PresentationItemOrigin) {
     const item = boardRef.current.items.find((entry) => entry.id === itemId);
+
     if (editing || item === undefined) return;
     playbackCoordinatorRef.current.pauseAll();
     setPresentedItem({
@@ -1004,15 +1085,21 @@ function BoardWorkspace({
     event.preventDefault();
     setPanel(null);
     const point = { x: event.clientX, y: event.clientY };
-    const target = event.target as HTMLElement;
+    const target = event.target;
+
+    if (!(target instanceof Element)) return;
     const itemElement = target.closest<HTMLElement>('[data-item-id]');
+
     const presentationDetailLink = editing
       ? null
       : target.closest<HTMLAnchorElement>('.presentation-detail-link');
+
     const presentationItem = editing
       ? null
       : target.closest<HTMLElement>('[data-presentation-item-id]');
+
     const presentationItemId = presentationItem?.dataset.presentationItemId;
+
     const item =
       editing && event.pointerType === 'touch'
         ? boardRef.current.items.find(
@@ -1077,6 +1164,7 @@ function BoardWorkspace({
       const previous = gesture.current;
       setCamera((current) => {
         const anchor = screenToWorld(previous.center, current);
+
         const z = Math.min(
           MAX_ZOOM,
           Math.max(
@@ -1084,12 +1172,14 @@ function BoardWorkspace({
             current.z * (distance / Math.max(1, previous.distance ?? distance)),
           ),
         );
+
         return { x: center.x / z - anchor.x, y: center.y / z - anchor.y, z };
       });
       gesture.current = { center, distance };
     } else if (pointers.length === 1) {
       const point = pointers[0];
       const previous = gesture.current;
+
       if (previous.itemId && previous.itemOrigin && previous.start) {
         const itemPosition = {
           x:
@@ -1099,6 +1189,7 @@ function BoardWorkspace({
             previous.itemOrigin.y +
             (point.y - previous.start.y) / cameraRef.current.z,
         };
+
         setItemPreview(previous.itemId, itemPosition);
         gesture.current = { ...previous, center: point, itemPosition };
       } else {
@@ -1115,6 +1206,7 @@ function BoardWorkspace({
   function handleCanvasPointerEnd(event: ReactPointerEvent<HTMLDivElement>) {
     const endingGesture = gesture.current;
     const wasOnlyPointer = activePointers.current.size === 1;
+
     if (wasOnlyPointer && endingGesture?.itemId && endingGesture.itemOrigin) {
       if (event.type === 'pointercancel') {
         setItemPreview(endingGesture.itemId, endingGesture.itemOrigin);
@@ -1136,9 +1228,11 @@ function BoardWorkspace({
     ) {
       if (endingGesture.presentationItemId !== undefined) {
         const items = boardRef.current.items;
+
         const item = items.find(
           (entry) => entry.id === endingGesture.presentationItemId,
         );
+
         if (item !== undefined) presentItem(item.id, endingGesture.start);
       } else if (endingGesture.linkHref !== undefined) {
         window.open(endingGesture.linkHref, '_blank', 'noopener,noreferrer');
@@ -1146,6 +1240,7 @@ function BoardWorkspace({
     }
 
     activePointers.current.delete(event.pointerId);
+
     if (event.currentTarget.hasPointerCapture(event.pointerId))
       event.currentTarget.releasePointerCapture(event.pointerId);
     const pointers = [...activePointers.current.values()];
@@ -1164,7 +1259,9 @@ function BoardWorkspace({
   function commitItemPosition(id: ItemId, x: number, y: number) {
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === id);
+
       if (!source || (source.x === x && source.y === y)) return current;
+
       return {
         ...current,
         items: current.items.map((item) =>
@@ -1177,8 +1274,10 @@ function BoardWorkspace({
   function commitItemSize(id: ItemId, width: number, height: number) {
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === id);
+
       if (!source || (source.width === width && source.height === height))
         return current;
+
       return {
         ...current,
         items: current.items.map((item) =>
@@ -1197,9 +1296,12 @@ function BoardWorkspace({
       boardRef.current.items.length >= MAX_REMOTE_ITEMS
     ) {
       setPanelError(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
+
       return;
     }
+
     beginWorking();
+
     try {
       const existing =
         editingId === undefined
@@ -1207,14 +1309,19 @@ function BoardWorkspace({
           : boardRef.current.items.find(
               (item) => item.id === editingId && item.kind === 'x',
             );
+
       if (editingId !== undefined && existing === undefined) {
         throw new Error('That X card is no longer on this board.');
       }
+
       let preview: XPostPreview | undefined;
+
       if (syncState === 'live') {
         preview = await resolveXPostPreview(parsed.src).catch(() => undefined);
       }
+
       const sameSource = existing?.src === parsed.src;
+
       const snapshot = {
         xAuthorName:
           preview?.authorName ??
@@ -1227,6 +1334,7 @@ function BoardWorkspace({
         xPostDate:
           preview?.date ?? (sameSource ? existing?.xPostDate : undefined),
       };
+
       if (existing !== undefined) {
         applyBoard((current) => ({
           ...current,
@@ -1247,17 +1355,22 @@ function BoardWorkspace({
         showToast(
           preview === undefined ? 'X card updated' : 'X card refreshed',
         );
+
         return;
       }
+
       if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
         throw new Error(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       }
+
       const point = screenToWorld(
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
+
       const width = xDisplay === 'media' ? 560 : 550;
       const height = xDisplay === 'media' ? 390 : 620;
+
       const item: BoardItem = {
         id: createId(),
         kind: 'x',
@@ -1275,6 +1388,7 @@ function BoardWorkspace({
           Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
           1,
       };
+
       applyBoard((current) => ({
         ...current,
         items: [...current.items, item],
@@ -1297,19 +1411,26 @@ function BoardWorkspace({
     event.preventDefault();
     setPanelError('');
     const xInput = parseXPostInput(panelDraft);
+
     if (xInput !== null) {
       await saveXPost(xInput);
+
       return;
     }
+
     const linkUrl = normalizeWebsiteUrl(panelDraft);
+
     if (linkUrl === null) {
       setPanelError(
         'Use a public HTTPS URL without credentials or a custom port.',
       );
+
       return;
     }
+
     if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
       setPanelError(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
+
       return;
     }
 
@@ -1321,18 +1442,20 @@ function BoardWorkspace({
       if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
         throw new Error(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       }
+
       const point = screenToWorld(
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
+
       const ratio = Math.min(8, Math.max(0.125, image.width / image.height));
       const width = ratio < 0.85 ? 420 : ratio > 1.65 ? 680 : 560;
       const height = width / ratio;
+
       const item: BoardItem = {
         id: createId(),
         kind: 'image',
         src,
-        ...(href === undefined ? {} : { href }),
         x: point.x - width / 2,
         y: point.y - height / 2,
         width,
@@ -1342,6 +1465,9 @@ function BoardWorkspace({
           Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
           1,
       };
+
+      if (href !== undefined) item.href = href;
+
       applyBoard((current) => ({
         ...current,
         items: [...current.items, item],
@@ -1351,10 +1477,12 @@ function BoardWorkspace({
     };
 
     beginWorking();
+
     try {
       try {
         const image = await inspectImageUrl(linkUrl);
         addImage(linkUrl, image);
+
         return;
       } catch {
         // A webpage URL is expected to fail direct image inspection.
@@ -1365,9 +1493,11 @@ function BoardWorkspace({
           { x: window.innerWidth / 2, y: window.innerHeight / 2 },
           cameraRef.current,
         );
+
         const metadata = localWebsiteMetadata(linkUrl);
         const width = 540;
         const height = 360;
+
         const item: BoardItem = {
           id: createId(),
           kind: 'website',
@@ -1382,6 +1512,7 @@ function BoardWorkspace({
             Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
             1,
         };
+
         applyBoard((current) => ({
           ...current,
           items: [...current.items, item],
@@ -1389,6 +1520,7 @@ function BoardWorkspace({
         setSelectedId(item.id);
         setPanel(null);
         showToast('Link added locally');
+
         return;
       }
 
@@ -1397,7 +1529,9 @@ function BoardWorkspace({
           'Connect to the board server before resolving this link.',
         );
       }
+
       const preview = await resolveWebsitePreview(linkUrl);
+
       if (
         preview.preferredLayout === 'image' &&
         preview.imageUrl !== undefined
@@ -1406,6 +1540,7 @@ function BoardWorkspace({
           const image = await inspectImageUrl(preview.imageUrl);
           addImage(preview.imageUrl, image, preview.url);
           showToast('Linked image added');
+
           return;
         } catch {
           // Keep a durable link card when a remote preview image refuses hotlinking.
@@ -1415,12 +1550,15 @@ function BoardWorkspace({
       if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
         throw new Error(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       }
+
       const point = screenToWorld(
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
+
       const width = 540;
       const height = 360;
+
       const item: BoardItem = {
         id: createId(),
         kind: 'website',
@@ -1438,6 +1576,7 @@ function BoardWorkspace({
           Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
           1,
       };
+
       applyBoard((current) => ({
         ...current,
         items: [...current.items, item],
@@ -1460,15 +1599,19 @@ function BoardWorkspace({
     event.preventDefault();
     setPanelError('');
     const websiteUrl = normalizeWebsiteUrl(panelDraft);
+
     if (websiteUrl === null) {
       setPanelError(
         'Use a public HTTPS website URL without credentials or a custom port.',
       );
+
       return;
     }
+
     if (localOnly) {
       const metadata = localWebsiteMetadata(websiteUrl);
       const editingId = panel?.type === 'website' ? panel.itemId : undefined;
+
       if (editingId !== undefined) {
         applyBoard((current) => ({
           ...current,
@@ -1486,14 +1629,18 @@ function BoardWorkspace({
         }));
         setPanel(null);
         showToast('Website link updated');
+
         return;
       }
+
       const point = screenToWorld(
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
+
       const width = 540;
       const height = 360;
+
       const item: BoardItem = {
         id: createId(),
         kind: 'website',
@@ -1508,6 +1655,7 @@ function BoardWorkspace({
           Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
           1,
       };
+
       applyBoard((current) => ({
         ...current,
         items: [...current.items, item],
@@ -1515,6 +1663,7 @@ function BoardWorkspace({
       setSelectedId(item.id);
       setPanel(null);
       showToast('Website link added');
+
       return;
     }
 
@@ -1522,13 +1671,16 @@ function BoardWorkspace({
       setPanelError(
         'Connect to the board server before creating a website preview.',
       );
+
       return;
     }
 
     beginWorking();
+
     try {
       const preview = await resolveWebsitePreview(websiteUrl);
       const editingId = panel?.type === 'website' ? panel.itemId : undefined;
+
       if (editingId !== undefined) {
         applyBoard((current) => ({
           ...current,
@@ -1549,18 +1701,22 @@ function BoardWorkspace({
         }));
         setPanel(null);
         showToast('Website preview refreshed');
+
         return;
       }
 
       if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
         throw new Error(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       }
+
       const point = screenToWorld(
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
+
       const width = 540;
       const height = 360;
+
       const item: BoardItem = {
         id: createId(),
         kind: 'website',
@@ -1578,6 +1734,7 @@ function BoardWorkspace({
           Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
           1,
       };
+
       applyBoard((current) => ({
         ...current,
         items: [...current.items, item],
@@ -1599,14 +1756,18 @@ function BoardWorkspace({
   function submitAudio(event: FormEvent) {
     event.preventDefault();
     const source = parseAudioSource(panelDraft);
+
     if (source === null) {
       setPanelError(
         'Use a supported Spotify or YouTube link, or a hosted HTTPS audio file URL.',
       );
+
       return;
     }
+
     const label = audioLabel.trim() || undefined;
     const editingId = panel?.type === 'audio' ? panel.itemId : undefined;
+
     if (editingId) {
       playbackCoordinatorRef.current.pauseAll();
       applyBoard((current) => ({
@@ -1633,6 +1794,7 @@ function BoardWorkspace({
       }));
       setPanel(null);
       showToast('Audio card updated');
+
       return;
     }
 
@@ -1640,8 +1802,10 @@ function BoardWorkspace({
       { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       cameraRef.current,
     );
+
     const width = 520;
     const height = preferredAudioCardHeight(source.kind, width);
+
     const item: BoardItem = {
       id: createId(),
       kind: source.kind,
@@ -1655,59 +1819,74 @@ function BoardWorkspace({
       order:
         Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
+
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
     setPanel(null);
     showToast(
-      source.kind === 'spotify'
-        ? 'Spotify card added'
-        : source.kind === 'youtube'
-          ? 'YouTube card added'
-          : 'Audio card added',
+      Match.value(source.kind).pipe(
+        Match.when('spotify', () => 'Spotify card added'),
+        Match.when('youtube', () => 'YouTube card added'),
+        Match.orElse(() => 'Audio card added'),
+      ),
     );
   }
 
   function submitImageLink(event: FormEvent) {
     event.preventDefault();
+
     if (panel?.type !== 'imageLink') return;
     const rawTitle = annotationTitle.trim();
     const rawDescription = annotationDescription.trim();
     const title = normalizeImageAnnotationTitle(rawTitle);
     const description = normalizeImageAnnotationDescription(rawDescription);
+
     if (
       (rawTitle && title === undefined) ||
       (rawDescription && description === undefined)
     ) {
       setPanelError('Image details exceed the supported length.');
+
       return;
     }
+
     const href = panelDraft.trim() ? normalizeImageLink(panelDraft) : undefined;
+
     if (href === null) {
       setPanelError(
         'Use a full http or https page URL without a username or password.',
       );
+
       return;
     }
+
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === panel.itemId);
+
       if (source?.kind !== 'image') return current;
+
       if (
         source.annotationTitle === title &&
         source.annotationDescription === description &&
         source.href === href
       )
         return current;
+
       return {
         ...current,
         items: current.items.map((item) => {
           if (item.id !== panel.itemId) return item;
           const next = { ...item };
+
           if (title) next.annotationTitle = title;
           else delete next.annotationTitle;
+
           if (description) next.annotationDescription = description;
           else delete next.annotationDescription;
+
           if (href) next.href = href;
           else delete next.href;
+
           return next;
         }),
       };
@@ -1724,6 +1903,7 @@ function BoardWorkspace({
     if (panel?.type !== 'imageLink') return;
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === panel.itemId);
+
       if (
         source?.kind !== 'image' ||
         (source.href === undefined &&
@@ -1731,6 +1911,7 @@ function BoardWorkspace({
           source.annotationDescription === undefined)
       )
         return current;
+
       return {
         ...current,
         items: current.items.map((item) => {
@@ -1739,6 +1920,7 @@ function BoardWorkspace({
           delete next.href;
           delete next.annotationTitle;
           delete next.annotationDescription;
+
           return next;
         }),
       };
@@ -1749,14 +1931,19 @@ function BoardWorkspace({
 
   function copyImageLink() {
     if (panel?.type !== 'imageLink') return;
+
     const item = boardRef.current.items.find(
       (entry) => entry.id === panel.itemId,
     );
+
     if (item?.href === undefined) return;
+
     if (!navigator.clipboard) {
       showToast('Copy is not available in this browser');
+
       return;
     }
+
     void navigator.clipboard.writeText(item.href).then(
       () => showToast('Image link copied'),
       () => showToast('The image link could not be copied'),
@@ -1766,12 +1953,15 @@ function BoardWorkspace({
   function submitNote(event: FormEvent) {
     event.preventDefault();
     const text = panelDraft.trim();
+
     if (!text) {
       setPanelError('Write a few words first.');
+
       return;
     }
 
     const editingId = panel?.type === 'note' ? panel.itemId : undefined;
+
     if (editingId) {
       applyBoard((current) => ({
         ...current,
@@ -1780,6 +1970,7 @@ function BoardWorkspace({
         ),
       }));
       setPanel(null);
+
       return;
     }
 
@@ -1787,6 +1978,7 @@ function BoardWorkspace({
       { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       cameraRef.current,
     );
+
     const item: BoardItem = {
       id: createId(),
       kind: 'note',
@@ -1799,6 +1991,7 @@ function BoardWorkspace({
       order:
         Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
+
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
     setPanel(null);
@@ -1807,10 +2000,13 @@ function BoardWorkspace({
   function submitCustomColor(event: FormEvent) {
     event.preventDefault();
     const color = normalizeHexColor(customColor.hex);
+
     if (color === null) {
       setPanelError('Use a six-digit hex value such as #C85A3D.');
+
       return;
     }
+
     addSwatch(color, customColor.label);
   }
 
@@ -1819,13 +2015,18 @@ function BoardWorkspace({
       setPanelError(
         'Close and reopen this panel before applying the latest background.',
       );
+
       return;
     }
+
     const color = normalizeHexColor(backgroundDraft.hex);
+
     if (color === null) {
       setPanelError('Use a six-digit hex value such as #EDEDED.');
+
       return;
     }
+
     const background = color === DEFAULT_BOARD_BACKGROUND ? undefined : color;
     const backgroundMediaId = backgroundDraft.mediaId;
     applyBoard((current) => {
@@ -1835,19 +2036,21 @@ function BoardWorkspace({
       )
         return current;
       const next = { ...current };
+
       if (background === undefined) delete next.background;
       else next.background = background;
+
       if (backgroundMediaId === undefined) delete next.backgroundMediaId;
       else next.backgroundMediaId = backgroundMediaId;
+
       return next;
     });
-    setBackgroundDraft({
-      hex: color,
-      lastValidHex: color,
-      ...(backgroundMediaId === undefined
-        ? {}
-        : { mediaId: backgroundMediaId }),
-    });
+    const draft = { hex: color, lastValidHex: color };
+    setBackgroundDraft(
+      backgroundMediaId === undefined
+        ? draft
+        : { ...draft, mediaId: backgroundMediaId },
+    );
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
     setPanelError('');
@@ -1861,12 +2064,16 @@ function BoardWorkspace({
 
   function addSwatch(color: string, label?: string) {
     const normalizedColor = normalizeHexColor(color);
+
     if (normalizedColor === null) {
       setPanelError('Use a six-digit hex value such as #C85A3D.');
+
       return;
     }
+
     const normalizedLabel = label?.trim() || undefined;
     const editingId = panel?.type === 'color' ? panel.itemId : undefined;
+
     if (editingId) {
       applyBoard((current) => ({
         ...current,
@@ -1877,6 +2084,7 @@ function BoardWorkspace({
         ),
       }));
       setPanel(null);
+
       return;
     }
 
@@ -1884,6 +2092,7 @@ function BoardWorkspace({
       { x: window.innerWidth / 2, y: window.innerHeight / 2 },
       cameraRef.current,
     );
+
     const item: BoardItem = {
       id: createId(),
       kind: 'swatch',
@@ -1897,6 +2106,7 @@ function BoardWorkspace({
       order:
         Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
+
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
     setPanel(null);
@@ -1908,38 +2118,53 @@ function BoardWorkspace({
   }
 
   const selectedItem = board.items.find((item) => item.id === selectedId);
+
   const presentedBoardItem =
     presentedItem === null
       ? undefined
       : board.items.find((item) => item.id === presentedItem.itemId);
+
   const imageLinkItem =
     panel?.type === 'imageLink'
       ? board.items.find(
           (item) => item.id === panel.itemId && item.kind === 'image',
         )
       : undefined;
+
   const normalizedCustomColor = normalizeHexColor(customColor.hex);
   const customPreviewColor = normalizedCustomColor ?? customColor.lastValidHex;
   const normalizedBackgroundDraft = normalizeHexColor(backgroundDraft.hex);
   const savedBackground = board.background ?? DEFAULT_BOARD_BACKGROUND;
+
   const backgroundDirty =
     normalizedBackgroundDraft !== null &&
     (normalizedBackgroundDraft !== savedBackground ||
       backgroundDraft.mediaId !== board.backgroundMediaId);
+
   const effectiveBackground =
     panel?.type === 'menu'
       ? (normalizedBackgroundDraft ?? backgroundDraft.lastValidHex)
       : savedBackground;
+
   const effectiveBackgroundMediaId =
     panel?.type === 'menu' ? backgroundDraft.mediaId : board.backgroundMediaId;
+
   const fieldColors = accessibleFieldColors(effectiveBackground);
+
   const appStyle: AppStyle = {
     '--field': effectiveBackground,
     '--field-foreground': fieldColors.foreground,
     '--field-muted': fieldColors.muted,
     '--field-selection': fieldColors.selection,
   };
+
+  const worldStyle: CSSProperties & { '--camera-zoom': number } = {
+    transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)`,
+    '--camera-zoom': camera.z,
+  };
+
   const { canUndo, canRedo } = historyState;
+
   const detectedXInput =
     panel?.type === 'url' || panel?.type === 'x'
       ? parseXPostInput(panelDraft)
@@ -1959,6 +2184,7 @@ function BoardWorkspace({
         onPointerCancel={handleCanvasPointerEnd}
         onDragEnter={(event) => {
           event.preventDefault();
+
           if (event.dataTransfer.types.includes('Files'))
             setDraggingFiles(true);
         }}
@@ -1973,12 +2199,7 @@ function BoardWorkspace({
           className="canvas-world"
           role={editing ? 'group' : undefined}
           aria-label={editing ? 'Mood board canvas items' : undefined}
-          style={
-            {
-              transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)`,
-              '--camera-zoom': camera.z,
-            } as CSSProperties
-          }
+          style={worldStyle}
         >
           {board.items.map((item, index) => (
             <BoardItemView
@@ -2194,6 +2415,7 @@ function BoardWorkspace({
                   onChange={(event) => setPanelDraft(event.target.value)}
                   onBlur={() => {
                     const title = panelDraft.trim() || 'Untitled mood';
+
                     if (title !== boardRef.current.title)
                       applyBoard((current) => ({ ...current, title }));
                   }}
@@ -2227,6 +2449,7 @@ function BoardWorkspace({
                   setBackgroundDraft((current) => {
                     const next = { ...current };
                     delete next.mediaId;
+
                     return next;
                   });
                 }}
@@ -2571,6 +2794,7 @@ function BoardWorkspace({
                     const value = event.target.value;
                     const parsed = parseXPostInput(value);
                     setPanelDraft(value);
+
                     if (parsed !== null) setXDisplay(parsed.display);
                     setPanelError('');
                   }}
@@ -2599,9 +2823,12 @@ function BoardWorkspace({
                     <span>Theme</span>
                     <select
                       value={xTheme}
-                      onChange={(event) =>
-                        setXTheme(event.target.value as XPostTheme)
-                      }
+                      onChange={(event) => {
+                        const value = event.target.value;
+
+                        if (Schema.is(XPostThemeSchema)(value))
+                          setXTheme(value);
+                      }}
                     >
                       <option value="automatic">Automatic</option>
                       <option value="light">Light</option>
@@ -2681,12 +2908,15 @@ function BoardWorkspace({
                 event.preventDefault();
                 setPanelError('');
                 const parsed = parseXPostInput(panelDraft);
+
                 if (parsed === null) {
                   setPanelError(
                     'Use an X or Twitter status URL, or official post embed code.',
                   );
+
                   return;
                 }
+
                 void saveXPost(parsed, panel.itemId);
               }}
             >
@@ -2701,6 +2931,7 @@ function BoardWorkspace({
                     const value = event.target.value;
                     const parsed = parseXPostInput(value);
                     setPanelDraft(value);
+
                     if (parsed !== null) setXDisplay(parsed.display);
                     setPanelError('');
                   }}
@@ -2718,9 +2949,11 @@ function BoardWorkspace({
                   <span>Theme</span>
                   <select
                     value={xTheme}
-                    onChange={(event) =>
-                      setXTheme(event.target.value as XPostTheme)
-                    }
+                    onChange={(event) => {
+                      const value = event.target.value;
+
+                      if (Schema.is(XPostThemeSchema)(value)) setXTheme(value);
+                    }}
                   >
                     <option value="automatic">Automatic</option>
                     <option value="light">Light</option>
@@ -3284,6 +3517,7 @@ function BoardWorkspace({
           aria-hidden="true"
           onChange={(event) => {
             const file = event.target.files?.[0];
+
             if (file)
               addLocalAudio(
                 file,
@@ -3302,6 +3536,7 @@ function BoardWorkspace({
         aria-hidden="true"
         onChange={(event) => {
           const file = event.target.files?.[0];
+
           if (file) void importBoard(file);
         }}
       />
@@ -3330,6 +3565,7 @@ export default function BoardEditor({
   const navigate = useCallback(
     (nextBoardId: BoardId, replace = false, force = false) => {
       if (localOnly || (navigationBlocked.current && !force)) return;
+
       if (force) navigationBlocked.current = false;
       void navigateRoute({
         to: '/boards/$boardId',

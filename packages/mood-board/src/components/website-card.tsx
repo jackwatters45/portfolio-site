@@ -5,8 +5,10 @@ import type { BoardItem } from '../client/board/types';
 
 const WebsiteCardContent = ({ item }: { readonly item: BoardItem }) => {
   const [failedImage, setFailedImage] = useState<string | null>(null);
+
   const imageAvailable =
     item.websiteImageUrl !== undefined && failedImage !== item.websiteImageUrl;
+
   return (
     <div
       className={`website-card${imageAvailable ? ' has-preview' : ' is-fallback'}`}
@@ -49,6 +51,7 @@ export function WebsiteCard({
   readonly editing: boolean;
 }) {
   const content = <WebsiteCardContent item={item} />;
+
   if (editing || item.websiteUrl === undefined) return content;
 
   const activateSpace = (event: ReactKeyboardEvent<HTMLAnchorElement>) => {

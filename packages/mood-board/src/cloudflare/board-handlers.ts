@@ -52,17 +52,22 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
     const listBoards = Effect.fn('CloudflareBoardHandlers.ListBoards')(
       function* () {
         const summaries = yield* boards.list();
+
         const entries: Array<{
           readonly summary: BoardSummary;
           readonly revision: BoardRevision;
         }> = [];
+
         for (const summary of summaries) {
           const snapshot = yield* boards.get(summary.id);
+
           if (snapshot !== null) {
             entries.push({ summary, revision: snapshot.revision });
           }
         }
+
         yield* bestEffort(projection.reconcile(entries));
+
         return summaries;
       },
     );
@@ -73,6 +78,7 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
         yield* bestEffort(
           projection.upsert(summary, BoardRevisionSchema.make(0)),
         );
+
         return summary;
       },
     );
@@ -83,6 +89,7 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
         yield* bestEffort(
           projection.upsert(summary, BoardRevisionSchema.make(0)),
         );
+
         return summary;
       },
     );
@@ -91,6 +98,7 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
       function* (...args: Parameters<typeof boards.delete>) {
         const event = yield* boards.delete(...args);
         yield* bestEffort(projection.tombstone(event));
+
         return event;
       },
     );
@@ -99,6 +107,7 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
       function* (input: Parameters<typeof boards.commit>[0]) {
         const change = yield* boards.commit(input);
         const snapshot = yield* boards.get(input.boardId);
+
         if (snapshot === null) return yield* missingBoard();
         yield* bestEffort(
           projection.upsert(
@@ -106,6 +115,7 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
             snapshot.revision,
           ),
         );
+
         return change;
       },
     );

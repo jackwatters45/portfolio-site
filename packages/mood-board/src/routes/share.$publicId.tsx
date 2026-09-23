@@ -6,6 +6,7 @@ import {
   ShareNetwork,
 } from '@phosphor-icons/react';
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { Predicate } from 'effect';
 import {
   useEffect,
   useMemo,
@@ -41,7 +42,9 @@ export const Route = createFileRoute('/share/$publicId')({
   params: {
     parse: ({ publicId }) => {
       const parsed = parsePublicId(publicId);
+
       if (parsed === null) throw notFound();
+
       return { publicId: parsed };
     },
     stringify: ({ publicId }) => ({ publicId }),
@@ -61,6 +64,7 @@ interface PublicWorldStyle extends CSSProperties {
 }
 
 type Point = { readonly x: number; readonly y: number };
+
 type PublicGesture = {
   readonly center: Point;
   readonly start?: Point;
@@ -68,43 +72,52 @@ type PublicGesture = {
   readonly presentationItemId?: string;
   readonly linkHref?: string;
 };
+
 type PresentedItem = {
   readonly itemId: ItemId;
   readonly origin: PresentationItemOrigin;
 };
 
 const shareCurrentPage = async (title: string): Promise<string> => {
-  if (typeof navigator.share === 'function') {
+  if (Predicate.isFunction(navigator.share)) {
     try {
       await navigator.share({ title, url: window.location.href });
+
       return 'Share sheet opened';
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError')
         return '';
     }
   }
+
   await navigator.clipboard.writeText(window.location.href);
+
   return 'Board link copied';
 };
 
 function PublicBoardPage() {
   const { publicId } = Route.useParams();
   const [snapshot, setSnapshot] = useState<PublicBoard | null>(null);
+
   const [itemSizeOverrides, setItemSizeOverrides] = useState<
     Readonly<
       Record<string, { readonly width: number; readonly height: number }>
     >
   >({});
+
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+
   const [camera, setCamera] = useState<Camera>({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
     z: 1,
   });
+
   const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(
     null,
   );
+
   const [playback] = useState(() => new AudioPlaybackCoordinator());
   const viewportRef = useRef<HTMLDivElement>(null);
   const pointersRef = useRef(new Map<number, Point>());
@@ -115,19 +128,26 @@ function PublicBoardPage() {
       snapshot?.board.items.map((item, index) => {
         const id = ItemIdSchema.make(`public-item-${index}`);
         const override = itemSizeOverrides[id];
+
         if (item.mediaId === undefined) {
-          return { id, ...item, ...(override === undefined ? {} : override) };
+          const result = { id, ...item };
+
+          return override === undefined ? result : { ...result, ...override };
         }
+
         const { mediaId, ...rest } = item;
-        return {
+
+        const result = {
           id,
           ...rest,
           src: publicMediaUrl(publicId, mediaId),
-          ...(override === undefined ? {} : override),
         };
+
+        return override === undefined ? result : { ...result, ...override };
       }) ?? [],
     [itemSizeOverrides, publicId, snapshot],
   );
+
   const itemsRef = useRef(items);
   useEffect(() => {
     itemsRef.current = items;
@@ -141,15 +161,16 @@ function PublicBoardPage() {
         setItemSizeOverrides({});
         setSnapshot(value);
       },
-      (reason: unknown) => {
+      (cause: unknown) => {
         if (!active) return;
         setError(
-          reason instanceof PublicApiError && reason.status === 404
+          cause instanceof PublicApiError && cause.status === 404
             ? 'This board is private, unpublished, or does not exist.'
             : 'The public board could not be loaded.',
         );
       },
     );
+
     return () => {
       active = false;
       playback.pauseAll();
@@ -161,27 +182,33 @@ function PublicBoardPage() {
     const refit = () => setCamera(fitCamera(itemsRef.current));
     refit();
     window.addEventListener('resize', refit);
+
     return () => window.removeEventListener('resize', refit);
   }, [snapshot]);
 
   const reconcileItemSize = (id: ItemId, width: number, height: number) => {
     setItemSizeOverrides((current) => {
       const previous = current[id];
+
       if (
         previous !== undefined &&
         Math.abs(previous.width - width) < 1 &&
         Math.abs(previous.height - height) < 4
       )
         return current;
+
       return { ...current, [id]: { width, height } };
     });
   };
 
   useEffect(() => {
     const viewport = viewportRef.current;
+
     if (viewport === null) return;
+
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
+
       if (event.ctrlKey || event.metaKey) {
         setCamera((current) =>
           zoomCamera(
@@ -198,7 +225,9 @@ function PublicBoardPage() {
         }));
       }
     };
+
     viewport.addEventListener('wheel', onWheel, { passive: false });
+
     return () => viewport.removeEventListener('wheel', onWheel);
   }, [snapshot]);
 
@@ -213,14 +242,20 @@ function PublicBoardPage() {
 
   const beginPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 && event.button !== 1) return;
-    const target = event.target as Element;
+    const target = event.target;
+
+    if (!(target instanceof Element)) return;
+
     const presentationDetailLink = target.closest<HTMLAnchorElement>(
       '.presentation-detail-link',
     );
+
     const presentationItem = target.closest<HTMLElement>(
       '[data-presentation-item-id]',
     );
+
     const presentationItemId = presentationItem?.dataset.presentationItemId;
+
     if (
       presentationDetailLink === null &&
       presentationItemId === undefined &&
@@ -232,6 +267,7 @@ function PublicBoardPage() {
     pointersRef.current.set(event.pointerId, point);
     event.currentTarget.setPointerCapture(event.pointerId);
     const pointers = [...pointersRef.current.values()];
+
     if (pointers.length >= 2) {
       const [left, right] = pointers;
       gestureRef.current = {
@@ -253,21 +289,26 @@ function PublicBoardPage() {
 
   const movePointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
+
     if (gesture === null || !pointersRef.current.has(event.pointerId)) return;
     pointersRef.current.set(event.pointerId, {
       x: event.clientX,
       y: event.clientY,
     });
     const pointers = [...pointersRef.current.values()];
+
     if (pointers.length >= 2) {
       const [left, right] = pointers;
       const center = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2 };
+
       const distance = Math.max(
         1,
         Math.hypot(left.x - right.x, left.y - right.y),
       );
+
       setCamera((current) => {
         const anchor = screenToWorld(gesture.center, current);
+
         const z = Math.min(
           MAX_ZOOM,
           Math.max(
@@ -275,11 +316,13 @@ function PublicBoardPage() {
             current.z * (distance / Math.max(1, gesture.distance ?? distance)),
           ),
         );
+
         return { x: center.x / z - anchor.x, y: center.y / z - anchor.y, z };
       });
       gestureRef.current = { center, distance };
     } else {
       const point = pointers[0];
+
       if (point === undefined) return;
       setCamera((current) => ({
         ...current,
@@ -292,6 +335,7 @@ function PublicBoardPage() {
 
   const endPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
+
     if (
       pointersRef.current.size === 1 &&
       event.type !== 'pointercancel' &&
@@ -305,15 +349,19 @@ function PublicBoardPage() {
         const item = items.find(
           (item) => item.id === gesture.presentationItemId,
         );
+
         if (item !== undefined) presentItem(item.id, gesture.start);
       } else if (gesture.linkHref !== undefined) {
         window.open(gesture.linkHref, '_blank', 'noopener,noreferrer');
       }
     }
+
     pointersRef.current.delete(event.pointerId);
+
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+
     const pointers = [...pointersRef.current.values()];
     gestureRef.current = pointers.length > 0 ? { center: pointers[0] } : null;
   };
@@ -338,6 +386,7 @@ function PublicBoardPage() {
 
   const background = snapshot.board.background ?? '#EDEDED';
   const colors = accessibleFieldColors(background);
+
   const style: PublicBoardStyle = {
     '--field': background,
     '--field-foreground': colors.foreground,
@@ -349,6 +398,7 @@ function PublicBoardPage() {
     transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)`,
     '--camera-zoom': camera.z,
   };
+
   const presentedBoardItem =
     presentedItem === null
       ? undefined
@@ -467,7 +517,7 @@ function PublicBoardPage() {
               );
             }}
           >
-            {typeof navigator.share === 'function' ? (
+            {Predicate.isFunction(navigator.share) ? (
               <ShareNetwork size={18} />
             ) : (
               <Copy size={18} />

@@ -17,6 +17,7 @@ export default Alchemy.Stack(
   Effect.gen(function* () {
     const stage = yield* Alchemy.Stage;
     const commentsPort = 4340;
+
     const comments = yield* Cloudflare.Worker('comments', {
       main: './packages/comments/src/worker.ts',
       compatibility: { date: '2026-01-14' },

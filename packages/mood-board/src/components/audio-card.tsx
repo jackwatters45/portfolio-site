@@ -1,4 +1,5 @@
 import { SpeakerHigh } from '@phosphor-icons/react';
+import { Match } from 'effect';
 import {
   useEffect,
   useMemo,
@@ -44,24 +45,32 @@ export function AudioCard({
   const onHeightRef = useRef(onHeight);
   const spotifyMountRef = useRef<HTMLDivElement>(null);
   const youtubeFrameRef = useRef<HTMLIFrameElement>(null);
+
   const [failedNativeSource, setFailedNativeSource] = useState<string | null>(
     null,
   );
+
   const [nativeAttempt, setNativeAttempt] = useState(0);
+
   const nativeSource =
     item.mediaId === undefined ? item.src : mediaUrl(item.mediaId);
+
   const nativeFailed =
     failedNativeSource !== null && failedNativeSource === nativeSource;
+
   const [spotifyError, setSpotifyError] = useState('');
   const [spotifyAttempt, setSpotifyAttempt] = useState(0);
+
   const spotify = useMemo(
     () => (item.kind === 'spotify' ? parseSpotifySource(item.src ?? '') : null),
     [item.kind, item.src],
   );
+
   const youtube = useMemo(
     () => (item.kind === 'youtube' ? parseYouTubeSource(item.src ?? '') : null),
     [item.kind, item.src],
   );
+
   const youtubeEmbedUrl =
     youtube === null
       ? null
@@ -76,13 +85,14 @@ export function AudioCard({
   }, [onHeight]);
 
   useEffect(() => {
-    const kind =
-      item.kind === 'spotify'
-        ? 'spotify'
-        : item.kind === 'youtube'
-          ? 'youtube'
-          : 'audio';
+    const kind = Match.value(item.kind).pipe(
+      Match.when('spotify', () => 'spotify' as const),
+      Match.when('youtube', () => 'youtube' as const),
+      Match.orElse(() => 'audio' as const),
+    );
+
     const height = preferredAudioCardHeight(kind, item.width);
+
     if (Math.abs(height - item.height) >= 4) onHeightRef.current?.(height);
   }, [item.height, item.kind, item.width]);
 
@@ -90,6 +100,7 @@ export function AudioCard({
     if (item.kind !== 'audio') return;
     const pause = () => audioRef.current?.pause();
     const unregister = coordinator.register(item.id, pause);
+
     return () => {
       pause();
       unregister();
@@ -118,8 +129,10 @@ export function AudioCard({
           (created) => {
             if (!active) {
               created.destroy();
+
               return;
             }
+
             controller = created;
             unregister = coordinator.register(item.id, () => created.pause());
             created.addListener('playback_update', (event) => {
@@ -128,14 +141,15 @@ export function AudioCard({
           },
         );
       })
-      .catch((error: unknown) => {
+      .catch((cause: unknown) => {
         if (active)
           setSpotifyError(
-            error instanceof Error
-              ? error.message
+            cause instanceof Error
+              ? cause.message
               : 'Spotify could not be loaded.',
           );
       });
+
     return () => {
       active = false;
       unregister?.();
@@ -147,11 +161,13 @@ export function AudioCard({
 
   useEffect(() => {
     if (youtube === null) return;
+
     const pause = () =>
       youtubeFrameRef.current?.contentWindow?.postMessage(
         JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }),
         YOUTUBE_PLAYER_ORIGIN,
       );
+
     const onMessage = (event: MessageEvent) => {
       if (
         isYouTubePlayingMessage(
@@ -162,8 +178,10 @@ export function AudioCard({
         coordinator.playing(item.id);
       }
     };
+
     window.addEventListener('message', onMessage);
     const unregister = coordinator.register(item.id, pause);
+
     return () => {
       window.removeEventListener('message', onMessage);
       pause();
@@ -173,11 +191,11 @@ export function AudioCard({
 
   const title =
     item.label?.trim() ||
-    (item.kind === 'spotify'
-      ? 'Spotify reference'
-      : item.kind === 'youtube'
-        ? 'YouTube reference'
-        : 'Audio reference');
+    Match.value(item.kind).pipe(
+      Match.when('spotify', () => 'Spotify reference'),
+      Match.when('youtube', () => 'YouTube reference'),
+      Match.orElse(() => 'Audio reference'),
+    );
 
   return (
     <div className={`audio-card audio-card--${item.kind}`}>

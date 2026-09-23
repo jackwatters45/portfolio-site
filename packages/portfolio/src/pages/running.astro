@@ -8,6 +8,7 @@ import Layout from '@/layouts/layout-full-screen.astro';
 const activities: StravaActivityWithIndex[] = [];
 
 const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+
 const activitiesWithIndex = activities.map((activity) => {
   const activityDate = new Date(activity.start_date);
   const diffTime = activityDate.getTime() - startOfYear.getTime();

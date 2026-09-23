@@ -11,6 +11,7 @@ import {
 export const AuthCleanupTimestampSchema = NonNegativeIntegerSchema.pipe(
   Schema.brand('AuthCleanupTimestamp'),
 );
+
 export type AuthCleanupTimestamp = typeof AuthCleanupTimestampSchema.Type;
 
 export const AuthBaseUrlSchema = Schema.String.check(
@@ -30,11 +31,13 @@ export const AuthBaseUrlSchema = Schema.String.check(
     }
   }),
 ).pipe(Schema.brand('AuthBaseUrl'));
+
 export type AuthBaseUrl = typeof AuthBaseUrlSchema.Type;
 
 export const AuthSecretSchema = Schema.String.check(Schema.isMinLength(1)).pipe(
   Schema.brand('AuthSecret'),
 );
+
 export type AuthSecret = typeof AuthSecretSchema.Type;
 
 export type AuthDatabase = NonNullable<BetterAuthOptions['database']>;
@@ -101,19 +104,24 @@ export const validateAuthSecret = (
   local: boolean,
 ): AuthSecret => {
   const value = secret.trim();
+
   if (!value) throw new Error('BETTER_AUTH_SECRET is required.');
+
   if (!local) {
     const normalized = value.toLowerCase();
+
     const looksLikeDefault =
       normalized.includes('change-me') ||
       normalized.includes('moodboard-local') ||
       normalized.includes('mood-board-local');
+
     if (value.length < 32 || new Set(value).size < 12 || looksLikeDefault) {
       throw new Error(
         'BETTER_AUTH_SECRET must be a high-entropy random value of at least 32 characters.',
       );
     }
   }
+
   return AuthSecretSchema.make(value);
 };
 
@@ -122,20 +130,24 @@ export const validateAuthBaseURL = (
   local: boolean,
 ): AuthBaseUrl => {
   let url: URL;
+
   try {
     url = new URL(value);
   } catch {
     throw new Error('BETTER_AUTH_URL must be an absolute URL.');
   }
+
   const loopback =
     url.hostname === 'localhost' ||
     url.hostname === '127.0.0.1' ||
     url.hostname === '[::1]';
+
   if (!local && url.protocol !== 'https:' && !loopback) {
     throw new Error(
       'BETTER_AUTH_URL must use HTTPS outside local development.',
     );
   }
+
   return AuthBaseUrlSchema.make(url.origin);
 };
 
@@ -145,6 +157,7 @@ export const configuredGoogle = (
 ): AuthConfig['google'] => {
   const id = clientId?.trim();
   const secret = clientSecret?.trim();
+
   return id && secret ? { clientId: id, clientSecret: secret } : undefined;
 };
 
@@ -174,12 +187,15 @@ const deliverMagicLinkEffect = Effect.fn('Auth.deliverMagicLink')(function* (
 ) {
   const apiKey = config.apiKey?.trim();
   const sender = config.sender?.trim();
+
   if (config.local) {
     yield* Effect.sync(() =>
       console.log(`[auth:magic-link] to=${input.email} url=${input.url}`),
     );
+
     return;
   }
+
   if (!apiKey || !sender) {
     return yield* new MagicLinkDeliveryError({
       reason: 'Configuration',

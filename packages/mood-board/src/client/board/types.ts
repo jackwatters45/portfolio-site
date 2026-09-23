@@ -9,7 +9,9 @@ import type {
 import type { Camera } from './camera';
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
+
 type MutableElement<T> = T extends Primitive ? T : Mutable<T>;
+
 type Mutable<T> = {
   -readonly [Key in keyof T]: T[Key] extends ReadonlyArray<infer Item>
     ? Array<MutableElement<Item>>
@@ -19,6 +21,7 @@ type Mutable<T> = {
 export type { Camera };
 
 export type BoardItem = Mutable<RemoteBoardItem>;
+
 export type ItemKind = BoardItem['kind'];
 
 export type Board = Mutable<RemoteBoard>;

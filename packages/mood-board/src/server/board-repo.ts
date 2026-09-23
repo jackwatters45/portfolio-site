@@ -1,16 +1,19 @@
 import { createHash } from 'node:crypto';
 
-import { Clock, Context, Effect, Layer, Schema } from 'effect';
+import { Clock, Context, Data, Effect, Layer, Schema } from 'effect';
 import * as SqlClient from 'effect/unstable/sql/SqlClient';
 import type { SqlError } from 'effect/unstable/sql/SqlError';
 
 import {
+  BoardChangeSchema,
+  BoardDeletedSchema,
   BoardColorSchema,
   BoardCountSchema,
   BoardIdSchema,
   BoardItemCountSchema,
   BoardItemSchema,
   BoardRevisionSchema,
+  BoardSchema,
   BoardSnapshotSchema,
   BoardSummarySchema,
   BoardTimestampSchema,
@@ -68,11 +71,14 @@ const BoardRowSchema = Schema.Struct({
   revision: BoardRevisionSchema,
   updated_at: BoardTimestampSchema,
 });
+
 const CountRowSchema = Schema.Struct({ count: BoardCountSchema });
+
 const TombstoneRowSchema = Schema.Struct({
   revision: BoardRevisionSchema,
   deleted_at: BoardTimestampSchema,
 });
+
 const boardNow = Clock.currentTimeMillis.pipe(
   Effect.map((millis) => BoardTimestampSchema.make(millis)),
 );
@@ -127,16 +133,19 @@ interface MediaValidationRow {
 const MutationRequestHashSchema = Sha256HexSchema.pipe(
   Schema.brand('MutationRequestHash'),
 );
+
 const MutationRowSchema = Schema.Struct({
   revision: BoardRevisionSchema,
   client_id: ClientIdSchema,
   request_hash: MutationRequestHashSchema,
   created_at: BoardTimestampSchema,
 });
+
 const ItemSizeRowSchema = Schema.Struct({
   id: ItemIdSchema,
   bytes: PositiveIntegerSchema,
 });
+
 const MediaValidationRowSchema = Schema.Struct({ kind: MediaKindSchema });
 
 export interface CommitInput {
@@ -168,6 +177,47 @@ export type ManagementRejected =
   | { readonly _tag: 'InvalidOperation' }
   | { readonly _tag: 'LastBoard' };
 
+const CommitRejection = Data.taggedEnum<CommitRejected>();
+
+const ManagementRejection = Data.taggedEnum<ManagementRejected>();
+
+type BoardChangePayload = {
+  -readonly [K in keyof Omit<BoardChange, '_tag'>]: Omit<
+    BoardChange,
+    '_tag'
+  >[K];
+};
+
+type SnapshotDocument = {
+  -readonly [K in keyof BoardSnapshot['board']]: BoardSnapshot['board'][K];
+};
+
+const committedChange = (
+  input: CommitInput,
+  revision: BoardChange['revision'],
+  clientId: ClientId,
+  updatedAt: BoardChange['updatedAt'],
+): BoardChange => {
+  const change: BoardChangePayload = {
+    boardId: input.boardId,
+    revision,
+    clientId,
+    mutationId: input.mutationId,
+    upserts: input.upserts,
+    deletes: input.deletes,
+    updatedAt,
+  };
+
+  if (input.title !== undefined) change.title = input.title;
+
+  if (input.background !== undefined) change.background = input.background;
+
+  if (input.backgroundMediaId !== undefined)
+    change.backgroundMediaId = input.backgroundMediaId;
+
+  return BoardChangeSchema.make(change, { disableChecks: true });
+};
+
 const mutationHash = (input: CommitInput) => {
   const payload = {
     boardId: input.boardId,
@@ -179,9 +229,11 @@ const mutationHash = (input: CommitInput) => {
     upserts: input.upserts,
     deletes: input.deletes,
   };
+
   const hash = createHash('sha256')
     .update(JSON.stringify(payload))
     .digest('hex');
+
   return MutationRequestHashSchema.make(hash);
 };
 
@@ -211,6 +263,7 @@ const decodeItemRow = Effect.fn('BoardRepo.decodeItemRow')(function* (
   const xHideThread = yield* Schema.decodeUnknownEffect(
     NullableSqliteBooleanSchema,
   )(row.x_hide_thread).pipe(Effect.orDie);
+
   return yield* Schema.decodeUnknownEffect(BoardItemSchema)({
     id: row.id,
     kind: row.kind,
@@ -266,6 +319,7 @@ const decodeCount = Effect.fn('BoardRepo.decodeCount')(function* (
   row: CountRow | undefined,
 ) {
   if (row === undefined) return 0;
+
   return (yield* Schema.decodeUnknownEffect(CountRowSchema)(row).pipe(
     Effect.orDie,
   )).count;
@@ -303,7 +357,7 @@ const decodeMediaValidationRow = Effect.fn(
   );
 });
 
-interface BoardRepoShape {
+interface BoardPersistence {
   readonly list: () => Effect.Effect<ReadonlyArray<BoardSummary>, SqlError>;
   readonly exists: (boardId: BoardId) => Effect.Effect<boolean, SqlError>;
   readonly getSnapshot: (
@@ -326,7 +380,7 @@ interface BoardRepoShape {
   ) => Effect.Effect<CommitResult | CommitRejected | null, SqlError>;
 }
 
-export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
+export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
   'mood-board/BoardRepo',
 ) {
   static readonly layer = Layer.effect(
@@ -345,7 +399,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
           WHERE b.id = ${boardId}
           GROUP BY b.id, b.title, b.updated_at
         `;
+
         const row = rows[0];
+
         return row === undefined ? null : yield* decodeSummary(row);
       });
 
@@ -358,6 +414,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
           ORDER BY b.updated_at DESC, b.id ASC
           LIMIT ${MAX_BOARDS}
         `;
+
         return yield* Effect.forEach(rows, decodeSummary);
       });
 
@@ -370,6 +427,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
           WHERE id = ${boardId}
           LIMIT 1
         `;
+
         return rows.length > 0;
       });
 
@@ -381,7 +439,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
           FROM boards
           WHERE id = ${boardId}
         `;
+
         const boardRow = boards[0];
+
         if (boardRow === undefined) return null;
         const board = yield* decodeBoardRow(boardRow);
 
@@ -394,25 +454,31 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
           WHERE board_id = ${boardId}
           ORDER BY order_index ASC, id ASC
         `;
+
         const items = yield* Effect.forEach(rows, decodeItemRow);
 
-        return yield* Schema.decodeUnknownEffect(BoardSnapshotSchema)({
-          _tag: 'Snapshot',
+        const document: SnapshotDocument = {
+          version: 1,
+          title: board.title,
+          items,
+          updatedAt: board.updated_at,
+        };
+
+        if (board.background_color !== null)
+          document.background = board.background_color;
+
+        if (board.background_media_id !== null)
+          document.backgroundMediaId = board.background_media_id;
+
+        const decoded = yield* Schema.decodeUnknownEffect(BoardSchema)(
+          document,
+        ).pipe(Effect.orDie);
+
+        return BoardSnapshotSchema.make({
           boardId,
           revision: board.revision,
-          board: {
-            version: 1,
-            title: board.title,
-            ...(board.background_color === null
-              ? {}
-              : { background: board.background_color }),
-            ...(board.background_media_id === null
-              ? {}
-              : { backgroundMediaId: board.background_media_id }),
-            items,
-            updatedAt: board.updated_at,
-          },
-        }).pipe(Effect.orDie);
+          board: decoded,
+        });
       });
 
       const create = Effect.fn('BoardRepo.create')(function* (
@@ -422,29 +488,36 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const existing = yield* getSummary(boardId);
+
             if (existing !== null) return existing;
+
             const tombstones = yield* sql<TombstoneRow>`
               SELECT revision, deleted_at
               FROM board_tombstones
               WHERE board_id = ${boardId}
             `;
+
             if (tombstones.length > 0) {
-              return { _tag: 'DeletedBoardId' } satisfies ManagementRejected;
+              return ManagementRejection.DeletedBoardId();
             }
 
             const counts =
               yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+
             const count = yield* decodeCount(counts[0]);
+
             const defaultExists =
               boardId === DEFAULT_BOARD_ID
                 ? false
                 : yield* exists(DEFAULT_BOARD_ID);
+
             const limit =
               defaultExists || boardId === DEFAULT_BOARD_ID
                 ? MAX_BOARDS
                 : MAX_BOARDS - 1;
+
             if (count >= limit) {
-              return { _tag: 'BoardLimit' } satisfies ManagementRejected;
+              return ManagementRejection.BoardLimit();
             }
 
             const updatedAt = yield* boardNow;
@@ -452,6 +525,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               INSERT INTO boards (id, title, version, revision, updated_at)
               VALUES (${boardId}, ${title}, 1, 0, ${updatedAt})
             `;
+
             return {
               id: boardId,
               title,
@@ -468,32 +542,38 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         title: string,
       ) {
         if (sourceBoardId === boardId) {
-          return { _tag: 'InvalidOperation' } satisfies ManagementRejected;
+          return ManagementRejection.InvalidOperation();
         }
 
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const existing = yield* getSummary(boardId);
+
             if (existing !== null) return existing;
+
             const tombstones = yield* sql<TombstoneRow>`
               SELECT revision, deleted_at
               FROM board_tombstones
               WHERE board_id = ${boardId}
             `;
+
             if (tombstones.length > 0) {
-              return { _tag: 'DeletedBoardId' } satisfies ManagementRejected;
+              return ManagementRejection.DeletedBoardId();
             }
 
             const source = yield* getSummary(sourceBoardId);
+
             if (source === null) return null;
 
             const counts =
               yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+
             const count = yield* decodeCount(counts[0]);
             const defaultExists = yield* exists(DEFAULT_BOARD_ID);
             const limit = defaultExists ? MAX_BOARDS : MAX_BOARDS - 1;
+
             if (count >= limit) {
-              return { _tag: 'BoardLimit' } satisfies ManagementRejected;
+              return ManagementRejection.BoardLimit();
             }
 
             const updatedAt = yield* boardNow;
@@ -536,8 +616,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         boardId: BoardId,
       ) {
         if (boardId === DEFAULT_BOARD_ID) {
-          return { _tag: 'InvalidOperation' } satisfies ManagementRejected;
+          return ManagementRejection.InvalidOperation();
         }
+
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const boards = yield* sql<BoardRow>`
@@ -545,22 +626,26 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               FROM boards
               WHERE id = ${boardId}
             `;
+
             const boardRow = boards[0];
+
             if (boardRow === undefined) {
               const tombstones = yield* sql<TombstoneRow>`
                 SELECT revision, deleted_at
                 FROM board_tombstones
                 WHERE board_id = ${boardId}
               `;
+
               const tombstoneRow = tombstones[0];
+
               if (tombstoneRow !== undefined) {
                 const tombstone = yield* decodeTombstone(tombstoneRow);
-                return {
-                  _tag: 'Deleted',
+
+                return BoardDeletedSchema.make({
                   boardId,
                   revision: tombstone.revision,
                   updatedAt: tombstone.deleted_at,
-                } satisfies BoardDeleted;
+                });
               }
 
               const revision = BoardRevisionSchema.make(0);
@@ -569,19 +654,21 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
                 INSERT INTO board_tombstones (board_id, revision, deleted_at)
                 VALUES (${boardId}, ${revision}, ${updatedAt})
               `;
-              return {
-                _tag: 'Deleted',
+
+              return BoardDeletedSchema.make({
                 boardId,
                 revision,
                 updatedAt,
-              } satisfies BoardDeleted;
+              });
             }
+
             const board = yield* decodeBoardRow(boardRow);
 
             const counts =
               yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+
             if ((yield* decodeCount(counts[0])) <= 1) {
-              return { _tag: 'LastBoard' } satisfies ManagementRejected;
+              return ManagementRejection.LastBoard();
             }
 
             const updatedAt = yield* boardNow;
@@ -594,12 +681,12 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
                 deleted_at = excluded.deleted_at
             `;
             yield* sql`DELETE FROM boards WHERE id = ${boardId}`;
-            return {
-              _tag: 'Deleted',
+
+            return BoardDeletedSchema.make({
               boardId,
               revision,
               updatedAt,
-            } satisfies BoardDeleted;
+            });
           }),
         );
       });
@@ -608,9 +695,11 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         input: CommitInput,
       ) {
         const deletedIds = new Set(input.deletes);
+
         if (input.upserts.some((item) => deletedIds.has(item.id))) {
-          return { _tag: 'InvalidMutation' } satisfies CommitRejected;
+          return CommitRejection.InvalidMutation();
         }
+
         const requestHash = mutationHash(input);
 
         return yield* sql.withTransaction(
@@ -621,33 +710,25 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               WHERE board_id = ${input.boardId}
                 AND mutation_id = ${input.mutationId}
             `;
+
             const existingMutationRow = existingMutations[0];
+
             if (existingMutationRow !== undefined) {
               const existingMutation =
                 yield* decodeMutationRow(existingMutationRow);
+
               if (existingMutation.request_hash !== requestHash) {
-                return { _tag: 'MutationConflict' } satisfies CommitRejected;
+                return CommitRejection.MutationConflict();
               }
-              return {
-                applied: false,
-                change: {
-                  _tag: 'Change',
-                  boardId: input.boardId,
-                  revision: existingMutation.revision,
-                  clientId: existingMutation.client_id,
-                  mutationId: input.mutationId,
-                  ...(input.title === undefined ? {} : { title: input.title }),
-                  ...(input.background === undefined
-                    ? {}
-                    : { background: input.background }),
-                  ...(input.backgroundMediaId === undefined
-                    ? {}
-                    : { backgroundMediaId: input.backgroundMediaId }),
-                  upserts: input.upserts,
-                  deletes: input.deletes,
-                  updatedAt: existingMutation.created_at,
-                },
-              } satisfies CommitResult;
+
+              const change = committedChange(
+                input,
+                existingMutation.revision,
+                existingMutation.client_id,
+                existingMutation.created_at,
+              );
+
+              return { applied: false, change } satisfies CommitResult;
             }
 
             const boards = yield* sql<BoardRow>`
@@ -655,7 +736,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               FROM boards
               WHERE id = ${input.boardId}
             `;
+
             const boardRow = boards[0];
+
             if (boardRow === undefined) return null;
             const board = yield* decodeBoardRow(boardRow);
 
@@ -668,37 +751,46 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
                 WHERE id = ${input.backgroundMediaId} AND ready_at IS NOT NULL
                 LIMIT 1
               `;
+
               const mediaRow = mediaRows[0];
+
               const media =
                 mediaRow === undefined
                   ? null
                   : yield* decodeMediaValidationRow(mediaRow);
+
               if (media?.kind !== 'image') {
-                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
+                return CommitRejection.InvalidMedia();
               }
             }
 
             for (const item of input.upserts) {
               if (item.mediaId === undefined) continue;
+
               const expectedKind =
                 item.kind === 'image' || item.kind === 'audio'
                   ? item.kind
                   : null;
+
               if (expectedKind === null) {
-                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
+                return CommitRejection.InvalidMedia();
               }
+
               const mediaRows = yield* sql<MediaValidationRow>`
                 SELECT kind FROM media_assets
                 WHERE id = ${item.mediaId} AND ready_at IS NOT NULL
                 LIMIT 1
               `;
+
               const mediaRow = mediaRows[0];
+
               const media =
                 mediaRow === undefined
                   ? null
                   : yield* decodeMediaValidationRow(mediaRow);
+
               if (media?.kind !== expectedKind) {
-                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
+                return CommitRejection.InvalidMedia();
               }
             }
 
@@ -725,25 +817,32 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               FROM items
               WHERE board_id = ${input.boardId}
             `;
+
             const decodedItems = yield* Effect.forEach(
               existingItems,
               decodeItemSizeRow,
             );
+
             const projectedItems = new Map(
               decodedItems.map((item) => [item.id, item.bytes]),
             );
+
             for (const itemId of input.deletes) projectedItems.delete(itemId);
+
             for (const item of input.upserts)
               projectedItems.set(item.id, itemBytes(item));
+
             if (projectedItems.size > MAX_REMOTE_ITEMS) {
-              return { _tag: 'TooManyItems' } satisfies CommitRejected;
+              return CommitRejection.TooManyItems();
             }
+
             const projectedBytes = [...projectedItems.values()].reduce(
               (total, bytes) => total + bytes,
               0,
             );
+
             if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
-              return { _tag: 'BoardTooLarge' } satisfies CommitRejected;
+              return CommitRejection.BoardTooLarge();
             }
 
             for (const itemId of input.deletes) {
@@ -806,14 +905,17 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
 
             const revision = BoardRevisionSchema.make(board.revision + 1);
             const updatedAt = yield* boardNow;
+
             const background =
               input.background === undefined
                 ? board.background_color
                 : input.background;
+
             const backgroundMediaId =
               input.backgroundMediaId === undefined
                 ? board.background_media_id
                 : input.backgroundMediaId;
+
             yield* sql`
               UPDATE boards
               SET title = ${input.title ?? board.title},
@@ -832,26 +934,14 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               )
             `;
 
-            return {
-              applied: true,
-              change: {
-                _tag: 'Change',
-                boardId: input.boardId,
-                revision,
-                clientId: input.clientId,
-                mutationId: input.mutationId,
-                ...(input.title === undefined ? {} : { title: input.title }),
-                ...(input.background === undefined
-                  ? {}
-                  : { background: input.background }),
-                ...(input.backgroundMediaId === undefined
-                  ? {}
-                  : { backgroundMediaId: input.backgroundMediaId }),
-                upserts: input.upserts,
-                deletes: input.deletes,
-                updatedAt,
-              },
-            } satisfies CommitResult;
+            const change = committedChange(
+              input,
+              revision,
+              input.clientId,
+              updatedAt,
+            );
+
+            return { applied: true, change } satisfies CommitResult;
           }),
         );
       });

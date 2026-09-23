@@ -14,4 +14,5 @@ export const signalAuthenticationRequired = (): void => {
 };
 
 export type AuthSession = typeof authClient.$Infer.Session;
+
 export type AccountUser = AuthSession['user'];

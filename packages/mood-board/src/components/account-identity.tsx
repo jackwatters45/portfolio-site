@@ -28,6 +28,7 @@ export function HomeAccountIdentity({
       />
     );
   }
+
   if (error) {
     return (
       <button className="home-account-error" type="button" onClick={onRetry}>
@@ -35,6 +36,7 @@ export function HomeAccountIdentity({
       </button>
     );
   }
+
   if (user === undefined) {
     return (
       <Link className="home-sign-in" to="/login" search={{ returnTo: '/' }}>
@@ -42,6 +44,7 @@ export function HomeAccountIdentity({
       </Link>
     );
   }
+
   return (
     <Link
       className="home-account"
@@ -81,6 +84,7 @@ export function MenuAccountIdentity({
       </section>
     );
   }
+
   if (error) {
     return (
       <section
@@ -98,6 +102,7 @@ export function MenuAccountIdentity({
       </section>
     );
   }
+
   if (user === undefined) {
     return (
       <section className="menu-account-card is-guest" aria-label="Account">
@@ -113,6 +118,7 @@ export function MenuAccountIdentity({
       </section>
     );
   }
+
   return (
     <Link
       className="menu-account-card is-member"

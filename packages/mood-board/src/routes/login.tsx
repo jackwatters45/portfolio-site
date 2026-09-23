@@ -1,5 +1,6 @@
 import { ArrowLeft, EnvelopeSimple, GoogleLogo } from '@phosphor-icons/react';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { Option, Schema } from 'effect';
 import { useEffect, useState, type FormEvent } from 'react';
 
 import { authClient } from '../client/auth-client';
@@ -10,13 +11,25 @@ type LoginSearch = {
   readonly error?: string;
 };
 
+const LoginSearchInputSchema = Schema.Struct({
+  returnTo: Schema.optional(Schema.Unknown),
+  error: Schema.optional(Schema.Unknown),
+});
+
+const decodeSearchString = Schema.decodeUnknownOption(Schema.String);
+
+const GoogleProviderSchema = Schema.Struct({ google: Schema.Literal(true) });
+
 export const Route = createFileRoute('/login')({
-  validateSearch: (search: Record<string, unknown>): LoginSearch => {
+  validateSearch: (search: typeof LoginSearchInputSchema.Type): LoginSearch => {
     const returnTo = safeReturnTo(
-      typeof search.returnTo === 'string' ? search.returnTo : null,
+      Option.getOrNull(decodeSearchString(search.returnTo)),
     );
-    return typeof search.error === 'string'
-      ? { returnTo, error: search.error }
+
+    const error = decodeSearchString(search.error);
+
+    return Option.isSome(error)
+      ? { returnTo, error: error.value }
       : { returnTo };
   },
   component: LoginPage,
@@ -30,11 +43,13 @@ function LoginPage() {
   const [googleEnabled, setGoogleEnabled] = useState(false);
   const [pending, setPending] = useState<'google' | 'email' | null>(null);
   const [sentTo, setSentTo] = useState('');
+
   const [error, setError] = useState(() =>
     search.error === undefined
       ? ''
       : 'That sign-in link could not be used. Please try again.',
   );
+
   const returnTo = search.returnTo;
 
   useEffect(() => {
@@ -46,17 +61,13 @@ function LoginPage() {
       .then(async (response) => {
         if (!response.ok) return;
         const value: unknown = await response.json();
-        if (
-          active &&
-          typeof value === 'object' &&
-          value !== null &&
-          'google' in value &&
-          value.google === true
-        ) {
+
+        if (active && Schema.is(GoogleProviderSchema)(value)) {
           setGoogleEnabled(true);
         }
       })
       .catch(() => undefined);
+
     return () => {
       active = false;
     };
@@ -71,12 +82,14 @@ function LoginPage() {
   const signInWithGoogle = async () => {
     setPending('google');
     setError('');
+
     try {
       const result = await authClient.signIn.social({
         provider: 'google',
         callbackURL: returnTo,
         errorCallbackURL: `/login?returnTo=${encodeURIComponent(returnTo)}`,
       });
+
       if (result.error) {
         setError(
           result.error.message ?? 'Google sign in could not be started.',
@@ -96,21 +109,26 @@ function LoginPage() {
   const sendMagicLink = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const address = email.trim();
+
     if (!address || pending !== null) return;
     setPending('email');
     setError('');
     setSentTo('');
+
     try {
       const result = await authClient.signIn.magicLink({
         email: address,
         callbackURL: returnTo,
         errorCallbackURL: `/login?returnTo=${encodeURIComponent(returnTo)}`,
       });
+
       if (result.error) {
         setError(result.error.message ?? 'The magic link could not be sent.');
         setPending(null);
+
         return;
       }
+
       setSentTo(address);
       setPending(null);
     } catch (cause) {

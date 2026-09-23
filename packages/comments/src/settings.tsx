@@ -14,6 +14,7 @@ export function NameForm({
   welcome?: boolean;
 }) {
   const id = useId();
+
   const form = useForm({
     defaultValues: { name },
     validators: {
@@ -32,6 +33,7 @@ export function NameForm({
       }
     },
   });
+
   return (
     <form
       className="pc-name-form"
@@ -95,6 +97,7 @@ export function NameForm({
     </form>
   );
 }
+
 export function Settings({
   preferences,
   update,

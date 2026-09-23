@@ -28,6 +28,7 @@ import { screenToWorld } from './camera';
 import type { Board, BoardItem, Camera } from './types';
 
 type Point = { readonly x: number; readonly y: number };
+
 interface BulkSession {
   readonly files: ReadonlyArray<File>;
   readonly anchor: Point;
@@ -35,12 +36,14 @@ interface BulkSession {
   readonly truncated: boolean;
   readonly failures: ReadonlyArray<TraversalFailure>;
 }
+
 interface IntakeState {
   readonly bulkSession: BulkSession | null;
   readonly collectingDrop: boolean;
   readonly imageIntakeStatus: string;
   readonly backgroundUploadError: string;
 }
+
 interface IntakeOptions {
   readonly localOnly: boolean;
   readonly boardRef: Readonly<RefObject<Board>>;
@@ -61,10 +64,12 @@ interface IntakeOptions {
   readonly onBackgroundReady: (id: MediaId) => void;
   readonly pauseAudio: () => void;
 }
+
 const center = (): Point => ({
   x: window.innerWidth / 2,
   y: window.innerHeight / 2,
 });
+
 const prepare = <A>(run: () => A) =>
   Effect.try({
     try: run,
@@ -85,19 +90,24 @@ const createIntakeAtoms = (options: IntakeOptions) => {
     imageIntakeStatus: '',
     backgroundUploadError: '',
   });
+
   const runtime = Atom.runtime(BoardTransfers.layer(options.localOnly)).pipe(
     Atom.setIdleTTL(0),
   );
+
   const view = Atom.make((get) => {
     get.mount(runtime);
+
     return { ...get(state), backgroundUploading: get(background).waiting };
   }).pipe(Atom.setIdleTTL(0));
+
   const withWorking = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
     Effect.acquireUseRelease(
       Effect.sync(options.beginWorking),
       () => effect,
       () => Effect.sync(options.endWorking),
     );
+
   const patch = (
     registry: AtomRegistry.AtomRegistry,
     patch: Partial<IntakeState>,
@@ -146,6 +156,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
             : 'Preparing image…',
       });
       const transfers = yield* BoardTransfers;
+
       const image = yield* transfers.image(file, () =>
         patch(registry, {
           imageIntakeStatus: options.localOnly
@@ -153,12 +164,15 @@ const createIntakeAtoms = (options: IntakeOptions) => {
             : 'Uploading image…',
         }),
       );
+
       patch(registry, { imageIntakeStatus: 'Adding image to board…' });
       const current = options.boardRef.current;
+
       if (current.items.length >= MAX_REMOTE_ITEMS)
         return yield* new BoardTransferError({
           message: `This board can hold ${MAX_REMOTE_ITEMS} items.`,
         });
+
       const layout = yield* prepare(() =>
         placeLayoutWithoutOverlap(
           layoutBulkImages(
@@ -169,11 +183,14 @@ const createIntakeAtoms = (options: IntakeOptions) => {
           current.items,
         ),
       );
+
       const placed = layout.items[0];
+
       if (placed === undefined)
         return yield* new BoardTransferError({
           message: 'The image could not be placed.',
         });
+
       const item: BoardItem = {
         id: createId(),
         kind: 'image',
@@ -187,6 +204,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
         rotation: 0,
         order: Math.max(0, ...current.items.map((entry) => entry.order)) + 1,
       };
+
       if (
         [...current.items, item].reduce(
           (total, entry) => total + estimateItemBytes(entry),
@@ -216,6 +234,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
       { concurrent: true },
     )
     .pipe(Atom.setIdleTTL(0));
+
   const drop = runtime
     .fn((input: { readonly data: DataTransfer; readonly point: Point }, get) =>
       withWorking(
@@ -224,6 +243,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
           const transfers = yield* BoardTransfers;
           const collection = yield* transfers.collectDrop(input.data);
           patch(get.registry, { collectingDrop: false });
+
           if (collection.files.length === 0) {
             options.showToast(
               collection.failures[0]?.message ??
@@ -239,6 +259,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
             openBulk(get.registry, collection.files, input.point, collection);
           } else {
             const file = collection.files[0];
+
             if (file !== undefined)
               get.set(image, { file, point: input.point });
           }
@@ -290,6 +311,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
         withWorking(
           Effect.gen(function* () {
             options.onPanelError('');
+
             if (
               !input.editingId &&
               options.boardRef.current.items.length >= MAX_REMOTE_ITEMS
@@ -299,10 +321,12 @@ const createIntakeAtoms = (options: IntakeOptions) => {
               });
             const transfers = yield* BoardTransfers;
             const mediaId = yield* transfers.audio(input.file);
+
             const label =
               input.label.trim() ||
               input.file.name.replace(/\.[^.]+$/, '').slice(0, 120) ||
               undefined;
+
             if (input.editingId) {
               options.pauseAudio();
               options.applyBoard((current) => ({
@@ -331,6 +355,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
               const point = screenToWorld(center(), options.cameraRef.current);
               const width = 520;
               const height = preferredAudioCardHeight('audio', width);
+
               const item: BoardItem = {
                 id: createId(),
                 kind: 'audio',
@@ -349,12 +374,14 @@ const createIntakeAtoms = (options: IntakeOptions) => {
                     ),
                   ) + 1,
               };
+
               options.applyBoard((current) => ({
                 ...current,
                 items: [...current.items, item],
               }));
               options.onSelect(item.id);
             }
+
             options.onClosePanel();
             options.showToast(
               input.editingId ? 'Audio card updated' : 'Local audio added',
@@ -378,24 +405,30 @@ const createIntakeAtoms = (options: IntakeOptions) => {
         withWorking(
           Effect.gen(function* () {
             const transfers = yield* BoardTransfers;
+
             if (input.type === 'import') {
               const imported = yield* transfers.importBoard(input.file);
               options.replaceDocument(imported.board, imported.camera, true);
               options.onClosePanel();
               options.showToast('Board imported');
+
               return;
             }
+
             const current = options.boardRef.current;
+
             const blob = yield* transfers.exportBoard(
               current,
               options.cameraRef.current,
             );
+
             yield* Effect.scoped(
               Effect.gen(function* () {
                 const url = yield* Effect.acquireRelease(
                   Effect.sync(() => URL.createObjectURL(blob)),
                   (url) => Effect.sync(() => URL.revokeObjectURL(url)),
                 );
+
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = `${
@@ -424,8 +457,10 @@ const createIntakeAtoms = (options: IntakeOptions) => {
     layoutKind: BulkLayoutKind,
   ): string | null => {
     const current = options.boardRef.current;
+
     if (current.items.length + images.length > MAX_REMOTE_ITEMS)
       return `This board can hold ${MAX_REMOTE_ITEMS} items. Select fewer images.`;
+
     const layout = layoutBulkImages(
       images.map((image) => ({
         id: image.entryId,
@@ -434,7 +469,9 @@ const createIntakeAtoms = (options: IntakeOptions) => {
       })),
       layoutKind,
     );
+
     let placed;
+
     try {
       placed = placeLayoutWithoutOverlap(
         layout,
@@ -446,12 +483,16 @@ const createIntakeAtoms = (options: IntakeOptions) => {
         ? error.message
         : 'Open canvas space could not be found.';
     }
+
     const prepared = new Map(images.map((image) => [image.entryId, image]));
     const topOrder = Math.max(0, ...current.items.map((item) => item.order));
+
     const additions = placed.items.map((item, index): BoardItem => {
       const image = prepared.get(item.id);
+
       if (!image)
         throw new Error('A prepared image was missing from this import.');
+
       return {
         id: createId(),
         kind: 'image',
@@ -466,6 +507,7 @@ const createIntakeAtoms = (options: IntakeOptions) => {
         order: topOrder + index + 1,
       };
     });
+
     if (
       [...current.items, ...additions].reduce(
         (total, item) => total + estimateItemBytes(item),
@@ -480,8 +522,10 @@ const createIntakeAtoms = (options: IntakeOptions) => {
     options.showToast(
       `${additions.length} ${additions.length === 1 ? 'image' : 'images'} added`,
     );
+
     return null;
   };
+
   return {
     state,
     view,
@@ -514,6 +558,7 @@ export function useBoardFiles(options: IntakeOptions) {
     onBackgroundReady,
     pauseAudio,
   } = options;
+
   const atoms = useMemo(
     () =>
       createIntakeAtoms({
@@ -549,6 +594,7 @@ export function useBoardFiles(options: IntakeOptions) {
       pauseAudio,
     ],
   );
+
   const registry = useContext(RegistryContext);
   const state = useAtomValue(atoms.view);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -560,6 +606,7 @@ export function useBoardFiles(options: IntakeOptions) {
   const background = useAtomSet(atoms.background);
   const audio = useAtomSet(atoms.audio);
   const archive = useAtomSet(atoms.archive);
+
   const actions = useMemo(
     () => ({
       imageInputRef,
@@ -575,6 +622,7 @@ export function useBoardFiles(options: IntakeOptions) {
       ) => {
         if (files.length > 0) onClosePanel();
         const file = files[0];
+
         if (
           !shouldStageImageSelection(files.length, selection.folder) &&
           file !== undefined
@@ -585,6 +633,7 @@ export function useBoardFiles(options: IntakeOptions) {
       },
       collectDroppedFiles: (data: DataTransfer, point: Point) => {
         const current = registry.get(atoms.state);
+
         if (current.bulkSession === null && !current.collectingDrop)
           drop({ data, point });
       },
@@ -613,11 +662,13 @@ export function useBoardFiles(options: IntakeOptions) {
         atoms.patch(registry, { backgroundUploadError: '' }),
       addLocalAudio: (file: File, label: string, editingId?: ItemId) => {
         audio({ file, label, editingId });
+
         if (audioInputRef.current) audioInputRef.current.value = '';
       },
       exportBoard: () => archive({ type: 'export' }),
       importBoard: (file: File) => {
         archive({ type: 'import', file });
+
         if (importInputRef.current) importInputRef.current.value = '';
       },
       cancelArchive: () => archive(Atom.Interrupt),
@@ -635,5 +686,6 @@ export function useBoardFiles(options: IntakeOptions) {
       showToast,
     ],
   );
+
   return { ...state, ...actions };
 }

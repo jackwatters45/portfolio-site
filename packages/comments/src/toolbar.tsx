@@ -1,3 +1,4 @@
+import * as Match from 'effect/Match';
 import type { RefObject } from 'react';
 import { Icon, type IconName } from './icons';
 import type { Peer } from './protocol';
@@ -41,6 +42,7 @@ function Tool({
     </button>
   );
 }
+
 interface Props {
   active: boolean;
   welcome: boolean;
@@ -61,8 +63,10 @@ interface Props {
   onCursors: () => void;
   onSettings: () => void;
 }
+
 export function Toolbar(props: Props) {
   const expanded = props.active && !props.welcome;
+
   return (
     <div
       ref={props.toolbar}
@@ -74,26 +78,31 @@ export function Toolbar(props: Props) {
       onKeyDown={(event) => {
         if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
           return;
+
         const buttons = Array.from(
           event.currentTarget.querySelectorAll<HTMLButtonElement>(
             'button:not(:disabled)',
           ),
         );
+
         const index =
           event.target instanceof HTMLButtonElement
             ? buttons.indexOf(event.target)
             : -1;
+
         if (index < 0) return;
         event.preventDefault();
-        const next =
-          event.key === 'Home'
-            ? 0
-            : event.key === 'End'
-              ? buttons.length - 1
-              : (index +
-                  (event.key === 'ArrowRight' ? 1 : -1) +
-                  buttons.length) %
-                buttons.length;
+
+        const next = Match.value(event.key).pipe(
+          Match.when('Home', () => 0),
+          Match.when('End', () => buttons.length - 1),
+          Match.orElse(
+            (key) =>
+              (index + (key === 'ArrowRight' ? 1 : -1) + buttons.length) %
+              buttons.length,
+          ),
+        );
+
         buttons[next]?.focus();
       }}
     >

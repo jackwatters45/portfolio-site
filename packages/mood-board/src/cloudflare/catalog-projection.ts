@@ -22,7 +22,7 @@ interface CatalogEntry {
   readonly revision: BoardRevision;
 }
 
-interface CatalogProjectionShape {
+interface CatalogProjectionOperations {
   readonly upsert: (
     summary: BoardSummary,
     revision: BoardRevision,
@@ -36,7 +36,7 @@ interface CatalogProjectionShape {
 
 export class CatalogProjection extends Context.Service<
   CatalogProjection,
-  CatalogProjectionShape
+  CatalogProjectionOperations
 >()('mood-board/cloudflare/CatalogProjection') {
   static layerFor(workspaceId: string) {
     return Layer.effect(
@@ -118,6 +118,7 @@ export class CatalogProjection extends Context.Service<
             ORDER BY updated_at DESC, board_id ASC
             LIMIT ${MAX_BOARDS}
           `;
+
           return yield* Effect.forEach(rows, decodeSummary);
         });
 

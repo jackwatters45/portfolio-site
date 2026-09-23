@@ -1,4 +1,13 @@
-import { Deferred, Effect, Fiber, Schedule, Schema, Stream } from 'effect';
+import {
+  Deferred,
+  Effect,
+  Fiber,
+  ManagedRuntime,
+  Match,
+  Schedule,
+  Schema,
+  Stream,
+} from 'effect';
 
 import type { AccountId } from '../../lib/account';
 import {
@@ -16,9 +25,8 @@ import type { WebsitePreview } from '../../lib/website-preview';
 import type { XPostPreview } from '../../lib/x-post';
 import {
   BoardRpcClient,
-  makeBoardRpcRuntime,
-  makeClientId,
-  makeMutationId,
+  createClientId,
+  createMutationId,
 } from './board-rpc-client';
 import {
   applyBoardChange,
@@ -72,12 +80,6 @@ const isBoardUnavailable = (
   error.reason === 'Unavailable' &&
   error.boardId !== undefined;
 
-const logSyncFailure = (error: unknown) =>
-  error instanceof BoardSyncError &&
-  (error.reason === 'Requested' || error.reason === 'Unavailable')
-    ? Effect.void
-    : Effect.logWarning('Board sync session failed', error);
-
 const storageEffect = <A>(operation: () => Promise<A>) =>
   Effect.tryPromise({
     try: operation,
@@ -92,14 +94,14 @@ const makePendingEntries = (
   drafts.map((mutation) => ({
     boardId,
     clientId,
-    mutationId: makeMutationId(),
+    mutationId: createMutationId(),
     mutation,
   }));
 
 export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
   const { accountId, boardId } = options;
-  const clientId = makeClientId();
-  const runtime = makeBoardRpcRuntime();
+  const clientId = createClientId();
+  const runtime = ManagedRuntime.make(BoardRpcClient.layer);
   const optimisticMutations = new Map<MutationId, BoardMutation>();
   let closed = false;
   let live = false;
@@ -116,6 +118,7 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
         (cause) => new BoardSyncError({ reason: 'Outbox', cause }),
       ),
     );
+
     const mutationId = yield* Schema.decodeUnknownEffect(MutationIdSchema)(
       entry.mutationId,
     ).pipe(
@@ -123,34 +126,42 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
         (cause) => new BoardSyncError({ reason: 'Outbox', cause }),
       ),
     );
+
+    const mutation: BoardMutation = {
+      upserts: entry.mutation.upserts,
+      deletes: entry.mutation.deletes,
+    };
+
+    if (entry.mutation.title !== undefined)
+      mutation.title = entry.mutation.title;
+
+    if (entry.mutation.background !== undefined)
+      mutation.background = entry.mutation.background;
+
+    if (entry.mutation.backgroundMediaId !== undefined)
+      mutation.backgroundMediaId = entry.mutation.backgroundMediaId;
+
     return yield* BoardRpcClient.use((client) =>
       client.CommitBoard({
         boardId,
         clientId: entryClientId,
         mutationId,
-        ...(entry.mutation.title === undefined
-          ? {}
-          : { title: entry.mutation.title }),
-        ...(entry.mutation.background === undefined
-          ? {}
-          : { background: entry.mutation.background }),
-        ...(entry.mutation.backgroundMediaId === undefined
-          ? {}
-          : { backgroundMediaId: entry.mutation.backgroundMediaId }),
-        upserts: entry.mutation.upserts,
-        deletes: entry.mutation.deletes,
+        ...mutation,
       }),
     );
   });
 
   const persistAndSend = (entries: ReadonlyArray<PendingBoardMutation>) => {
     if (entries.length === 0) return;
+
     for (const entry of entries) {
       optimisticMutations.set(entry.mutationId, entry.mutation);
     }
+
     writeQueue = writeQueue
       .then(async () => {
         await appendPendingMutations(accountId, boardId, entries);
+
         if (closed || !live) return;
 
         try {
@@ -180,9 +191,11 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
 
       return Effect.gen(function* () {
         const client = yield* BoardRpcClient;
+
         const outboxBeforeOpen = yield* storageEffect(() =>
           loadPendingMutations(accountId, boardId),
         );
+
         const exists = yield* client.BoardExists({ boardId });
 
         if (!exists) {
@@ -194,6 +207,7 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
           }
 
           let seedBoard = options.initialBoard;
+
           for (const entry of outboxBeforeOpen) {
             seedBoard = applyBoardMutation(seedBoard, entry.mutation);
           }
@@ -204,11 +218,13 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
             items: [],
             updatedAt: seedBoard.updatedAt,
           };
+
           const seedEntries = makePendingEntries(
             boardId,
             clientId,
             diffBoards(emptyBoard, seedBoard),
           );
+
           yield* storageEffect(() =>
             appendPendingMutations(accountId, boardId, seedEntries),
           );
@@ -218,9 +234,9 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
           });
         }
 
-        const restartSignal = yield* Deferred.make<void>();
+        const restartSignal = yield* Deferred.make<null>();
         requestRestart = () => {
-          runtime.runFork(Deferred.succeed(restartSignal, undefined));
+          runtime.runFork(Deferred.succeed(restartSignal, null));
         };
 
         const reconcileSnapshot = Effect.fn('BoardSync.reconcileSnapshot')(
@@ -229,18 +245,22 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
             serverBoard = toLocalBoard(event.board);
 
             yield* storageEffect(() => writeQueue);
+
             const pending = yield* storageEffect(() =>
               loadPendingMutations(accountId, boardId),
             );
+
             const pendingIds = new Set(
               pending.map((entry) => entry.mutationId),
             );
+
             for (const mutationId of optimisticMutations.keys()) {
               if (!pendingIds.has(mutationId))
                 optimisticMutations.delete(mutationId);
             }
 
             let reconciled = serverBoard;
+
             for (const entry of pending) {
               reconciled = applyBoardMutation(reconciled, entry.mutation);
               optimisticMutations.delete(entry.mutationId);
@@ -255,15 +275,18 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
               clientId,
               diffBoards(serverBoard, reconciled),
             );
+
             if (squashed.length > 0) {
               yield* storageEffect(() =>
                 appendPendingMutations(accountId, boardId, squashed),
               );
+
               for (const entry of squashed) {
                 optimisticMutations.set(entry.mutationId, entry.mutation);
                 yield* sendEntry(entry);
               }
             }
+
             yield* storageEffect(() =>
               removePendingMutations(accountId, boardId, [
                 ...pending.map((entry) => entry.mutationId),
@@ -274,36 +297,44 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
         );
 
         const subscription = client.SubscribeBoard({ boardId }).pipe(
-          Stream.runForEach((event) => {
-            if (event._tag === 'Snapshot') return reconcileSnapshot(event);
+          Stream.runForEach((event) =>
+            Match.value(event).pipe(
+              Match.tag('Snapshot', reconcileSnapshot),
+              Match.tag(
+                'Deleted',
+                () => new BoardSyncError({ reason: 'Unavailable', boardId }),
+              ),
+              Match.tag('Change', (event) => {
+                if (event.revision <= revision) return Effect.void;
 
-            if (event._tag === 'Deleted') {
-              return Effect.fail(
-                new BoardSyncError({ reason: 'Unavailable', boardId }),
-              );
-            }
+                if (event.revision !== revision + 1) {
+                  return Effect.fail(
+                    new BoardSyncError({ reason: 'SkippedRevision' }),
+                  );
+                }
 
-            if (event.revision <= revision) return Effect.void;
-            if (event.revision !== revision + 1) {
-              return Effect.fail(
-                new BoardSyncError({ reason: 'SkippedRevision' }),
-              );
-            }
+                revision = event.revision;
 
-            revision = event.revision;
-            if (serverBoard === undefined) return Effect.void;
-            serverBoard = applyBoardChange(serverBoard, event);
-            const localAcknowledgement = optimisticMutations.delete(
-              event.mutationId,
-            );
-            let displayBoard = serverBoard;
-            for (const mutation of optimisticMutations.values()) {
-              displayBoard = applyBoardMutation(displayBoard, mutation);
-            }
-            return Effect.sync(() =>
-              options.onBoard(displayBoard, !localAcknowledgement),
-            );
-          }),
+                if (serverBoard === undefined) return Effect.void;
+                serverBoard = applyBoardChange(serverBoard, event);
+
+                const localAcknowledgement = optimisticMutations.delete(
+                  event.mutationId,
+                );
+
+                let displayBoard = serverBoard;
+
+                for (const mutation of optimisticMutations.values()) {
+                  displayBoard = applyBoardMutation(displayBoard, mutation);
+                }
+
+                return Effect.sync(() =>
+                  options.onBoard(displayBoard, !localAcknowledgement),
+                );
+              }),
+              Match.exhaustive,
+            ),
+          ),
         );
 
         yield* Effect.raceFirst(
@@ -314,14 +345,21 @@ export const startBoardSync = (options: StartBoardSyncOptions): BoardSync => {
             ),
           ),
         );
+
         return yield* new BoardSyncError({ reason: 'SubscriptionEnded' });
       });
     }),
   )().pipe(
-    Effect.tapError(logSyncFailure),
+    Effect.tapError((error) =>
+      error instanceof BoardSyncError &&
+      (error.reason === 'Requested' || error.reason === 'Unavailable')
+        ? Effect.void
+        : Effect.logWarning('Board sync session failed', error),
+    ),
     Effect.tapCause(() =>
       Effect.sync(() => {
         requestRestart = undefined;
+
         if (closed) return;
         live = false;
         options.onStatus('local');

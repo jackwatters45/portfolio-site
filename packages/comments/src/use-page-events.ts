@@ -18,22 +18,27 @@ interface Events {
   key: (event: KeyboardEvent) => void;
   hash: () => void;
 }
+
 export function usePageEvents(events: Events) {
   const current = useRef(events);
   current.current = events;
+
   const source = useMemo(
     () =>
       Atom.make(
         Effect.gen(function* () {
           const root = document.querySelector<HTMLElement>(events.rootSelector);
           current.current.root(root);
+
           const observer = yield* Effect.acquireRelease(
             Effect.sync(
               () => new ResizeObserver(() => current.current.layout()),
             ),
             (observer) => Effect.sync(() => observer.disconnect()),
           );
+
           if (root) observer.observe(root);
+
           const layout = Stream.mergeAll(
             [
               BrowserStream.fromEventListenerWindow('resize'),
@@ -47,6 +52,7 @@ export function usePageEvents(events: Events) {
             ],
             { concurrency: 'unbounded' },
           );
+
           yield* layout.pipe(
             Stream.throttle({
               cost: () => 1,
@@ -63,13 +69,16 @@ export function usePageEvents(events: Events) {
             Stream.runForEach(() => Effect.sync(() => current.current.hash())),
             Effect.forkScoped,
           );
+
           // Capture must cancel page navigation synchronously, before event dispatch ends.
           const click = (event: MouseEvent) => {
             if (current.current.picking) current.current.click(event);
           };
+
           const key = (event: KeyboardEvent) => {
             if (current.current.active) current.current.key(event);
           };
+
           yield* Effect.acquireRelease(
             Effect.sync(() => {
               document.addEventListener('click', click, true);
@@ -81,11 +90,13 @@ export function usePageEvents(events: Events) {
                 window.removeEventListener('keydown', key);
               }),
           );
+
           return yield* Effect.never;
         }),
       ),
     [events.rootSelector],
   );
+
   const pointers = useMemo(
     () =>
       Atom.make(
@@ -97,6 +108,7 @@ export function usePageEvents(events: Events) {
             Stream.runForEach(() => Effect.sync(() => current.current.leave())),
             Effect.forkScoped,
           );
+
           return yield* BrowserStream.fromEventListenerDocument(
             'pointermove',
           ).pipe(
@@ -114,6 +126,7 @@ export function usePageEvents(events: Events) {
       ),
     [],
   );
+
   const idle = useMemo(() => Atom.make(null), []);
   useAtomMount(source);
   useAtomMount(events.pointerActive ? pointers : idle);
@@ -121,6 +134,7 @@ export function usePageEvents(events: Events) {
   useLayoutEffect(() => {
     const root = document.querySelector(events.rootSelector);
     root?.toggleAttribute('data-comments-picking', events.picking);
+
     return () => {
       root?.removeAttribute('data-comments-picking');
     };

@@ -23,7 +23,9 @@ export const Route = createFileRoute('/boards/$boardId')({
   params: {
     parse: ({ boardId }) => {
       const parsed = parseBoardId(boardId);
+
       if (parsed === null) throw notFound();
+
       return { boardId: parsed };
     },
     stringify: ({ boardId }) => ({ boardId }),
@@ -37,10 +39,13 @@ function PrivateApp() {
   const returnTo = useRouterState({ select: (state) => state.location.href });
   const session = authClient.useSession();
   const user = session.data?.user;
+
   const accountId =
     user === undefined ? null : Option.getOrNull(decodeAccountId(user.id));
+
   const [revalidating, setRevalidating] = useState(false);
   const checking = session.isPending || session.isRefetching || revalidating;
+
   const revalidate = useCallback(() => {
     setRevalidating(true);
     void session.refetch().finally(() => setRevalidating(false));
@@ -56,10 +61,12 @@ function PrivateApp() {
     const onVisibility = () => {
       if (document.visibilityState === 'visible') revalidate();
     };
+
     window.addEventListener(AUTHENTICATION_REQUIRED_EVENT, revalidate);
     window.addEventListener('focus', revalidate);
     window.addEventListener('pageshow', revalidate);
     document.addEventListener('visibilitychange', onVisibility);
+
     return () => {
       window.removeEventListener(AUTHENTICATION_REQUIRED_EVENT, revalidate);
       window.removeEventListener('focus', revalidate);
@@ -104,6 +111,7 @@ function PrivateApp() {
   }
 
   if (user === undefined || accountId === null) return null;
+
   return (
     <BoardEditor
       key={`${accountId}:${boardId}`}

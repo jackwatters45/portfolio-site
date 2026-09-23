@@ -3,6 +3,7 @@ import Layout from '../layouts/layout.astro';
 import { getRestaurants } from '../lib/restaurants';
 
 const restaurants = await getRestaurants();
+
 const date = new Intl.DateTimeFormat('en-AU', {
   day: 'numeric',
   month: 'short',

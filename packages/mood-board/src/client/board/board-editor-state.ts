@@ -48,14 +48,19 @@ const createEditorAtoms = (options: Omit<BoardDocumentOptions, 'initial'>) => {
     syncState: options.localOnly ? 'local' : 'connecting',
     historyState: { canUndo: false, canRedo: false },
   };
+
   const snapshot = Atom.make(initial);
+
   const runtime = Atom.runtime(
     BoardDocument.layer({ ...options, initial }, snapshot),
   ).pipe(Atom.setIdleTTL(0));
+
   const state = Atom.make((get) => {
     get.mount(runtime);
+
     return get(snapshot);
   }).pipe(Atom.setIdleTTL(0));
+
   const command = runtime
     .fn(
       (command: DocumentCommand) =>
@@ -87,6 +92,7 @@ const createEditorAtoms = (options: Omit<BoardDocumentOptions, 'initial'>) => {
       { concurrent: true },
     )
     .pipe(Atom.setIdleTTL(0));
+
   return {
     state,
     command,
@@ -144,6 +150,7 @@ export function useBoardDocument({
   readonly showToast: (message: string) => void;
 }) {
   const registry = useContext(RegistryContext);
+
   const atoms = useMemo(
     () =>
       createEditorAtoms({
@@ -156,18 +163,22 @@ export function useBoardDocument({
       }),
     [accountId, boardId, localOnly, onChange, onNavigate, showToast],
   );
+
   const state = useAtomValue(atoms.state);
   const dispatch = useAtomSet(atoms.command);
   const listBoards = useAtomSet(atoms.listBoards, { mode: 'promise' });
   const createBoard = useAtomSet(atoms.createBoard, { mode: 'promise' });
   const duplicateBoard = useAtomSet(atoms.duplicateBoard, { mode: 'promise' });
   const deleteBoard = useAtomSet(atoms.deleteBoard, { mode: 'promise' });
+
   const resolveWebsitePreview = useAtomSet(atoms.resolveWebsitePreview, {
     mode: 'promise',
   });
+
   const resolveXPostPreview = useAtomSet(atoms.resolveXPostPreview, {
     mode: 'promise',
   });
+
   const commands = useMemo(
     () => ({
       // Read-only views keep event handlers current without another copy of document state.
@@ -198,11 +209,14 @@ export function useBoardDocument({
 
   useEffect(() => {
     const flush = () => dispatch({ type: 'flush' });
+
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') flush();
     };
+
     window.addEventListener('pagehide', flush);
     document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
       window.removeEventListener('pagehide', flush);
       document.removeEventListener('visibilitychange', onVisibilityChange);

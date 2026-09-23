@@ -9,6 +9,7 @@ import {
 } from '../lib/public-api';
 
 const decodeBoardId = Schema.decodeUnknownOption(BoardIdSchema);
+
 const decodePublicId = Schema.decodeUnknownOption(PublicIdSchema);
 
 export const parseBoardId = (value: string): BoardId | null =>

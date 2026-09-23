@@ -1,11 +1,16 @@
+import { Data, flow, Option, Schema } from 'effect';
+
 import type { MediaId } from '../../lib/media';
 import type { BoardItem } from './types';
 
 export const MAX_BULK_FILES = 150;
+
 export const BULK_CONCURRENCY = 3;
 
 export type BulkSort = 'original' | 'filename' | 'capture';
+
 export type BulkLayoutKind = 'loose' | 'contact' | 'masonry';
+
 export type BulkEntryStatus =
   | 'checking'
   | 'ready'
@@ -58,22 +63,27 @@ export async function runBoundedWorkers<T, R>(
     1,
     Math.trunc(options.concurrency ?? BULK_CONCURRENCY),
   );
+
   const results: Array<WorkerResult<R> | undefined> = Array.from({
     length: items.length,
   });
+
   let nextIndex = 0;
 
   const run = async () => {
     while (!options.signal?.aborted) {
       const index = nextIndex++;
       const item = items[index];
+
       if (item === undefined) return;
       let result: WorkerResult<R>;
+
       try {
         result = { ok: true, value: await worker(item, index) };
       } catch (error) {
         result = { ok: false, error };
       }
+
       results[index] = result;
       options.onSettled?.(index, result);
     }
@@ -82,18 +92,22 @@ export async function runBoundedWorkers<T, R>(
   await Promise.all(
     Array.from({ length: Math.min(concurrency, items.length) }, run),
   );
+
   return results;
+}
+
+interface StagedFiles {
+  readonly entries: ReadonlyArray<BulkImageEntry>;
+  readonly omitted: number;
 }
 
 export function stageBulkFiles(
   files: ReadonlyArray<File>,
   startIndex = 0,
   capacity = MAX_BULK_FILES,
-): {
-  readonly entries: ReadonlyArray<BulkImageEntry>;
-  readonly omitted: number;
-} {
+): StagedFiles {
   const accepted = files.slice(0, Math.max(0, capacity));
+
   return {
     entries: accepted.map((file, index) => ({
       id: crypto.randomUUID(),
@@ -117,12 +131,15 @@ export function sortBulkEntries(
         numeric: true,
         sensitivity: 'base',
       });
+
       if (byName !== 0) return byName;
     } else if (sort === 'capture') {
       const leftTime = left.captureTime || Number.POSITIVE_INFINITY;
       const rightTime = right.captureTime || Number.POSITIVE_INFINITY;
+
       if (leftTime !== rightTime) return leftTime - rightTime;
     }
+
     return left.originalIndex - right.originalIndex;
   });
 }
@@ -136,9 +153,11 @@ export function toggleBulkSelection(
   shift: boolean,
 ): ReadonlyArray<BulkImageEntry> {
   const targetIds = new Set<string>();
+
   if (shift && rangeAnchor !== null) {
     const anchorIndex = displayedIds.indexOf(rangeAnchor);
     const targetIndex = displayedIds.indexOf(id);
+
     if (anchorIndex >= 0 && targetIndex >= 0) {
       const start = Math.min(anchorIndex, targetIndex);
       const end = Math.max(anchorIndex, targetIndex);
@@ -147,7 +166,9 @@ export function toggleBulkSelection(
         .forEach((entryId) => targetIds.add(entryId));
     }
   }
+
   if (targetIds.size === 0) targetIds.add(id);
+
   return entries.map((entry) =>
     targetIds.has(entry.id) && entry.status !== 'failed'
       ? { ...entry, selected }
@@ -170,6 +191,7 @@ export function selectedBulkTotals(entries: ReadonlyArray<BulkImageEntry>): {
 
 export function estimateItemBytes(item: BoardItem): number {
   const encoder = new TextEncoder();
+
   return (
     512 +
     encoder.encode(item.src ?? '').byteLength +
@@ -238,18 +260,21 @@ const callbackResult = <T>(
   new Promise((resolve, reject) => {
     throwIfTraversalAborted(signal);
     let settled = false;
+
     const finish = (callback: (value: T) => void, value: T) => {
       if (settled) return;
       settled = true;
       signal?.removeEventListener('abort', abort);
       callback(value);
     };
+
     const fail = (error: DOMException) => {
       if (settled) return;
       settled = true;
       signal?.removeEventListener('abort', abort);
       reject(error);
     };
+
     const abort = () => fail(traversalAbortError());
     signal?.addEventListener('abort', abort, { once: true });
     start((value) => finish(resolve, value), fail);
@@ -261,16 +286,27 @@ const readFileEntry = (
 ): Promise<File> => {
   if (!entry.file)
     return Promise.reject(new Error('The dropped file could not be read.'));
+
   return callbackResult(
     (success, failure) => entry.file?.(success, failure),
     signal,
   );
 };
 
-const failureMessage = (error: unknown) =>
-  error instanceof Error
-    ? error.message
-    : 'The dropped entry could not be read.';
+const failureMessage = flow(
+  Schema.decodeUnknownOption(Schema.instanceOf(Error)),
+  Option.match({
+    onSome: (error) => error.message,
+    onNone: () => 'The dropped entry could not be read.',
+  }),
+);
+
+type DroppedSource = Data.TaggedEnum<{
+  Entry: { readonly entry: FileEntry };
+  File: { readonly file: File };
+}>;
+
+const DroppedSource = Data.taggedEnum<DroppedSource>();
 
 export async function collectDroppedImageFiles(
   dataTransfer: DataTransfer,
@@ -293,11 +329,14 @@ export async function collectDroppedImageFiles(
 
   const visit = async (entry: FileEntry): Promise<void> => {
     throwIfTraversalAborted(options.signal);
+
     if (entry.isFile) {
       if (files.length >= limit) {
         omitted += 1;
+
         return;
       }
+
       try {
         addFile(await readFileEntry(entry, options.signal));
       } catch (error) {
@@ -307,19 +346,25 @@ export async function collectDroppedImageFiles(
           message: failureMessage(error),
         });
       }
+
       return;
     }
+
     if (!entry.isDirectory) return;
     const reader = entry.createReader?.();
+
     if (!reader) {
       failures.push({
         name: entry.name || 'Unreadable folder',
         message: 'The folder could not be opened.',
       });
+
       return;
     }
+
     while (true) {
       let batch: ReadonlyArray<FileEntry>;
+
       try {
         batch = await callbackResult<ReadonlyArray<FileEntry>>(
           (success, failure) => reader.readEntries(success, failure),
@@ -331,38 +376,42 @@ export async function collectDroppedImageFiles(
           name: entry.name || 'Unreadable folder',
           message: failureMessage(error),
         });
+
         return;
       }
+
       if (batch.length === 0) return;
+
       for (const child of batch) {
         if (files.length >= limit) {
           omitted += 1;
+
           if (child.isDirectory) truncated = true;
         } else await visit(child);
       }
+
       if (files.length >= limit) {
         truncated = true;
+
         return;
       }
     }
   };
 
-  const sources: Array<
-    | { readonly _tag: 'Entry'; readonly entry: FileEntry }
-    | { readonly _tag: 'File'; readonly file: File }
-  > = [];
+  const sources: DroppedSource[] = [];
+
   for (const item of Array.from(dataTransfer.items)) {
     throwIfTraversalAborted(options.signal);
-    const withEntry = item as DataTransferItem & {
-      webkitGetAsEntry?: () => FileEntry | null;
-    };
-    const entry = withEntry.webkitGetAsEntry?.();
+
+    const entry = item.webkitGetAsEntry?.();
+
     if (entry) {
       if (entry.isDirectory) hadDirectory = true;
-      sources.push({ _tag: 'Entry', entry });
+      sources.push(DroppedSource.Entry({ entry }));
     } else {
       const file = item.getAsFile();
-      if (file) sources.push({ _tag: 'File', file });
+
+      if (file) sources.push(DroppedSource.File({ file }));
     }
   }
 
@@ -372,9 +421,10 @@ export async function collectDroppedImageFiles(
     for (const source of sources) {
       if (files.length >= limit) {
         omitted += 1;
-        if (source._tag === 'Entry' && source.entry.isDirectory)
+
+        if (DroppedSource.$is('Entry')(source) && source.entry.isDirectory)
           truncated = true;
-      } else if (source._tag === 'File') addFile(source.file);
+      } else if (DroppedSource.$is('File')(source)) addFile(source.file);
       else await visit(source.entry);
     }
   }

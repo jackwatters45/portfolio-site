@@ -1,6 +1,7 @@
 import { Schema } from 'effect';
 
 const EMBEDDED_IMAGE_PATTERN = /^data:image\/(?:png|jpe?g|webp|gif);base64,/i;
+
 const REMOTE_IMAGE_PATTERN = /^https?:\/\/[^/\\]/i;
 
 export function isSupportedImageSource(value: string): boolean {

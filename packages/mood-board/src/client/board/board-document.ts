@@ -2,6 +2,7 @@ import {
   Context,
   Effect,
   Layer,
+  Predicate,
   Queue,
   Schema,
   Semaphore,
@@ -57,7 +58,9 @@ export interface BoardDocumentOptions {
 }
 
 type HistoryEntry = { readonly board: Board; readonly camera?: Camera };
+
 export type BoardUpdate = Board | ((current: Board) => Board);
+
 export type CameraUpdate = Camera | ((current: Camera) => Camera);
 
 export class BoardDocumentError extends Schema.Error<BoardDocumentError>(
@@ -85,10 +88,12 @@ const makeDocument = (
 ) =>
   Effect.gen(function* () {
     const registry = yield* AtomRegistry.AtomRegistry;
+
     const saves = yield* Queue.sliding<{
       readonly generation: number;
       readonly document: SavedDocument;
     }>(1);
+
     const cameraChanges = yield* Queue.sliding<null>(1);
     const saveLock = yield* Semaphore.make(1);
     let state = options.initial;
@@ -103,17 +108,21 @@ const makeDocument = (
 
     const update = (patch: Partial<EditorDocumentState>) => {
       state = { ...state, ...patch };
+
       if (!closed) registry.set(stateAtom, state);
     };
+
     const historyState = () => ({
       canUndo: undoStack.length > 0,
       canRedo: redoStack.length > 0,
     });
+
     const canSave = () =>
       state.ready &&
       persistenceEnabled &&
       !deleted &&
       deletingBoard !== options.boardId;
+
     const queueSave = () => {
       if (closed || !canSave()) return;
       Queue.offerUnsafe(saves, {
@@ -121,6 +130,7 @@ const makeDocument = (
         document: { board: state.board, camera: state.camera },
       });
     };
+
     const writeDocument = Effect.fn('BoardDocument.write')(function* (
       document: SavedDocument,
     ) {
@@ -170,13 +180,16 @@ const makeDocument = (
 
     const commit = (board: Board, camera = state.camera) => {
       const previous = state.board;
+
       const next = {
         ...board,
         updatedAt: BoardTimestampSchema.make(Date.now()),
       };
+
       update({ board: next, camera, historyState: historyState() });
       sync?.commit(previous, next);
       queueSave();
+
       return next;
     };
 
@@ -186,6 +199,7 @@ const makeDocument = (
         'The saved board could not be opened. Its local copy was left untouched.',
         () => loadDocument(options.accountId, options.boardId),
       );
+
       if (
         options.localOnly &&
         document !== null &&
@@ -198,6 +212,7 @@ const makeDocument = (
             'The saved board could not be opened. Its local copy was left untouched.',
         });
       }
+
       if (document !== null)
         update({ board: document.board, camera: document.camera });
       else update({ camera: fitCamera(options.initial.board.items) });
@@ -216,6 +231,7 @@ const makeDocument = (
         Effect.gen(function* () {
           update({ ready: true });
           queueSave();
+
           if (options.localOnly) return;
           sync = yield* Effect.acquireRelease(
             Effect.sync(() =>
@@ -226,10 +242,12 @@ const makeDocument = (
                 onBoard: (next, remoteDivergence) => {
                   if (closed || deleted) return;
                   const previous = state.board;
+
                   if (remoteDivergence) {
                     undoStack = [];
                     redoStack = [];
                   }
+
                   update({ board: next, historyState: historyState() });
                   options.onChange({ type: 'remote', previous, next });
                   queueSave();
@@ -252,10 +270,13 @@ const makeDocument = (
         }),
       ),
     );
+
     yield* initialize.pipe(Effect.forkScoped);
     yield* Effect.addFinalizer(() => {
       closed = true;
+
       if (!canSave()) return Effect.void;
+
       return saveLock
         .withPermit(writeDocument({ board: state.board, camera: state.camera }))
         .pipe(
@@ -269,13 +290,17 @@ const makeDocument = (
       updater: BoardUpdate,
     ) {
       if (closed || deleted) return;
-      const next =
-        typeof updater === 'function' ? updater(state.board) : updater;
+
+      const next = Predicate.isFunction(updater)
+        ? updater(state.board)
+        : updater;
+
       if (next === state.board) return;
       undoStack = [...undoStack.slice(-49), { board: state.board }];
       redoStack = [];
       commit(next);
     });
+
     const replace = Effect.fn('BoardDocument.replace')(function* (
       board: Board,
       camera: Camera,
@@ -288,42 +313,53 @@ const makeDocument = (
         { board: previous, camera: state.camera },
       ];
       redoStack = [];
+
       if (enablePersistence) persistenceEnabled = true;
       const next = commit(board, camera);
       options.onChange({ type: 'replace', previous, next });
     });
+
     const restoreHistory = Effect.fn('BoardDocument.restoreHistory')(function* (
       direction: 'undo' | 'redo',
     ) {
       if (closed || deleted) return;
       const entry = (direction === 'undo' ? undoStack : redoStack).pop();
+
       if (entry === undefined) return;
       const previous = state.board;
-      (direction === 'undo' ? redoStack : undoStack).push({
-        board: previous,
-        ...(entry.camera === undefined ? {} : { camera: state.camera }),
-      });
+
+      const currentEntry: HistoryEntry =
+        entry.camera === undefined
+          ? { board: previous }
+          : { board: previous, camera: state.camera };
+
+      (direction === 'undo' ? redoStack : undoStack).push(currentEntry);
       const next = commit(entry.board, entry.camera ?? state.camera);
       options.onChange({ type: 'history', previous, next });
     });
+
     const setCamera = Effect.fn('BoardDocument.setCamera')(function* (
       updater: CameraUpdate,
     ) {
       if (closed || deleted) return;
       update({
-        camera: typeof updater === 'function' ? updater(state.camera) : updater,
+        camera: Predicate.isFunction(updater) ? updater(state.camera) : updater,
       });
       Queue.offerUnsafe(cameraChanges, null);
     });
+
     const resizeEmbeddedItem = Effect.fn('BoardDocument.resizeEmbeddedItem')(
       function* (id: string, width: number, height: number) {
         if (closed || deleted) return;
         const source = state.board.items.find((item) => item.id === id);
+
         if (source === undefined) return;
+
         const nextWidth = Math.min(
           source.kind === 'x' ? MAX_X_POST_CARD_WIDTH : 2_400,
           Math.max(320, width),
         );
+
         const nextHeight =
           source.kind === 'x'
             ? Math.min(2_000, Math.max(240, height))
@@ -335,6 +371,7 @@ const makeDocument = (
                   Math.max(minimumAudioCardHeight(source.kind), height),
                 )
               : undefined;
+
         if (
           nextHeight === undefined ||
           (Math.abs(source.width - nextWidth) < 1 &&
@@ -352,6 +389,7 @@ const makeDocument = (
         });
       },
     );
+
     const requireCatalog = () =>
       catalog === undefined
         ? Effect.fail(
@@ -361,35 +399,42 @@ const makeDocument = (
             }),
           )
         : Effect.succeed(catalog);
+
     const listBoards = Effect.fn('BoardDocument.listBoards')(function* () {
       const client = yield* requireCatalog();
+
       return yield* attempt(
         'Catalog',
         'The board library could not be refreshed.',
         () => client.list(),
       );
     });
+
     const createBoard = Effect.fn('BoardDocument.createBoard')(function* (
       title: string,
     ) {
       const client = yield* requireCatalog();
+
       return yield* attempt(
         'Catalog',
         'The new board could not be created.',
         () => client.create(title),
       );
     });
+
     const duplicateBoard = Effect.fn('BoardDocument.duplicateBoard')(function* (
       boardId: BoardId,
       title: string,
     ) {
       const client = yield* requireCatalog();
+
       return yield* attempt(
         'Catalog',
         'That board could not be duplicated.',
         () => client.duplicate(boardId, title),
       );
     });
+
     const deleteBoard = Effect.fn('BoardDocument.deleteBoard')(function* (
       boardId: BoardId,
     ) {
@@ -403,10 +448,12 @@ const makeDocument = (
               client.delete(boardId),
             ),
           );
+
           if (boardId === options.boardId) {
             deleted = true;
             options.onUnavailable(DEFAULT_BOARD_ID);
           }
+
           yield* saveLock
             .withPermit(
               attempt(
@@ -429,26 +476,32 @@ const makeDocument = (
         ),
       );
     });
+
     const resolveWebsitePreview = Effect.fn(
       'BoardDocument.resolveWebsitePreview',
     )(function* (url: string) {
       const client = sync;
+
       if (client === undefined || state.syncState !== 'live')
         return yield* new BoardDocumentError({
           operation: 'Preview',
           message: 'Connect to the board server before resolving this link.',
         });
+
       return yield* attempt(
         'Preview',
         'That website preview could not be created.',
         () => client.resolveWebsitePreview(url),
       );
     });
+
     const resolveXPostPreview = Effect.fn('BoardDocument.resolveXPostPreview')(
       function* (url: string) {
         const client = sync;
+
         if (client === undefined || state.syncState !== 'live')
           return undefined;
+
         return yield* attempt(
           'Preview',
           'That X post could not be resolved.',

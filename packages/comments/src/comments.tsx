@@ -44,6 +44,7 @@ export default function Comments({
   const identified = validName(preferences.name);
   const sharingCursors = identified && preferences.cursors;
   const ui = useCommentUi(sharingCursors);
+
   const {
     mounted,
     active,
@@ -71,32 +72,41 @@ export default function Comments({
     setLayout,
     setKeyboardTarget,
   } = ui;
+
   const live = useRoom(endpoint, identified, preferences);
   const store = useMemo(() => draftStore(room, registry), [room, registry]);
   const launcher = useRef<HTMLButtonElement>(null);
   const toolbar = useRef<HTMLDivElement>(null);
   const pageMarkers = useRef<HTMLButtonElement>(null);
   const root = useRef<HTMLElement | null>(null);
+
   const pageThreads = useMemo(
     () => live.threads.filter((thread) => !thread.target.selector),
     [live.threads],
   );
+
   const pageMessageCount = pageThreads.reduce(
     (count, thread) => count + thread.messages.length,
     0,
   );
+
   const listedThreads = list === 'page' ? pageThreads : live.threads;
+
   const activeThread =
     selected?.kind === 'thread'
       ? live.threads.find((thread) => thread.id === selected.id)
       : undefined;
+
   const target =
     selected?.kind === 'new' ? selected.target : activeThread?.target;
+
   const draftKey =
     selected?.kind === 'thread' ? selected.id : `new:${target?.selector ?? ''}`;
+
   const typingPeers = live.peers.filter(
     (peer) => peer.typing === draftKey && presenceNow - peer.updatedAt < 6000,
   );
+
   const canPick =
     active &&
     !welcome &&
@@ -105,17 +115,21 @@ export default function Comments({
     !settings &&
     !keyboardPicker &&
     !list;
+
   const targets = useMemo(
     () => (mounted && root.current ? pageTargets(root.current) : []),
     [mounted],
   );
+
   const sending = live.sending;
   const stopTyping = () => live.updatePresence({ typing: null });
+
   const closeCard = () => {
     if (sending) return;
     setSelected(null);
     stopTyping();
   };
+
   const clearPanels = () => {
     setSelected(null);
     setSettings(false);
@@ -124,19 +138,23 @@ export default function Comments({
     setHover(null);
     stopTyping();
   };
+
   const choose = (value: Target) => {
     if (sending) return;
     clearPanels();
     setSelected({ kind: 'new', target: value });
   };
+
   const openThread = (thread: Thread, locate = true) => {
     if (sending) return;
     clearPanels();
     setActive(true);
     setPicking(false);
     setSelected({ kind: 'thread', id: thread.id });
+
     if (locate) reveal(thread.target, root.current);
   };
+
   const close = () => {
     if (sending) return;
     clearPanels();
@@ -144,13 +162,16 @@ export default function Comments({
     setWelcome(false);
     launcher.current?.focus({ preventScroll: true });
   };
+
   const copyLink = (thread: Thread) => {
     const url = new URL(location.href);
     url.hash = `comment=${thread.id}`;
     ui.copyLink(url.href);
   };
+
   const submit = async (body: string, previous?: Mutation) => {
     if (!selected || !target) return;
+
     const threadId = await live.submit({
       body,
       previous,
@@ -158,10 +179,12 @@ export default function Comments({
       threadId: selected.kind === 'thread' ? selected.id : undefined,
       draft: store.atom(draftKey),
     });
+
     setSelected({ kind: 'thread', id: threadId });
     setList(null);
     setNotice(selected.kind === 'new' ? 'Comment added' : 'Reply added');
   };
+
   const like = async (threadId: string, messageId: string, liked: boolean) => {
     try {
       await live.like({ threadId, messageId, liked });
@@ -171,13 +194,16 @@ export default function Comments({
       );
     }
   };
+
   const hash = () => {
     const comment = new URLSearchParams(location.hash.slice(1)).get('comment');
+
     if (!comment) return;
     setActive(true);
     setWelcome(!validName(preferences.name));
     setSelected({ kind: 'thread', id: comment });
   };
+
   usePageEvents({
     rootSelector,
     active: active && !welcome,
@@ -194,14 +220,17 @@ export default function Comments({
       if (!root.current || !(event.target instanceof Element)) return;
       const element = targetElement(event.target, root.current);
       const point = { x: event.clientX, y: event.clientY };
+
       if (canPick) {
         const value = element ? targetFor(element, root.current, point) : null;
         setHover((previous) =>
           previous?.selector === value?.selector ? previous : value,
         );
       }
+
       if (sharingCursors) {
         const cursor = cursorFor(element ?? event.target, root.current, point);
+
         if (cursor) live.updatePresence({ cursor });
       }
     },
@@ -210,6 +239,7 @@ export default function Comments({
     click: (event) => {
       if (!root.current || !(event.target instanceof Element)) return;
       const element = targetElement(event.target, root.current);
+
       if (!element) return;
       event.preventDefault();
       event.stopPropagation();
@@ -224,6 +254,7 @@ export default function Comments({
     key: (event) => {
       if (event.key !== 'Escape' || event.defaultPrevented || sending) return;
       event.preventDefault();
+
       if (settings) setSettings(false);
       else if (keyboardPicker) setKeyboardPicker(false);
       else if (list) setList(null);
@@ -242,8 +273,10 @@ export default function Comments({
       reveal(activeThread.target, root.current);
     }
   }, [activeThread]);
+
   const anchor = useMemo(() => {
     if (!target || !mounted) return null;
+
     if (!target.selector)
       return {
         contextElement: pageMarkers.current ?? root.current ?? undefined,
@@ -251,13 +284,16 @@ export default function Comments({
           pageMarkers.current?.getBoundingClientRect() ??
           new DOMRect(window.innerWidth - 12, 12, 0, 23),
       };
+
     return {
       contextElement: root.current ?? undefined,
       getBoundingClientRect: () => {
         const point = pointFor(target, root.current);
         const right = root.current?.getBoundingClientRect().right ?? 0;
+
         const inMargin =
           selected?.kind === 'thread' && window.innerWidth - right >= 310;
+
         return new DOMRect(
           inMargin ? right + 4 : (point?.x ?? 16),
           inMargin ? (point?.y ?? 80) : (point?.rect.top ?? 80),
@@ -267,10 +303,12 @@ export default function Comments({
       },
     };
   }, [mounted, target, selected?.kind]);
+
   if (!mounted) return null;
   const selectedPoint = target ? pointFor(target, root.current) : null;
   const previewPoint = hover && canPick ? pointFor(hover, root.current) : null;
   const highlight = selectedPoint ?? previewPoint;
+
   const composer = (
     <Composer
       key={draftKey}
@@ -288,6 +326,7 @@ export default function Comments({
       }
     />
   );
+
   const typing = !!typingPeers.length && (
     <output className="pc-typing">
       <span className="pc-typing-dots">
@@ -299,6 +338,7 @@ export default function Comments({
       {typingPeers.length === 1 ? 'is' : 'are'} typing…
     </output>
   );
+
   return createPortal(
     <div data-comments-ui="" className="pc-root" data-layout={layout}>
       {highlight && !welcome && (
@@ -326,10 +366,13 @@ export default function Comments({
           onClick={() => {
             if (list === 'page' || activeThread?.target.selector === '') {
               clearPanels();
+
               return;
             }
+
             const thread =
               pageThreads.length === 1 ? pageThreads[0] : undefined;
+
             if (thread) openThread(thread, false);
             else {
               clearPanels();
@@ -346,6 +389,7 @@ export default function Comments({
         preferences.markers &&
         live.threads.map((thread) => {
           const point = pointFor(thread.target, root.current);
+
           return point && point.y > 0 && point.y < window.innerHeight ? (
             <button
               key={thread.id}
@@ -367,6 +411,7 @@ export default function Comments({
             peer.cursor && presenceNow - peer.updatedAt < 10_000
               ? pointFor(peer.cursor, root.current)
               : null;
+
           return point && point.y >= 0 && point.y <= window.innerHeight ? (
             <div
               key={peer.id}
@@ -544,9 +589,11 @@ export default function Comments({
                 value={keyboardTarget}
                 onChange={(event) => {
                   setKeyboardTarget(event.target.value);
+
                   const target = targets.find(
                     (value) => value.selector === event.target.value,
                   );
+
                   if (target) reveal(target, root.current);
                 }}
               >
@@ -566,6 +613,7 @@ export default function Comments({
                 const target = targets.find(
                   (value) => value.selector === keyboardTarget,
                 );
+
                 if (target) choose(target);
               }}
             >

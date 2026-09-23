@@ -1,4 +1,5 @@
 import { ArrowSquareOut, ImageBroken, X } from '@phosphor-icons/react';
+import { Match } from 'effect';
 import {
   useEffect,
   useRef,
@@ -45,13 +46,16 @@ const focusableSelector =
 
 const initialAvailableRoom = (): AvailablePresentationRoom => {
   if (typeof window === 'undefined') return { width: 1_160, height: 650 };
+
   if (window.innerWidth < 640) {
     return {
       width: Math.max(1, window.innerWidth - 28),
       height: Math.max(1, window.innerHeight - 132),
     };
   }
+
   const inset = Math.min(84, Math.max(38, window.innerWidth * 0.06));
+
   return {
     width: Math.max(1, window.innerWidth - inset * 2),
     height: Math.max(1, window.innerHeight - inset - 76),
@@ -61,25 +65,30 @@ const initialAvailableRoom = (): AvailablePresentationRoom => {
 const itemTitle = (item: BoardItem): string => {
   if (item.kind === 'image')
     return item.annotationTitle?.trim() || 'Image reference';
+
   if (item.kind === 'note') return 'Field note';
+
   if (item.kind === 'swatch')
     return item.label?.trim() || item.color?.toUpperCase() || 'Color study';
+
   if (item.kind === 'website')
     return (
       item.websiteTitle?.trim() || item.websiteSiteLabel?.trim() || 'Website'
     );
+
   if (item.kind === 'x')
     return (
       item.xAuthorName?.trim() ||
       (item.xAuthorHandle ? `@${item.xAuthorHandle}` : 'X post')
     );
+
   return (
     item.label?.trim() ||
-    (item.kind === 'spotify'
-      ? 'Spotify reference'
-      : item.kind === 'youtube'
-        ? 'YouTube reference'
-        : 'Audio reference')
+    Match.value(item.kind).pipe(
+      Match.when('spotify', () => 'Spotify reference'),
+      Match.when('youtube', () => 'YouTube reference'),
+      Match.orElse(() => 'Audio reference'),
+    )
   );
 };
 
@@ -88,16 +97,21 @@ const sourceLink = (
 ): { readonly href: string; readonly label: string } | null => {
   if (item.kind === 'image' && item.href)
     return { href: item.href, label: 'Open source' };
+
   if (item.kind === 'website' && item.websiteUrl)
     return { href: item.websiteUrl, label: 'Visit site' };
+
   if (item.kind === 'x' && item.src)
     return { href: item.src, label: 'Open on X' };
+
   if ((item.kind === 'spotify' || item.kind === 'youtube') && item.src) {
     return { href: item.src, label: 'Open source' };
   }
+
   if (item.kind === 'audio' && item.mediaId === undefined && item.src) {
     return { href: item.src, label: 'Open audio' };
   }
+
   return null;
 };
 
@@ -106,17 +120,21 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
   const stageRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
+
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   );
+
   const [availableRoom, setAvailableRoom] = useState(initialAvailableRoom);
   const [playback] = useState(() => new AudioPlaybackCoordinator());
+
   const imageSrc =
     item.kind === 'image'
       ? item.mediaId === undefined
         ? item.src
         : mediaUrl(item.mediaId)
       : undefined;
+
   const title = itemTitle(item);
   const link = sourceLink(item);
   const resolvedImageState = imageSrc ? imageState : 'error';
@@ -127,7 +145,9 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
 
   useEffect(() => {
     const stage = stageRef.current;
+
     if (stage === null) return;
+
     const measure = () => {
       const computed = getComputedStyle(stage);
       setAvailableRoom({
@@ -145,9 +165,11 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
         ),
       });
     };
+
     const observer = new ResizeObserver(measure);
     observer.observe(stage);
     measure();
+
     return () => observer.disconnect();
   }, []);
 
@@ -156,6 +178,7 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
+
     closeRef.current?.focus();
 
     const keyDown = (event: KeyboardEvent) => {
@@ -163,17 +186,22 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
         event.preventDefault();
         event.stopPropagation();
         onCloseRef.current();
+
         return;
       }
+
       if (event.key !== 'Tab') return;
 
       const focusable = Array.from(
         dialogRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ??
           [],
       );
+
       const first = focusable[0];
       const last = focusable.at(-1);
+
       if (first === undefined || last === undefined) return;
+
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -184,9 +212,11 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
     };
 
     document.addEventListener('keydown', keyDown);
+
     return () => {
       playback.pauseAll();
       document.removeEventListener('keydown', keyDown);
+
       if (previousFocus?.isConnected) previousFocus.focus();
     };
   }, [playback]);
@@ -195,11 +225,13 @@ export function PresentationItemViewer({ item, origin, onClose }: Props) {
     '--viewer-origin-x': `${origin.x}px`,
     '--viewer-origin-y': `${origin.y}px`,
   };
+
   const itemScale = fitPresentationItemScale(
     item.width,
     item.height,
     availableRoom,
   );
+
   const itemFrameStyle: ItemFrameStyle = {
     width: item.width * itemScale,
     height: item.height * itemScale,

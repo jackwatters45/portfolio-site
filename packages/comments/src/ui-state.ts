@@ -2,6 +2,7 @@ import { useAtom, useAtomSet, useAtomValue } from '@effect/atom-react';
 import * as Clipboard from '@effect/platform-browser/Clipboard';
 import * as Clock from 'effect/Clock';
 import * as Effect from 'effect/Effect';
+import * as Predicate from 'effect/Predicate';
 import * as Schedule from 'effect/Schedule';
 import * as Stream from 'effect/Stream';
 import { AsyncResult, Atom } from 'effect/unstable/reactivity';
@@ -11,6 +12,7 @@ import type { Target } from './protocol';
 export type Selection =
   | { kind: 'new'; target: Target }
   | { kind: 'thread'; id: string };
+
 interface UiState {
   mounted: boolean;
   active: boolean;
@@ -25,12 +27,14 @@ interface UiState {
   layout: number;
   keyboardTarget: string;
 }
+
 const clock = Atom.make(
   Stream.fromSchedule(Schedule.spaced('1 second')).pipe(
     Stream.mapEffect(() => Clock.currentTimeMillis),
   ),
   { initialValue: 0 },
 ).pipe(Atom.map(AsyncResult.getOrElse(() => 0)));
+
 const idleClock = Atom.make(0);
 
 export function useCommentUi(presenceActive: boolean) {
@@ -49,6 +53,7 @@ export function useCommentUi(presenceActive: boolean) {
       layout: 0,
       keyboardTarget: '',
     });
+
     const notice = Atom.fn((notice: string, get) =>
       Effect.gen(function* () {
         get.set(state, { ...get(state), notice });
@@ -56,6 +61,7 @@ export function useCommentUi(presenceActive: boolean) {
         get.set(state, { ...get(state), notice: '' });
       }),
     );
+
     const copy = Atom.fn((url: string, get) =>
       Clipboard.Clipboard.use((clipboard) => clipboard.writeString(url)).pipe(
         Effect.as('Comment link copied'),
@@ -64,22 +70,27 @@ export function useCommentUi(presenceActive: boolean) {
         Effect.provide(Clipboard.layer),
       ),
     );
+
     return { state, notice, copy };
   }, []);
+
   const [value, set] = useAtom(model.state);
   const setNotice = useAtomSet(model.notice);
   const copyLink = useAtomSet(model.copy);
+
   const presenceNow = useAtomValue(
     value.active || presenceActive ? clock : idleClock,
   );
+
   const actions = useMemo(() => {
     const field =
       <K extends keyof UiState>(key: K) =>
       (value: UiState[K] | ((previous: UiState[K]) => UiState[K])) =>
         set((state) => ({
           ...state,
-          [key]: typeof value === 'function' ? value(state[key]) : value,
+          [key]: Predicate.isFunction(value) ? value(state[key]) : value,
         }));
+
     return {
       setMounted: field('mounted'),
       setActive: field('active'),
@@ -94,5 +105,6 @@ export function useCommentUi(presenceActive: boolean) {
       setKeyboardTarget: field('keyboardTarget'),
     };
   }, [set]);
+
   return { ...value, ...actions, setNotice, copyLink, presenceNow };
 }

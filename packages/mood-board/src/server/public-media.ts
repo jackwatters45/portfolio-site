@@ -1,16 +1,13 @@
-import { Option, Schema } from 'effect';
-
 import type { MediaId } from '../lib/media';
-import { PublicBoardSchema } from '../lib/public-api';
-
-const decodePublicBoard = Schema.decodeUnknownOption(PublicBoardSchema);
+import type { PublicBoard } from '../lib/public-api';
 
 export const publicBoardReferencesMedia = (
-  value: unknown,
+  board: PublicBoard | null,
   mediaId: MediaId,
 ): boolean => {
-  const decoded = decodePublicBoard(value);
-  if (Option.isNone(decoded)) return false;
-  if (decoded.value.board.backgroundMediaId === mediaId) return true;
-  return decoded.value.board.items.some((item) => item.mediaId === mediaId);
+  if (board === null) return false;
+
+  if (board.board.backgroundMediaId === mediaId) return true;
+
+  return board.board.items.some((item) => item.mediaId === mediaId);
 };

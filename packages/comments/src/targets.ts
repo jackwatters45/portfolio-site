@@ -1,8 +1,10 @@
 import type { Cursor, Target } from './protocol';
 
 const ELEMENTS = 'h1,h2,h3,h4,h5,h6,p,li,dt,dd,figcaption,img,a,button,summary';
+
 export const UI_SELECTOR =
   '[data-comments-ui],[data-feedback-ui],[data-agentation-root],astro-dev-toolbar';
+
 export const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), Math.max(min, max));
 
@@ -11,8 +13,10 @@ export function findElement(
   root: Element | null,
 ): HTMLElement | null {
   if (!selector || !root) return null;
+
   try {
     const element = document.querySelector<HTMLElement>(selector);
+
     return element && root.contains(element) && !element.closest(UI_SELECTOR)
       ? element
       : null;
@@ -27,11 +31,13 @@ export function targetElement(
 ): HTMLElement | null {
   if (!root.contains(element) || element.closest(UI_SELECTOR)) return null;
   const target = element.closest<HTMLElement>(ELEMENTS);
+
   return target && root.contains(target) ? target : null;
 }
 
 function selectorFor(element: Element, root: Element): string {
   const parts: string[] = [];
+
   for (
     let current: Element | null = element;
     current;
@@ -41,20 +47,27 @@ function selectorFor(element: Element, root: Element): string {
       parts.unshift(`#${CSS.escape(current.id)}`);
       break;
     }
+
     const key = current.getAttribute('data-comment-anchor');
+
     if (key) {
       parts.unshift(`[data-comment-anchor="${CSS.escape(key)}"]`);
       break;
     }
+
     const tag = current.tagName.toLowerCase();
+
     const siblings = current.parentElement
       ? Array.from(current.parentElement.children).filter(
           (child) => child.tagName === current.tagName,
         )
       : [];
+
     parts.unshift(`${tag}:nth-of-type(${siblings.indexOf(current) + 1})`);
+
     if (current === root && current === document.body) break;
   }
+
   return parts.join(' > ');
 }
 
@@ -64,9 +77,11 @@ export function targetFor(
   point?: { x: number; y: number },
 ): Target {
   const rect = element.getBoundingClientRect();
+
   const text =
     (element instanceof HTMLImageElement ? element.alt : element.textContent) ??
     element.tagName;
+
   return {
     selector: selectorFor(element, root),
     quote:
@@ -84,7 +99,9 @@ export function cursorFor(
 ): Cursor | null {
   if (!root.contains(element) || element.closest(UI_SELECTOR)) return null;
   const rect = element.getBoundingClientRect();
+
   if (!rect.width || !rect.height) return null;
+
   return {
     selector: selectorFor(element, root),
     x: clamp((point.x - rect.left) / rect.width, 0, 1),
@@ -94,9 +111,12 @@ export function cursorFor(
 
 export function pointFor(cursor: Cursor, root: Element | null) {
   const element = findElement(cursor.selector, root);
+
   if (!element) return null;
   const rect = element.getBoundingClientRect();
+
   if (!rect.width || !rect.height) return null;
+
   return {
     x: rect.left + rect.width * cursor.x,
     y: rect.top + rect.height * cursor.y,
@@ -106,7 +126,9 @@ export function pointFor(cursor: Cursor, root: Element | null) {
 
 export function reveal(target: Target, root: Element | null) {
   const element = findElement(target.selector, root);
+
   if (!element) return;
+
   for (
     let parent = element.parentElement;
     parent;
@@ -114,6 +136,7 @@ export function reveal(target: Target, root: Element | null) {
   ) {
     if (parent instanceof HTMLDetailsElement) parent.open = true;
   }
+
   element.scrollIntoView({
     block: 'center',
     behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches

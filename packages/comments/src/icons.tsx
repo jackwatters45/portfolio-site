@@ -13,6 +13,7 @@ export type IconName =
   | 'check'
   | 'link'
   | 'keyboard';
+
 const paths: Record<IconName, string> = {
   heart:
     'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z',
@@ -31,6 +32,7 @@ const paths: Record<IconName, string> = {
   link: 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',
   keyboard: 'M3 6h18v12H3Z M6 9h1 M10 9h1 M14 9h1 M18 9h1 M7 14h10',
 };
+
 export function Icon({
   name,
   size = 20,

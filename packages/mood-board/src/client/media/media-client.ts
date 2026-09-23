@@ -20,6 +20,7 @@ import {
 import { mediaUrl } from './media-url';
 
 const MediaErrorResponseSchema = Schema.Struct({ error: Schema.String });
+
 const decodeMediaErrorResponse = Schema.decodeUnknownOption(
   MediaErrorResponseSchema,
 );
@@ -40,12 +41,8 @@ export class MediaClientError extends Schema.Error<MediaClientError>(
     status: HttpStatusCode | null = null,
     cause?: unknown,
   ) {
-    super({
-      reason,
-      message,
-      status,
-      ...(cause === undefined ? {} : { cause }),
-    });
+    const fields = { reason, message, status };
+    super(cause === undefined ? fields : { ...fields, cause });
   }
 }
 
@@ -55,24 +52,33 @@ const responseMessage = Effect.fn('MediaClient.responseMessage')(function* (
   const value = yield* Effect.tryPromise(() => response.json()).pipe(
     Effect.catch(() => Effect.succeed(undefined)),
   );
+
   const decoded = decodeMediaErrorResponse(value);
+
   if (Option.isSome(decoded)) return decoded.value.error;
+
   if (response.status === 401 || response.status === 403) {
     return 'Media upload requires access to the owner workspace.';
   }
+
   if (response.status === 413)
     return 'That file is larger than the media upload limit.';
+
   if (response.status === 415) return 'That file type is not supported.';
+
   if (response.status === 429) {
     return 'This client has reached a media upload allowance. Wait and try again.';
   }
+
   if (response.status === 507) return 'Managed media storage is full.';
+
   return 'The media server could not accept that upload.';
 });
 
 const decodeUploadReceipt = Effect.fn('MediaClient.decodeUploadReceipt')(
   function* (response: Response) {
     const value: unknown = yield* Effect.tryPromise(() => response.json());
+
     return yield* Schema.decodeUnknownEffect(MediaUploadResponseSchema)(value);
   },
 );
@@ -91,14 +97,17 @@ const uploadMediaEffect = Effect.fn('MediaClient.uploadMedia')(function* (
   signal?: AbortSignal,
 ) {
   const mimeType = normalizeMediaMimeType(kind, blob.type);
+
   if (mimeType === null) {
     return yield* new MediaClientError(
       'Validation',
       'That file type is not supported.',
     );
   }
+
   if (blob.size === 0)
     return yield* new MediaClientError('Validation', 'That file is empty.');
+
   if (blob.size > mediaByteLimit(kind)) {
     return yield* new MediaClientError(
       'Validation',
@@ -125,9 +134,12 @@ const uploadMediaEffect = Effect.fn('MediaClient.uploadMedia')(function* (
         'Media uploads require the live mood-board server. Start the local Alchemy stack and try again.',
       ),
   });
+
   const status = HttpStatusCodeSchema.make(response.status);
+
   if (!response.ok) {
     if (response.status === 401) signalAuthenticationRequired();
+
     return yield* new MediaClientError(
       'Http',
       yield* responseMessage(response),
@@ -146,6 +158,7 @@ const uploadMediaEffect = Effect.fn('MediaClient.uploadMedia')(function* (
         ),
     ),
   );
+
   if (decoded.kind !== kind || decoded.byteLength !== blob.size) {
     return yield* new MediaClientError(
       'InvalidPayload',
@@ -153,6 +166,7 @@ const uploadMediaEffect = Effect.fn('MediaClient.uploadMedia')(function* (
       status,
     );
   }
+
   return decoded;
 });
 
@@ -187,9 +201,12 @@ const downloadMediaEffect = Effect.fn('MediaClient.downloadMedia')(function* (
         'The managed media could not be downloaded from the live server.',
       ),
   });
+
   const status = HttpStatusCodeSchema.make(response.status);
+
   if (!response.ok) {
     if (response.status === 401) signalAuthenticationRequired();
+
     return yield* new MediaClientError(
       'Http',
       response.status === 404
@@ -198,16 +215,19 @@ const downloadMediaEffect = Effect.fn('MediaClient.downloadMedia')(function* (
       status,
     );
   }
+
   const mimeType = normalizeMediaMimeType(
     kind,
     response.headers.get('content-type'),
   );
+
   if (mimeType === null) {
     return yield* new MediaClientError(
       'InvalidPayload',
       'A managed media file has an unexpected type.',
     );
   }
+
   const blob = yield* Effect.tryPromise({
     try: () => response.blob(),
     catch: (cause) =>
@@ -218,6 +238,7 @@ const downloadMediaEffect = Effect.fn('MediaClient.downloadMedia')(function* (
         cause,
       ),
   });
+
   if (blob.size === 0 || blob.size > mediaByteLimit(kind)) {
     return yield* new MediaClientError(
       'InvalidPayload',
@@ -225,6 +246,7 @@ const downloadMediaEffect = Effect.fn('MediaClient.downloadMedia')(function* (
       status,
     );
   }
+
   return {
     blob,
     mimeType,

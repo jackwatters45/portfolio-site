@@ -2,9 +2,11 @@
 <script is:inline>
   (() => {
     const details = document.currentScript.parentElement;
+
     try {
       // Keep this pre-paint read synchronous; saving uses the Effect store.
       const saved = localStorage.getItem(`nz:disclosure:${details.dataset.disclosureKey}`);
+
       if (saved === 'true' || saved === 'false') details.open = saved === 'true';
     } catch {
       // Keep the HTML default when storage is unavailable.

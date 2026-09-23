@@ -7,26 +7,33 @@ import '../styles/activity-calculator.css';
 
 export default function ActivityCalculator() {
   const id = useId();
+
   const model = useMemo(() => {
     const selection = Atom.make<ReadonlyMap<string, ActivityOption>>(new Map());
+
     const total = Atom.make((get) => {
       const options = [...get(selection).values()];
+
       return {
         cents: options.reduce((sum, option) => sum + perPersonCents(option), 0),
         count: options.length,
         from: options.some((option) => option.from),
       };
     });
+
     return { selection, total };
   }, []);
+
   const [selection, setSelection] = useAtom(model.selection);
   const total = useAtomValue(model.total);
 
   function choose(activityId: string, option: ActivityOption | undefined) {
     setSelection((previous) => {
       const next = new Map(previous);
+
       if (option) next.set(activityId, option);
       else next.delete(activityId);
+
       return next;
     });
   }
@@ -65,6 +72,7 @@ export default function ActivityCalculator() {
             const selected = selection.has(activity.id);
             const option = selection.get(activity.id) ?? activity.options[0];
             const inputId = `${id}-${activity.id}`;
+
             return (
               <li key={activity.id} data-selected={selected}>
                 <label className="calculator-choice" htmlFor={inputId}>
@@ -102,6 +110,7 @@ export default function ActivityCalculator() {
                           const next = activity.options.find(
                             (item) => item.id === event.currentTarget.value,
                           );
+
                           if (next) choose(activity.id, next);
                         }}
                       >

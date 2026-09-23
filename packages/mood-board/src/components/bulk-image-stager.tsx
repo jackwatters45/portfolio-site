@@ -1,4 +1,5 @@
 import { FolderOpen, ImageSquare, X } from '@phosphor-icons/react';
+import { Match, Schema } from 'effect';
 import {
   useCallback,
   useEffect,
@@ -48,12 +49,30 @@ type Phase = 'staging' | 'processing' | 'done';
 
 const formatBytes = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
+
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
 
-const errorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : 'This image could not be uploaded.';
+const errorMessage = (cause: unknown) =>
+  cause instanceof Error ? cause.message : 'This image could not be uploaded.';
+
+const BulkSortSchema = Schema.Literals(['original', 'filename', 'capture']);
+
+const failureIds = new WeakMap<TraversalFailure, number>();
+
+let nextFailureId = 0;
+
+const failureId = (failure: TraversalFailure): number => {
+  const existing = failureIds.get(failure);
+
+  if (existing !== undefined) return existing;
+  const id = nextFailureId++;
+  failureIds.set(failure, id);
+
+  return id;
+};
 
 export function BulkImageStager({
   initialFiles,
@@ -75,6 +94,7 @@ export function BulkImageStager({
   const generationRef = useRef(0);
   const initializedRef = useRef(false);
   const preparedRef = useRef(new Map<string, PreparedBulkImage>());
+
   const restoreFocusRef = useRef(
     typeof document !== 'undefined' &&
       document.activeElement instanceof HTMLElement
@@ -89,14 +109,17 @@ export function BulkImageStager({
   const [layout, setLayout] = useState<BulkLayoutKind>('loose');
   const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('staging');
+
   const [inspectionProgress, setInspectionProgress] = useState({
     completed: 0,
     total: 0,
   });
+
   const [processingProgress, setProcessingProgress] = useState({
     completed: 0,
     total: 0,
   });
+
   const [sessionError, setSessionError] = useState('');
 
   useEffect(() => {
@@ -128,10 +151,12 @@ export function BulkImageStager({
               completed: Math.min(progress.total, progress.completed + 1),
             }));
             const target = created[index];
+
             if (!target) return;
             setEntries((current) =>
               current.map((entry) => {
                 if (entry.id !== target.id) return entry;
+
                 if (!result.ok) {
                   return {
                     ...entry,
@@ -140,6 +165,7 @@ export function BulkImageStager({
                     error: errorMessage(result.error),
                   };
                 }
+
                 return {
                   ...entry,
                   width: result.value.width,
@@ -165,6 +191,7 @@ export function BulkImageStager({
       const capacity = Math.max(0, MAX_BULK_FILES - current.length);
       const staged = stageBulkFiles(files, current.length, capacity);
       setOmitted((value) => value + staged.omitted);
+
       if (staged.entries.length === 0) return;
       const next = [...current, ...staged.entries];
       entriesRef.current = next;
@@ -189,6 +216,7 @@ export function BulkImageStager({
     const inspectionController = inspectionControllerRef.current;
     const restoreFocus = restoreFocusRef.current;
     dialog?.querySelector<HTMLElement>('[data-initial-focus]')?.focus();
+
     return () => {
       inspectionGenerationRef.current += 1;
       inspectionController.abort();
@@ -201,10 +229,12 @@ export function BulkImageStager({
     () => sortBulkEntries(entries, sort),
     [entries, sort],
   );
+
   const displayedIds = useMemo(
     () => displayed.map((entry) => entry.id),
     [displayed],
   );
+
   const navigableIds = useMemo(
     () =>
       displayed
@@ -214,18 +244,23 @@ export function BulkImageStager({
         .map((entry) => entry.id),
     [displayed],
   );
+
   const totals = useMemo(() => selectedBulkTotals(entries), [entries]);
   const checking = entries.some((entry) => entry.status === 'checking');
+
   const failedCount = entries.filter(
     (entry) => entry.status === 'failed',
   ).length;
+
   const readySelected = displayed.filter(
     (entry) => entry.selected && entry.status === 'ready',
   );
+
   const largeSelectionWarning =
     totals.count >= 75 || totals.bytes > 200 * 1024 * 1024
       ? 'Large selection: preparation and upload may take a while; selected files must still fit the board limit.'
       : '';
+
   const itemCapacityError =
     readySelected.length > maxItems
       ? `This board has room for ${Math.max(0, maxItems)} more ${maxItems === 1 ? 'item' : 'items'}. Select fewer images.`
@@ -257,10 +292,13 @@ export function BulkImageStager({
   const processSelected = async () => {
     if (checking || readySelected.length === 0 || phase !== 'staging') return;
     setSessionError('');
+
     if (itemCapacityError) {
       setSessionError(itemCapacityError);
+
       return;
     }
+
     setPhase('processing');
     setProcessingProgress({ completed: 0, total: readySelected.length });
     const generation = ++generationRef.current;
@@ -279,8 +317,10 @@ export function BulkImageStager({
       selected,
       async (entry) => {
         const cached = preparedRef.current.get(entry.id);
+
         if (cached) return cached;
         const image = await ingestImageFile(entry.file, controller.signal);
+
         const source = localOnly
           ? { src: await blobToDataUrl(image.blob, controller.signal) }
           : {
@@ -288,13 +328,16 @@ export function BulkImageStager({
                 await uploadMedia(image.blob, 'image', controller.signal)
               ).mediaId,
             };
+
         const prepared = {
           entryId: entry.id,
           ...source,
           width: image.width,
           height: image.height,
         } satisfies PreparedBulkImage;
+
         preparedRef.current.set(entry.id, prepared);
+
         return prepared;
       },
       {
@@ -308,10 +351,12 @@ export function BulkImageStager({
             completed: Math.min(progress.total, progress.completed + 1),
           }));
           const target = selected[index];
+
           if (!target) return;
           setEntries((current) =>
             current.map((entry) => {
               if (entry.id !== target.id) return entry;
+
               return result.ok
                 ? { ...entry, status: 'prepared', error: undefined }
                 : {
@@ -333,7 +378,9 @@ export function BulkImageStager({
     const failed = new Map<string, string>();
     results.forEach((result, index) => {
       const entry = selected[index];
+
       if (!entry || !result) return;
+
       if (result.ok) successful.push(result.value);
       else failed.set(entry.id, errorMessage(result.error));
     });
@@ -355,10 +402,12 @@ export function BulkImageStager({
       );
       setPhase('staging');
       setSessionError('None of the selected images could be uploaded.');
+
       return;
     }
 
     const commitError = onCommit(successful, layout);
+
     if (commitError !== null) {
       setEntries((current) =>
         current.map((entry) => {
@@ -370,6 +419,7 @@ export function BulkImageStager({
               error: failed.get(entry.id),
             };
           }
+
           return entry.status === 'processing' || entry.status === 'prepared'
             ? { ...entry, status: 'ready' }
             : entry;
@@ -381,6 +431,7 @@ export function BulkImageStager({
           ? `${commitError} ${failed.size} selected ${failed.size === 1 ? 'file also failed' : 'files also failed'} during upload.`
           : commitError,
       );
+
       return;
     }
 
@@ -394,6 +445,7 @@ export function BulkImageStager({
             error: undefined,
           };
         }
+
         if (failed.has(entry.id)) {
           return {
             ...entry,
@@ -402,6 +454,7 @@ export function BulkImageStager({
             error: failed.get(entry.id),
           };
         }
+
         return entry;
       }),
     );
@@ -415,7 +468,9 @@ export function BulkImageStager({
 
   const focusGridEntry = (currentId: string, key: string) => {
     const currentIndex = navigableIds.indexOf(currentId);
+
     if (currentIndex < 0) return;
+
     const columns = Math.max(
       1,
       Math.floor(
@@ -423,20 +478,19 @@ export function BulkImageStager({
           160) / 154,
       ),
     );
-    const nextIndex =
-      key === 'Home'
-        ? 0
-        : key === 'End'
-          ? navigableIds.length - 1
-          : key === 'ArrowLeft'
-            ? currentIndex - 1
-            : key === 'ArrowRight'
-              ? currentIndex + 1
-              : key === 'ArrowUp'
-                ? currentIndex - columns
-                : currentIndex + columns;
+
+    const nextIndex = Match.value(key).pipe(
+      Match.when('Home', () => 0),
+      Match.when('End', () => navigableIds.length - 1),
+      Match.when('ArrowLeft', () => currentIndex - 1),
+      Match.when('ArrowRight', () => currentIndex + 1),
+      Match.when('ArrowUp', () => currentIndex - columns),
+      Match.orElse(() => currentIndex + columns),
+    );
+
     const nextId =
       navigableIds[Math.max(0, Math.min(navigableIds.length - 1, nextIndex))];
+
     if (!nextId) return;
     dialogRef.current
       ?.querySelector<HTMLInputElement>(
@@ -448,19 +502,26 @@ export function BulkImageStager({
   const handleDialogKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
+
       if (phase === 'processing') cancelProcessing();
       else close();
+
       return;
     }
+
     if (event.key !== 'Tab') return;
+
     const focusable = Array.from(
       dialogRef.current?.querySelectorAll<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex="0"]',
       ) ?? [],
     ).filter((element) => element.offsetParent !== null);
+
     const first = focusable[0];
     const last = focusable.at(-1);
+
     if (!first || !last) return;
+
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
@@ -536,7 +597,11 @@ export function BulkImageStager({
             <span>Sort</span>
             <select
               value={sort}
-              onChange={(event) => setSort(event.target.value as BulkSort)}
+              onChange={(event) => {
+                const value = event.target.value;
+
+                if (Schema.is(BulkSortSchema)(value)) setSort(value);
+              }}
               disabled={phase !== 'staging'}
             >
               <option value="original">Original order</option>
@@ -562,8 +627,8 @@ export function BulkImageStager({
                 be read.
               </strong>
               <ul>
-                {initialFailures.map((failure, index) => (
-                  <li key={`${failure.name}-${index}`} title={failure.message}>
+                {initialFailures.map((failure) => (
+                  <li key={failureId(failure)} title={failure.message}>
                     {failure.name}: {failure.message}
                   </li>
                 ))}
@@ -696,35 +761,39 @@ export function BulkImageStager({
               </button>
             </div>
             <div className="bulk-stager-primary-actions">
-              {phase === 'processing' ? (
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={cancelProcessing}
-                >
-                  Cancel upload
-                </button>
-              ) : phase === 'done' ? (
-                <button
-                  type="button"
-                  className="primary-button"
-                  onClick={close}
-                >
-                  Done
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="primary-button"
-                  disabled={
-                    checking ||
-                    readySelected.length === 0 ||
-                    itemCapacityError !== ''
-                  }
-                  onClick={() => void processSelected()}
-                >
-                  Add {readySelected.length || 'selected'}
-                </button>
+              {Match.value(phase).pipe(
+                Match.when('processing', () => (
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={cancelProcessing}
+                  >
+                    Cancel upload
+                  </button>
+                )),
+                Match.when('done', () => (
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={close}
+                  >
+                    Done
+                  </button>
+                )),
+                Match.orElse(() => (
+                  <button
+                    type="button"
+                    className="primary-button"
+                    disabled={
+                      checking ||
+                      readySelected.length === 0 ||
+                      itemCapacityError !== ''
+                    }
+                    onClick={() => void processSelected()}
+                  >
+                    Add {readySelected.length || 'selected'}
+                  </button>
+                )),
               )}
             </div>
           </div>

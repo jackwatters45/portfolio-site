@@ -5,6 +5,7 @@ import { Config, Effect, Redacted, Schema } from 'effect';
 import type { WorkspaceDurableObject } from './src/cloudflare/worker';
 
 const localAuthSecret = 'mood-board-local-development-secret';
+
 const productionAuthSecret = Schema.Redacted(Schema.String).check(
   Schema.makeFilter(
     (secret) =>
@@ -23,14 +24,17 @@ export const moodBoard = Effect.gen(function* () {
   const catalog = yield* Cloudflare.D1.Database('mood-board-catalog', {
     migrations: 'packages/mood-board/src/cloudflare/d1-migrations',
   });
+
   const media = yield* Cloudflare.R2.Bucket('mood-board-media', {
     domains: [],
     cors: [],
   });
+
   const authRateLimit = Cloudflare.RateLimit('mood-board-auth-rate-limit', {
     namespaceId: 1002,
     simple: { limit: 5, period: 60 },
   });
+
   const workspaces = Cloudflare.DurableObject<WorkspaceDurableObject>(
     'mood-board-workspaces',
     { className: 'WorkspaceDurableObject' },

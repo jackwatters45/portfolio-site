@@ -29,6 +29,14 @@ const formatUpdatedAt = (value: number) =>
         : 'numeric',
   });
 
+interface BoardRowStyle extends CSSProperties {
+  '--board-index': number;
+}
+
+const boardRowStyle = (index: number): BoardRowStyle => ({
+  '--board-index': index,
+});
+
 function HomePage() {
   const navigate = useNavigate();
   const session = authClient.useSession();
@@ -77,6 +85,7 @@ function HomePage() {
 
     return () => {
       active = false;
+
       if (catalogRef.current === catalog) catalogRef.current = null;
       void catalog.close();
     };
@@ -84,9 +93,11 @@ function HomePage() {
 
   const createNewBoard = useCallback(async () => {
     const catalog = catalogRef.current;
+
     if (catalog === null || creating) return;
     setCreating(true);
     setCreateError('');
+
     try {
       const board = await catalog.create('Untitled mood');
       await navigate({ to: '/boards/$boardId', params: { boardId: board.id } });
@@ -99,6 +110,7 @@ function HomePage() {
   const catalogCurrent = loadedAccountId === user?.id;
   const visibleBoards = catalogCurrent ? boards : [];
   const visibleError = catalogCurrent ? error : '';
+
   const catalogLoading =
     session.isPending ||
     session.isRefetching ||
@@ -231,7 +243,7 @@ function HomePage() {
                 className="home-board-row"
                 to="/boards/$boardId"
                 params={{ boardId: DEFAULT_BOARD_ID }}
-                style={{ '--board-index': 0 } as CSSProperties}
+                style={boardRowStyle(0)}
               >
                 <span className="home-board-number">01</span>
                 <strong>For the way a place can feel</strong>
@@ -256,7 +268,7 @@ function HomePage() {
                   className="home-board-row"
                   to="/boards/$boardId"
                   params={{ boardId: board.id }}
-                  style={{ '--board-index': index } as CSSProperties}
+                  style={boardRowStyle(index)}
                 >
                   <span className="home-board-number">
                     {String(index + 1).padStart(2, '0')}

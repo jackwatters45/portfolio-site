@@ -4,6 +4,7 @@ import type { HttpServerRequest } from 'effect/unstable/http';
 import { Sha256HexSchema } from '../lib/schema';
 
 export const MEDIA_CLIENT_ID_HEADER = 'x-mood-board-media-client';
+
 export const MediaQuotaClientIdSchema = Schema.String.check(
   Schema.makeFilter((value) =>
     value.length > 0
@@ -11,14 +12,20 @@ export const MediaQuotaClientIdSchema = Schema.String.check(
       : { path: [], issue: 'Media quota client IDs cannot be empty' },
   ),
 ).pipe(Schema.brand('MediaQuotaClientId'));
+
 export type MediaQuotaClientId = typeof MediaQuotaClientIdSchema.Type;
+
 export const MediaClientHashSchema = Sha256HexSchema.pipe(
   Schema.brand('MediaClientHash'),
   Schema.brand('MediaQuotaClientId'),
 );
+
 export type MediaClientHash = typeof MediaClientHashSchema.Type;
+
 const decodeMediaClientHash = Schema.decodeUnknownOption(MediaClientHashSchema);
+
 const MISSING_MEDIA_CLIENT = MediaQuotaClientIdSchema.make('missing-client');
+
 export const SERVICE_DIRECT_MEDIA_CLIENT =
   MediaQuotaClientIdSchema.make('service-direct');
 
@@ -28,13 +35,15 @@ const hashText = Effect.fn('MediaClientIdentity.hashText')(function* (
   const digest = yield* Effect.tryPromise(() =>
     crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)),
   ).pipe(Effect.orDie);
+
   const hash = [...new Uint8Array(digest)]
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
+
   return MediaClientHashSchema.make(hash);
 });
 
-interface MediaClientIdentityShape {
+interface MediaClientIdentification {
   readonly identify: (
     request: HttpServerRequest.HttpServerRequest,
   ) => Effect.Effect<MediaQuotaClientId>;
@@ -42,7 +51,7 @@ interface MediaClientIdentityShape {
 
 export class MediaClientIdentity extends Context.Service<
   MediaClientIdentity,
-  MediaClientIdentityShape
+  MediaClientIdentification
 >()('mood-board/MediaClientIdentity') {
   static readonly layer = Layer.succeed(
     this,

@@ -5,6 +5,7 @@ import Layout from '../layouts/layout.astro';
 import { getRestaurants } from '../lib/restaurants';
 
 const restaurants = await getRestaurants();
+
 const locations = restaurants.flatMap(({ id, data }) =>
   data.coordinates
     ? [
@@ -36,10 +37,13 @@ const locations = restaurants.flatMap(({ id, data }) =>
   import site from '@site/site';
 
   const container = document.querySelector<HTMLElement>('#restaurant-map')!;
+
   const status = document.querySelector<HTMLElement>('#map-status')!;
+
   const locations: { name: string; address: string; coordinates: [number, number]; scores: { meg: number | null; jack: number | null }; url: string }[] = JSON.parse(container.dataset.locations!);
 
   const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).setView([-37.8136, 144.9631], 12);
+
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -57,6 +61,7 @@ const locations = restaurants.flatMap(({ id, data }) =>
     address.textContent = location.address;
     const scores = document.createElement('div');
     scores.className = 'map-scores';
+
     for (const person of ['meg', 'jack'] as const) {
       if (location.scores[person] === null) continue;
       const rating = document.createElement('div');
@@ -67,8 +72,11 @@ const locations = restaurants.flatMap(({ id, data }) =>
       rating.append(label, score);
       scores.append(rating);
     }
+
     popup.append(link, address);
+
     if (scores.childElementCount > 0) popup.append(scores);
+
     const marker = L.marker(location.coordinates, {
       alt: location.name,
       riseOnHover: true,
@@ -78,16 +86,21 @@ const locations = restaurants.flatMap(({ id, data }) =>
         iconSize: [72, 82], iconAnchor: [36, 70], popupAnchor: [0, -52],
       }),
     }).addTo(map).bindPopup(popup, { className: 'restaurant-popup', minWidth: 220, maxWidth: 260 });
+
     const pin = marker.getElement()!;
+
     const closeIfOutside = (event: PointerEvent | FocusEvent) => {
       if (event instanceof PointerEvent && event.pointerType !== 'mouse') return;
       const preview = marker.getPopup()?.getElement();
       const next = event.relatedTarget;
+
       if (next instanceof Node && (pin.contains(next) || preview?.contains(next))) return;
+
       if (!pin.matches(':hover, :focus-visible') && !preview?.matches(':hover, :focus-within')) {
         marker.closePopup();
       }
     };
+
     pin.setAttribute('aria-label', location.name);
     pin.addEventListener('pointerenter', (event) => {
       if (event.pointerType === 'mouse') marker.openPopup();

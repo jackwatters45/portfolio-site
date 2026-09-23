@@ -6,10 +6,13 @@ interface Props {
   ratings: CollectionEntry<'restaurants'>['data']['ratings'];
   showNames?: boolean;
 }
+
 const { ratings, showNames = true } = Astro.props;
+
 const entries = Object.entries(ratings).filter(
   ([, rating]) => rating.score !== null || rating.review,
 );
+
 const hasGuests = entries.some(
   ([person]) => person !== 'meg' && person !== 'jack',
 );
