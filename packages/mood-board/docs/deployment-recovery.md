@@ -37,4 +37,21 @@ Before repairing state:
 
 Do not repeat state deletion after adoption succeeds. Do not delete the extra cloud resources during recovery; inspect them separately before any cleanup.
 
-The other sites' redirect-rule permission failures are separate. Their deployment token needs access to the zone's dynamic redirect rules; changing the Moodboard domain does not resolve those failures.
+## Redirect-rule authorization
+
+The `tacos`, `sangas`, and `nz` sites use `domain.redirects` for their `www` hostnames. Alchemy updates the zone's `http_request_dynamic_redirect` ruleset for these redirects.
+
+The GitHub Actions `CLOUDFLARE_API_TOKEN` needs **Zone > Single Redirect > Edit** for **jackwatters.dev**, in addition to its Worker and storage permissions. The API names this permission `Dynamic URL Redirects Write`. `Workers Routes Write` alone does not grant it.
+
+Without this permission, the Worker uploads succeed, but redirect updates fail with `Forbidden: Authentication error` in `reconcileRedirectRules`.
+
+To fix this failure:
+
+1. Add the missing permission to the existing deployment token. Limit the new permission to `jackwatters.dev`. Preserve its existing policies.
+2. Rerun the failed GitHub Actions deployment. Editing the existing token does not require a new GitHub secret.
+3. Keep this permission when rotating the deployment token. Replace the GitHub secret only if the token value changes.
+
+Do not remove redirects, change domains, or delete Alchemy state to fix this permission error.
+
+Cloudflare documents the permission here:
+https://developers.cloudflare.com/rules/url-forwarding/single-redirects/create-api/
