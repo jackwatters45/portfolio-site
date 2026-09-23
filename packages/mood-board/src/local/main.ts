@@ -2,14 +2,15 @@
 import { BunRuntime, BunServices } from '@effect/platform-bun';
 import { Console, Effect, Layer, Logger, Schema } from 'effect';
 import { Command, Flag } from 'effect/unstable/cli';
+import { FetchHttpClient } from 'effect/unstable/http';
+
+import { AccountBoards } from './account-boards';
+import { AccountConnection } from './account-connection';
+import type { AccountConfig } from './account-contracts';
 
 import { actions } from './actions';
 import { BoardRenderer } from './board-renderer';
-import {
-  LocalBoardError,
-  MAX_INPUT_BYTES,
-  type LocalConfig,
-} from './contracts';
+import { LocalBoardError, MAX_INPUT_BYTES } from './contracts';
 import { LocalArchive } from './local-archive';
 import { LocalFiles } from './local-files';
 import { LocalImages } from './local-images';
@@ -18,6 +19,23 @@ import { mcpLayer } from './mcp';
 import { Moodboards } from './moodboards';
 
 const policyFlags = {
+  accountOrigin: Flag.String('account-origin').pipe(
+    Flag.withDefault(''),
+    Flag.withDescription(
+      'Explicit HTTPS account origin. Omit to keep all actions local.',
+    ),
+  ),
+  accountSessionDirectory: Flag.String('account-session-dir').pipe(
+    Flag.withDefault(''),
+    Flag.withDescription(
+      'Existing owner-only (0700) session directory outside approved input/output folders.',
+    ),
+  ),
+  allowAccountWrite: Flag.Boolean('allow-account-write').pipe(
+    Flag.withDescription(
+      'Allow explicitly confirmed account board writes. Does not enable public publishing.',
+    ),
+  ),
   assetRoot: Flag.String('root').pipe(
     Flag.withDescription(
       'Explicit absolute path to the approved input folder for images, audio, and archives.',
@@ -40,7 +58,7 @@ const policyFlags = {
   ),
 };
 
-const localLayer = (config: LocalConfig) => {
+const localLayer = (config: AccountConfig) => {
   const resources = Layer.mergeAll(
     LocalFiles.layer(config),
     LocalImages.layer,
@@ -51,8 +69,14 @@ const localLayer = (config: LocalConfig) => {
     Layer.provide(resources),
   );
 
-  return Moodboards.layer.pipe(
-    Layer.provide(Layer.merge(resources, capabilities)),
+  const account = AccountConnection.layer(config).pipe(
+    Layer.provide(FetchHttpClient.layer),
+  );
+
+  return Layer.mergeAll(
+    Moodboards.layer.pipe(Layer.provide(Layer.merge(resources, capabilities))),
+    AccountBoards.layer.pipe(Layer.provide(Layer.merge(resources, account))),
+    account,
   );
 };
 
@@ -108,7 +132,7 @@ const serve = Command.make('mcp', policyFlags, (config) =>
 
 const cli = Command.make('moodboard').pipe(
   Command.withDescription(
-    'Create and edit portable moodboards locally. No model, network, or account access.',
+    'Create and edit local moodboards, with optional browser-approved account access. No model or public publishing.',
   ),
   Command.withSubcommands([...commands, serve]),
 );

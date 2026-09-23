@@ -1,6 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { Context, Effect, Layer } from 'effect';
 
+import { handleAgentConnection } from '../server/agent-connection';
 import {
   configuredGoogle,
   createAuth,
@@ -90,6 +91,7 @@ const makeCloudflareAuth = (
 
 interface CloudflareAuthRequests {
   readonly handle: (request: Request) => Effect.Effect<Response>;
+  readonly connectAgent: (request: Request) => Effect.Effect<Response>;
   readonly account: (
     request: Request,
   ) => Effect.Effect<AuthenticatedAccount | null, AuthResolutionError>;
@@ -104,6 +106,7 @@ export class CloudflareAuth extends Context.Service<
       const auth = makeCloudflareAuth(env, requestOrigin);
 
       return CloudflareAuth.of({
+        connectAgent: (request) => handleAgentConnection(auth, request),
         handle: Effect.fn('CloudflareAuth.handle')((request: Request) =>
           Effect.promise(() => auth.handler(request)),
         ),
@@ -123,5 +126,8 @@ export const pruneExpiredCloudflareAuth = async (
       .prepare('DELETE FROM "verification" WHERE "expiresAt" < ?')
       .bind(now),
     database.prepare('DELETE FROM "session" WHERE "expiresAt" < ?').bind(now),
+    database
+      .prepare('DELETE FROM "deviceCode" WHERE "expiresAt" < ?')
+      .bind(now),
   ]);
 };

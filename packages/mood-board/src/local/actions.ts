@@ -1,4 +1,7 @@
-import { Effect, Schema } from 'effect';
+import { Effect } from 'effect';
+
+import { accountActions } from './account-actions';
+import { action } from './action';
 
 import {
   AddAudioInput,
@@ -15,8 +18,6 @@ import {
   LayoutItemsInput,
   ListBoardsInput,
   ListBoardsOutput,
-  LocalBoardError,
-  MAX_INPUT_BYTES,
   PreviewBoardInput,
   PreviewOutput,
   PreviewPhotosInput,
@@ -24,64 +25,11 @@ import {
   ScanInput,
   ScanOutput,
   SetBackgroundInput,
-  type PreviewImage,
 } from './contracts';
 import { Moodboards } from './moodboards';
 
-type ActionValue<A> = { readonly value: A; readonly image?: PreviewImage };
-
-type ActionDefinition<P, S> = {
-  readonly name: string;
-  readonly description: string;
-  readonly input: Schema.Codec<P, unknown>;
-  readonly output: Schema.Codec<S, unknown>;
-  readonly readOnly: boolean;
-  readonly destructive: boolean;
-  readonly handle: (
-    input: P,
-  ) => Effect.Effect<ActionValue<S>, LocalBoardError, Moodboards>;
-};
-
-// Both transports use these contracts and handlers. Binary previews stay outside JSON.
-const action = <P, S>(definition: ActionDefinition<P, S>) => ({
-  ...definition,
-  execute: Effect.fn(`MoodboardAction.${definition.name}`)(function* (
-    payload: Schema.Json,
-  ) {
-    if (
-      new TextEncoder().encode(JSON.stringify(payload)).length > MAX_INPUT_BYTES
-    ) {
-      return yield* new LocalBoardError({
-        code: 'Limit',
-        message: 'Action JSON exceeds 256 KiB.',
-      });
-    }
-
-    const input = yield* Schema.decodeUnknownEffect(definition.input)(payload, {
-      onExcessProperty: 'error',
-    }).pipe(
-      Effect.mapError(
-        (error) =>
-          new LocalBoardError({ code: 'InvalidInput', message: error.message }),
-      ),
-    );
-
-    const result = yield* definition.handle(input);
-
-    // Serialize optional undefined fields before validating structured MCP output.
-    const encoded = yield* Schema.encodeEffect(
-      Schema.fromJsonString(definition.output),
-    )(result.value).pipe(Effect.orDie);
-
-    const value = yield* Schema.decodeUnknownEffect(
-      Schema.fromJsonString(Schema.JsonObject),
-    )(encoded).pipe(Effect.orDie);
-
-    return { value, image: result.image };
-  }),
-});
-
 export const actions = [
+  ...accountActions,
   action({
     name: 'scan_assets',
     description:

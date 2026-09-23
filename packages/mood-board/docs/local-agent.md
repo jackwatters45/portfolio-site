@@ -2,7 +2,7 @@
 
 Use the CLI or stdio MCP server to create, inspect, edit, arrange, import, preview, and export boards. Both interfaces call the same Schema-validated Effect actions.
 
-All existing card types and board backgrounds are supported. The calling agent chooses content and composition. These tools do not call a model, access an account, upload media, or publish a board.
+All existing card types and board backgrounds are supported. The calling agent chooses content and composition. Local actions stay offline. Optional [account actions](account-agent.md) connect through browser approval, save local revisions privately, and edit account boards. No action calls a model or changes publication settings.
 
 ## Install and run
 
@@ -26,7 +26,7 @@ bun packages/mood-board/src/local/main.ts create_board \
   --input '{"title":"Coastal textures","background":"#f5f3ef","output":"coast-01.moodboard"}'
 ```
 
-From `packages/mood-board`, `bun run local` invokes the same entry point. No application server or Cloudflare credentials are needed.
+From `packages/mood-board`, `bun run local` invokes the same entry point. Local actions need no application server or Cloudflare credentials. Account actions need a running account server, not deployment credentials.
 
 ## MCP configuration
 
@@ -54,7 +54,7 @@ The server uses stdio, not HTTP. Stdout carries only MCP messages. Logs go to st
 
 Previews return JPEG image content and small JSON results. They do not repeat image bytes as textual JSON. The CLI writes the same JPEG and prints its path and dimensions. A CLI agent must open that file with its image-viewing tool.
 
-The server has no network operations. However, your MCP client can send returned images and board content to its model provider. Use a local client/model if this content must remain on-device.
+This configuration enables no account access. Follow [Account access](account-agent.md) to add an approved server origin and private session directory. Local actions never use the network. Your MCP client can send returned images and board content to its model provider. Use a local client/model if this content must remain on-device.
 
 ## Saved revisions
 
@@ -360,9 +360,9 @@ New and imported image assets become static WebP in sRGB without embedded metada
 
 The process resolves approved folders at startup. Reads validate relative paths and canonical paths. Traversal, symlink components, hard-linked files, and special files are rejected. Native opens use `O_NOFOLLOW`; identity, size, and changes are checked. Content hashes pin both source selections and board revisions.
 
-Use directories you control. Do not let another process change files, directories, or mount points during an action. Separate CLI/server processes do not share a lock. These checks are not an operating-system sandbox against hostile local changes. A deletion hash check is not an atomic transaction with an external writer.
+Use directories you control. Do not let another process change files, directories, or mount points during an action. Separate CLI/server processes do not share a local archive lock. These checks are not an operating-system sandbox against hostile local changes. A deletion hash check is not an atomic transaction with an external writer.
 
-All filesystem policy lives in a shared service, below CLI and MCP. No arbitrary filesystem, shell, code-execution, or network tool is exposed. Windows is not supported by this adapter.
+Local filesystem policy lives in a shared service, below CLI and MCP. Account credentials use a separate private directory. No arbitrary filesystem, shell, code-execution, or network tool is exposed. Windows is not supported by this adapter.
 
 ## Open a board in the app
 
@@ -375,12 +375,13 @@ The existing importer checks paths, references, counts, sizes, MIME/signatures, 
 
 The guest `/demo` can restore image assets without sign-in, but not managed audio or image backgrounds. Its 32 MiB document limit applies after images become data URLs. Signed-in import uploads media through normal authenticated application services. This is a separate user action, not an MCP operation.
 
-Remote images and embedded providers can make network requests when the app displays an imported board. Local preview never makes those requests. These tools do not edit a live browser board or remote account.
+Remote images and embedded providers can make network requests when the app displays an imported board. Local preview never makes those requests. Local actions do not edit a live browser board or account. Use the separate account actions for explicit account access.
 
 ## Code boundaries
 
 - `src/local/contracts.ts`: action schemas, limits, and expected failures.
-- `src/local/actions.ts`: the shared CLI/MCP action registry.
+- `src/local/action.ts`, `actions.ts`: shared CLI/MCP validation and action registry.
+- `src/local/account-*.ts`: optional browser-approved account access and transfers.
 - `src/local/moodboards.ts`: board operations and revision creation.
 - `src/local/local-files.ts`: approved paths, bounded reads, writes, and authorized deletion.
 - `src/local/local-media.ts`: source references and image/audio preparation.
