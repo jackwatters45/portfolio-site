@@ -18,17 +18,27 @@ const productionAuthSecret = Schema.Redacted(Schema.String).check(
 export const moodBoard = Effect.gen(function* () {
   const stage = yield* Alchemy.Stage;
   const { dev: isAlchemyDev } = yield* Alchemy.AlchemyContext;
+  const isProduction = stage === 'prod';
   const domain = 'moodboard.jackwatters.dev';
   const origin = isAlchemyDev ? 'http://localhost:8787' : `https://${domain}`;
 
+  // Keep the pre-upgrade production resources, including their existing data.
   const catalog = yield* Cloudflare.D1.Database('mood-board-catalog', {
+    name: isProduction ? 'mood-board-catalog' : undefined,
     migrations: 'packages/mood-board/src/cloudflare/d1-migrations',
-  });
+  }).pipe(
+    Alchemy.AdoptPolicy.adopt(isProduction),
+    Alchemy.RemovalPolicy.retain(isProduction),
+  );
 
   const media = yield* Cloudflare.R2.Bucket('mood-board-media', {
+    name: isProduction ? 'mood-board-media' : undefined,
     domains: [],
     cors: [],
-  });
+  }).pipe(
+    Alchemy.AdoptPolicy.adopt(isProduction),
+    Alchemy.RemovalPolicy.retain(isProduction),
+  );
 
   const authRateLimit = Cloudflare.RateLimit('mood-board-auth-rate-limit', {
     namespaceId: 1002,
@@ -41,6 +51,7 @@ export const moodBoard = Effect.gen(function* () {
   );
 
   return yield* Cloudflare.Website.Vite('mood-board', {
+    name: isProduction ? 'mood-board' : undefined,
     rootDir: 'packages/mood-board',
     main: 'src/cloudflare/worker.ts',
     compatibility: {
@@ -100,7 +111,7 @@ export const moodBoard = Effect.gen(function* () {
     },
     crons: ['17 3 * * *'],
     dev: { host: '127.0.0.1', port: 8787, strictPort: true },
-    domain: stage === 'prod' ? domain : undefined,
+    domain: isProduction ? domain : undefined,
     workersDev: { enabled: false, previewsEnabled: false },
     memo: {
       include: [
@@ -115,5 +126,8 @@ export const moodBoard = Effect.gen(function* () {
       ],
       lockfile: true,
     },
-  });
+  }).pipe(
+    Alchemy.AdoptPolicy.adopt(isProduction),
+    Alchemy.RemovalPolicy.retain(isProduction),
+  );
 });
