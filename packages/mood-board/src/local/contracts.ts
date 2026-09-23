@@ -201,7 +201,9 @@ export const BoardOutput = Schema.Struct({
   media: Schema.Array(MediaInfoSchema),
 });
 
-export const ListBoardsInput = Schema.Struct({});
+export const NoArgumentsInput = Schema.Record(Schema.String, Schema.Never);
+
+export const ListBoardsInput = NoArgumentsInput;
 
 export const ListBoardsOutput = Schema.Struct({
   files: Schema.Array(ArchiveName),

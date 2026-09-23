@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 import { BunRuntime, BunServices } from '@effect/platform-bun';
-import { Console, Effect, Layer, Logger, Schema } from 'effect';
+import { Cause, Console, Effect, Layer, Logger, Schema } from 'effect';
 import { Command, Flag } from 'effect/unstable/cli';
 import { FetchHttpClient } from 'effect/unstable/http';
 
@@ -32,6 +32,7 @@ const policyFlags = {
     ),
   ),
   allowAccountWrite: Flag.Boolean('allow-account-write').pipe(
+    Flag.withDefault(false),
     Flag.withDescription(
       'Allow explicitly confirmed account board writes. Does not enable public publishing.',
     ),
@@ -47,11 +48,13 @@ const policyFlags = {
     ),
   ),
   allowOverwrite: Flag.Boolean('allow-overwrite').pipe(
+    Flag.withDefault(false),
     Flag.withDescription(
       'Allow overwrite:true requests to replace export and preview files. Edits always create new files.',
     ),
   ),
   allowDelete: Flag.Boolean('allow-delete').pipe(
+    Flag.withDefault(false),
     Flag.withDescription(
       'Allow confirmed deletion of output archives. Disabled by default.',
     ),
@@ -139,6 +142,9 @@ const cli = Command.make('moodboard').pipe(
 
 Command.run(cli, { version: '0.1.0' }).pipe(
   Effect.provide(BunServices.layer),
+  Effect.tapCause((cause) =>
+    Cause.hasInterruptsOnly(cause) ? Effect.void : Effect.logError(cause),
+  ),
   Effect.provideService(Logger.LogToStderr, true),
-  BunRuntime.runMain,
+  BunRuntime.runMain({ disableErrorReporting: true }),
 );
