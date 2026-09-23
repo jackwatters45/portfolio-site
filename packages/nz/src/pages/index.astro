@@ -5,6 +5,7 @@ import { Agentation } from 'agentation';
 import Comments from '@personal-sites/comments';
 import PlanSection from '../components/plan-section.astro';
 import DisclosureState from '../components/disclosure-state.astro';
+import ActivityCalculator from '../components/activity-calculator';
 import '@personal-sites/comments/styles.css';
 ---
 
@@ -52,6 +53,7 @@ import '@personal-sites/comments/styles.css';
         <a href="#major-activities">Activities</a>
         <a href="#schedule">The week</a>
         <a href="#to-confirm">Still to plan</a>
+        <a href="#activity-calculator">Cost calculator</a>
       </nav>
 
       <main id="main">
@@ -334,16 +336,6 @@ import '@personal-sites/comments/styles.css';
           </ul>
         </PlanSection>
 
-        {/*
-        <PlanSection number="08" headingId="budget" title="Activity Budget">
-          <div class="budget-summary">
-            <p class="budget-amount"><strong>A$1,000</strong><span>per person · approximate maximum</span></p>
-            <p>For vehicle rental, adventure activities, Onsen, and wine. A limit, not a target.</p>
-          </div>
-          <p class="note">Food, drinks, groceries, and daily spending are separate. Operator prices above are in NZ dollars; this budget is in Australian dollars.</p>
-        </PlanSection>
-        */}
-
         <PlanSection number="08" headingId="schedule" title="Loose Weekly Plan">
           <p>Tentative — dates depend on weather and bookings.</p>
 
@@ -425,6 +417,11 @@ import '@personal-sites/comments/styles.css';
             <li data-comment-anchor="suggestion-gardens"><strong>Visit Queenstown Gardens.</strong> An easy walk from town through lakeside gardens, with mountain views and space for a picnic. A good option for a quiet afternoon.</li>
             <li data-comment-anchor="suggestion-milford"><strong>Day trip to Milford Sound.</strong> A fiord cruise beneath steep cliffs and waterfalls. It is a long return journey from Queenstown, so allow a full day and consider a coach-and-cruise trip.</li>
           </ul>
+        </PlanSection>
+        <PlanSection number="11" headingId="activity-calculator" title="Activity Cost Calculator">
+          <ActivityCalculator client:only="react">
+            <p slot="fallback" class="note">The calculator needs JavaScript. Activity prices are listed above.</p>
+          </ActivityCalculator>
         </PlanSection>
       </main>
 
