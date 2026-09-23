@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import {
   CommentRequestError,
   Mutation,
+  SetLike,
   type Author,
   type Target,
 } from './protocol';
@@ -89,6 +90,34 @@ const rooms = Atom.family((endpoint: string) => {
         }),
       ),
     ),
+    like: runtime.fn(
+      (input: { threadId: string; messageId: string; liked: boolean }, get) =>
+        Effect.gen(function* () {
+          const preferences = get(preferencesAtom);
+          const requestId = yield* Crypto.Crypto.use(
+            (crypto) => crypto.randomUUIDv4,
+          );
+          return yield* RoomClient.use((room) =>
+            room.submit(
+              new SetLike({
+                ...input,
+                type: 'like',
+                requestId,
+                author: {
+                  id: preferences.id,
+                  name: preferences.name,
+                  color: preferences.color,
+                },
+              }),
+            ),
+          );
+        }).pipe(
+          Effect.catchTag(
+            'PlatformError',
+            (error) => new CommentRequestError({ message: error.message }),
+          ),
+        ),
+    ),
     presence: runtime.fn(
       ({ patch, author }: { patch: Partial<Presence>; author: Author }) =>
         RoomClient.use((room) => room.presence(patch, author)),
@@ -115,11 +144,15 @@ export function useRoom(endpoint: string, active: boolean, author: Author) {
   const state = useAtomValue(atoms.state);
   const submission = useAtomValue(atoms.submit);
   const submit = useAtomSet(atoms.submit, { mode: 'promise' });
+  const like = useAtomSet(atoms.like, { mode: 'promise' });
+  const liking = useAtomValue(atoms.like);
   const presence = useAtomSet(atoms.presence);
   const typing = useAtomSet(atoms.typing);
   return {
     ...state,
     submit,
+    like,
+    liking: liking.waiting,
     sending: submission.waiting,
     updatePresence: (patch: Partial<Presence>) => {
       if ('typing' in patch) typing({ typing: patch.typing ?? null, author });
