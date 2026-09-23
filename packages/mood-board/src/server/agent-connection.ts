@@ -103,7 +103,7 @@ export const handleAgentConnection = Effect.fn('AgentConnection.handle')(
 
     if (request.method === 'GET') {
       return page(
-        `<h1>Connect your agent?</h1><p>Account: <strong>${escapeHtml(account.email)}</strong></p><code>${code.value}</code><p>Approve only if this code appears in your own agent client. This creates a separate signed-in session with full account access, including changes and deletion.</p><p>The agent tools save privately. They do not publish boards. Use disconnect_account to revoke this session.</p><form method="post" action="${AGENT_CONNECT_PATH}?user_code=${code.value}"><button name="decision" value="approve">Approve connection</button><button name="decision" value="deny">Deny</button></form>`,
+        `<h1>Connect your agent?</h1><p>Account: <strong>${escapeHtml(account.email)}</strong></p><code>${code.value}</code><p>Approve only if this code appears in your own agent client. This creates a separate signed-in session with full account access, including changes and deletion.</p><p>New boards start private. Agent tools can also publish boards with your explicit approval. Use disconnect_account to revoke this session.</p><form method="post" action="${AGENT_CONNECT_PATH}?user_code=${code.value}"><button name="decision" value="approve">Approve connection</button><button name="decision" value="deny">Deny</button></form>`,
       );
     }
 

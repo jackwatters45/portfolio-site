@@ -5,6 +5,7 @@ import * as SqlClient from 'effect/unstable/sql/SqlClient';
 
 import {
   BoardIdSchema,
+  BoardRevisionSchema,
   ClientIdSchema,
   DEFAULT_BOARD_ID,
   ItemIdSchema,
@@ -209,7 +210,12 @@ describe('PublishingService', () => {
         bio: '',
       });
       const publicId = yield* publishing.publish(boardId);
-      yield* boards.duplicate(boardId, duplicateId, 'Private copy');
+      yield* boards.duplicate(
+        boardId,
+        duplicateId,
+        'Private copy',
+        BoardRevisionSchema.make(1),
+      );
 
       const profileBefore = yield* publishing.getProfile('studio');
       expect(profileBefore?.boards).toHaveLength(1);
@@ -229,7 +235,7 @@ describe('PublishingService', () => {
         bio: '',
       });
       const publicId = yield* publishing.publish(boardId);
-      yield* boards.delete(boardId);
+      yield* boards.delete(boardId, BoardRevisionSchema.make(1));
 
       expect(yield* publishing.getBoard(publicId)).toBeNull();
       expect((yield* publishing.getProfile('studio'))?.boards).toEqual([]);

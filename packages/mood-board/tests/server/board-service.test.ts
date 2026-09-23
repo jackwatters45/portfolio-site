@@ -4,6 +4,7 @@ import { Deferred, Effect, Fiber, Layer, Option, Schema, Stream } from 'effect';
 
 import {
   BoardIdSchema,
+  BoardRevisionSchema,
   BoardMutationPayloadSchema,
   ClientIdSchema,
   DEFAULT_BOARD_ID,
@@ -182,7 +183,12 @@ describe('BoardService', () => {
         'http://shop.example/chair',
       );
 
-      yield* service.duplicate(boardA, boardB, 'Shopping copy');
+      yield* service.duplicate(
+        boardA,
+        boardB,
+        'Shopping copy',
+        linked.revision,
+      );
       expect((yield* service.get(boardB))?.board.items[0]?.href).toBe(
         'http://shop.example/chair',
       );
@@ -243,7 +249,12 @@ describe('BoardService', () => {
         });
         expect(change.upserts).toEqual(audioItems);
         expect((yield* service.get(boardA))?.board.items).toEqual(audioItems);
-        yield* service.duplicate(boardA, boardB, 'Sound study copy');
+        yield* service.duplicate(
+          boardA,
+          boardB,
+          'Sound study copy',
+          change.revision,
+        );
         expect((yield* service.get(boardB))?.board.items).toEqual(audioItems);
       }).pipe(Effect.provide(TestLayer)),
   );
@@ -303,7 +314,12 @@ describe('BoardService', () => {
       });
       expect(change.upserts).toEqual([websiteItem]);
       expect((yield* service.get(boardA))?.board.items).toEqual([websiteItem]);
-      yield* service.duplicate(boardA, boardB, 'Reading list copy');
+      yield* service.duplicate(
+        boardA,
+        boardB,
+        'Reading list copy',
+        change.revision,
+      );
       expect((yield* service.get(boardB))?.board.items).toEqual([websiteItem]);
 
       const invalid = Schema.decodeUnknownOption(BoardMutationPayloadSchema)({
@@ -326,7 +342,12 @@ describe('BoardService', () => {
         deletes: [],
       });
       expect((yield* service.get(boardA))?.board.items).toEqual([xItem]);
-      yield* service.duplicate(boardA, boardB, 'X references copy');
+      yield* service.duplicate(
+        boardA,
+        boardB,
+        'X references copy',
+        BoardRevisionSchema.make(1),
+      );
       expect((yield* service.get(boardB))?.board.items).toEqual([xItem]);
 
       const normalized = yield* service.commit({
@@ -373,7 +394,12 @@ describe('BoardService', () => {
       });
       expect((yield* service.get(boardA))?.board.background).toBe('#DDE3DC');
 
-      yield* service.duplicate(boardA, boardB, 'Dark field copy');
+      yield* service.duplicate(
+        boardA,
+        boardB,
+        'Dark field copy',
+        BoardRevisionSchema.make(2),
+      );
       expect((yield* service.get(boardB))?.board.background).toBe('#DDE3DC');
 
       const reset = yield* service.commit({
@@ -452,16 +478,20 @@ describe('BoardService', () => {
         boardA,
         boardB,
         'Trip ideas — copy',
+        BoardRevisionSchema.make(1),
       );
-      const retry = yield* service.duplicate(
-        boardA,
-        boardB,
-        'Trip ideas — copy',
-      );
+      const retry = yield* service
+        .duplicate(
+          boardA,
+          boardB,
+          'Trip ideas — copy',
+          BoardRevisionSchema.make(1),
+        )
+        .pipe(Effect.flip);
       const list = yield* service.list();
       const duplicateSnapshot = yield* service.get(boardB);
 
-      expect(duplicate).toEqual(retry);
+      expect(retry.code).toBe('Conflict');
       expect(new Set(list.map((entry) => entry.id))).toEqual(
         new Set([boardA, boardB]),
       );
@@ -691,7 +721,10 @@ describe('BoardService', () => {
         );
         yield* Deferred.await(snapshotSeen);
 
-        const deleted = yield* service.delete(boardA);
+        const deleted = yield* service.delete(
+          boardA,
+          BoardRevisionSchema.make(0),
+        );
         expect(yield* Deferred.await(deletedSeen)).toEqual(deleted);
         expect(yield* service.exists(boardA)).toBe(false);
         expect(yield* service.exists(DEFAULT_BOARD_ID)).toBe(true);
@@ -736,20 +769,23 @@ describe('BoardService', () => {
         deletes: [],
       });
 
-      const deleted = yield* service.delete(boardA);
-      const retry = yield* service.delete(boardA);
+      const deleted = yield* service.delete(
+        boardA,
+        BoardRevisionSchema.make(1),
+      );
+      const retry = yield* service.delete(boardA, BoardRevisionSchema.make(1));
       expect(retry).toEqual(deleted);
       expect(deleted.revision).toBe(2);
 
       const error = yield* service.create(boardA, 'Reused').pipe(Effect.flip);
       expect(error.code).toBe('Conflict');
 
-      const missingDelete = yield* service.delete(boardB);
-      expect(yield* service.delete(boardB)).toEqual(missingDelete);
-      const missingReuse = yield* service
-        .create(boardB, 'Reused missing id')
+      const missingDelete = yield* service
+        .delete(boardB, BoardRevisionSchema.make(0))
         .pipe(Effect.flip);
-      expect(missingReuse.code).toBe('Conflict');
+      expect(missingDelete.code).toBe('Conflict');
+      const newBoard = yield* service.create(boardB, 'Previously missing id');
+      expect(newBoard.id).toBe(boardB);
     }).pipe(Effect.provide(TestLayer)),
   );
 
@@ -757,7 +793,9 @@ describe('BoardService', () => {
     Effect.gen(function* () {
       const service = yield* BoardService;
       yield* service.create(DEFAULT_BOARD_ID, 'Home');
-      const error = yield* service.delete(DEFAULT_BOARD_ID).pipe(Effect.flip);
+      const error = yield* service
+        .delete(DEFAULT_BOARD_ID, BoardRevisionSchema.make(0))
+        .pipe(Effect.flip);
 
       expect(error.code).toBe('Invalid');
       expect(yield* service.exists(DEFAULT_BOARD_ID)).toBe(true);

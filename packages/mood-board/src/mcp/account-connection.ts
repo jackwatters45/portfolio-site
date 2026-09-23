@@ -1,4 +1,5 @@
 import {
+  Cause,
   Clock,
   Context,
   Effect,
@@ -16,6 +17,7 @@ import {
   FetchHttpClient,
   Headers,
   HttpClient,
+  HttpClientError,
   HttpClientRequest,
   type HttpClientResponse,
 } from 'effect/unstable/http';
@@ -31,6 +33,11 @@ import {
   type AccountConfig,
   type AccountReference,
 } from './account-contracts';
+
+import {
+  accountRequestError,
+  accountTransportError,
+} from './account-diagnostics';
 
 const Secret = Schema.RedactedFromValue(
   Schema.String.check(Schema.isLengthBetween(1, 4096)),
@@ -78,7 +85,7 @@ const DeviceFailure = Schema.Struct({ error: Schema.String });
 const problem = (code: typeof AccountError.fields.code.Type, message: string) =>
   new AccountError({ code, message });
 
-// Do not expose response bodies or HTTP errors: authentication responses contain secrets.
+// Expose only safe diagnostics: authentication responses contain secrets.
 const readJson = Effect.fn('AccountConnection.readJson')(
   function* <A, I>(
     response: HttpClientResponse.HttpClientResponse,
@@ -95,8 +102,15 @@ const readJson = Effect.fn('AccountConnection.readJson')(
           : Effect.succeed(chunk);
       }),
       Stream.runCollect,
-      Effect.mapError(() =>
-        problem('Remote', 'Cannot read the account response.'),
+      Effect.mapError((error) =>
+        accountRequestError(
+          Predicate.isTagged(error, 'AccountError')
+            ? 'ResponseTooLarge'
+            : 'ResponseRead',
+          'Cannot read the account response.',
+          response.request,
+          response,
+        ),
       ),
     );
 
@@ -112,14 +126,29 @@ const readJson = Effect.fn('AccountConnection.readJson')(
       new TextDecoder().decode(bytes),
     ).pipe(
       Effect.mapError(() =>
-        problem('Remote', 'The account server returned an invalid response.'),
+        accountRequestError(
+          'InvalidResponse',
+          'The account server returned an invalid response.',
+          response.request,
+          response,
+        ),
       ),
     );
   },
-  Effect.timeout('30 seconds'),
-  Effect.mapError(() =>
-    problem('Remote', 'Cannot read a valid account response.'),
-  ),
+  (effect, response) =>
+    effect.pipe(
+      Effect.timeout('30 seconds'),
+      Effect.mapError((error) =>
+        Cause.isTimeoutError(error)
+          ? accountRequestError(
+              'ResponseTimeout',
+              'Account response timed out after 30 seconds.',
+              response.request,
+              response,
+            )
+          : error,
+      ),
+    ),
 );
 
 const make = (config: AccountConfig) =>
@@ -352,12 +381,7 @@ const make = (config: AccountConfig) =>
         .execute(input)
         .pipe(
           Effect.timeout('30 seconds'),
-          Effect.mapError(() =>
-            problem(
-              'Remote',
-              'Account request failed. Check the configured server. No automatic retry was made.',
-            ),
-          ),
+          Effect.mapError((error) => accountTransportError(error, input)),
         );
 
     const post = (endpoint: string, payload: Schema.JsonObject) =>
@@ -372,11 +396,36 @@ const make = (config: AccountConfig) =>
 
     const authenticatedHttp = (token: Redacted.Redacted<string>) =>
       http.pipe(
-        HttpClient.mapRequest((input) =>
-          input.pipe(
-            HttpClientRequest.bearerToken(token),
-            HttpClientRequest.setHeader('origin', origin),
-          ),
+        HttpClient.mapRequestEffect((input) =>
+          Effect.gen(function* () {
+            const url = yield* Effect.try({
+              try: () => new URL(input.url),
+              catch: () =>
+                new HttpClientError.HttpClientError({
+                  reason: new HttpClientError.InvalidUrlError({
+                    request: input,
+                  }),
+                }),
+            });
+
+            if (
+              url.origin !== origin ||
+              url.username !== '' ||
+              url.password !== ''
+            )
+              return yield* new HttpClientError.HttpClientError({
+                reason: new HttpClientError.InvalidUrlError({
+                  request: input,
+                  description:
+                    'Authenticated requests must use the configured origin.',
+                }),
+              });
+
+            return input.pipe(
+              HttpClientRequest.bearerToken(token),
+              HttpClientRequest.setHeader('origin', origin),
+            );
+          }),
         ),
       );
 
@@ -389,9 +438,16 @@ const make = (config: AccountConfig) =>
         );
 
         if (response.status !== 200)
-          return yield* problem(
-            'Authentication',
-            'Account access has expired or was revoked. Connect again.',
+          return yield* accountRequestError(
+            'HttpStatus',
+            response.status === 401 || response.status === 403
+              ? 'Account access was rejected. Connect again if the session expired or was revoked.'
+              : 'Account session check returned an unexpected HTTP status.',
+            response.request,
+            response,
+            response.status === 401 || response.status === 403
+              ? 'Authentication'
+              : 'Remote',
           );
 
         const session = yield* readJson(response, SessionResponse);
@@ -473,9 +529,11 @@ const make = (config: AccountConfig) =>
             );
 
             if (response.status !== 200 && response.status !== 401)
-              return yield* problem(
-                'Remote',
+              return yield* accountRequestError(
+                'HttpStatus',
                 'Cannot revoke the expired stored session. Retry before replacing it.',
+                response.request,
+                response,
               );
             yield* fs
               .remove(filename)
@@ -499,9 +557,11 @@ const make = (config: AccountConfig) =>
             });
 
             if (response.status !== 200)
-              return yield* problem(
-                'Remote',
+              return yield* accountRequestError(
+                'HttpStatus',
                 'Cannot start account approval. The server must include device authentication. Wait if rate limited.',
+                response.request,
+                response,
               );
             const code = yield* readJson(response, DeviceResponse);
             pending = Pending.make({
@@ -611,9 +671,12 @@ const make = (config: AccountConfig) =>
                     ),
                   );
 
-                return yield* problem(
-                  'Authentication',
+                return yield* accountRequestError(
+                  'HttpStatus',
                   'Connection denied or expired. Start a new connection if needed.',
+                  response.request,
+                  response,
+                  'Authentication',
                 );
               }
 
@@ -681,9 +744,11 @@ const make = (config: AccountConfig) =>
             );
 
             if (response.status !== 200 && response.status !== 401)
-              return yield* problem(
-                'Remote',
+              return yield* accountRequestError(
+                'HttpStatus',
                 'Could not revoke the session. The local credential was retained so you can retry.',
+                response.request,
+                response,
               );
             yield* fs
               .remove(filename)
@@ -714,7 +779,7 @@ const make = (config: AccountConfig) =>
 export class AccountConnection extends Context.Service<
   AccountConnection,
   Effect.Success<ReturnType<typeof make>>
->()('moodboard/local/AccountConnection') {
+>()('moodboard/mcp/AccountConnection') {
   static readonly layer = (config: AccountConfig) =>
     Layer.effect(this, make(config));
 }

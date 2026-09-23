@@ -103,7 +103,7 @@ Upserts replace complete items. Copy all fields you want to preserve. Use only e
 
 If the reply is lost, retry the identical mutation ID and payload. The existing server deduplication prevents a second application. Otherwise, read the board again before changing the mutation.
 
-Account edits change live content. Existing public views can reflect those changes. These tools never change publication settings and expose no publishing operation.
+Account edits change live content. Existing public views can reflect those changes. Editing does not change publication settings. Separate publish and unpublish tools require explicit approval, `confirm:true`, and current board, profile, and publication versions.
 
 Account writes run one at a time per MCP process. Local operations and account reads can run separately. Revision checks protect account edits across processes.
 
@@ -123,10 +123,11 @@ Your MCP client can send returned images and board content to its model provider
 
 ## Implementation
 
-- `src/local/account-contracts.ts`: account action contracts and safe errors.
-- `src/local/account-connection.ts`: device flow, private credentials, pinned HTTP origin, and revocation.
-- `src/local/account-boards.ts`: authenticated RPC and local-to-account media transfer.
-- `src/local/account-actions.ts`: shared CLI/MCP account handlers.
+- `src/mcp/account-contracts.ts`: account action contracts and safe errors.
+- `src/mcp/account-connection.ts`: device flow, private credentials, pinned HTTP origin, and revocation.
+- `src/mcp/account-diagnostics.ts`: safe request diagnostics without credentials or response bodies.
+- `src/mcp/account-boards.ts`: authenticated RPC and local-to-account media transfer.
+- `src/mcp/account-actions.ts`: shared CLI/MCP account handlers.
 - `src/server/agent-connection.ts`: browser consent through the existing login.
 - `src/server/auth.ts`: Better Auth device authorization and bearer-session plugins.
 - `src/server/board-repo.ts`: atomic create-only and expected-revision checks.

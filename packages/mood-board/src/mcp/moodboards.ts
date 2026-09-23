@@ -172,7 +172,7 @@ const sizedLayout = (
 };
 
 export class Moodboards extends Context.Service<Moodboards, MoodboardActions>()(
-  'moodboard/local/Moodboards',
+  'moodboard/mcp/Moodboards',
 ) {
   static readonly layer = Layer.effect(
     Moodboards,

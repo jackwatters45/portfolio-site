@@ -1,9 +1,27 @@
-import { Effect } from 'effect';
+import { Effect, Schema } from 'effect';
+import {
+  parseAudioSource,
+  MAX_AUDIO_SOURCE_CHARACTERS,
+} from '../lib/audio-source';
+import {
+  parseXPostInput,
+  MAX_X_POST_INPUT_CHARACTERS,
+  XPostUrlSchema,
+  XPostDisplaySchema,
+} from '../lib/x-post';
+import { boardCapabilities, BoardCapabilitySchema } from './capabilities';
 
 import { accountActions } from './account-actions';
+import { accountArchiveActions } from './account-archive-actions';
+import { accountEditingActions } from './account-editing-actions';
+import { accountLinkActions } from './account-link-actions';
+import { accountMediaActions } from './account-media-actions';
+import { accountOwnerActions } from './account-owner-actions';
 import { action } from './action';
 
 import {
+  LocalBoardError,
+  NoArgumentsInput,
   AddAudioInput,
   AddPhotosInput,
   BoardOutput,
@@ -29,7 +47,81 @@ import {
 import { Moodboards } from './moodboards';
 
 export const actions = [
+  action({
+    name: 'get_moodboard_capabilities',
+    description:
+      'Read supported board-content operations and explicit limits for browser selection, camera, playback, presentation, and undo. No network or filesystem access.',
+    input: NoArgumentsInput,
+    output: Schema.Struct({
+      capabilities: Schema.Array(BoardCapabilitySchema),
+    }),
+    readOnly: true,
+    destructive: false,
+    handle: () =>
+      Effect.succeed({ value: { capabilities: boardCapabilities } }),
+  }),
+  action({
+    name: 'parse_audio_source',
+    description:
+      'Normalize a hosted audio URL, Spotify source, YouTube URL, or supported embed code using the same parser as the UI. Returns the canonical kind and source for an item upsert. Does not fetch media or change a board.',
+    input: Schema.Struct({
+      source: Schema.String.check(
+        Schema.isMaxLength(MAX_AUDIO_SOURCE_CHARACTERS),
+      ),
+    }),
+    output: Schema.Struct({
+      kind: Schema.Literals(['audio', 'spotify', 'youtube']),
+      src: Schema.String,
+    }),
+    readOnly: true,
+    destructive: false,
+    handle: (input) =>
+      Effect.gen(function* () {
+        const source = parseAudioSource(input.source);
+
+        if (source === null)
+          return yield* new LocalBoardError({
+            code: 'InvalidInput',
+            message: 'Unsupported audio, Spotify, or YouTube source.',
+          });
+
+        return { value: { kind: source.kind, src: source.src } };
+      }),
+  }),
+  action({
+    name: 'parse_x_source',
+    description:
+      'Normalize an X post URL or official embed code with the UI parser. Returns the canonical source and display mode. Never executes embed code. Resolve a snapshot with resolve_account_x_post, then add the card through an edit.',
+    input: Schema.Struct({
+      source: Schema.String.check(
+        Schema.isMaxLength(MAX_X_POST_INPUT_CHARACTERS),
+      ),
+    }),
+    output: Schema.Struct({
+      src: XPostUrlSchema,
+      xDisplay: XPostDisplaySchema,
+    }),
+    readOnly: true,
+    destructive: false,
+    handle: (input) =>
+      Effect.gen(function* () {
+        const source = parseXPostInput(input.source);
+
+        if (source === null)
+          return yield* new LocalBoardError({
+            code: 'InvalidInput',
+            message: 'Unsupported X post URL or embed code.',
+          });
+
+        return { value: { src: source.src, xDisplay: source.display } };
+      }),
+  }),
   ...accountActions,
+  ...accountArchiveActions,
+  ...accountLinkActions,
+  ...accountOwnerActions,
+  ...accountEditingActions,
+  ...accountMediaActions,
   action({
     name: 'scan_assets',
     description:

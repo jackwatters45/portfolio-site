@@ -3,6 +3,12 @@ import { Effect } from 'effect';
 import { AccountBoards } from './account-boards';
 import { AccountConnection } from './account-connection';
 import {
+  AccountCreateInput,
+  AccountCreateOutput,
+  AccountDuplicateInput,
+  AccountDeleteInput,
+  AccountDeleteOutput,
+  AccountRenameInput,
   AccountBoardInput,
   AccountBoardOutput,
   AccountCompleteInput,
@@ -21,6 +27,62 @@ import { action } from './action';
 import { NoArgumentsInput } from './contracts';
 
 export const accountActions = [
+  action({
+    name: 'create_account_board',
+    description:
+      'Create a new private account board with a fresh UUID. Requires exact account, startup write permission, and confirm:true. Never publishes. Occupied or deleted IDs are rejected; inspect the board after an uncertain response. No automatic retries.',
+    input: AccountCreateInput,
+    output: AccountCreateOutput,
+    readOnly: false,
+    destructive: false,
+    openWorld: true,
+    handle: (input) =>
+      Effect.gen(function* () {
+        return { value: yield* (yield* AccountBoards).create(input) };
+      }),
+  }),
+  action({
+    name: 'rename_account_board',
+    description:
+      'Rename an account board at expectedRevision. Requires exact account, startup write permission, confirm:true, and mutationId. For an uncertain response, read first or explicitly retry the identical mutationId and payload. Public views may reflect changes.',
+    input: AccountRenameInput,
+    output: AccountEditOutput,
+    readOnly: false,
+    destructive: true,
+    openWorld: true,
+    handle: (input) =>
+      Effect.gen(function* () {
+        return { value: yield* (yield* AccountBoards).rename(input) };
+      }),
+  }),
+  action({
+    name: 'duplicate_account_board',
+    description:
+      'Copy sourceBoardId at expectedRevision into a fresh private boardId. Requires exact account, startup write permission, and confirm:true. Rejects occupied destinations and stale revisions. Never publishes; inspect destination after an uncertain response.',
+    input: AccountDuplicateInput,
+    output: AccountCreateOutput,
+    readOnly: false,
+    destructive: false,
+    openWorld: true,
+    handle: (input) =>
+      Effect.gen(function* () {
+        return { value: yield* (yield* AccountBoards).duplicate(input) };
+      }),
+  }),
+  action({
+    name: 'delete_account_board',
+    description:
+      'Delete an account board at expectedRevision. Requires exact account, startup write permission, and confirm:true. Protects default and last boards. No automatic retry; an explicit retry with the same revision returns the deletion receipt.',
+    input: AccountDeleteInput,
+    output: AccountDeleteOutput,
+    readOnly: false,
+    destructive: true,
+    openWorld: true,
+    handle: (input) =>
+      Effect.gen(function* () {
+        return { value: yield* (yield* AccountBoards).delete(input) };
+      }),
+  }),
   action({
     name: 'connect_account',
     description:

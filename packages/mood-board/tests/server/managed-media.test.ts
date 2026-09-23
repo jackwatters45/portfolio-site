@@ -6,6 +6,7 @@ import * as SqlClient from 'effect/unstable/sql/SqlClient';
 
 import {
   BoardIdSchema,
+  BoardRevisionSchema,
   ClientIdSchema,
   DEFAULT_BOARD_ID,
   ItemIdSchema,
@@ -154,7 +155,12 @@ describe('managed media persistence', () => {
         const copyId = BoardIdSchema.make(
           'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         );
-        yield* boards.duplicate(DEFAULT_BOARD_ID, copyId, 'Media copy');
+        yield* boards.duplicate(
+          DEFAULT_BOARD_ID,
+          copyId,
+          'Media copy',
+          BoardRevisionSchema.make(1),
+        );
         expect((yield* boards.get(copyId))?.board).toMatchObject({
           backgroundMediaId: uploaded.mediaId,
           items: [{ mediaId: uploaded.mediaId }],
@@ -191,7 +197,7 @@ describe('managed media persistence', () => {
         expect(
           yield* media.cleanupUnreferenced(mediaTimestamp(Date.now() + 1)),
         ).toBe(0);
-        yield* boards.delete(copyId);
+        yield* boards.delete(copyId, BoardRevisionSchema.make(1));
         expect(
           yield* media.cleanupUnreferenced(
             mediaTimestamp(Date.now() - 30 * 24 * 60 * 60 * 1_000),

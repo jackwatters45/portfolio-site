@@ -74,7 +74,7 @@ const audioMime = (path: string, bytes: Uint8Array) => {
 };
 
 export class LocalMedia extends Context.Service<LocalMedia, MediaPreparation>()(
-  'moodboard/local/LocalMedia',
+  'moodboard/mcp/LocalMedia',
 ) {
   static readonly layer = Layer.effect(
     LocalMedia,

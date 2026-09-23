@@ -4,9 +4,14 @@ import { Cause, Console, Effect, Layer, Logger, Schema } from 'effect';
 import { Command, Flag } from 'effect/unstable/cli';
 import { FetchHttpClient } from 'effect/unstable/http';
 
+import { AccountArchive } from './account-archive';
 import { AccountBoards } from './account-boards';
+import { AccountClient } from './account-client';
 import { AccountConnection } from './account-connection';
 import type { AccountConfig } from './account-contracts';
+import { AccountEditing } from './account-editing';
+import { AccountMedia } from './account-media';
+import { AccountOwner } from './account-owner';
 
 import { actions } from './actions';
 import { BoardRenderer } from './board-renderer';
@@ -34,7 +39,7 @@ const policyFlags = {
   allowAccountWrite: Flag.Boolean('allow-account-write').pipe(
     Flag.withDefault(false),
     Flag.withDescription(
-      'Allow explicitly confirmed account board writes. Does not enable public publishing.',
+      'Allow account writes, including publication and deletion, only with explicit per-call confirmation.',
     ),
   ),
   assetRoot: Flag.String('root').pipe(
@@ -76,9 +81,23 @@ const localLayer = (config: AccountConfig) => {
     Layer.provide(FetchHttpClient.layer),
   );
 
+  const client = AccountClient.layer.pipe(Layer.provide(account));
+
+  const accountResources = Layer.mergeAll(
+    resources,
+    capabilities,
+    account,
+    client,
+  );
+
   return Layer.mergeAll(
     Moodboards.layer.pipe(Layer.provide(Layer.merge(resources, capabilities))),
-    AccountBoards.layer.pipe(Layer.provide(Layer.merge(resources, account))),
+    AccountBoards.layer.pipe(Layer.provide(accountResources)),
+    AccountArchive.layer.pipe(Layer.provide(accountResources)),
+    AccountEditing.layer.pipe(Layer.provide(client)),
+    AccountMedia.layer.pipe(Layer.provide(accountResources)),
+    AccountOwner.layer.pipe(Layer.provide(accountResources)),
+    client,
     account,
   );
 };
@@ -135,7 +154,7 @@ const serve = Command.make('mcp', policyFlags, (config) =>
 
 const cli = Command.make('moodboard').pipe(
   Command.withDescription(
-    'Create and edit local moodboards, with optional browser-approved account access. No model or public publishing.',
+    'Author local archives and signed-in account boards. Account writes, deletion, and publication require explicit confirmation.',
   ),
   Command.withSubcommands([...commands, serve]),
 );

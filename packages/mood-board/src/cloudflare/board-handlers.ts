@@ -125,9 +125,10 @@ export const CloudflareBoardHandlers = BoardRpcs.toLayer(
       BoardExists: ({ boardId }) => boards.exists(boardId),
       CreateBoard: ({ boardId, title, requireNew }) =>
         createBoard(boardId, title, requireNew),
-      DuplicateBoard: ({ sourceBoardId, boardId, title }) =>
-        duplicateBoard(sourceBoardId, boardId, title),
-      DeleteBoard: ({ boardId }) => deleteBoard(boardId),
+      DuplicateBoard: ({ sourceBoardId, boardId, title, expectedRevision }) =>
+        duplicateBoard(sourceBoardId, boardId, title, expectedRevision),
+      DeleteBoard: ({ boardId, expectedRevision }) =>
+        deleteBoard(boardId, expectedRevision),
       SubscribeBoard: ({ boardId }) =>
         boards
           .subscribe(boardId)

@@ -16,6 +16,7 @@ import { AccountIdSchema, type AccountId } from '../lib/account';
 import { AGENT_CONNECT_PATH } from '../lib/agent-auth';
 import { BoardRpcs } from '../lib/board-rpc';
 import { MediaIdSchema, MediaQuotaLimitsSchema } from '../lib/media';
+import { OWNER_ACCOUNT_HEADER } from '../lib/owner-api';
 import {
   ProfileHandleSchema,
   PublicBoardSchema,
@@ -38,6 +39,8 @@ import {
   DEFAULT_MEDIA_QUOTA_LIMITS,
   MediaService,
 } from '../server/media-service';
+import { OwnerHandlers } from '../server/owner-handlers';
+import { OwnerService } from '../server/owner-service';
 import { PublicHandlers } from '../server/public-handlers';
 import { publicBoardReferencesMedia } from '../server/public-media';
 import { PublishingService } from '../server/publishing-service';
@@ -55,6 +58,7 @@ import {
 import { CloudflareBoardHandlers } from './board-handlers';
 import { CatalogProjection } from './catalog-projection';
 import { DurableDatabase } from './database';
+import { publicationRoutingLayer } from './publication-routing';
 import { R2MediaObjectStore } from './r2-media-object-store';
 import { CloudflareWebsitePreviewFetcher } from './website-preview-fetcher';
 import { WorkspaceBindings } from './workspace-bindings';
@@ -193,7 +197,19 @@ export class WorkspaceDurableObject {
       Layer.provide(database),
     );
 
-    const server = Layer.mergeAll(rpcServer, publicServer, mediaServer);
+    const ownerServer = OwnerHandlers.pipe(
+      Layer.provide(OwnerService.layer),
+      Layer.provide(publicationRoutingLayer(env.CATALOG)),
+      Layer.provide(database),
+    );
+
+    const server = Layer.mergeAll(
+      rpcServer,
+      publicServer,
+      mediaServer,
+      ownerServer,
+    );
+
     const web = HttpRouter.toWebHandler(server, { disableLogger: true });
     this.#webHandler = web.handler;
   }
@@ -291,6 +307,7 @@ const forwardPrivateRequest = async (
 ): Promise<Response> => {
   const headers = new Headers(request.headers);
   headers.delete(MEDIA_CLIENT_ID_HEADER);
+  headers.set(OWNER_ACCOUNT_HEADER, accountId);
 
   if (pathname === '/api/owner/media' && request.method === 'POST') {
     headers.set(

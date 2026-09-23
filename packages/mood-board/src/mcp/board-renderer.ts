@@ -123,7 +123,7 @@ const cardSvg = (item: BoardItem, width: number, height: number) => {
 };
 
 export class BoardRenderer extends Context.Service<BoardRenderer, Renderer>()(
-  'moodboard/local/BoardRenderer',
+  'moodboard/mcp/BoardRenderer',
 ) {
   static readonly layer = Layer.effect(
     BoardRenderer,

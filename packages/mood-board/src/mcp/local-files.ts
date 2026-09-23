@@ -91,7 +91,7 @@ const byteLimits = {
 };
 
 export class LocalFiles extends Context.Service<LocalFiles, FilePolicy>()(
-  'moodboard/local/LocalFiles',
+  'moodboard/mcp/LocalFiles',
 ) {
   static layer(config: LocalConfig) {
     return Layer.effect(
