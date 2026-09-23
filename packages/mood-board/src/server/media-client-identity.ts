@@ -35,7 +35,6 @@ const hashText = Effect.fn('MediaClientIdentity.hashText')(function* (
 });
 
 interface MediaClientIdentityShape {
-  readonly allowsScheduledMaintenance: boolean;
   readonly identify: (
     request: HttpServerRequest.HttpServerRequest,
   ) => Effect.Effect<MediaQuotaClientId>;
@@ -45,21 +44,9 @@ export class MediaClientIdentity extends Context.Service<
   MediaClientIdentity,
   MediaClientIdentityShape
 >()('mood-board/MediaClientIdentity') {
-  static readonly bun = Layer.succeed(
+  static readonly layer = Layer.succeed(
     this,
     this.of({
-      allowsScheduledMaintenance: false,
-      identify: (request) =>
-        hashText(
-          Option.getOrElse(request.remoteAddress, () => 'unknown-socket'),
-        ),
-    }),
-  );
-
-  static readonly cloudflareForwarded = Layer.succeed(
-    this,
-    this.of({
-      allowsScheduledMaintenance: true,
       identify: (request) =>
         Effect.succeed(
           Option.getOrElse(
@@ -71,7 +58,6 @@ export class MediaClientIdentity extends Context.Service<
   );
 }
 
-export const hashMediaClientAddress = hashText;
 export const hashMediaClientAddressPromise = (
   value: string,
 ): Promise<MediaClientHash> => Effect.runPromise(hashText(value));

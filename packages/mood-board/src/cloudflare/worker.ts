@@ -145,7 +145,7 @@ export class WorkspaceDurableObject {
           }),
         ),
       ),
-      Layer.provide(MediaClientIdentity.cloudflareForwarded),
+      Layer.provide(MediaClientIdentity.layer),
       Layer.provide(makeR2MediaObjectStore(env.MEDIA, workspaceId)),
       Layer.provide(database),
     );

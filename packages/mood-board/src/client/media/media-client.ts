@@ -122,7 +122,7 @@ const uploadMediaEffect = Effect.fn('MediaClient.uploadMedia')(function* (
     catch: (cause) =>
       transportFailure(
         cause,
-        'Media uploads require the live mood-board server. Start the Bun or Cloudflare server and try again.',
+        'Media uploads require the live mood-board server. Start the local Alchemy stack and try again.',
       ),
   });
   const status = HttpStatusCodeSchema.make(response.status);

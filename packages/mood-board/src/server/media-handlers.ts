@@ -370,10 +370,7 @@ export const MediaHandlers = HttpRouter.use((router) =>
 
     const maintenance = Effect.fn('MediaHandlers.Maintenance')(function* () {
       const request = yield* HttpServerRequest.HttpServerRequest;
-      if (
-        !identities.allowsScheduledMaintenance ||
-        request.headers['x-mood-board-maintenance'] !== 'scheduled'
-      ) {
+      if (request.headers['x-mood-board-maintenance'] !== 'scheduled') {
         return jsonError(404, 'Not found');
       }
       const removed = yield* media.maintain();
