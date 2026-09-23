@@ -14,6 +14,14 @@ Use `bunx turbo run typecheck` for cached, parallel workspace type checks. Run `
 
 Run `bun run format:check` and `bun run lint` for formatting and lint checks. These are not registered as Turbo tasks yet. Do not run builds for formatting or lint changes.
 
+## Vendored lint rules
+
+`tools/oxlint/anti-slop/` contains anti-slop source, not an npm package. Its `UPSTREAM.md` records the exact commit and update procedure. Preserve both upstream licenses and the nested provenance record.
+
+The root `.oxlintrc.json` enables all generic and Effect rules at error severity. Keep `oxlint` and `@oxlint/plugins` pinned together at `1.85.0`. Existing lint commands and Git hooks use this configuration.
+
+Stage updates separately and merge against the recorded source commit. Preserve local changes. Keep vendored source and installed agent assets excluded from lint and formatting. Report existing owned-source findings; change them only when migration is requested. The Effect service-import rule does not check package or path aliases.
+
 ## Styles
 
 Keep shared review-site styles in `packages/reviews/src/styles/global.css`. Put site colors in each site's `theme.css`. Scope page-specific selectors so they do not affect other pages.
