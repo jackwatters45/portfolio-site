@@ -1,5 +1,6 @@
 import { ArrowRight, Copy, ShareNetwork } from '@phosphor-icons/react';
 import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { Match, Predicate } from 'effect';
 import { useEffect, useState, type CSSProperties } from 'react';
 
 import { parseProfileHandle, profilePath } from '../client/board-route';
@@ -12,7 +13,9 @@ export const Route = createFileRoute('/@{$handle}')({
   params: {
     parse: ({ handle }) => {
       const parsed = parseProfileHandle(handle);
+
       if (parsed === null) throw notFound();
+
       return { handle: parsed };
     },
     stringify: ({ handle }) => ({ handle }),
@@ -28,16 +31,19 @@ const shareUrl = async (
   title: string,
   url: string,
 ): Promise<'shared' | 'copied' | 'cancelled'> => {
-  if (typeof navigator.share === 'function') {
+  if (Predicate.isFunction(navigator.share)) {
     try {
       await navigator.share({ title, url });
+
       return 'shared';
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError')
         return 'cancelled';
     }
   }
+
   await navigator.clipboard.writeText(url);
+
   return 'copied';
 };
 
@@ -53,15 +59,16 @@ function PublicProfilePage() {
       (value) => {
         if (active) setProfile(value);
       },
-      (reason: unknown) => {
+      (cause: unknown) => {
         if (!active) return;
         setError(
-          reason instanceof PublicApiError && reason.status === 404
+          cause instanceof PublicApiError && cause.status === 404
             ? 'This profile is private or does not exist.'
             : 'The profile could not be loaded.',
         );
       },
     );
+
     return () => {
       active = false;
     };
@@ -108,18 +115,18 @@ function PublicProfilePage() {
             void shareUrl(profile.owner.displayName, profileUrl).then(
               (result) => {
                 setNotice(
-                  result === 'copied'
-                    ? 'Profile link copied'
-                    : result === 'shared'
-                      ? 'Share sheet opened'
-                      : '',
+                  Match.value(result).pipe(
+                    Match.when('copied', () => 'Profile link copied'),
+                    Match.when('shared', () => 'Share sheet opened'),
+                    Match.orElse(() => ''),
+                  ),
                 );
               },
               () => setNotice('Could not copy this profile link'),
             );
           }}
         >
-          {typeof navigator.share === 'function' ? (
+          {Predicate.isFunction(navigator.share) ? (
             <ShareNetwork size={18} />
           ) : (
             <Copy size={18} />
@@ -144,6 +151,7 @@ function PublicProfilePage() {
               const background = board.background ?? '#EDEDED';
               const colors = accessibleFieldColors(background);
               const hasBackgroundImage = board.backgroundMediaId !== undefined;
+
               const cardStyle: PublicCardStyle = {
                 backgroundColor: background,
                 color: hasBackgroundImage ? '#F8F7F3' : colors.foreground,
@@ -151,6 +159,7 @@ function PublicProfilePage() {
                   ? '#F8F7F3'
                   : colors.muted,
               };
+
               return (
                 <Link
                   key={board.publicId}

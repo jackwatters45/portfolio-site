@@ -1,4 +1,5 @@
 import { XLogo } from '@phosphor-icons/react';
+import { Match } from 'effect';
 import {
   useCallback,
   useEffect,
@@ -32,9 +33,15 @@ const useResolvedTheme = (theme: BoardItem['xTheme']): 'light' | 'dark' => {
     const update = () => setAutomatic(query.matches ? 'dark' : 'light');
     update();
     query.addEventListener('change', update);
+
     return () => query.removeEventListener('change', update);
   }, [theme]);
-  return theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : automatic;
+
+  return Match.value(theme).pipe(
+    Match.when('dark', () => 'dark' as const),
+    Match.when('light', () => 'light' as const),
+    Match.orElse(() => automatic),
+  );
 };
 
 function XPostSnapshot({
@@ -71,9 +78,11 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
   useEffect(() => {
     onHeightRef.current = onHeight;
   }, [onHeight]);
+
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   );
+
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const theme = useResolvedTheme(item.xTheme);
@@ -84,6 +93,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
   const scaleCurrentIframe = useCallback(() => {
     const mount = mountRef.current;
     const iframe = mount?.querySelector('iframe');
+
     if (
       mount === null ||
       mount === undefined ||
@@ -92,20 +102,25 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
     )
       return false;
     const scale = xPostVisualScale(iframe.offsetWidth, mount.clientWidth);
+
     if (scale === null || iframe.offsetHeight < 100) return false;
     iframe.style.transform = scale === 1 ? '' : `scale(${scale})`;
     iframe.style.transformOrigin = 'top center';
     mount.style.height = `${Math.ceil(iframe.offsetHeight * scale)}px`;
+
     return true;
   }, []);
 
   const reconcileCurrentHeight = useCallback(() => {
     const root = rootRef.current;
     const iframe = mountRef.current?.querySelector('iframe');
+
     if (root === null || iframe == null) return false;
     // offsetHeight is unscaled; getBoundingClientRect() is distorted by the canvas zoom transform.
     const next = measureRenderedXPostHeight(iframe, root);
+
     if (next === null) return false;
+
     if (
       Math.abs(next - itemHeightRef.current) >= 4 &&
       onHeightRef.current !== undefined
@@ -113,6 +128,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
       itemHeightRef.current = next;
       onHeightRef.current(next);
     }
+
     return true;
   }, []);
 
@@ -142,6 +158,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
 
     const finishRendered = () => {
       const iframe = mount.querySelector('iframe');
+
       if (
         !active ||
         iframe === null ||
@@ -149,27 +166,34 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
         !scaleCurrentIframe()
       )
         return false;
+
       if (renderTimeout !== undefined) {
         window.clearTimeout(renderTimeout);
         renderTimeout = undefined;
       }
+
       mutationObserver?.disconnect();
       setError('');
       setStatus('loaded');
       requestAnimationFrame(reconcileCurrentHeight);
+
       return true;
     };
 
     const observeIframe = () => {
       const iframe = mount.querySelector('iframe');
+
       if (iframe === null) return false;
+
       if (iframe !== observedIframe) {
         iframeObserver?.disconnect();
         observedIframe = iframe;
         iframeObserver = new ResizeObserver(finishRendered);
         iframeObserver.observe(iframe);
       }
+
       requestAnimationFrame(finishRendered);
+
       return finishRendered();
     };
 
@@ -180,6 +204,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
         quote.className = 'twitter-tweet';
         quote.dataset.dnt = 'true';
         quote.dataset.theme = theme;
+
         if (item.xDisplay === 'media') {
           quote.dataset.mediaMaxWidth = String(
             Math.round(Math.min(1_920, Math.max(560, item.width))),
@@ -187,6 +212,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
         } else {
           quote.dataset.conversation = 'none';
         }
+
         const link = document.createElement('a');
         link.href = sourceSrc;
         link.textContent =
@@ -195,6 +221,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
         mount.replaceChildren(quote);
 
         rootObserver = new ResizeObserver(finishRendered);
+
         if (rootRef.current !== null) rootObserver.observe(rootRef.current);
         mutationObserver = new MutationObserver(observeIframe);
         mutationObserver.observe(mount, { childList: true, subtree: true });
@@ -210,12 +237,12 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
           setError('This X post could not be displayed here.');
         }, 20_000);
       })
-      .catch((reason: unknown) => {
+      .catch((cause: unknown) => {
         if (active) {
           mount.replaceChildren();
           setStatus('error');
           setError(
-            reason instanceof Error ? reason.message : 'X could not be loaded.',
+            cause instanceof Error ? cause.message : 'X could not be loaded.',
           );
         }
       });
@@ -225,6 +252,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
       mutationObserver?.disconnect();
       iframeObserver?.disconnect();
       rootObserver?.disconnect();
+
       if (renderTimeout !== undefined) window.clearTimeout(renderTimeout);
       mount.style.height = '';
       mount.replaceChildren();
@@ -249,6 +277,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
       : source
         ? `@${source.handle}`
         : 'X post');
+
   return (
     <div
       ref={rootRef}

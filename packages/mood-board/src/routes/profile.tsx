@@ -13,7 +13,7 @@ function SignedInProfile({
   refresh,
 }: {
   readonly user: AccountUser;
-  readonly refresh: () => Promise<unknown>;
+  readonly refresh: () => Promise<void>;
 }) {
   const navigate = useNavigate();
   const [name, setName] = useState(user.name);
@@ -24,12 +24,15 @@ function SignedInProfile({
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextName = name.trim();
+
     if (!nextName || pending !== null) return;
     setPending('saving');
     setNotice('');
     setError('');
+
     try {
       const result = await authClient.updateUser({ name: nextName });
+
       if (result.error) {
         setError(result.error.message ?? 'Your profile could not be updated.');
       } else {
@@ -51,13 +54,17 @@ function SignedInProfile({
     setPending('signing-out');
     setNotice('');
     setError('');
+
     try {
       const result = await authClient.signOut();
+
       if (result.error) {
         setError(result.error.message ?? 'You could not be signed out.');
         setPending(null);
+
         return;
       }
+
       await navigate({ to: '/' });
     } catch (cause) {
       setError(
@@ -194,7 +201,12 @@ function ProfilePage() {
       <Link className="profile-back" to="/">
         <ArrowLeft size={15} /> Moodboard
       </Link>
-      <SignedInProfile user={user} refresh={() => session.refetch()} />
+      <SignedInProfile
+        user={user}
+        refresh={async () => {
+          await session.refetch();
+        }}
+      />
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import { ArrowSquareOut, ImageBroken } from '@phosphor-icons/react';
+import { Match } from 'effect';
 import {
   lazy,
   memo,
@@ -25,11 +26,13 @@ import { WebsiteCard } from './website-card';
 
 const AudioCard = lazy(async () => {
   const module = await import('./audio-card');
+
   return { default: module.AudioCard };
 });
 
 const XPostCard = lazy(async () => {
   const module = await import('./x-post-card');
+
   return { default: module.XPostCard };
 });
 
@@ -80,13 +83,18 @@ function BoardItemComponent({
 }: Props) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+
   const imageSrc =
     item.mediaId === undefined ? item.src : mediaUrl(item.mediaId);
+
   const imageFailed = imageSrc !== undefined && failedImageSrc === imageSrc;
+
   const hasImageAnnotation =
     item.kind === 'image' &&
     Boolean(item.annotationTitle || item.annotationDescription || item.href);
+
   const hasPresentationDetails = hasImageAnnotation || item.kind === 'x';
+
   const editingInteractiveMedia =
     editing &&
     (item.kind === 'audio' ||
@@ -99,10 +107,12 @@ function BoardItemComponent({
     event.preventDefault();
     onInteractionStart?.();
     onSelect(item.id);
+
     if (event.pointerType === 'touch') return;
     event.stopPropagation();
 
     const element = elementRef.current;
+
     if (!element) return;
 
     const pointerId = event.pointerId;
@@ -131,8 +141,10 @@ function BoardItemComponent({
       document.removeEventListener('pointerup', finish);
       document.removeEventListener('pointercancel', cancel);
       element.classList.remove('is-moving');
+
       if (element.hasPointerCapture(pointerId))
         element.releasePointerCapture(pointerId);
+
       if (moved) onMove(item.id, nextX, nextY);
     };
 
@@ -156,6 +168,7 @@ function BoardItemComponent({
     event.stopPropagation();
     onInteractionStart?.();
     const element = elementRef.current;
+
     if (!element) return;
 
     const pointerId = event.pointerId;
@@ -171,19 +184,25 @@ function BoardItemComponent({
       const angle = (item.rotation * Math.PI) / 180;
       const screenDeltaX = (moveEvent.clientX - startX) / zoom;
       const screenDeltaY = (moveEvent.clientY - startY) / zoom;
+
       const localDeltaX =
         screenDeltaX * Math.cos(angle) + screenDeltaY * Math.sin(angle);
+
       const localDeltaY =
         -screenDeltaX * Math.sin(angle) + screenDeltaY * Math.cos(angle);
+
       const scaleDelta =
         (localDeltaX * item.width + localDeltaY * item.height) /
         (item.width ** 2 + item.height ** 2);
+
       const audioItem =
         item.kind === 'audio' ||
         item.kind === 'spotify' ||
         item.kind === 'youtube';
+
       const fixedWidthItem =
         audioItem || item.kind === 'website' || item.kind === 'x';
+
       const minimumHeight =
         item.kind === 'youtube'
           ? MIN_YOUTUBE_AUDIO_CARD_HEIGHT
@@ -196,10 +215,12 @@ function BoardItemComponent({
                 : audioItem
                   ? MIN_NATIVE_AUDIO_CARD_HEIGHT
                   : 80;
+
       const minScale = Math.max(
         (fixedWidthItem ? 320 : 80) / item.width,
         minimumHeight / item.height,
       );
+
       const maximumWidth = item.kind === 'x' ? MAX_X_POST_CARD_WIDTH : 2_400;
       const maxScale = Math.min(maximumWidth / item.width, 2_400 / item.height);
       const scale = Math.min(maxScale, Math.max(minScale, 1 + scaleDelta));
@@ -215,8 +236,10 @@ function BoardItemComponent({
       document.removeEventListener('pointerup', finish);
       document.removeEventListener('pointercancel', cancel);
       element.classList.remove('is-resizing');
+
       if (element.hasPointerCapture(pointerId))
         element.releasePointerCapture(pointerId);
+
       if (Math.abs(nextWidth - item.width) > 0.5)
         onResize(item.id, nextWidth, nextHeight);
     };
@@ -237,9 +260,12 @@ function BoardItemComponent({
   }
 
   function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
-    const interactiveTarget = (event.target as HTMLElement).closest(
+    if (!(event.target instanceof Element)) return;
+
+    const interactiveTarget = event.target.closest(
       'a, button, audio, iframe, .audio-card-controls, .x-post-card',
     );
+
     if (!editing) {
       if (
         interactiveTarget === null &&
@@ -249,44 +275,58 @@ function BoardItemComponent({
         event.stopPropagation();
         presentItem();
       }
+
       return;
     }
+
     if (interactiveTarget !== null) return;
     const key = event.key;
+
     if (key === 'Delete' || key === 'Backspace') {
       event.preventDefault();
       event.stopPropagation();
       onDelete(item.id);
+
       return;
     }
+
     if (key === 'Enter' || key === ' ') {
       event.preventDefault();
       event.stopPropagation();
       onSelect(item.id);
+
       if (key === 'Enter') onEdit(item);
+
       return;
     }
+
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key))
       return;
 
     event.preventDefault();
     event.stopPropagation();
+
     if (event.altKey) {
       onReorder(
         item.id,
         key === 'ArrowUp' || key === 'ArrowRight' ? 'front' : 'back',
       );
+
       return;
     }
+
     if (event.shiftKey) {
       const grow = key === 'ArrowUp' || key === 'ArrowRight';
       const scale = grow ? 1.06 : 0.94;
+
       const audioItem =
         item.kind === 'audio' ||
         item.kind === 'spotify' ||
         item.kind === 'youtube';
+
       const fixedWidthItem =
         audioItem || item.kind === 'website' || item.kind === 'x';
+
       const minimumHeight =
         item.kind === 'youtube'
           ? MIN_YOUTUBE_AUDIO_CARD_HEIGHT
@@ -299,22 +339,38 @@ function BoardItemComponent({
                 : audioItem
                   ? MIN_NATIVE_AUDIO_CARD_HEIGHT
                   : 80;
+
       const minScale = Math.max(
         (fixedWidthItem ? 320 : 80) / item.width,
         minimumHeight / item.height,
       );
+
       const maximumWidth = item.kind === 'x' ? MAX_X_POST_CARD_WIDTH : 2_400;
       const maxScale = Math.min(maximumWidth / item.width, 2_400 / item.height);
       const boundedScale = Math.min(maxScale, Math.max(minScale, scale));
       onResize(item.id, item.width * boundedScale, item.height * boundedScale);
+
       return;
     }
 
     const step = 10 / zoom;
+
     const x =
-      item.x + (key === 'ArrowRight' ? step : key === 'ArrowLeft' ? -step : 0);
+      item.x +
+      Match.value(key).pipe(
+        Match.when('ArrowRight', () => step),
+        Match.when('ArrowLeft', () => -step),
+        Match.orElse(() => 0),
+      );
+
     const y =
-      item.y + (key === 'ArrowDown' ? step : key === 'ArrowUp' ? -step : 0);
+      item.y +
+      Match.value(key).pipe(
+        Match.when('ArrowDown', () => step),
+        Match.when('ArrowUp', () => -step),
+        Match.orElse(() => 0),
+      );
+
     onMove(item.id, x, y);
   }
 
@@ -354,12 +410,25 @@ function BoardItemComponent({
       item.kind === 'youtube' ||
       item.kind === 'x');
 
-  const presentationLabel =
-    item.kind === 'website'
-      ? `Website card: ${item.websiteTitle ?? item.websiteSiteLabel}. Press Enter to enlarge.`
-      : item.kind === 'x'
-        ? `X ${item.xDisplay === 'media' ? 'media' : 'post'} reference. Press Enter to enlarge.`
-        : `${item.kind === 'spotify' ? 'Spotify' : item.kind === 'youtube' ? 'YouTube' : 'Audio'} card. Press Enter to enlarge.`;
+  const audioLabel = Match.value(item.kind).pipe(
+    Match.when('spotify', () => 'Spotify'),
+    Match.when('youtube', () => 'YouTube'),
+    Match.orElse(() => 'Audio'),
+  );
+
+  const presentationLabel = Match.value(item.kind).pipe(
+    Match.when(
+      'website',
+      () =>
+        `Website card: ${item.websiteTitle ?? item.websiteSiteLabel}. Press Enter to enlarge.`,
+    ),
+    Match.when(
+      'x',
+      () =>
+        `X ${item.xDisplay === 'media' ? 'media' : 'post'} reference. Press Enter to enlarge.`,
+    ),
+    Match.orElse(() => `${audioLabel} card. Press Enter to enlarge.`),
+  );
 
   const style: ItemStyle = {
     '--item-x': `${item.x}px`,
@@ -380,10 +449,13 @@ function BoardItemComponent({
       onDoubleClick={(event) => {
         if (editing) {
           onEdit(item);
+
           return;
         }
+
         if (
-          (event.target as HTMLElement).closest(
+          event.target instanceof Element &&
+          event.target.closest(
             'a, button, audio, iframe, .audio-card-controls, .x-post-card',
           ) === null
         ) {
@@ -395,19 +467,32 @@ function BoardItemComponent({
       role={editing || presentationKeyboardTarget ? 'group' : undefined}
       aria-label={
         editing
-          ? `${selected ? 'Selected. ' : ''}${
-              item.kind === 'image'
-                ? `Image reference${hasImageAnnotation ? ' with details' : ''}. Arrow keys move; Shift and arrow keys resize; Alt and arrow keys change layering.`
-                : item.kind === 'note'
-                  ? `Note: ${item.text}`
-                  : item.kind === 'swatch'
-                    ? `Color swatch: ${item.label ?? item.color}`
-                    : item.kind === 'website'
-                      ? `Website card: ${item.websiteTitle ?? item.websiteSiteLabel}`
-                      : item.kind === 'x'
-                        ? `X ${item.xDisplay === 'media' ? 'media' : 'post'} reference: ${item.xAuthorHandle ? `@${item.xAuthorHandle}` : item.src}`
-                        : `${item.kind === 'spotify' ? 'Spotify' : item.kind === 'youtube' ? 'YouTube' : 'Audio'} card: ${item.label || (item.mediaId ? 'managed board audio' : item.src)}`
-            }`
+          ? `${selected ? 'Selected. ' : ''}${Match.value(item.kind).pipe(
+              Match.when(
+                'image',
+                () =>
+                  `Image reference${hasImageAnnotation ? ' with details' : ''}. Arrow keys move; Shift and arrow keys resize; Alt and arrow keys change layering.`,
+              ),
+              Match.when('note', () => `Note: ${item.text}`),
+              Match.when(
+                'swatch',
+                () => `Color swatch: ${item.label ?? item.color}`,
+              ),
+              Match.when(
+                'website',
+                () =>
+                  `Website card: ${item.websiteTitle ?? item.websiteSiteLabel}`,
+              ),
+              Match.when(
+                'x',
+                () =>
+                  `X ${item.xDisplay === 'media' ? 'media' : 'post'} reference: ${item.xAuthorHandle ? `@${item.xAuthorHandle}` : item.src}`,
+              ),
+              Match.orElse(
+                () =>
+                  `${audioLabel} card: ${item.label || (item.mediaId ? 'managed board audio' : item.src)}`,
+              ),
+            )}`
           : presentationKeyboardTarget
             ? presentationLabel
             : undefined
@@ -438,61 +523,69 @@ function BoardItemComponent({
           className={`item-annotation${item.kind === 'x' ? ' item-annotation--x' : ''}`}
           aria-label={item.kind === 'x' ? 'X post details' : 'Image details'}
         >
-          {item.kind === 'image' ? (
-            <>
-              {item.annotationTitle && <strong>{item.annotationTitle}</strong>}
-              {item.annotationDescription && (
-                <p>{item.annotationDescription}</p>
-              )}
-              {item.href && (
-                <a
-                  className="item-annotation-link presentation-item-link presentation-detail-link"
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  onClick={(event) => {
-                    if (event.detail > 0) event.preventDefault();
-                  }}
-                >
-                  <span>
-                    {item.annotationTitle ? 'View source' : 'Open source page'}
+          {Match.value(item.kind).pipe(
+            Match.when('image', () => (
+              <>
+                {item.annotationTitle && (
+                  <strong>{item.annotationTitle}</strong>
+                )}
+                {item.annotationDescription && (
+                  <p>{item.annotationDescription}</p>
+                )}
+                {item.href && (
+                  <a
+                    className="item-annotation-link presentation-item-link presentation-detail-link"
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    onClick={(event) => {
+                      if (event.detail > 0) event.preventDefault();
+                    }}
+                  >
+                    <span>
+                      {item.annotationTitle
+                        ? 'View source'
+                        : 'Open source page'}
+                    </span>
+                    <ArrowSquareOut size={14} weight="bold" />
+                  </a>
+                )}
+              </>
+            )),
+            Match.when('x', () => (
+              <>
+                <strong>
+                  {item.xAuthorName ||
+                    (item.xAuthorHandle ? `@${item.xAuthorHandle}` : 'X post')}
+                </strong>
+                {(item.xAuthorHandle || item.xPostDate) && (
+                  <span className="item-annotation-meta">
+                    {item.xAuthorHandle ? `@${item.xAuthorHandle}` : ''}
+                    {item.xAuthorHandle && item.xPostDate ? ' · ' : ''}
+                    {item.xPostDate ?? ''}
                   </span>
-                  <ArrowSquareOut size={14} weight="bold" />
-                </a>
-              )}
-            </>
-          ) : item.kind === 'x' ? (
-            <>
-              <strong>
-                {item.xAuthorName ||
-                  (item.xAuthorHandle ? `@${item.xAuthorHandle}` : 'X post')}
-              </strong>
-              {(item.xAuthorHandle || item.xPostDate) && (
-                <span className="item-annotation-meta">
-                  {item.xAuthorHandle ? `@${item.xAuthorHandle}` : ''}
-                  {item.xAuthorHandle && item.xPostDate ? ' · ' : ''}
-                  {item.xPostDate ?? ''}
-                </span>
-              )}
-              {item.xPostText && <p>{item.xPostText}</p>}
-              {item.src && (
-                <a
-                  className="item-annotation-link presentation-item-link presentation-detail-link"
-                  href={item.src}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  onClick={(event) => {
-                    if (event.detail > 0) event.preventDefault();
-                  }}
-                >
-                  <span>Open on X</span>
-                  <ArrowSquareOut size={14} weight="bold" />
-                </a>
-              )}
-            </>
-          ) : null}
+                )}
+                {item.xPostText && <p>{item.xPostText}</p>}
+                {item.src && (
+                  <a
+                    className="item-annotation-link presentation-item-link presentation-detail-link"
+                    href={item.src}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    onClick={(event) => {
+                      if (event.detail > 0) event.preventDefault();
+                    }}
+                  >
+                    <span>Open on X</span>
+                    <ArrowSquareOut size={14} weight="bold" />
+                  </a>
+                )}
+              </>
+            )),
+            Match.orElse(() => null),
+          )}
         </aside>
       )}
 
