@@ -199,6 +199,37 @@
   },
   "overrides": [
     {
+      "files": [
+        "packages/mood-board/src/server/**/*.ts",
+        "packages/mood-board/src/cloudflare/**/*.ts",
+        "packages/mood-board/scripts/**/*.ts",
+        "packages/mood-board/src/client/board-sync.ts",
+        "packages/mood-board/src/client/board-catalog.ts"
+      ],
+      "rules": {
+        "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["packages/mood-board/src/**/*.tsx"],
+      "rules": {
+        "eslint/eqeqeq": ["error", "always", { "null": "ignore" }],
+        "jsx-a11y/prefer-tag-over-role": "off"
+      }
+    },
+    {
+      "files": ["packages/mood-board/src/components/board-item-view.tsx"],
+      "rules": {
+        "jsx-a11y/no-static-element-interactions": "off"
+      }
+    },
+    {
+      "files": ["packages/mood-board/src/components/audio-card.tsx"],
+      "rules": {
+        "jsx-a11y/media-has-caption": "off"
+      }
+    },
+    {
       "files": ["**/*.svelte", "**/*.astro", "**/*.vue"],
       "rules": {
         "eslint/prefer-const": "off",
