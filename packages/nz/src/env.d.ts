@@ -1,10 +1,11 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import type { CommentsEnv } from './services/comments-handler';
+export {};
 
 declare global {
   namespace Cloudflare {
-    // oxlint-disable-next-line typescript/no-empty-interface -- Workers bindings require interface augmentation.
-    interface Env extends CommentsEnv {}
+    interface Env {
+      COMMENTS: { fetch(request: Request): Promise<Response> };
+    }
   }
 }

@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.3.2",
-    "@tanstack/react-form": "^1.33.5",
-    "@tanstack/react-query": "^5.103.2",
+    "@personal-sites/comments": "workspace:*",
     "astro": "7.3.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
