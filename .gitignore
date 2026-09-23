@@ -3,6 +3,7 @@ dist/
 
 # generated types and task cache
 .astro/
+.tanstack/
 .turbo/
 
 # dependencies
