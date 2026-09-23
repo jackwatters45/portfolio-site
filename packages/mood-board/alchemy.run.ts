@@ -60,6 +60,7 @@ export const moodBoard = Effect.gen(function* () {
             '/demo',
             '/demo/*',
             '/profile*',
+            '/connect-agent',
             '/media/*',
             '/_internal/*',
             '/health',

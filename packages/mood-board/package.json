@@ -6,12 +6,14 @@
   "scripts": {
     "build": "vite build && oxfmt --write src/routeTree.gen.ts",
     "dev": "cd ../.. && alchemy dev",
+    "local": "bun src/local/main.ts",
     "test": "vitest run tests",
     "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@effect/atom-react": "4.0.0-rc.117",
     "@effect/platform-browser": "4.0.0-rc.117",
+    "@effect/platform-bun": "4.0.0-rc.117",
     "@effect/sql-d1": "4.0.0-rc.117",
     "@effect/sql-sqlite-do": "4.0.0-rc.117",
     "@phosphor-icons/react": "^2.1.10",
@@ -24,7 +26,8 @@
     "heic-to": "^1.5.2",
     "image-dimensions": "2.5.1",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260728.1",

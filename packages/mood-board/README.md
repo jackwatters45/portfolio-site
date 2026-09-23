@@ -35,11 +35,30 @@ bun run format
 
 The root lint config has mood-board-only exceptions for Effect service `use` methods and existing canvas markup. Formatting follows the unchanged root formatter config, including generated routes.
 
+## Local agent tools
+
+A local Bun CLI and stdio MCP server can create, inspect, edit, arrange, import, preview, and export boards. All existing card types and board backgrounds are supported. Both interfaces use the same Schema-defined Effect actions. Local actions stay offline. Optional [account actions](docs/account-agent.md) use browser approval to save local revisions privately and edit account boards. No action calls a model or changes publication settings.
+
+Each edit creates a new standard `.moodboard` archive. Saved revisions survive process restarts and provide undo points. Agents can inspect images, add cards, edit metadata, move and resize items, rotate and stack them, duplicate or delete them, and prepare an archive for the existing app.
+
+```bash
+bun install --frozen-lockfile
+bun packages/mood-board/src/local/main.ts create_board \
+  --root /absolute/path/to/input-assets \
+  --output-dir /absolute/path/to/separate-output-folder \
+  --input '{"title":"Coastal textures","output":"coast-01.moodboard"}'
+```
+
+Both folders must exist and cannot contain each other. Follow [Local moodboard authoring](docs/local-agent.md) for MCP configuration, the action reference, revision handling, and limits. The adapter supports macOS and Linux. HEIC support depends on the installed Sharp/libvips codecs.
+
+Local previews show local images, notes, swatches, and backgrounds. Remote images and player cards use static placeholders; no network content is fetched. Open a saved archive with the app's existing importer, or explicitly use `save_board_to_account` after account approval. Account writes require `--allow-account-write` and per-request confirmation.
+
 ## Code layout
 
 - `src/client/board/`: board creation, camera, colors, archives, local storage, and synchronization.
 - `src/client/media/`: image processing, uploads, media URLs, playback, and embeds.
-- `src/lib/`: definitions shared by browser and server code.
+- `src/lib/`: shared definitions, image preflight, and the portable archive codec.
+- `src/local/`: local authoring, revision, media, preview, and optional account services, plus shared CLI and stdio MCP adapters.
 - `src/server/`: board, media, authentication, and publishing logic.
 - `src/cloudflare/`: Cloudflare adapters and the Worker entry point.
 - `src/components/` and `src/routes/`: React rendering and routes.
@@ -74,7 +93,7 @@ The Cloudflare target keeps each account's authority inside a separate `Workspac
 - Per-account Durable Object SQLite is authoritative for that account's boards, items, revisions, publications, media metadata, and mutation deduplication.
 - One long-lived Effect runtime owns board-scoped PubSub channels for each object instance.
 - Browser clients use Effect RPC over HTTP with NDJSON framing, so snapshots and changes stream before the response closes.
-- D1 stores Better Auth users, sessions, encrypted OAuth credentials, hashed verification tokens, globally unique public handles/ids, and account-scoped board-directory projections. Expired sessions/tokens are pruned daily, and Cloudflare's native rate limiter caps magic-link requests by trusted connecting IP and normalized recipient.
+- D1 stores Better Auth users, sessions, encrypted OAuth credentials, hashed verification tokens, globally unique public handles/ids, and account-scoped board-directory projections. The Better Auth device plugin also stores agent approval codes. Expired sessions, tokens, and device codes are pruned daily. Cloudflare's native rate limiter caps magic-link requests by trusted connecting IP and normalized recipient, and device requests by route and IP.
 - Static Vite assets and SPA fallback are served through the Worker assets binding.
 - Managed image and audio bytes live in the private `MEDIA` R2 bucket under a Durable-Object-specific prefix. Private reads use authenticated `/api/owner/media/:mediaId` URLs with `private, no-store`. Public reads use publication-scoped URLs and are allowed only while that media is referenced by the requested published board.
 
@@ -165,7 +184,7 @@ YouTube remains a visible official player rather than an extracted audio stream;
 
 ## Current collaboration model
 
-Each account supports up to 100 boards, with server-ordered last-write-wins changes. Boards have direct `/boards/:id` routes, while the permanent default board remains the safe fallback for stale or deleted links. Item movement and resizing stay local during the gesture and write once on pointer-up. Incoming remote changes clear local undo history rather than risking a whole-board overwrite.
+Each account supports up to 100 boards, with server-ordered last-write-wins browser changes. Agent edits require an expected revision, checked inside the commit transaction. Agent imports use an atomic create-only guard so they cannot replace an existing board. Boards have direct `/boards/:id` routes, while the permanent default board remains the safe fallback for stale or deleted links. Item movement and resizing stay local during the gesture and write once on pointer-up. Incoming remote changes clear local undo history rather than risking a whole-board overwrite.
 
 Better Auth is the authorization boundary. Cloudflare selects a per-account Durable Object after validating the session at the edge. A client cannot choose a workspace id. Private media, RPC, previews, imports, and cleanup remain inside that selected workspace. IndexedDB documents and durable offline outboxes are keyed by both immutable account id and board id. Pending mutations are rebased onto that account board's next server snapshot and replayed in order. Same-field conflicts remain server-ordered last-write-wins. Bulk intake stages at most 150 files locally, creates privacy-stripped thumbnails, prepares and uploads selected images three at a time, reads EXIF `DateTimeOriginal`/`CreateDate` for capture sorting, and falls back to file modification time. Content-based duplicate detection, EXIF grouping, smart curation, and AI-assisted selection remain follow-up work.
 

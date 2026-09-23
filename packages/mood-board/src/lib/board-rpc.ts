@@ -488,7 +488,7 @@ export const BoardRpcs = RpcGroup.make(
     error: BoardBackendError,
   }),
   Rpc.make('CreateBoard', {
-    payload: NewBoardFields,
+    payload: { ...NewBoardFields, requireNew: Schema.optional(Schema.Boolean) },
     success: BoardSummarySchema,
     error: BoardBackendError,
   }),
@@ -529,6 +529,7 @@ export const BoardRpcs = RpcGroup.make(
     payload: {
       ...BoardIdentityFields,
       ...BoardMutationIdentityFields,
+      expectedRevision: Schema.optional(BoardRevisionSchema),
       ...BoardMutationPayloadSchema.fields,
     },
     success: BoardChangeSchema,

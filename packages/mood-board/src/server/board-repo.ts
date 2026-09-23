@@ -28,6 +28,7 @@ import {
   type BoardDeleted,
   type BoardId,
   type BoardSnapshot,
+  type BoardRevision,
   type BoardSummary,
   type ClientId,
   type ItemId,
@@ -152,6 +153,7 @@ export interface CommitInput {
   readonly boardId: BoardId;
   readonly clientId: ClientId;
   readonly mutationId: MutationId;
+  readonly expectedRevision?: BoardRevision | undefined;
   readonly title?: string | undefined;
   readonly background?: string | null | undefined;
   readonly backgroundMediaId?: MediaId | null | undefined;
@@ -167,6 +169,7 @@ export interface CommitResult {
 export type CommitRejected =
   | { readonly _tag: 'InvalidMutation' }
   | { readonly _tag: 'MutationConflict' }
+  | { readonly _tag: 'RevisionConflict' }
   | { readonly _tag: 'TooManyItems' }
   | { readonly _tag: 'BoardTooLarge' }
   | { readonly _tag: 'InvalidMedia' };
@@ -174,6 +177,7 @@ export type CommitRejected =
 export type ManagementRejected =
   | { readonly _tag: 'BoardLimit' }
   | { readonly _tag: 'DeletedBoardId' }
+  | { readonly _tag: 'ExistingBoardId' }
   | { readonly _tag: 'InvalidOperation' }
   | { readonly _tag: 'LastBoard' };
 
@@ -223,6 +227,7 @@ const mutationHash = (input: CommitInput) => {
     boardId: input.boardId,
     clientId: input.clientId,
     mutationId: input.mutationId,
+    expectedRevision: input.expectedRevision,
     title: input.title,
     background: input.background,
     backgroundMediaId: input.backgroundMediaId,
@@ -366,6 +371,7 @@ interface BoardPersistence {
   readonly create: (
     boardId: BoardId,
     title: string,
+    requireNew?: boolean,
   ) => Effect.Effect<BoardSummary | ManagementRejected, SqlError>;
   readonly duplicate: (
     sourceBoardId: BoardId,
@@ -484,12 +490,16 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
       const create = Effect.fn('BoardRepo.create')(function* (
         boardId: BoardId,
         title: string,
+        requireNew = false,
       ) {
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const existing = yield* getSummary(boardId);
 
-            if (existing !== null) return existing;
+            if (existing !== null)
+              return requireNew
+                ? ManagementRejection.ExistingBoardId()
+                : existing;
 
             const tombstones = yield* sql<TombstoneRow>`
               SELECT revision, deleted_at
@@ -741,6 +751,13 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardPersistence>()(
 
             if (boardRow === undefined) return null;
             const board = yield* decodeBoardRow(boardRow);
+
+            if (
+              input.expectedRevision !== undefined &&
+              input.expectedRevision !== board.revision
+            ) {
+              return CommitRejection.RevisionConflict();
+            }
 
             if (
               input.backgroundMediaId !== undefined &&

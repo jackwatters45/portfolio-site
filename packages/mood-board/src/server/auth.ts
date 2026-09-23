@@ -1,7 +1,8 @@
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
-import { magicLink } from 'better-auth/plugins';
+import { bearer, deviceAuthorization, magicLink } from 'better-auth/plugins';
 import { Effect, Schema } from 'effect';
 
+import { AGENT_CLIENT_ID, AGENT_CONNECT_PATH } from '../lib/agent-auth';
 import {
   HttpStatusCodeSchema,
   NonNegativeIntegerSchema,
@@ -80,6 +81,13 @@ export const createAuth = (config: AuthConfig) =>
     socialProviders:
       config.google === undefined ? {} : { google: config.google },
     plugins: [
+      bearer(),
+      deviceAuthorization({
+        expiresIn: '10m',
+        interval: '15s',
+        verificationUri: AGENT_CONNECT_PATH,
+        validateClient: (clientId) => clientId === AGENT_CLIENT_ID,
+      }),
       magicLink({
         expiresIn: 60 * 15,
         storeToken: 'hashed',

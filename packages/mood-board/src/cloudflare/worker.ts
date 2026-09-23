@@ -13,6 +13,7 @@ import * as RpcSerialization from 'effect/unstable/rpc/RpcSerialization';
 import * as RpcServer from 'effect/unstable/rpc/RpcServer';
 
 import { AccountIdSchema, type AccountId } from '../lib/account';
+import { AGENT_CONNECT_PATH } from '../lib/agent-auth';
 import { BoardRpcs } from '../lib/board-rpc';
 import { MediaIdSchema, MediaQuotaLimitsSchema } from '../lib/media';
 import {
@@ -216,7 +217,7 @@ const jsonError = (status: number, error: string) =>
 const authRateLimitResponse = () =>
   withSecurityHeaders(
     Response.json(
-      { error: 'Too many sign-in links requested. Try again in a minute.' },
+      { error: 'Too many authentication requests. Try again in a minute.' },
       {
         status: 429,
         headers: { 'cache-control': 'no-store', 'retry-after': '60' },
@@ -463,6 +464,29 @@ export default {
       !(await allowMagicLinkRequest(request, env.AUTH_RATE_LIMIT))
     )
       return authRateLimitResponse();
+
+    if (
+      url.pathname === AGENT_CONNECT_PATH ||
+      /^\/api\/auth\/device(?:\/|$)/.test(url.pathname)
+    ) {
+      const address = request.headers.get('CF-Connecting-IP') ?? 'local';
+
+      const allowed = await env.AUTH_RATE_LIMIT.limit({
+        key: `agent:${url.pathname}:${address}`,
+      });
+
+      if (!allowed.success) return authRateLimitResponse();
+    }
+
+    if (url.pathname === AGENT_CONNECT_PATH) {
+      return Effect.runPromise(
+        Effect.gen(function* () {
+          const auth = yield* CloudflareAuth;
+
+          return yield* auth.connectAgent(request);
+        }).pipe(Effect.provide(CloudflareAuth.layerFor(env, url.origin))),
+      );
+    }
 
     if (url.pathname === '/api/auth/providers' && request.method === 'GET') {
       return withSecurityHeaders(

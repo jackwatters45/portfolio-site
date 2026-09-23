@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 
 import { authClient } from '../client/auth-client';
 import { safeReturnTo } from '../client/auth-route';
+import { AGENT_CONNECT_PATH } from '../lib/agent-auth';
 
 type LoginSearch = {
   readonly returnTo: string;
@@ -52,6 +53,10 @@ function LoginPage() {
 
   const returnTo = search.returnTo;
 
+  const returningToAgent =
+    returnTo === AGENT_CONNECT_PATH ||
+    returnTo.startsWith(`${AGENT_CONNECT_PATH}?`);
+
   useEffect(() => {
     document.title = 'Sign in — Moodboard';
     let active = true;
@@ -75,9 +80,13 @@ function LoginPage() {
 
   useEffect(() => {
     if (session.data !== null && session.data !== undefined) {
-      void navigate({ href: returnTo, replace: true });
+      void navigate({
+        href: returnTo,
+        replace: true,
+        reloadDocument: returningToAgent,
+      });
     }
-  }, [navigate, returnTo, session.data]);
+  }, [navigate, returnTo, returningToAgent, session.data]);
 
   const signInWithGoogle = async () => {
     setPending('google');
@@ -153,7 +162,11 @@ function LoginPage() {
 
   return (
     <main className="login-page">
-      <Link className="login-back" to={returnTo}>
+      <Link
+        className="login-back"
+        to={returnTo}
+        reloadDocument={returningToAgent}
+      >
         <ArrowLeft size={15} />
         Back to Moodboard
       </Link>

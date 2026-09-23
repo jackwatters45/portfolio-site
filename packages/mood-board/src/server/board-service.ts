@@ -120,6 +120,11 @@ const managementError = (rejection: ManagementRejected) =>
           code: 'Conflict',
           message: 'The last board cannot be deleted.',
         }),
+      ExistingBoardId: () =>
+        new BoardBackendError({
+          code: 'Conflict',
+          message: 'That board already exists. Choose a new board id.',
+        }),
       DeletedBoardId: () =>
         new BoardBackendError({
           code: 'Conflict',
@@ -147,6 +152,7 @@ interface BoardOperations {
   readonly create: (
     boardId: BoardId,
     title: string,
+    requireNew?: boolean,
   ) => Effect.Effect<BoardSummary, BoardBackendError>;
   readonly duplicate: (
     sourceBoardId: BoardId,
@@ -232,9 +238,10 @@ export class BoardService extends Context.Service<
       const create = Effect.fn('BoardService.create')(function* (
         boardId: BoardId,
         title: string,
+        requireNew = false,
       ) {
         const result = yield* recoverPersistence(
-          mutex.withPermit(repo.create(boardId, title)),
+          mutex.withPermit(repo.create(boardId, title, requireNew)),
         );
 
         if ('_tag' in result) return yield* managementError(result);
@@ -551,6 +558,12 @@ export class BoardService extends Context.Service<
                         new BoardBackendError({
                           code: 'Limit',
                           message: 'That board is too large to sync.',
+                        }),
+                      RevisionConflict: () =>
+                        new BoardBackendError({
+                          code: 'Conflict',
+                          message:
+                            'This board changed. Read its current revision before editing.',
                         }),
                       MutationConflict: () =>
                         new BoardBackendError({
