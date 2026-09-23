@@ -44,6 +44,15 @@ The root lint config has mood-board-only exceptions for Effect service `use` met
 - `src/cloudflare/`: Cloudflare adapters and the Worker entry point.
 - `src/components/` and `src/routes/`: React rendering and routes.
 
+The editor uses two scoped Effect services:
+
+- `board-document.ts` owns document state, camera state, history, local saves, synchronization, and the board catalog.
+- `board-transfers.ts` owns cancellable image, background, audio, archive, and dropped-file operations.
+
+`board-editor-state.ts` connects the document service to React through Effect atoms. `board-file-intake.ts` binds transfer atoms to file inputs, progress, and bulk placement. `board-editor.tsx` keeps canvas gestures, selection, panels, and rendering. Service scopes close when the account or board changes, not during valid-session revalidation.
+
+These services reuse the existing storage, synchronization, archive, image-processing, and bulk-layout modules. Archive validation and file limits remain unchanged.
+
 ## Media cleanup
 
 Uploaded files that never become board references, including interrupted imports, enter a 30-day grace period. An authenticated operator can reclaim at most 50 eligible or retry-pending objects per call:
