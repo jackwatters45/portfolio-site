@@ -30,10 +30,22 @@ export function usePageEvents(events: Events) {
           const root = document.querySelector<HTMLElement>(events.rootSelector);
           current.current.root(root);
 
+          let frame = 0;
+
+          const updateLayout = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+              frame = 0;
+              current.current.layout();
+            });
+          };
+
+          yield* Effect.addFinalizer(() =>
+            Effect.sync(() => cancelAnimationFrame(frame)),
+          );
+
           const observer = yield* Effect.acquireRelease(
-            Effect.sync(
-              () => new ResizeObserver(() => current.current.layout()),
-            ),
+            Effect.sync(() => new ResizeObserver(updateLayout)),
             (observer) => Effect.sync(() => observer.disconnect()),
           );
 
@@ -49,20 +61,22 @@ export function usePageEvents(events: Events) {
               BrowserStream.fromEventListenerDocument('toggle', {
                 capture: true,
               }),
+              BrowserStream.fromEventListenerDocument('load', {
+                capture: true,
+              }),
+              Stream.fromEventListener(document.fonts, 'loadingdone'),
+              ...(window.visualViewport
+                ? [
+                    Stream.fromEventListener(window.visualViewport, 'resize'),
+                    Stream.fromEventListener(window.visualViewport, 'scroll'),
+                  ]
+                : []),
             ],
             { concurrency: 'unbounded' },
           );
 
           yield* layout.pipe(
-            Stream.throttle({
-              cost: () => 1,
-              units: 1,
-              duration: '16 millis',
-              strategy: 'enforce',
-            }),
-            Stream.runForEach(() =>
-              Effect.sync(() => current.current.layout()),
-            ),
+            Stream.runForEach(() => Effect.sync(updateLayout)),
             Effect.forkScoped,
           );
           yield* BrowserStream.fromEventListenerWindow('hashchange').pipe(

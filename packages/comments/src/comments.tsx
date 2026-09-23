@@ -277,6 +277,9 @@ export default function Comments({
     }
   }, [activeThread]);
 
+  const selectedPoint = target ? pointFor(target, root.current) : null;
+  const selectedElement = selectedPoint?.element;
+
   const anchor = useMemo(() => {
     if (!target || !mounted) return null;
 
@@ -288,27 +291,31 @@ export default function Comments({
           new DOMRect(window.innerWidth - 12, 12, 0, 23),
       };
 
+    if (!selectedElement) return null;
+
     return {
-      contextElement: root.current ?? undefined,
+      contextElement: selectedElement,
       getBoundingClientRect: () => {
         const point = pointFor(target, root.current);
+
+        if (!point) return new DOMRect();
         const right = root.current?.getBoundingClientRect().right ?? 0;
 
         const inMargin =
           selected?.kind === 'thread' && window.innerWidth - right >= 310;
 
         return new DOMRect(
-          inMargin ? right + 4 : (point?.x ?? 16),
-          inMargin ? (point?.y ?? 80) : (point?.rect.top ?? 80),
+          inMargin ? right + 4 : point.x,
+          inMargin ? point.y : point.rect.top,
           0,
-          inMargin ? 0 : (point?.rect.height ?? 0),
+          inMargin ? 0 : point.rect.height,
         );
       },
     };
-  }, [mounted, target, selected?.kind]);
+  }, [mounted, target, selected?.kind, selectedElement]);
 
   if (!mounted) return null;
-  const selectedPoint = target ? pointFor(target, root.current) : null;
+  const unavailableTarget = target?.selector && !selectedPoint;
   const previewPoint = hover && canPick ? pointFor(hover, root.current) : null;
   const highlight = selectedPoint ?? previewPoint;
 
@@ -462,6 +469,7 @@ export default function Comments({
           anchor={anchor ?? toolbar.current}
           placement={target?.selector ? 'bottom-start' : 'bottom-end'}
           label="New comment"
+          layoutVersion={layout}
           className="pc-new-comment"
           onClose={closeCard}
         >
@@ -469,6 +477,11 @@ export default function Comments({
             title={target?.quote ?? 'Page comment'}
             onClose={closeCard}
           />
+          {unavailableTarget && (
+            <output className="pc-status">
+              Selected element is hidden or unavailable.
+            </output>
+          )}
           {composer}
           {typing}
         </FloatingPanel>
@@ -478,6 +491,7 @@ export default function Comments({
           anchor={anchor ?? toolbar.current}
           placement={target?.selector ? 'bottom-start' : 'bottom-end'}
           label="Comment thread"
+          layoutVersion={layout}
           focusIndex={0}
           className="pc-thread-panel"
           onClose={closeCard}
@@ -497,6 +511,11 @@ export default function Comments({
               like(activeThread.id, messageId, liked)
             }
           >
+            {unavailableTarget && (
+              <output className="pc-status">
+                Selected element is hidden or unavailable.
+              </output>
+            )}
             {composer}
             {typing}
           </ThreadCard>
