@@ -266,15 +266,19 @@ export class RoomClient extends Context.Service<
                     case 'thread':
                       yield* SubscriptionRef.update(state, (value) => ({
                         ...value,
-                        threads: value.threads.some(
-                          (thread) => thread.id === event.thread.id,
-                        )
-                          ? value.threads.map((thread) =>
-                              thread.id === event.thread.id
-                                ? event.thread
-                                : thread,
+                        threads: !event.thread.messages.length
+                          ? value.threads.filter(
+                              (thread) => thread.id !== event.thread.id,
                             )
-                          : [...value.threads, event.thread],
+                          : value.threads.some(
+                                (thread) => thread.id === event.thread.id,
+                              )
+                            ? value.threads.map((thread) =>
+                                thread.id === event.thread.id
+                                  ? event.thread
+                                  : thread,
+                              )
+                            : [...value.threads, event.thread],
                       }));
                       break;
                     case 'presence':

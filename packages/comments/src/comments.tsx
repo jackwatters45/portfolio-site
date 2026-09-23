@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { Composer } from './composer';
 import { FloatingPanel, PanelHeading } from './floating-panel';
 import { Icon } from './icons';
+import { MessageActions } from './message-actions';
 import {
   GENERAL_TARGET,
   validName,
@@ -86,7 +87,8 @@ export default function Comments({
   );
 
   const pageMessageCount = pageThreads.reduce(
-    (count, thread) => count + thread.messages.length,
+    (count, thread) =>
+      count + thread.messages.filter((message) => !message.deletedAt).length,
     0,
   );
 
@@ -121,7 +123,7 @@ export default function Comments({
     [mounted],
   );
 
-  const sending = live.sending;
+  const sending = live.sending || live.changing;
   const stopTyping = () => live.updatePresence({ typing: null });
 
   const closeCard = () => {
@@ -399,12 +401,12 @@ export default function Comments({
               type="button"
               className={`pc-pin ${activeThread?.id === thread.id ? 'pc-pin-active' : ''}`}
               style={{ left: point.x, top: point.y }}
-              aria-label={`${thread.messages.length} ${thread.messages.length === 1 ? 'comment' : 'comments'} on ${thread.target.quote}`}
+              aria-label={`${thread.messages.filter((message) => !message.deletedAt).length} comments on ${thread.target.quote}`}
               aria-pressed={activeThread?.id === thread.id}
               disabled={sending}
               onClick={() => openThread(thread, false)}
             >
-              {thread.messages.length}
+              {thread.messages.filter((message) => !message.deletedAt).length}
             </button>
           ) : null;
         })}
@@ -490,6 +492,19 @@ export default function Comments({
             onLocate={() => reveal(activeThread.target, root.current)}
             onCopy={() => copyLink(activeThread)}
             authorId={preferences.id}
+            actions={(message) =>
+              identified && live.ownerId && message.ownerId === live.ownerId ? (
+                <MessageActions
+                  message={message}
+                  threadId={activeThread.id}
+                  store={store}
+                  author={preferences}
+                  connection={live.connection}
+                  sending={sending}
+                  change={live.change}
+                />
+              ) : null
+            }
             likesDisabled={
               !identified || live.connection !== 'live' || live.liking
             }

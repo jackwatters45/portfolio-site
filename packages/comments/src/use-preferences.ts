@@ -13,6 +13,7 @@ import {
   Atom,
   type AtomRegistry,
 } from 'effect/unstable/reactivity';
+import { Ownership } from './ownership';
 import { Author, BODY_LIMIT, COLORS, Mutation, NAME_LIMIT } from './protocol';
 
 class PreferencesSchema extends Schema.Class<PreferencesSchema>(
@@ -87,6 +88,15 @@ export const preferencesAtom = Atom.kvs({
       markers: true,
     }),
 });
+
+export const ownershipAtom = Atom.family((endpoint: string) =>
+  Atom.kvs({
+    runtime: storageRuntime,
+    key: `page-comments:ownership:${endpoint}`,
+    schema: Schema.NullOr(Ownership),
+    defaultValue: () => null,
+  }).pipe(Atom.keepAlive),
+);
 
 const drafts = Atom.family((key: string) =>
   Atom.kvs({

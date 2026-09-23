@@ -6,16 +6,24 @@ import * as Layer from 'effect/Layer';
 import * as Schema from 'effect/Schema';
 import { AsyncResult, Atom } from 'effect/unstable/reactivity';
 import { useMemo } from 'react';
+import { generateOwnership } from './ownership';
 import {
   CommentRequestError,
   Mutation,
   SetLike,
+  type EditComment,
+  type DeleteComment,
   validName,
   type Author,
   type Target,
 } from './protocol';
 import { initialRoom, RoomClient, type Presence } from './room-client';
-import { DraftSchema, preferencesAtom, type Draft } from './use-preferences';
+import {
+  DraftSchema,
+  ownershipAtom,
+  preferencesAtom,
+  type Draft,
+} from './use-preferences';
 
 export type { Connection } from './room-client';
 
@@ -50,6 +58,11 @@ const rooms = Atom.family((endpoint: string) => {
       Effect.gen(function* () {
         const preferences = get(preferencesAtom);
 
+        const ownership =
+          get(ownershipAtom(endpoint)) ?? (yield* generateOwnership());
+
+        get.set(ownershipAtom(endpoint), ownership);
+
         const author = {
           id: preferences.id,
           name: preferences.name,
@@ -65,6 +78,7 @@ const rooms = Atom.family((endpoint: string) => {
             (input.threadId
               ? {
                   type: 'reply',
+                  credential: ownership.credential,
                   requestId,
                   threadId: input.threadId,
                   author,
@@ -72,6 +86,7 @@ const rooms = Atom.family((endpoint: string) => {
                 }
               : {
                   type: 'create',
+                  credential: ownership.credential,
                   requestId,
                   target: input.target,
                   author,
@@ -97,6 +112,58 @@ const rooms = Atom.family((endpoint: string) => {
             }),
         }),
       ),
+    ),
+    change: runtime.fn(
+      (
+        input: {
+          change:
+            | Omit<EditComment, 'author' | 'credential' | 'requestId'>
+            | Omit<DeleteComment, 'author' | 'credential' | 'requestId'>;
+          draft: Atom.Writable<Draft, Draft>;
+        },
+        get,
+      ) =>
+        Effect.gen(function* () {
+          const ownership = get(ownershipAtom(endpoint));
+
+          if (!ownership)
+            return yield* new CommentRequestError({
+              message: 'The original browser key is unavailable.',
+            });
+          const previous = get(input.draft).request;
+
+          const event = yield* Schema.decodeUnknownEffect(Mutation)(
+            previous ?? {
+              ...input.change,
+              author: get(preferencesAtom),
+              credential: ownership.credential,
+              requestId: yield* Crypto.Crypto.use(
+                (crypto) => crypto.randomUUIDv4,
+              ),
+            },
+          );
+
+          get.set(
+            input.draft,
+            new DraftSchema({
+              body: input.change.type === 'edit' ? input.change.body : '',
+              request: event,
+            }),
+          );
+          const threadId = yield* RoomClient.use((room) => room.submit(event));
+          get.set(input.draft, new DraftSchema({ body: '' }));
+
+          return threadId;
+        }).pipe(
+          Effect.catchTags({
+            PlatformError: (error) =>
+              new CommentRequestError({ message: error.message }),
+            SchemaError: () =>
+              new CommentRequestError({
+                message: 'Check your name and comment.',
+              }),
+          }),
+        ),
     ),
     like: runtime.fn(
       (input: { threadId: string; messageId: string; liked: boolean }, get) =>
@@ -153,6 +220,9 @@ export function useRoom(endpoint: string, author: Author) {
   useAtomMount(atoms.connection);
   useAtomMount(atoms.author);
   const state = useAtomValue(atoms.state);
+  const ownership = useAtomValue(ownershipAtom(endpoint));
+  const change = useAtomSet(atoms.change, { mode: 'promise' });
+  const changing = useAtomValue(atoms.change);
   const submission = useAtomValue(atoms.submit);
   const submit = useAtomSet(atoms.submit, { mode: 'promise' });
   const like = useAtomSet(atoms.like, { mode: 'promise' });
@@ -162,6 +232,9 @@ export function useRoom(endpoint: string, author: Author) {
 
   return {
     ...state,
+    ownerId: ownership?.id,
+    change,
+    changing: changing.waiting,
     submit,
     like,
     liking: liking.waiting,

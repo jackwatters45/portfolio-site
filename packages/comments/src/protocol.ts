@@ -4,6 +4,10 @@ export const NAME_LIMIT = 40;
 
 export const BODY_LIMIT = 2000;
 
+export const OwnershipCredential = Schema.String.check(
+  Schema.isPattern(/^[a-f0-9]{64}$/),
+);
+
 export const COLORS = [
   '#5268e8',
   '#bf4b72',
@@ -51,6 +55,9 @@ export class Message extends Schema.Class<Message>('CommentMessage')({
   author: Author,
   body: text(BODY_LIMIT),
   createdAt: Schema.String,
+  ownerId: Schema.optional(OwnershipCredential),
+  editedAt: Schema.optional(Schema.String),
+  deletedAt: Schema.optional(Schema.String),
 }) {}
 
 export class Thread extends Schema.Class<Thread>('CommentThread')({
@@ -80,6 +87,7 @@ export class Peer extends Schema.Class<Peer>('CommentPeer')({
 export class CreateComment extends Schema.Class<CreateComment>('CreateComment')(
   {
     type: Schema.Literal('create'),
+    credential: OwnershipCredential,
     requestId: Id,
     author: Author,
     target: Target,
@@ -89,6 +97,7 @@ export class CreateComment extends Schema.Class<CreateComment>('CreateComment')(
 
 export class Reply extends Schema.Class<Reply>('Reply')({
   type: Schema.Literal('reply'),
+  credential: OwnershipCredential,
   requestId: Id,
   author: Author,
   threadId: Id,
@@ -104,7 +113,35 @@ export class SetLike extends Schema.Class<SetLike>('SetLike')({
   liked: Schema.Boolean,
 }) {}
 
-export const Mutation = Schema.Union([CreateComment, Reply, SetLike]);
+export class EditComment extends Schema.Class<EditComment>('EditComment')({
+  type: Schema.Literal('edit'),
+  requestId: Id,
+  author: Author,
+  credential: OwnershipCredential,
+  threadId: Id,
+  messageId: Id,
+  body: text(BODY_LIMIT),
+  expectedBody: text(BODY_LIMIT),
+}) {}
+
+export class DeleteComment extends Schema.Class<DeleteComment>('DeleteComment')(
+  {
+    type: Schema.Literal('delete'),
+    requestId: Id,
+    author: Author,
+    credential: OwnershipCredential,
+    threadId: Id,
+    messageId: Id,
+  },
+) {}
+
+export const Mutation = Schema.Union([
+  CreateComment,
+  Reply,
+  SetLike,
+  EditComment,
+  DeleteComment,
+]);
 
 export type Mutation = typeof Mutation.Type;
 

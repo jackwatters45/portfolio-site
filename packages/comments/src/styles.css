@@ -105,6 +105,23 @@
   white-space: nowrap;
 }
 
+.pc-root .pc-message-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pc-root .pc-message-actions button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.pc-root .pc-edited {
+  color: var(--pc-muted);
+  font-size: 11px;
+}
+.pc-root .pc-delete-confirmation {
+  padding-top: 8px;
+}
+
 /* The launcher stays fixed. Tools expand to its right. */
 .pc-root .pc-toolbar {
   position: fixed;
