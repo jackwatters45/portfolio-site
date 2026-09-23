@@ -34,7 +34,7 @@ const decodePublicId = Schema.decodeUnknownOption(PublicIdSchema);
 const makePublicId = (): PublicId =>
   PublicIdSchema.make(crypto.randomUUID().replaceAll('-', '').toLowerCase());
 
-interface PublishingServiceShape {
+interface PublicationOperations {
   readonly configureProfile: (input: {
     readonly handle: string;
     readonly displayName: string;
@@ -56,7 +56,7 @@ interface PublishingServiceShape {
 
 export class PublishingService extends Context.Service<
   PublishingService,
-  PublishingServiceShape
+  PublicationOperations
 >()('mood-board/PublishingService') {
   static readonly layer = Layer.effect(
     this,
@@ -73,12 +73,14 @@ export class PublishingService extends Context.Service<
           const handle = normalizeProfileHandle(input.handle);
           const displayName = normalizeDisplayName(input.displayName);
           const bio = normalizeProfileBio(input.bio);
+
           if (handle === null || displayName === null || bio === null) {
             return yield* new PublishingError({
               code: 'Invalid',
               message: 'The profile handle, display name, or bio is invalid.',
             });
           }
+
           return yield* mutex
             .withPermit(repo.upsertProfile(handle, displayName, bio))
             .pipe(Effect.mapError(persistenceError));
@@ -91,6 +93,7 @@ export class PublishingService extends Context.Service<
         const result = yield* mutex
           .withPermit(repo.publish(boardId, makePublicId()))
           .pipe(Effect.mapError(persistenceError));
+
         if (result === null) {
           return yield* new PublishingError({
             code: 'NotFound',
@@ -98,6 +101,7 @@ export class PublishingService extends Context.Service<
               'Create the publisher profile and board before publishing.',
           });
         }
+
         return result;
       });
 
@@ -113,7 +117,9 @@ export class PublishingService extends Context.Service<
         rawHandle: string,
       ) {
         const handle = normalizeProfileHandle(rawHandle);
+
         if (handle === null) return null;
+
         return yield* mutex
           .withPermit(repo.getProfile(handle))
           .pipe(Effect.mapError(persistenceError));
@@ -123,7 +129,9 @@ export class PublishingService extends Context.Service<
         rawPublicId: string,
       ) {
         const publicId = Option.getOrNull(decodePublicId(rawPublicId));
+
         if (publicId === null) return null;
+
         return yield* mutex
           .withPermit(repo.getBoard(publicId))
           .pipe(Effect.mapError(persistenceError));

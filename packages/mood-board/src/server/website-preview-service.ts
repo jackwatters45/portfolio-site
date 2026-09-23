@@ -24,7 +24,7 @@ import {
 import { parseWebsitePreview } from './website-preview-parser';
 import { parseXPostOEmbed } from './x-post-preview-parser';
 
-interface WebsitePreviewServiceShape {
+interface WebsitePreviewOperations {
   readonly resolve: (
     url: string,
   ) => Effect.Effect<WebsitePreview, BoardBackendError>;
@@ -36,16 +36,22 @@ interface WebsitePreviewServiceShape {
 const XPreviewCacheTimestampMillisSchema = NonNegativeIntegerSchema.pipe(
   Schema.brand('XPreviewCacheTimestampMillis'),
 );
+
 type XPreviewCacheTimestampMillis =
   typeof XPreviewCacheTimestampMillisSchema.Type;
+
 const XPreviewCacheDurationMillisSchema = PositiveIntegerSchema.pipe(
   Schema.brand('XPreviewCacheDurationMillis'),
 );
+
 type XPreviewCacheDurationMillis =
   typeof XPreviewCacheDurationMillisSchema.Type;
+
 const MILLISECONDS_PER_MINUTE = 60_000;
+
 const X_PREVIEW_FAILURE_CACHE_TTL: XPreviewCacheDurationMillis =
   XPreviewCacheDurationMillisSchema.make(5 * MILLISECONDS_PER_MINUTE);
+
 const X_PREVIEW_SUCCESS_CACHE_TTL: XPreviewCacheDurationMillis =
   XPreviewCacheDurationMillisSchema.make(60 * MILLISECONDS_PER_MINUTE);
 
@@ -65,18 +71,20 @@ const fallbackPreview = (url: WebsiteUrl): WebsitePreview => {
   const normalizedLabel = hostname.slice(0, 80);
   const title = WebsiteTitleSchema.make(normalizedLabel);
   const siteLabel = WebsiteSiteLabelSchema.make(normalizedLabel);
+
   return { url, preferredLayout: 'card', title, siteLabel };
 };
 
 export class WebsitePreviewService extends Context.Service<
   WebsitePreviewService,
-  WebsitePreviewServiceShape
+  WebsitePreviewOperations
 >()('mood-board/WebsitePreviewService') {
   static readonly layer = Layer.effect(
     this,
     Effect.gen(function* () {
       const fetcher = yield* WebsitePreviewFetcher;
       const permits = yield* Semaphore.make(4);
+
       const xCache = new Map<
         XPostUrl,
         {
@@ -89,11 +97,13 @@ export class WebsitePreviewService extends Context.Service<
         input: string,
       ) {
         const normalizedInput = normalizeWebsiteUrl(input);
+
         if (normalizedInput === null) {
           return yield* invalid(
             'Use a public HTTPS website URL without credentials or a custom port.',
           );
         }
+
         let currentUrl = normalizedInput;
 
         for (
@@ -110,7 +120,9 @@ export class WebsitePreviewService extends Context.Service<
                   : logFetchFailure(error),
             }),
           );
+
           if (response === null) return fallbackPreview(currentUrl);
+
           if ([301, 302, 303, 307, 308].includes(response.status)) {
             if (
               response.location === undefined ||
@@ -118,7 +130,9 @@ export class WebsitePreviewService extends Context.Service<
             ) {
               return yield* invalid('That website redirected too many times.');
             }
+
             let redirectUrl: string;
+
             try {
               redirectUrl = new URL(response.location, currentUrl).href;
             } catch {
@@ -126,29 +140,37 @@ export class WebsitePreviewService extends Context.Service<
                 'That website returned an invalid redirect.',
               );
             }
+
             const redirected = normalizeWebsiteUrl(redirectUrl);
+
             if (redirected === null) {
               return yield* invalid(
                 'That website redirects to an unsupported or private address.',
               );
             }
+
             currentUrl = redirected;
             continue;
           }
+
           if (response.status < 200 || response.status >= 300) {
             return fallbackPreview(currentUrl);
           }
+
           const contentType = response.contentType
             ?.split(';', 1)[0]
             ?.trim()
             .toLowerCase();
+
           if (
             contentType !== 'text/html' &&
             contentType !== 'application/xhtml+xml'
           ) {
             return fallbackPreview(currentUrl);
           }
+
           if (response.body === undefined) return fallbackPreview(currentUrl);
+
           try {
             return parseWebsitePreview(
               new TextDecoder().decode(response.body),
@@ -165,37 +187,45 @@ export class WebsitePreviewService extends Context.Service<
       const resolveXPostOne = Effect.fn('WebsitePreviewService.resolveXPost')(
         function* (input: string) {
           const src = normalizeXPostSource(input);
+
           if (src === null)
             return yield* invalid('Use a public X or Twitter post URL.');
           const cached = xCache.get(src);
           const lookupTime = yield* Clock.currentTimeMillis;
+
           const lookupTimestamp =
             XPreviewCacheTimestampMillisSchema.make(lookupTime);
+
           if (cached !== undefined && cached.expiresAt > lookupTimestamp)
             return cached.preview;
 
           const endpoint = WebsiteUrlSchema.make(
             `https://publish.x.com/oembed?url=${encodeURIComponent(src)}&omit_script=1&dnt=1`,
           );
+
           const response = yield* fetcher
             .fetch(endpoint)
             .pipe(Effect.catch(logFetchFailure));
+
           const contentType = response?.contentType
             ?.split(';', 1)[0]
             ?.trim()
             .toLowerCase();
+
           const resolved =
-            response !== null &&
-            response.status === 200 &&
+            response?.status === 200 &&
             contentType === 'application/json' &&
             response.body !== undefined
               ? parseXPostOEmbed(response.body, src)
               : null;
+
           const preview = resolved ?? { src };
+
           const ttl =
             resolved === null
               ? X_PREVIEW_FAILURE_CACHE_TTL
               : X_PREVIEW_SUCCESS_CACHE_TTL;
+
           const insertionTime = yield* Clock.currentTimeMillis;
           xCache.set(src, {
             preview,
@@ -203,8 +233,10 @@ export class WebsitePreviewService extends Context.Service<
               insertionTime + ttl,
             ),
           });
+
           if (xCache.size > 100)
             xCache.delete(xCache.keys().next().value ?? src);
+
           return preview;
         },
       );

@@ -27,7 +27,7 @@ export interface MediaObjectRange {
   readonly length: MediaByteLength;
 }
 
-interface MediaObjectStoreShape {
+interface MediaObjectStorage {
   readonly put: (
     key: MediaId,
     bytes: Uint8Array,
@@ -43,5 +43,5 @@ interface MediaObjectStoreShape {
 
 export class MediaObjectStore extends Context.Service<
   MediaObjectStore,
-  MediaObjectStoreShape
+  MediaObjectStorage
 >()('mood-board/MediaObjectStore') {}

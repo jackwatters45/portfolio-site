@@ -32,6 +32,7 @@ export const PublicHandlers = HttpRouter.use((router) =>
     const getProfile = Effect.fn('PublicHandlers.GetProfile')(function* () {
       const params = yield* HttpRouter.params;
       const profile = yield* publishing.getProfile(params.handle ?? '');
+
       return profile === null
         ? notFound()
         : HttpServerResponse.jsonUnsafe(profile, responseOptions);
@@ -40,6 +41,7 @@ export const PublicHandlers = HttpRouter.use((router) =>
     const getBoard = Effect.fn('PublicHandlers.GetBoard')(function* () {
       const params = yield* HttpRouter.params;
       const board = yield* publishing.getBoard(params.publicId ?? '');
+
       return board === null
         ? notFound()
         : HttpServerResponse.jsonUnsafe(board, responseOptions);

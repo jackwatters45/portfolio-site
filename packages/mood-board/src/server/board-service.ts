@@ -2,6 +2,8 @@ import {
   Context,
   Effect,
   Layer,
+  Match,
+  Predicate,
   Option,
   PubSub,
   Schema,
@@ -28,6 +30,7 @@ import {
   type BoardId,
   type BoardSnapshot,
   type BoardSummary,
+  type RemoteBoardItem,
   MAX_REMOTE_ITEMS,
 } from '../lib/board-rpc';
 import {
@@ -65,19 +68,32 @@ import {
 } from './board-repo';
 
 const decodeXAuthorHandle = Schema.decodeUnknownOption(XAuthorHandleSchema);
+
 const decodeXAuthorName = Schema.decodeUnknownOption(XAuthorNameSchema);
+
 const decodeXPostDate = Schema.decodeUnknownOption(XPostDateSchema);
+
 const decodeXPostText = Schema.decodeUnknownOption(XPostTextSchema);
+
 const decodeWebsiteTitle = Schema.decodeUnknownOption(WebsiteTitleSchema);
+
 const decodeWebsiteDescription = Schema.decodeUnknownOption(
   WebsiteDescriptionSchema,
 );
+
 const decodeWebsiteSiteLabel = Schema.decodeUnknownOption(
   WebsiteSiteLabelSchema,
 );
+
 const decodeSupportedImageSource = Schema.decodeUnknownOption(
   SupportedImageSourceSchema,
 );
+
+type NormalizedBoardItem = {
+  -readonly [K in keyof RemoteBoardItem]: RemoteBoardItem[K];
+};
+
+type NormalizedCommit = { -readonly [K in keyof CommitInput]: CommitInput[K] };
 
 const persistenceError = () =>
   new BoardBackendError({
@@ -91,32 +107,33 @@ const missingBoardError = () =>
     message: 'That board does not exist.',
   });
 
-const managementError = (rejection: ManagementRejected) => {
-  switch (rejection._tag) {
-    case 'BoardLimit':
-      return new BoardBackendError({
-        code: 'Limit',
-        message: 'This workspace can contain at most 100 boards.',
-      });
-    case 'LastBoard':
-      return new BoardBackendError({
-        code: 'Conflict',
-        message: 'The last board cannot be deleted.',
-      });
-    case 'DeletedBoardId':
-      return new BoardBackendError({
-        code: 'Conflict',
-        message: 'A deleted board id cannot be reused.',
-      });
-    case 'InvalidOperation':
-      return new BoardBackendError({
-        code: 'Invalid',
-        message: 'That board operation is not valid.',
-      });
-  }
-};
+const managementError = (rejection: ManagementRejected) =>
+  Match.value(rejection).pipe(
+    Match.tagsExhaustive({
+      BoardLimit: () =>
+        new BoardBackendError({
+          code: 'Limit',
+          message: 'This workspace can contain at most 100 boards.',
+        }),
+      LastBoard: () =>
+        new BoardBackendError({
+          code: 'Conflict',
+          message: 'The last board cannot be deleted.',
+        }),
+      DeletedBoardId: () =>
+        new BoardBackendError({
+          code: 'Conflict',
+          message: 'A deleted board id cannot be reused.',
+        }),
+      InvalidOperation: () =>
+        new BoardBackendError({
+          code: 'Invalid',
+          message: 'That board operation is not valid.',
+        }),
+    }),
+  );
 
-interface BoardServiceShape {
+interface BoardOperations {
   readonly list: () => Effect.Effect<
     ReadonlyArray<BoardSummary>,
     BoardBackendError
@@ -149,13 +166,14 @@ interface BoardServiceShape {
 
 export class BoardService extends Context.Service<
   BoardService,
-  BoardServiceShape
+  BoardOperations
 >()('mood-board/BoardService') {
   static readonly layer = Layer.effect(
     this,
     Effect.gen(function* () {
       const repo = yield* BoardRepo;
       const mutex = yield* Semaphore.make(1);
+
       const channels = new Map<
         BoardId,
         PubSub.PubSub<BoardChange | BoardDeleted>
@@ -179,9 +197,11 @@ export class BoardService extends Context.Service<
         boardId: BoardId,
       ) {
         const existing = channels.get(boardId);
+
         if (existing !== undefined) return existing;
         const channel = yield* PubSub.sliding<BoardChange | BoardDeleted>(256);
         channels.set(boardId, channel);
+
         return channel;
       });
 
@@ -216,7 +236,9 @@ export class BoardService extends Context.Service<
         const result = yield* recoverPersistence(
           mutex.withPermit(repo.create(boardId, title)),
         );
+
         if ('_tag' in result) return yield* managementError(result);
+
         return result;
       });
 
@@ -228,8 +250,11 @@ export class BoardService extends Context.Service<
         const result = yield* recoverPersistence(
           mutex.withPermit(repo.duplicate(sourceBoardId, boardId, title)),
         );
+
         if (result === null) return yield* missingBoardError();
+
         if ('_tag' in result) return yield* managementError(result);
+
         return result;
       });
 
@@ -241,13 +266,17 @@ export class BoardService extends Context.Service<
             Effect.uninterruptible(
               Effect.gen(function* () {
                 const result = yield* repo.delete(boardId);
-                if (result._tag !== 'Deleted') {
+
+                if (!Predicate.isTagged(result, 'Deleted')) {
                   return yield* managementError(result);
                 }
+
                 const channel = channels.get(boardId);
+
                 if (channel !== undefined)
                   yield* PubSub.publish(channel, result);
                 channels.delete(boardId);
+
                 return result;
               }),
             ),
@@ -259,14 +288,18 @@ export class BoardService extends Context.Service<
         input: CommitInput,
       ) {
         let invalidMedia = false;
+
         const upserts = input.upserts.map((item) => {
-          let normalized = item;
+          let normalized: NormalizedBoardItem = item;
+
           const annotationTitle = normalizeImageAnnotationTitle(
             item.annotationTitle,
           );
+
           const annotationDescription = normalizeImageAnnotationDescription(
             item.annotationDescription,
           );
+
           if (
             (item.annotationTitle !== undefined ||
               item.annotationDescription !== undefined) &&
@@ -278,14 +311,15 @@ export class BoardService extends Context.Service<
           )
             invalidMedia = true;
           else if (item.kind === 'image') {
-            normalized = {
-              ...normalized,
-              ...(annotationTitle === undefined ? {} : { annotationTitle }),
-              ...(annotationDescription === undefined
-                ? {}
-                : { annotationDescription }),
-            };
+            normalized = { ...normalized };
+
+            if (annotationTitle !== undefined)
+              normalized.annotationTitle = annotationTitle;
+
+            if (annotationDescription !== undefined)
+              normalized.annotationDescription = annotationDescription;
           }
+
           if (
             item.kind !== 'x' &&
             (item.xDisplay !== undefined ||
@@ -297,6 +331,7 @@ export class BoardService extends Context.Service<
               item.xPostDate !== undefined)
           )
             invalidMedia = true;
+
           if (
             item.kind !== 'website' &&
             (item.websiteUrl !== undefined ||
@@ -306,6 +341,7 @@ export class BoardService extends Context.Service<
               item.websiteSiteLabel !== undefined)
           )
             invalidMedia = true;
+
           if (item.kind === 'image') {
             if (
               (item.src === undefined) === (item.mediaId === undefined) ||
@@ -319,6 +355,7 @@ export class BoardService extends Context.Service<
           } else if (item.kind === 'spotify') {
             if (item.mediaId !== undefined) invalidMedia = true;
             const src = normalizeSpotifySource(item.src ?? '');
+
             if (
               src === null ||
               item.width < MIN_AUDIO_CARD_WIDTH ||
@@ -329,6 +366,7 @@ export class BoardService extends Context.Service<
           } else if (item.kind === 'youtube') {
             if (item.mediaId !== undefined) invalidMedia = true;
             const src = normalizeYouTubeSource(item.src ?? '');
+
             if (
               src === null ||
               item.width < MIN_AUDIO_CARD_WIDTH ||
@@ -338,6 +376,7 @@ export class BoardService extends Context.Service<
             else normalized = { ...normalized, src };
           } else if (item.kind === 'x') {
             const src = normalizeXPostSource(item.src ?? '');
+
             const xAuthorName = Option.getOrUndefined(
               decodeXAuthorName(
                 cleanXSnapshotText(
@@ -346,6 +385,7 @@ export class BoardService extends Context.Service<
                 ),
               ),
             );
+
             const xAuthorHandle = Option.getOrNull(
               decodeXAuthorHandle(
                 cleanXSnapshotText(
@@ -354,12 +394,15 @@ export class BoardService extends Context.Service<
                 ),
               ),
             );
+
             const xPostText = Option.getOrUndefined(
               decodeXPostText(
                 cleanXSnapshotText(item.xPostText, MAX_X_POST_TEXT_CHARACTERS),
               ),
             );
+
             const xPostDate = Option.getOrNull(decodeXPostDate(item.xPostDate));
+
             if (
               src === null ||
               item.width < MIN_X_CARD_WIDTH ||
@@ -378,19 +421,23 @@ export class BoardService extends Context.Service<
               (item.xPostDate !== undefined && xPostDate === null)
             )
               invalidMedia = true;
-            else
-              normalized = {
-                ...normalized,
-                src,
-                ...(xAuthorName === undefined ? {} : { xAuthorName }),
-                ...(xAuthorHandle === null ? {} : { xAuthorHandle }),
-                ...(xPostText === undefined ? {} : { xPostText }),
-              };
+            else {
+              normalized = { ...normalized, src };
+
+              if (xAuthorName !== undefined)
+                normalized.xAuthorName = xAuthorName;
+
+              if (xAuthorHandle !== null)
+                normalized.xAuthorHandle = xAuthorHandle;
+
+              if (xPostText !== undefined) normalized.xPostText = xPostText;
+            }
           } else if (item.kind === 'audio') {
             const src =
               item.src === undefined
                 ? undefined
                 : normalizeDirectAudioSource(item.src);
+
             if (
               (item.src === undefined) === (item.mediaId === undefined) ||
               (item.src !== undefined && src === null) ||
@@ -402,24 +449,30 @@ export class BoardService extends Context.Service<
               normalized = { ...normalized, src };
           } else if (item.kind === 'website') {
             const websiteUrl = normalizeWebsiteUrl(item.websiteUrl ?? '');
+
             const websiteImageUrl =
               item.websiteImageUrl === undefined
                 ? undefined
                 : (normalizeWebsiteImageUrl(item.websiteImageUrl) ?? undefined);
+
             const websiteTitle = Option.getOrNull(
               decodeWebsiteTitle(item.websiteTitle?.trim()),
             );
+
             const websiteDescriptionCandidate =
               item.websiteDescription?.trim() || undefined;
+
             const websiteDescription =
               websiteDescriptionCandidate === undefined
                 ? undefined
                 : Option.getOrNull(
                     decodeWebsiteDescription(websiteDescriptionCandidate),
                   );
+
             const websiteSiteLabel = Option.getOrNull(
               decodeWebsiteSiteLabel(item.websiteSiteLabel?.trim()),
             );
+
             if (
               websiteUrl === null ||
               (item.websiteImageUrl !== undefined &&
@@ -437,69 +490,95 @@ export class BoardService extends Context.Service<
               item.label !== undefined
             )
               invalidMedia = true;
-            else
+            else {
               normalized = {
                 ...normalized,
                 websiteUrl,
-                ...(websiteImageUrl === undefined ? {} : { websiteImageUrl }),
                 websiteTitle,
-                ...(websiteDescription === undefined
-                  ? {}
-                  : { websiteDescription }),
                 websiteSiteLabel,
               };
+
+              if (websiteImageUrl !== undefined)
+                normalized.websiteImageUrl = websiteImageUrl;
+
+              if (websiteDescription !== undefined)
+                normalized.websiteDescription = websiteDescription;
+            }
           }
+
           if (item.href === undefined) return normalized;
           const href = normalizeImageLink(item.href);
+
           if (item.kind !== 'image' || href === null) {
             invalidMedia = true;
+
             return normalized;
           }
+
           return { ...normalized, href };
         });
+
         if (invalidMedia) {
           return yield* new BoardBackendError({
             code: 'Invalid',
             message: 'Board media URLs are invalid or unsupported.',
           });
         }
-        const normalizedInput = {
-          ...input,
-          upserts,
-          ...(typeof input.background === 'string'
-            ? { background: input.background.toUpperCase() }
-            : {}),
-        };
+
+        const normalizedInput: NormalizedCommit = { ...input, upserts };
+
+        if (input.background !== undefined && input.background !== null) {
+          normalizedInput.background = input.background.toUpperCase();
+        }
+
         return yield* recoverPersistence(
           mutex.withPermit(
             Effect.uninterruptible(
               Effect.gen(function* () {
                 const result = yield* repo.commit(normalizedInput);
+
                 if (result === null) return yield* missingBoardError();
+
                 if ('_tag' in result) {
-                  const message =
-                    result._tag === 'TooManyItems'
-                      ? `A board can contain at most ${MAX_REMOTE_ITEMS} items.`
-                      : result._tag === 'BoardTooLarge'
-                        ? 'That board is too large to sync.'
-                        : result._tag === 'MutationConflict'
-                          ? 'That mutation id was already used for another change.'
-                          : result._tag === 'InvalidMedia'
-                            ? 'Managed media is missing, not ready, or has the wrong kind.'
-                            : 'An item cannot be upserted and deleted in the same change.';
-                  const code =
-                    result._tag === 'TooManyItems' ||
-                    result._tag === 'BoardTooLarge'
-                      ? ('Limit' as const)
-                      : result._tag === 'MutationConflict'
-                        ? ('Conflict' as const)
-                        : ('Invalid' as const);
-                  return yield* new BoardBackendError({ code, message });
+                  return yield* Match.value(result).pipe(
+                    Match.tagsExhaustive({
+                      TooManyItems: () =>
+                        new BoardBackendError({
+                          code: 'Limit',
+                          message: `A board can contain at most ${MAX_REMOTE_ITEMS} items.`,
+                        }),
+                      BoardTooLarge: () =>
+                        new BoardBackendError({
+                          code: 'Limit',
+                          message: 'That board is too large to sync.',
+                        }),
+                      MutationConflict: () =>
+                        new BoardBackendError({
+                          code: 'Conflict',
+                          message:
+                            'That mutation id was already used for another change.',
+                        }),
+                      InvalidMedia: () =>
+                        new BoardBackendError({
+                          code: 'Invalid',
+                          message:
+                            'Managed media is missing, not ready, or has the wrong kind.',
+                        }),
+                      InvalidMutation: () =>
+                        new BoardBackendError({
+                          code: 'Invalid',
+                          message:
+                            'An item cannot be upserted and deleted in the same change.',
+                        }),
+                    }),
+                  );
                 }
+
                 if (result.applied) {
                   const channel = yield* channelFor(normalizedInput.boardId);
                   yield* PubSub.publish(channel, result.change);
                 }
+
                 return result.change;
               }),
             ),
@@ -510,6 +589,7 @@ export class BoardService extends Context.Service<
       const openSubscription = Effect.fn('BoardService.openSubscription')(
         function* (boardId: BoardId) {
           const snapshot = yield* repo.getSnapshot(boardId);
+
           if (snapshot === null) return yield* missingBoardError();
           const channel = yield* channelFor(boardId);
           const subscription = yield* PubSub.subscribe(channel);
@@ -517,10 +597,12 @@ export class BoardService extends Context.Service<
           const changes = Stream.fromSubscription(subscription).pipe(
             Stream.filter(
               (event) =>
-                event._tag === 'Deleted' || event.revision > snapshot.revision,
+                Predicate.isTagged(event, 'Deleted') ||
+                event.revision > snapshot.revision,
             ),
-            Stream.takeUntil((event) => event._tag === 'Deleted'),
+            Stream.takeUntil(Predicate.isTagged('Deleted')),
           );
+
           return Stream.concat(Stream.succeed(snapshot), changes);
         },
       );

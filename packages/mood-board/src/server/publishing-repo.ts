@@ -89,21 +89,75 @@ const decodeOwnerRow = Effect.fn('PublishingRepo.decodeOwnerRow')(function* (
   }).pipe(Effect.orDie);
 });
 
+interface PublicationBackgroundInput {
+  background?: SummaryRow['background_color'];
+  backgroundMediaId?: SummaryRow['background_media_id'];
+}
+
+interface PublicationSummaryInput extends PublicationBackgroundInput {
+  publicId: SummaryRow['public_id'];
+  title: SummaryRow['title'];
+  itemCount: SummaryRow['item_count'];
+  updatedAt: SummaryRow['updated_at'];
+  publishedAt: SummaryRow['published_at'];
+}
+
+interface PublicationItemInput {
+  kind: ItemRow['kind'];
+  x: ItemRow['x'];
+  y: ItemRow['y'];
+  width: ItemRow['width'];
+  height: ItemRow['height'];
+  rotation: ItemRow['rotation'];
+  order: ItemRow['order_index'];
+  src?: ItemRow['src'];
+  mediaId?: ItemRow['media_id'];
+  href?: ItemRow['href'];
+  annotationTitle?: ItemRow['annotation_title'];
+  annotationDescription?: ItemRow['annotation_description'];
+  text?: ItemRow['text'];
+  color?: ItemRow['color'];
+  label?: ItemRow['label'];
+  websiteUrl?: ItemRow['website_url'];
+  websiteImageUrl?: ItemRow['website_image_url'];
+  websiteTitle?: ItemRow['website_title'];
+  websiteDescription?: ItemRow['website_description'];
+  websiteSiteLabel?: ItemRow['website_site_label'];
+  xDisplay?: ItemRow['x_display'];
+  xTheme?: ItemRow['x_theme'];
+  xHideThread?: boolean;
+  xAuthorName?: ItemRow['x_author_name'];
+  xAuthorHandle?: ItemRow['x_author_handle'];
+  xPostText?: ItemRow['x_post_text'];
+  xPostDate?: ItemRow['x_post_date'];
+}
+
+interface PublicationBoardInput extends PublicationBackgroundInput {
+  version: 1;
+  title: PublicBoardRow['title'];
+  items: PublicBoard['board']['items'];
+  updatedAt: PublicBoardRow['updated_at'];
+}
+
 const decodeSummaryRow = Effect.fn('PublishingRepo.decodeSummaryRow')(
   function* (row: SummaryRow) {
-    return yield* Schema.decodeUnknownEffect(PublicBoardSummarySchema)({
+    const summary: PublicationSummaryInput = {
       publicId: row.public_id,
       title: row.title,
       itemCount: row.item_count,
       updatedAt: row.updated_at,
       publishedAt: row.published_at,
-      ...(row.background_color === null
-        ? {}
-        : { background: row.background_color }),
-      ...(row.background_media_id === null
-        ? {}
-        : { backgroundMediaId: row.background_media_id }),
-    }).pipe(Effect.orDie);
+    };
+
+    if (row.background_color !== null)
+      summary.background = row.background_color;
+
+    if (row.background_media_id !== null)
+      summary.backgroundMediaId = row.background_media_id;
+
+    return yield* Schema.decodeUnknownEffect(PublicBoardSummarySchema)(
+      summary,
+    ).pipe(Effect.orDie);
   },
 );
 
@@ -113,7 +167,8 @@ const decodeItemRow = Effect.fn('PublishingRepo.decodeItemRow')(function* (
   const storedXHideThread = yield* Schema.decodeUnknownEffect(
     NullableSqliteBooleanSchema,
   )(row.x_hide_thread).pipe(Effect.orDie);
-  return yield* Schema.decodeUnknownEffect(PublicBoardItemSchema)({
+
+  const item: PublicationItemInput = {
     kind: row.kind,
     x: row.x,
     y: row.y,
@@ -121,44 +176,59 @@ const decodeItemRow = Effect.fn('PublishingRepo.decodeItemRow')(function* (
     height: row.height,
     rotation: row.rotation,
     order: row.order_index,
-    ...(row.src === null ? {} : { src: row.src }),
-    ...(row.media_id === null ? {} : { mediaId: row.media_id }),
-    ...(row.href === null ? {} : { href: row.href }),
-    ...(row.annotation_title === null
-      ? {}
-      : { annotationTitle: row.annotation_title }),
-    ...(row.annotation_description === null
-      ? {}
-      : { annotationDescription: row.annotation_description }),
-    ...(row.text === null ? {} : { text: row.text }),
-    ...(row.color === null ? {} : { color: row.color }),
-    ...(row.label === null ? {} : { label: row.label }),
-    ...(row.website_url === null ? {} : { websiteUrl: row.website_url }),
-    ...(row.website_image_url === null
-      ? {}
-      : { websiteImageUrl: row.website_image_url }),
-    ...(row.website_title === null ? {} : { websiteTitle: row.website_title }),
-    ...(row.website_description === null
-      ? {}
-      : { websiteDescription: row.website_description }),
-    ...(row.website_site_label === null
-      ? {}
-      : { websiteSiteLabel: row.website_site_label }),
-    ...(row.x_display === null ? {} : { xDisplay: row.x_display }),
-    ...(row.x_theme === null ? {} : { xTheme: row.x_theme }),
-    ...(storedXHideThread === null
-      ? {}
-      : { xHideThread: storedXHideThread === 1 }),
-    ...(row.x_author_name === null ? {} : { xAuthorName: row.x_author_name }),
-    ...(row.x_author_handle === null
-      ? {}
-      : { xAuthorHandle: row.x_author_handle }),
-    ...(row.x_post_text === null ? {} : { xPostText: row.x_post_text }),
-    ...(row.x_post_date === null ? {} : { xPostDate: row.x_post_date }),
-  }).pipe(Effect.orDie);
+  };
+
+  if (row.src !== null) item.src = row.src;
+
+  if (row.media_id !== null) item.mediaId = row.media_id;
+
+  if (row.href !== null) item.href = row.href;
+
+  if (row.annotation_title !== null)
+    item.annotationTitle = row.annotation_title;
+
+  if (row.annotation_description !== null)
+    item.annotationDescription = row.annotation_description;
+
+  if (row.text !== null) item.text = row.text;
+
+  if (row.color !== null) item.color = row.color;
+
+  if (row.label !== null) item.label = row.label;
+
+  if (row.website_url !== null) item.websiteUrl = row.website_url;
+
+  if (row.website_image_url !== null)
+    item.websiteImageUrl = row.website_image_url;
+
+  if (row.website_title !== null) item.websiteTitle = row.website_title;
+
+  if (row.website_description !== null)
+    item.websiteDescription = row.website_description;
+
+  if (row.website_site_label !== null)
+    item.websiteSiteLabel = row.website_site_label;
+
+  if (row.x_display !== null) item.xDisplay = row.x_display;
+
+  if (row.x_theme !== null) item.xTheme = row.x_theme;
+
+  if (storedXHideThread !== null) item.xHideThread = storedXHideThread === 1;
+
+  if (row.x_author_name !== null) item.xAuthorName = row.x_author_name;
+
+  if (row.x_author_handle !== null) item.xAuthorHandle = row.x_author_handle;
+
+  if (row.x_post_text !== null) item.xPostText = row.x_post_text;
+
+  if (row.x_post_date !== null) item.xPostDate = row.x_post_date;
+
+  return yield* Schema.decodeUnknownEffect(PublicBoardItemSchema)(item).pipe(
+    Effect.orDie,
+  );
 });
 
-interface PublishingRepoShape {
+interface PublicationPersistence {
   readonly upsertProfile: (
     handle: ProfileHandle,
     displayName: ProfileDisplayName,
@@ -179,7 +249,7 @@ interface PublishingRepoShape {
 
 export class PublishingRepo extends Context.Service<
   PublishingRepo,
-  PublishingRepoShape
+  PublicationPersistence
 >()('mood-board/PublishingRepo') {
   static readonly layer = Layer.effect(
     this,
@@ -203,6 +273,7 @@ export class PublishingRepo extends Context.Service<
             bio = excluded.bio,
             updated_at = excluded.updated_at
         `;
+
           return { handle, displayName, bio } satisfies PublicOwner;
         },
       );
@@ -216,26 +287,34 @@ export class PublishingRepo extends Context.Service<
             const existing = yield* sql<PublicationRow>`
               SELECT public_id FROM board_publications WHERE board_id = ${boardId}
             `;
+
             if (existing[0] !== undefined) {
               return yield* Schema.decodeUnknownEffect(PublicIdSchema)(
                 existing[0].public_id,
               ).pipe(Effect.orDie);
             }
+
             const boards = yield* sql<{ readonly found: unknown }>`
               SELECT 1 AS found FROM boards WHERE id = ${boardId} LIMIT 1
             `;
+
             if (boards.length === 0) return null;
+
             const profiles = yield* sql<{ readonly found: unknown }>`
               SELECT 1 AS found FROM publisher_profile WHERE singleton = 1 LIMIT 1
             `;
+
             if (profiles.length === 0) return null;
+
             const publishedAt = BoardTimestampSchema.make(
               yield* Clock.currentTimeMillis,
             );
+
             yield* sql`
               INSERT INTO board_publications (board_id, public_id, published_at)
               VALUES (${boardId}, ${publicId}, ${publishedAt})
             `;
+
             return publicId;
           }),
         );
@@ -249,6 +328,7 @@ export class PublishingRepo extends Context.Service<
           WHERE board_id = ${boardId}
           RETURNING public_id
         `;
+
         return removed.length > 0;
       });
 
@@ -262,8 +342,11 @@ export class PublishingRepo extends Context.Service<
               FROM publisher_profile
               WHERE singleton = 1 AND handle = ${handle} COLLATE NOCASE
             `;
+
             const profile = profiles[0];
+
             if (profile === undefined) return null;
+
             const boards = yield* sql<SummaryRow>`
               SELECT
                 p.public_id,
@@ -281,8 +364,10 @@ export class PublishingRepo extends Context.Service<
               ORDER BY p.published_at DESC, p.public_id ASC
               LIMIT 100
             `;
+
             const owner = yield* decodeOwnerRow(profile);
             const summaries = yield* Effect.forEach(boards, decodeSummaryRow);
+
             return yield* Schema.decodeUnknownEffect(PublicProfileSchema)({
               owner,
               boards: summaries,
@@ -312,8 +397,11 @@ export class PublishingRepo extends Context.Service<
               INNER JOIN publisher_profile profile ON profile.singleton = 1
               WHERE p.public_id = ${publicId}
             `;
+
             const board = boards[0];
+
             if (board === undefined) return null;
+
             const items = yield* sql<ItemRow>`
               SELECT kind, x, y, width, height, rotation, order_index,
                 src, media_id, href, annotation_title, annotation_description, text, color, label,
@@ -325,23 +413,27 @@ export class PublishingRepo extends Context.Service<
               )
               ORDER BY order_index ASC, id ASC
             `;
+
             const owner = yield* decodeOwnerRow(board);
             const decodedItems = yield* Effect.forEach(items, decodeItemRow);
+
+            const document: PublicationBoardInput = {
+              version: 1,
+              title: board.title,
+              items: decodedItems,
+              updatedAt: board.updated_at,
+            };
+
+            if (board.background_color !== null)
+              document.background = board.background_color;
+
+            if (board.background_media_id !== null)
+              document.backgroundMediaId = board.background_media_id;
+
             return yield* Schema.decodeUnknownEffect(PublicBoardSchema)({
               publicId: board.public_id,
               owner,
-              board: {
-                version: 1,
-                title: board.title,
-                ...(board.background_color === null
-                  ? {}
-                  : { background: board.background_color }),
-                ...(board.background_media_id === null
-                  ? {}
-                  : { backgroundMediaId: board.background_media_id }),
-                items: decodedItems,
-                updatedAt: board.updated_at,
-              },
+              board: document,
               publishedAt: board.published_at,
             }).pipe(Effect.orDie);
           }),

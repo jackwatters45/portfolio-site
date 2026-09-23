@@ -1,12 +1,13 @@
 import type {
   D1Database,
   DurableObjectState,
+  DurableObjectId,
   R2Bucket,
   RateLimit as CloudflareRateLimit,
   ScheduledController,
 } from '@cloudflare/workers-types';
 import { D1Client } from '@effect/sql-d1';
-import { Layer, Option, Schema } from 'effect';
+import { Effect, Layer, Option, Schema } from 'effect';
 import * as HttpRouter from 'effect/unstable/http/HttpRouter';
 import * as RpcSerialization from 'effect/unstable/rpc/RpcSerialization';
 import * as RpcServer from 'effect/unstable/rpc/RpcServer';
@@ -16,6 +17,7 @@ import { BoardRpcs } from '../lib/board-rpc';
 import { MediaIdSchema, MediaQuotaLimitsSchema } from '../lib/media';
 import {
   ProfileHandleSchema,
+  PublicBoardSchema,
   PublicIdSchema,
   type ProfileHandle,
   type PublicId,
@@ -41,24 +43,24 @@ import { PublishingService } from '../server/publishing-service';
 import {
   accountWorkspaceName,
   isSameOriginMutation,
-  resolveAuthenticatedAccount,
 } from '../server/request-auth';
 import { withSecurityHeaders } from '../server/security-headers';
 import { WebsitePreviewService } from '../server/website-preview-service';
 import {
   cloudflareGoogleEnabled,
-  makeCloudflareAuth,
+  CloudflareAuth,
   pruneExpiredCloudflareAuth,
 } from './auth';
 import { CloudflareBoardHandlers } from './board-handlers';
 import { CatalogProjection } from './catalog-projection';
-import { makeDurableDatabaseLayer } from './database';
-import { makeR2MediaObjectStore } from './r2-media-object-store';
+import { DurableDatabase } from './database';
+import { R2MediaObjectStore } from './r2-media-object-store';
 import { CloudflareWebsitePreviewFetcher } from './website-preview-fetcher';
+import { WorkspaceBindings } from './workspace-bindings';
 
-interface WorkspaceNamespace {
-  readonly idFromName: (name: string) => unknown;
-  readonly get: (id: unknown) => {
+interface WorkspaceNamespace<Id = DurableObjectId> {
+  readonly idFromName: (name: string) => Id;
+  readonly get: (id: Id) => {
     readonly fetch: (request: Request) => Promise<Response>;
   };
 }
@@ -85,6 +87,32 @@ export interface CloudflareEnv {
   readonly MEDIA_RESERVATION_TTL_MS?: string;
 }
 
+const handleAuthRequest = (
+  env: CloudflareEnv,
+  origin: string,
+  request: Request,
+) =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const auth = yield* CloudflareAuth;
+
+      return yield* auth.handle(request);
+    }).pipe(Effect.provide(CloudflareAuth.layerFor(env, origin))),
+  );
+
+const authenticatedAccount = (
+  env: CloudflareEnv,
+  origin: string,
+  request: Request,
+) =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const auth = yield* CloudflareAuth;
+
+      return yield* auth.account(request);
+    }).pipe(Effect.provide(CloudflareAuth.layerFor(env, origin))),
+  );
+
 const decodePositiveInteger = Schema.decodeUnknownOption(PositiveIntegerSchema);
 
 export class WorkspaceDurableObject {
@@ -92,19 +120,30 @@ export class WorkspaceDurableObject {
 
   constructor(state: DurableObjectState, env: CloudflareEnv) {
     const workspaceId = state.id.toString();
-    const database = makeDurableDatabaseLayer(state.storage);
+
+    const bindings = Layer.succeed(WorkspaceBindings, {
+      storage: state.storage,
+      media: env.MEDIA,
+      workspaceId,
+    });
+
+    const database = DurableDatabase.pipe(Layer.provide(bindings));
+
     const projection = CatalogProjection.layerFor(workspaceId).pipe(
       Layer.provide(D1Client.layer({ db: env.CATALOG })),
     );
+
     const websitePreviews = WebsitePreviewService.layer.pipe(
       Layer.provide(CloudflareWebsitePreviewFetcher),
     );
+
     const handlers = CloudflareBoardHandlers.pipe(
       Layer.provide(BoardService.layer),
       Layer.provide(websitePreviews),
       Layer.provide(database),
       Layer.provide(projection),
     );
+
     const rpcServer = RpcServer.layerHttp({
       group: BoardRpcs,
       path: '/rpc',
@@ -113,15 +152,18 @@ export class WorkspaceDurableObject {
       Layer.provide(handlers),
       Layer.provide(RpcSerialization.layerNdjson),
     );
+
     const publicServer = PublicHandlers.pipe(
       Layer.provide(PublishingService.layer),
       Layer.provide(database),
     );
+
     const positiveInteger = (
       value: string | undefined,
       fallback: number,
     ): number =>
       Option.getOrNull(decodePositiveInteger(Number(value))) ?? fallback;
+
     const mediaServer = MediaHandlers.pipe(
       Layer.provide(
         MediaService.layerWith(
@@ -146,9 +188,10 @@ export class WorkspaceDurableObject {
         ),
       ),
       Layer.provide(MediaClientIdentity.layer),
-      Layer.provide(makeR2MediaObjectStore(env.MEDIA, workspaceId)),
+      Layer.provide(R2MediaObjectStore.pipe(Layer.provide(bindings))),
       Layer.provide(database),
     );
+
     const server = Layer.mergeAll(rpcServer, publicServer, mediaServer);
     const web = HttpRouter.toWebHandler(server, { disableLogger: true });
     this.#webHandler = web.handler;
@@ -187,24 +230,29 @@ const allowMagicLinkRequest = async (
 ): Promise<boolean> => {
   const address = request.headers.get('CF-Connecting-IP') ?? 'local';
   const ipLimit = await limiter.limit({ key: `ip:${address}` });
+
   if (!ipLimit.success) return false;
 
   try {
     const value: unknown = await request.clone().json();
     const email = decodeMagicLinkEmail(value);
+
     if (email === null) return true;
+
     if (!email) return true;
+
     return (await limiter.limit({ key: `email:${email}` })).success;
   } catch {
     return true;
   }
 };
 
-const workspaceStub = (
-  env: Pick<CloudflareEnv, 'WORKSPACES'>,
+const workspaceStub = <Id>(
+  env: { readonly WORKSPACES: WorkspaceNamespace<Id> },
   workspaceName: string,
 ) => {
   const id = env.WORKSPACES.idFromName(workspaceName);
+
   return env.WORKSPACES.get(id);
 };
 
@@ -216,6 +264,7 @@ const workspaceRequest = (
   const url = new URL(request.url);
   url.pathname = pathname;
   headers.delete('x-mood-board-workspace');
+
   return new Request(new Request(url.toString(), request), { headers });
 };
 
@@ -223,6 +272,7 @@ const privateResponse = (response: Response): Response => {
   const headers = new Headers(response.headers);
   headers.set('cache-control', 'private, no-store');
   headers.set('cross-origin-resource-policy', 'same-origin');
+
   return withSecurityHeaders(
     new Response(response.body, {
       status: response.status,
@@ -240,6 +290,7 @@ const forwardPrivateRequest = async (
 ): Promise<Response> => {
   const headers = new Headers(request.headers);
   headers.delete(MEDIA_CLIENT_ID_HEADER);
+
   if (pathname === '/api/owner/media' && request.method === 'POST') {
     headers.set(
       MEDIA_CLIENT_ID_HEADER,
@@ -248,17 +299,23 @@ const forwardPrivateRequest = async (
       ),
     );
   }
+
   const response = await workspaceStub(
     env,
     accountWorkspaceName(accountId),
   ).fetch(workspaceRequest(request, pathname, headers));
+
   return privateResponse(response);
 };
 
 const CatalogUserRowSchema = Schema.Struct({ id: AccountIdSchema });
+
 const decodeCatalogUserRow = Schema.decodeUnknownOption(CatalogUserRowSchema);
+
 const decodeProfileHandle = Schema.decodeUnknownOption(ProfileHandleSchema);
+
 const decodePublicId = Schema.decodeUnknownOption(PublicIdSchema);
+
 const decodeMediaId = Schema.decodeUnknownOption(MediaIdSchema);
 
 type PublicCatalogRoute =
@@ -281,7 +338,9 @@ const publicWorkspaceName = async (
         )
           .bind(route.identifier)
           .first<{ readonly userId: unknown }>();
+
   const userId = decodeCatalogRouteUserId(rawRow);
+
   return userId === null ? null : accountWorkspaceName(userId);
 };
 
@@ -296,6 +355,7 @@ const servePublicMedia = async (
 
   const decodedPublicId = Option.getOrNull(decodePublicId(publicId));
   const decodedMediaId = Option.getOrNull(decodeMediaId(mediaId));
+
   if (decodedPublicId === null || decodedMediaId === null)
     return jsonError(404, 'Not found');
 
@@ -303,25 +363,37 @@ const servePublicMedia = async (
     kind: 'board',
     identifier: decodedPublicId,
   });
+
   if (workspaceName === null) return jsonError(404, 'Not found');
   const workspace = workspaceStub(env, workspaceName);
+
   const boardResponse = await workspace.fetch(
     workspaceRequest(
       new Request(request.url, { headers: request.headers }),
       `/api/public/boards/${decodedPublicId}`,
     ),
   );
+
   if (
     !boardResponse.ok ||
-    !publicBoardReferencesMedia(await boardResponse.json(), decodedMediaId)
+    !publicBoardReferencesMedia(
+      Option.getOrNull(
+        Schema.decodeUnknownOption(PublicBoardSchema)(
+          await boardResponse.json(),
+        ),
+      ),
+      decodedMediaId,
+    )
   )
     return jsonError(404, 'Not found');
 
   const response = await workspace.fetch(
     workspaceRequest(request, `/media/${decodedMediaId}`),
   );
+
   const headers = new Headers(response.headers);
   headers.set('cache-control', 'public, max-age=60, must-revalidate');
+
   return withSecurityHeaders(
     new Response(response.body, {
       status: response.status,
@@ -331,8 +403,8 @@ const servePublicMedia = async (
   );
 };
 
-export const runScheduledMediaMaintenance = async (
-  env: Pick<CloudflareEnv, 'WORKSPACES'>,
+export const runScheduledMediaMaintenance = async <Id>(
+  env: { readonly WORKSPACES: WorkspaceNamespace<Id> },
   workspaceNames: ReadonlyArray<string>,
 ): Promise<void> => {
   for (const workspaceName of workspaceNames) {
@@ -342,6 +414,7 @@ export const runScheduledMediaMaintenance = async (
         headers: { 'x-mood-board-maintenance': 'scheduled' },
       }),
     );
+
     if (!response.ok) {
       throw new Error(
         `Media maintenance failed for ${workspaceName} with status ${response.status}`,
@@ -358,12 +431,15 @@ const listWorkspaceNames = async (
   ).all<{
     readonly id: unknown;
   }>();
+
   const workspaceNames = (users.results ?? []).flatMap((user) => {
     const decoded = decodeCatalogUserRow(user);
+
     return Option.isSome(decoded)
       ? [accountWorkspaceName(decoded.value.id)]
       : [];
   });
+
   return workspaceNames;
 };
 
@@ -400,10 +476,11 @@ export default {
     if (url.pathname === '/api/auth' || url.pathname.startsWith('/api/auth/')) {
       try {
         return withSecurityHeaders(
-          await makeCloudflareAuth(env, url.origin).handler(request),
+          await handleAuthRequest(env, url.origin, request),
         );
       } catch (cause) {
         console.error('[auth] request failed', cause);
+
         return jsonError(500, 'Authentication is temporarily unavailable');
       }
     }
@@ -411,22 +488,25 @@ export default {
     const privateMedia = /^\/api\/owner\/media\/([0-9a-f]{32})$/.exec(
       url.pathname,
     );
+
     const privateApi =
       /^\/rpc\/?$/.test(url.pathname) ||
       url.pathname === '/api/owner' ||
       url.pathname.startsWith('/api/owner/');
+
     if (privateApi) {
       if (/^\/rpc\/?$/.test(url.pathname) && request.method !== 'POST') {
         return jsonError(404, 'Not found');
       }
+
       if (!isSameOriginMutation(request)) {
         return jsonError(403, 'Cross-origin request rejected');
       }
-      const account = await resolveAuthenticatedAccount(
-        makeCloudflareAuth(env, url.origin),
-        request,
-      );
+
+      const account = await authenticatedAccount(env, url.origin, request);
+
       if (account === null) return jsonError(401, 'Authentication required');
+
       return forwardPrivateRequest(
         request,
         env,
@@ -442,6 +522,7 @@ export default {
     const publicMedia = /^\/api\/public\/boards\/([^/]+)\/media\/([^/]+)$/.exec(
       url.pathname,
     );
+
     if (publicMedia !== null) {
       return servePublicMedia(request, env, publicMedia[1], publicMedia[2]);
     }
@@ -449,27 +530,36 @@ export default {
     const publicProfile = /^\/api\/public\/profiles\/([^/]+)\/?$/.exec(
       url.pathname,
     );
+
     const publicBoard = /^\/api\/public\/boards\/([^/]+)\/?$/.exec(
       url.pathname,
     );
+
     if (
       request.method === 'GET' &&
       (publicProfile !== null || publicBoard !== null)
     ) {
       let route: PublicCatalogRoute | null = null;
+
       if (publicProfile !== null) {
         const handle = Option.getOrNull(decodeProfileHandle(publicProfile[1]));
+
         if (handle !== null) route = { kind: 'profile', identifier: handle };
       } else if (publicBoard !== null) {
         const publicId = Option.getOrNull(decodePublicId(publicBoard[1]));
+
         if (publicId !== null) route = { kind: 'board', identifier: publicId };
       }
+
       if (route === null) return jsonError(404, 'Not found');
       const workspaceName = await publicWorkspaceName(env, route);
+
       if (workspaceName === null) return jsonError(404, 'Not found');
+
       const response = await workspaceStub(env, workspaceName).fetch(
         workspaceRequest(request, url.pathname),
       );
+
       return withSecurityHeaders(response);
     }
 
@@ -489,12 +579,11 @@ export default {
       (/^\/boards(?:\/|$)/.test(url.pathname) ||
         /^\/profile\/?$/.test(url.pathname))
     ) {
-      const account = await resolveAuthenticatedAccount(
-        makeCloudflareAuth(env, url.origin),
-        request,
-      );
+      const account = await authenticatedAccount(env, url.origin, request);
+
       if (account === null) {
         const returnTo = `${url.pathname}${url.search}`;
+
         return withSecurityHeaders(
           new Response(null, {
             status: 302,

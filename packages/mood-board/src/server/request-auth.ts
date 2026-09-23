@@ -8,6 +8,7 @@ export const AuthenticatedAccountSchema = Schema.Struct({
   email: Schema.String,
   name: Schema.String,
 });
+
 export type AuthenticatedAccount = typeof AuthenticatedAccountSchema.Type;
 
 export class AuthResolutionError extends Schema.Error<AuthResolutionError>(
@@ -24,8 +25,11 @@ export const resolveAuthenticatedAccountEffect = Effect.fn(
     try: () => auth.api.getSession({ headers: request.headers }),
     catch: (cause) => new AuthResolutionError({ cause }),
   });
+
   const user = result?.user;
+
   if (user === undefined || user === null) return null;
+
   return yield* Schema.decodeUnknownEffect(AuthenticatedAccountSchema)(
     user,
   ).pipe(Effect.mapError((cause) => new AuthResolutionError({ cause })));
@@ -42,8 +46,10 @@ export const isSameOriginMutation = (request: Request): boolean => {
   ) {
     return true;
   }
+
   if (request.headers.get('sec-fetch-site') === 'cross-site') return false;
   const origin = request.headers.get('origin');
+
   return origin !== null && origin === new URL(request.url).origin;
 };
 

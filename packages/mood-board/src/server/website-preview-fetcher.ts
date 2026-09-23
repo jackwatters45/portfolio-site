@@ -6,10 +6,13 @@ import type { WebsiteUrl } from '../lib/website-preview';
 export const WebsiteRedirectLocationSchema = Schema.String.pipe(
   Schema.brand('WebsiteRedirectLocation'),
 );
+
 export type WebsiteRedirectLocation = typeof WebsiteRedirectLocationSchema.Type;
+
 export const WebsiteContentTypeSchema = Schema.String.pipe(
   Schema.brand('WebsiteContentType'),
 );
+
 export type WebsiteContentType = typeof WebsiteContentTypeSchema.Type;
 
 export interface WebsiteFetchResponse {
@@ -28,7 +31,7 @@ export class WebsiteFetchFailure extends Schema.Error<WebsiteFetchFailure>(
   cause: OptionalErrorCauseSchema,
 }) {}
 
-interface WebsitePreviewFetcherShape {
+interface WebsitePreviewTransport {
   readonly fetch: (
     url: WebsiteUrl,
   ) => Effect.Effect<WebsiteFetchResponse, WebsiteFetchFailure>;
@@ -36,5 +39,5 @@ interface WebsitePreviewFetcherShape {
 
 export class WebsitePreviewFetcher extends Context.Service<
   WebsitePreviewFetcher,
-  WebsitePreviewFetcherShape
+  WebsitePreviewTransport
 >()('mood-board/WebsitePreviewFetcher') {}

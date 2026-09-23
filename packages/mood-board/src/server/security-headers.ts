@@ -35,15 +35,18 @@ export function withSecurityHeaders(
   options: SecurityHeaderOptions = {},
 ): Response {
   const headers = new Headers(response.headers);
+
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     headers.set(name, value);
   }
+
   if (options.allowViteDevelopmentScripts) {
     headers.set(
       'Content-Security-Policy',
       VITE_DEVELOPMENT_CONTENT_SECURITY_POLICY,
     );
   }
+
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
