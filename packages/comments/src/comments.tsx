@@ -628,13 +628,17 @@ export default function Comments({
           <span>Select an element</span>
           <button
             type="button"
+            className="pc-hint-keyboard"
             aria-label="Choose a location with keyboard"
             title="Choose a location with keyboard"
             onClick={() => setKeyboardPicker(true)}
           >
             <Icon name="keyboard" size={15} />
           </button>
-          <kbd>esc</kbd>
+          <kbd className="pc-hint-keyboard">esc</kbd>
+          <button type="button" className="pc-hint-cancel" onClick={close}>
+            Cancel
+          </button>
         </div>
       )}
       {active &&
