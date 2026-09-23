@@ -126,7 +126,13 @@ Reserve one day or substantial portion of a day for something exciting / adventu
 
 The group has mixed levels of tolerance for extreme activities, so this should initially remain a **menu of possibilities rather than one fixed group activity**.
 
-Options researched on 22 September 2026. Published adult prices are NZD:
+**Current front runner: [Skyline Gondola & Luge](https://queenstown.skyline.co.nz/things-to-do/queenstown-luge/).** Take the gondola up, then ride gravity-powered carts on dedicated downhill tracks above town. Use the chairlift for repeat rides and the gondola to return to town. This is a preference, not a booking or fixed group commitment. Published adult packages checked on 22 September 2026: gondola + 3 / 5 / 6 luge rides cost NZ$99 / NZ$104 / NZ$106. Six rides for seven adults total NZ$742. Unlimited rides cost NZ$140 each, but are unavailable during peak holiday periods. These are current published prices, not confirmed October quotes.
+
+Allow roughly 2–3 hours for six rides and gondola access. Arrive at the gondola base at least 45 minutes before the booked luge session. Complete the first ride within the 30-minute session and use remaining rides that day. Direct booking cancellations require at least 48 hours’ notice for a refund; partial-use refunds have separate limits.
+
+Keep the front-runner preference in planning notes only, not on the public page. Full sources and restrictions: [Skyline Luge research](research/skyline-luge.md).
+
+Other options researched on 22 September 2026. Published adult prices are NZD:
 
 - Shotover Jet: NZ$199; allow 1 hour 45 minutes with the free town shuttle.
 - Ziptrek Moa / Kea: NZ$238 / NZ$288 including the separate NZ$69 gondola ticket and October tour rates.
