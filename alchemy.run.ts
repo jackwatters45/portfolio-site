@@ -1,12 +1,17 @@
 import * as Alchemy from 'alchemy';
 import * as Cloudflare from 'alchemy/Cloudflare';
 import * as Effect from 'effect/Effect';
+import * as Layer from 'effect/Layer';
 
 export default Alchemy.Stack(
   'portfolio-site',
   {
     providers: Cloudflare.providers(),
-    state: Cloudflare.state(),
+    state: Layer.unwrap(
+      Effect.map(Alchemy.AlchemyContext, ({ dev }) =>
+        dev ? Alchemy.localState() : Cloudflare.state(),
+      ),
+    ),
   },
   Effect.gen(function* () {
     const stage = yield* Alchemy.Stage;
