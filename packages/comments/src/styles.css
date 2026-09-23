@@ -701,6 +701,20 @@
 .pc-root .pc-hint button:hover {
   background: var(--pc-input);
 }
+.pc-root .pc-hint .pc-hint-cancel {
+  display: none;
+}
+@media (hover: none), (pointer: coarse) {
+  .pc-root .pc-hint .pc-hint-keyboard {
+    display: none;
+  }
+  .pc-root .pc-hint .pc-hint-cancel {
+    display: inline-flex;
+    width: auto;
+    min-width: 44px;
+    height: 44px;
+  }
+}
 .pc-root .pc-hint kbd {
   padding: 1px 3px;
   border: 1px solid var(--pc-border);
