@@ -6,7 +6,9 @@ export type XWidgetsApi = {
 
 declare global {
   interface Window {
-    twttr?: XWidgetsApi & { readonly ready?: (callback: (api: XWidgetsApi) => void) => void };
+    twttr?: XWidgetsApi & {
+      readonly ready?: (callback: (api: XWidgetsApi) => void) => void;
+    };
   }
 }
 
@@ -30,35 +32,44 @@ export function loadXWidgets(): Promise<XWidgetsApi> {
       settled = true;
       clearTimeout(timeout);
       loading = null;
-      document.querySelector("script[data-moodboard-x-widgets]")?.remove();
+      document.querySelector('script[data-moodboard-x-widgets]')?.remove();
       reject(new Error(message));
     };
     const ready = () => {
       const api = window.twttr;
       if (api?.widgets?.load === undefined) {
-        fail("X returned an invalid widget API.");
+        fail('X returned an invalid widget API.');
         return;
       }
       if (api.ready) api.ready(finish);
       else finish(api);
     };
-    const timeout = window.setTimeout(() => fail("X took too long to load."), 12_000);
+    const timeout = window.setTimeout(
+      () => fail('X took too long to load.'),
+      12_000,
+    );
     if (window.twttr?.widgets?.load !== undefined) {
       ready();
       return;
     }
-    const existing = document.querySelector<HTMLScriptElement>("script[data-moodboard-x-widgets]");
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[data-moodboard-x-widgets]',
+    );
     if (existing !== null) {
-      existing.addEventListener("load", ready, { once: true });
-      existing.addEventListener("error", () => fail("X could not be loaded."), { once: true });
+      existing.addEventListener('load', ready, { once: true });
+      existing.addEventListener('error', () => fail('X could not be loaded.'), {
+        once: true,
+      });
       return;
     }
-    const script = document.createElement("script");
+    const script = document.createElement('script');
     script.async = true;
-    script.src = "https://platform.x.com/widgets.js";
-    script.dataset.moodboardXWidgets = "true";
-    script.addEventListener("load", ready, { once: true });
-    script.addEventListener("error", () => fail("X could not be loaded."), { once: true });
+    script.src = 'https://platform.x.com/widgets.js';
+    script.dataset.moodboardXWidgets = 'true';
+    script.addEventListener('load', ready, { once: true });
+    script.addEventListener('error', () => fail('X could not be loaded.'), {
+      once: true,
+    });
     document.head.append(script);
   });
   return loading;

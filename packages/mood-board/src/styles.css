@@ -93,7 +93,11 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   display: none;
-  background: linear-gradient(145deg, rgba(252, 252, 252, 0.035), rgba(23, 23, 23, 0.055));
+  background: linear-gradient(
+    145deg,
+    rgba(252, 252, 252, 0.035),
+    rgba(23, 23, 23, 0.055)
+  );
 }
 
 .canvas-background[data-has-image="true"] .canvas-background-wash {
@@ -121,7 +125,8 @@ textarea:focus-visible {
   left: 0;
   width: var(--item-width);
   height: var(--item-height);
-  transform: translate3d(var(--item-x), var(--item-y), 0) rotate(var(--item-rotation));
+  transform: translate3d(var(--item-x), var(--item-y), 0)
+    rotate(var(--item-rotation));
   transform-origin: center;
   user-select: none;
   cursor: grab;
@@ -174,7 +179,8 @@ textarea:focus-visible {
   z-index: 3;
   border: calc(1px / var(--camera-zoom)) solid rgba(72, 64, 55, 0.34);
   border-radius: 14px;
-  box-shadow: inset 0 0 0 calc(1px / var(--camera-zoom)) rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 0 calc(1px / var(--camera-zoom))
+    rgba(255, 255, 255, 0.28);
   pointer-events: none;
 }
 
@@ -527,7 +533,8 @@ textarea:focus-visible {
   background: rgba(250, 248, 244, 0.96);
   box-shadow:
     inset 0 calc(1px / var(--camera-zoom)) 0 rgba(255, 255, 255, 0.82),
-    0 calc(14px / var(--camera-zoom)) calc(38px / var(--camera-zoom)) rgba(42, 34, 26, 0.16);
+    0 calc(14px / var(--camera-zoom)) calc(38px / var(--camera-zoom))
+      rgba(42, 34, 26, 0.16);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -555,13 +562,15 @@ textarea:focus-visible {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateX(-50%) rotate(calc(var(--item-rotation) * -1)) translateY(0);
+  transform: translateX(-50%) rotate(calc(var(--item-rotation) * -1))
+    translateY(0);
   transition-delay: 450ms, 450ms, 450ms;
 }
 
 .is-presenting .board-item.has-annotation:hover .item-annotation--x,
 .is-presenting .board-item.has-annotation:focus-within .item-annotation--x {
-  transform: translate(-50%, -50%) rotate(calc(var(--item-rotation) * -1)) translateY(0);
+  transform: translate(-50%, -50%) rotate(calc(var(--item-rotation) * -1))
+    translateY(0);
 }
 
 .is-presenting .item-annotation:hover,
@@ -627,7 +636,8 @@ textarea:focus-visible {
   content: "";
   position: absolute;
   inset: calc(-2px / var(--camera-zoom));
-  border: calc(1px / var(--camera-zoom)) solid var(--field-selection, var(--orange));
+  border: calc(1px / var(--camera-zoom)) solid
+    var(--field-selection, var(--orange));
   pointer-events: none;
 }
 
@@ -763,7 +773,12 @@ textarea:focus-visible {
 
 .website-card.is-fallback .website-card-image {
   background:
-    linear-gradient(115deg, transparent 48%, rgba(255, 255, 255, 0.28) 48% 52%, transparent 52%),
+    linear-gradient(
+      115deg,
+      transparent 48%,
+      rgba(255, 255, 255, 0.28) 48% 52%,
+      transparent 52%
+    ),
     #d7cbbd;
 }
 
@@ -1650,7 +1665,8 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
-.field-block.color-picker-field input[type="color"]::-webkit-color-swatch-wrapper {
+.field-block.color-picker-field
+  input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 
@@ -2479,8 +2495,16 @@ textarea:focus-visible {
 }
 
 .empty-mark span:first-child {
-  border-color: color-mix(in srgb, var(--field-selection, var(--ink)) 42%, transparent);
-  background: color-mix(in srgb, var(--field-selection, var(--ink)) 14%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--field-selection, var(--ink)) 42%,
+    transparent
+  );
+  background: color-mix(
+    in srgb,
+    var(--field-selection, var(--ink)) 14%,
+    transparent
+  );
 }
 
 .text-button {
@@ -2703,7 +2727,8 @@ textarea:focus-visible {
   position: fixed;
   inset: 0;
   z-index: 80;
-  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  padding: max(18px, env(safe-area-inset-top)) 18px
+    max(18px, env(safe-area-inset-bottom));
   display: grid;
   place-items: center;
   background: rgba(34, 31, 28, 0.42);
@@ -3188,7 +3213,13 @@ textarea:focus-visible {
   position: fixed;
   inset: 0;
   overflow: auto;
-  background: radial-gradient(circle at 88% 8%, rgba(255, 103, 13, 0.12), transparent 29%), #f6f1e9;
+  background:
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(255, 103, 13, 0.12),
+      transparent 29%
+    ),
+    #f6f1e9;
 }
 
 .public-state-page {
@@ -3333,7 +3364,11 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   content: "";
-  background: linear-gradient(180deg, rgba(23, 23, 23, 0.64), rgba(23, 23, 23, 0.82));
+  background: linear-gradient(
+    180deg,
+    rgba(23, 23, 23, 0.64),
+    rgba(23, 23, 23, 0.82)
+  );
   pointer-events: none;
 }
 
@@ -4083,14 +4118,21 @@ textarea:focus-visible {
   overflow: auto;
   color: #28231f;
   background:
-    radial-gradient(circle at 84% 14%, rgba(174, 83, 43, 0.13), transparent 25%),
+    radial-gradient(
+      circle at 84% 14%,
+      rgba(174, 83, 43, 0.13),
+      transparent 25%
+    ),
     linear-gradient(115deg, rgba(255, 255, 255, 0.22), transparent 54%), #eee7dc;
 }
 
 .login-page {
   padding: clamp(24px, 5vw, 70px);
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(320px, 520px) minmax(0, 0.55fr);
+  grid-template-columns: minmax(140px, 1fr) minmax(320px, 520px) minmax(
+      0,
+      0.55fr
+    );
   align-items: center;
   gap: clamp(24px, 6vw, 92px);
 }

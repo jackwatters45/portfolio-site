@@ -6,7 +6,7 @@ The app keeps an account-scoped IndexedDB backup and syncs through either a self
 
 ## Development
 
-This package was imported from https://github.com/jackwatters45/mood-board at commit `a70ceb7`. It uses the root Bun workspace, lockfile, and `alchemy.run.ts`. Effect and its adapters use `4.0.0-rc.112`, matching the root Alchemy `2.0.0-beta.76` setup.
+This package was imported from https://github.com/jackwatters45/mood-board at commit `a70ceb7`. It uses the root Bun workspace, lockfile, and `alchemy.run.ts`. Effect and its adapters use `4.0.0-rc.117`, matching the root Alchemy `2.0.0-beta.79` setup.
 
 From the repository root, install dependencies, copy the environment template, provide Cloudflare credentials, and start the local Alchemy stack:
 
@@ -22,14 +22,18 @@ Open `http://localhost:8787`. Both root and package dev commands start the root 
 
 Signed-out visitors can bypass account creation at `/demo`. The guest demo keeps one example board and locally added images entirely in IndexedDB, never starts private RPC, and cannot call owner media routes. Hosted audio, Spotify, YouTube, direct image URLs, basic website links, X references, notes, and colors remain available. Guest boards are specific to that browser and can disappear when site data is cleared; JSON export is the backup path. Signing in opens the separate server-backed private board library and does not silently claim guest data.
 
-Type checking uses the TypeScript 7 native preview compiler (`tsgo`). Oxlint and Oxfmt are the only linting and formatting tools:
+One package `tsconfig.json` checks the browser, Bun server, Cloudflare worker, and tests. It inherits shared settings from the root config. Lint, format, and ignore rules also live at the root; the package has no separate tool configs.
+
+Run these commands from the repository root:
 
 ```bash
 bun run typecheck
 bun run lint
+bun run format:check
 bun run format
-bun run fix
 ```
+
+The root lint config has mood-board-only exceptions for Effect service `use` methods and existing canvas markup. Formatting follows the unchanged root formatter config, including generated routes.
 
 ## Optional self-hosted Bun target
 
@@ -191,6 +195,5 @@ Run the checks with:
 bun run typecheck
 bun run test
 bun run test:e2e
-bun run lint
 bun run build
 ```

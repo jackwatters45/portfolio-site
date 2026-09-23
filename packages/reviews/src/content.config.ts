@@ -1,5 +1,6 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const review = z.object({
   score: z.number().min(0).max(10).nullable().default(null),
@@ -10,7 +11,7 @@ const review = z.object({
     .transform((value) => value ?? ''),
 });
 
-const ratings = z.object({ meg: review, jack: review });
+const ratings = z.object({ meg: review, jack: review }).catchall(review);
 
 const restaurants = defineCollection({
   loader: glob({ pattern: '*.md', base: './content/restaurants' }),
@@ -18,13 +19,14 @@ const restaurants = defineCollection({
     name: z.string().trim().min(1),
     suburb: z.string().trim().min(1),
     address: z.string().trim().optional(),
-    mapsUrl: z.string().url().startsWith('https://').optional(),
+    mapsUrl: z.url().startsWith('https://').optional(),
     coordinates: z
       .tuple([z.number().min(-90).max(90), z.number().min(-180).max(180)])
       .optional(),
-    visited: z.string().date().optional(),
+    visited: z.iso.date().optional(),
     draft: z.boolean().default(true),
     ratings,
+    glutenFreeBread: ratings.optional(),
     items: z
       .array(
         z.object({

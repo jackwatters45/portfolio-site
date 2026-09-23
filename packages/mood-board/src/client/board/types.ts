@@ -5,8 +5,8 @@ import type {
   MutationId,
   RemoteBoard,
   RemoteBoardItem,
-} from "../../lib/board-rpc";
-import type { Camera } from "./camera";
+} from '../../lib/board-rpc';
+import type { Camera } from './camera';
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 type MutableElement<T> = T extends Primitive ? T : Mutable<T>;
@@ -19,7 +19,7 @@ type Mutable<T> = {
 export type { Camera };
 
 export type BoardItem = Mutable<RemoteBoardItem>;
-export type ItemKind = BoardItem["kind"];
+export type ItemKind = BoardItem['kind'];
 
 export type Board = Mutable<RemoteBoard>;
 

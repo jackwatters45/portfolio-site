@@ -6,7 +6,7 @@ export type SpotifyPlaybackUpdate = {
 
 export type SpotifyEmbedController = {
   readonly addListener: (
-    event: "playback_update",
+    event: 'playback_update',
     listener: (event: SpotifyPlaybackUpdate) => void,
   ) => void;
   readonly pause: () => void;
@@ -51,7 +51,9 @@ export function loadSpotifyIframeApi(): Promise<SpotifyIframeApi> {
         window.onSpotifyIframeApiReady = previous;
       }
       document.querySelector<HTMLScriptElement>(scriptSelector)?.remove();
-      document.querySelector<HTMLScriptElement>("#spotify-iframeapi-script")?.remove();
+      document
+        .querySelector<HTMLScriptElement>('#spotify-iframeapi-script')
+        ?.remove();
       if (window.SpotifyIframeConfig) window.SpotifyIframeConfig.loading = 0;
       loading = null;
       reject(new Error(message));
@@ -69,18 +71,18 @@ export function loadSpotifyIframeApi(): Promise<SpotifyIframeApi> {
       resolve(api);
     };
     const timeout = window.setTimeout(
-      () => cleanupFailure("Spotify took too long to load."),
+      () => cleanupFailure('Spotify took too long to load.'),
       12_000,
     );
     window.onSpotifyIframeApiReady = ready;
 
     const existing = document.querySelector<HTMLScriptElement>(scriptSelector);
     if (existing !== null) return;
-    const script = document.createElement("script");
-    script.src = "https://open.spotify.com/embed/iframe-api/v1";
+    const script = document.createElement('script');
+    script.src = 'https://open.spotify.com/embed/iframe-api/v1';
     script.async = true;
-    script.dataset.moodboardSpotifyApi = "true";
-    script.onerror = () => cleanupFailure("Spotify could not be loaded.");
+    script.dataset.moodboardSpotifyApi = 'true';
+    script.onerror = () => cleanupFailure('Spotify could not be loaded.');
     document.head.append(script);
   });
 

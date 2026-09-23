@@ -1,18 +1,22 @@
-import { Database } from "bun:sqlite";
-import { chmodSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { Database } from 'bun:sqlite';
+import { chmodSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
-import { Option, Schema } from "effect";
+import { Option, Schema } from 'effect';
 
-import type { AccountId } from "../lib/account";
-import type { BoardId } from "../lib/board-rpc";
-import { ProfileHandleSchema, type ProfileHandle, type PublicId } from "../lib/public-api";
-import { NonNegativeIntegerSchema } from "../lib/schema";
-import { AUTH_SCHEMA_SQL } from "./auth-schema";
-import { decodeCatalogRouteUserId } from "./catalog-route";
+import type { AccountId } from '../lib/account';
+import type { BoardId } from '../lib/board-rpc';
+import {
+  ProfileHandleSchema,
+  type ProfileHandle,
+  type PublicId,
+} from '../lib/public-api';
+import { NonNegativeIntegerSchema } from '../lib/schema';
+import { AUTH_SCHEMA_SQL } from './auth-schema';
+import { decodeCatalogRouteUserId } from './catalog-route';
 
 const PublicDirectoryTimestampSchema = NonNegativeIntegerSchema.pipe(
-  Schema.brand("PublicDirectoryTimestamp"),
+  Schema.brand('PublicDirectoryTimestamp'),
 );
 type PublicDirectoryTimestamp = typeof PublicDirectoryTimestampSchema.Type;
 
@@ -22,12 +26,18 @@ export interface BunPublicDirectory {
   readonly boardAccount: (publicId: PublicId) => AccountId | null;
   readonly setProfile: (accountId: AccountId, handle: ProfileHandle) => void;
   readonly removeProfile: (accountId: AccountId) => void;
-  readonly setBoard: (accountId: AccountId, boardId: BoardId, publicId: PublicId) => void;
+  readonly setBoard: (
+    accountId: AccountId,
+    boardId: BoardId,
+    publicId: PublicId,
+  ) => void;
   readonly removeBoard: (accountId: AccountId, boardId: BoardId) => void;
   readonly close: () => void;
 }
 
-export const openBunPublicDirectory = (databasePath: string): BunPublicDirectory => {
+export const openBunPublicDirectory = (
+  databasePath: string,
+): BunPublicDirectory => {
   const directory = dirname(databasePath);
   mkdirSync(directory, { recursive: true, mode: 0o700 });
   chmodSync(directory, 0o700);
@@ -48,11 +58,17 @@ export const openBunPublicDirectory = (databasePath: string): BunPublicDirectory
   const removeProfiles = database.query<unknown, [string]>(
     'DELETE FROM "public_profile_route" WHERE "userId" = ?',
   );
-  const insertProfile = database.query<unknown, [string, string, PublicDirectoryTimestamp]>(`
+  const insertProfile = database.query<
+    unknown,
+    [string, string, PublicDirectoryTimestamp]
+  >(`
     INSERT INTO "public_profile_route" ("handle", "userId", "updatedAt")
     VALUES (?, ?, ?)
   `);
-  const insertBoard = database.query<unknown, [string, string, string, PublicDirectoryTimestamp]>(`
+  const insertBoard = database.query<
+    unknown,
+    [string, string, string, PublicDirectoryTimestamp]
+  >(`
     INSERT INTO "public_board_route" ("publicId", "userId", "boardId", "updatedAt")
     VALUES (?, ?, ?, ?)
     ON CONFLICT("userId", "boardId") DO UPDATE SET
@@ -64,14 +80,22 @@ export const openBunPublicDirectory = (databasePath: string): BunPublicDirectory
   );
 
   return {
-    profileAccount: (handle) => decodeCatalogRouteUserId(profileAccount.get(handle)),
+    profileAccount: (handle) =>
+      decodeCatalogRouteUserId(profileAccount.get(handle)),
     profileHandle: (accountId) =>
-      Option.getOrNull(decodeProfileHandle(profileHandle.get(accountId)?.handle)),
-    boardAccount: (publicId) => decodeCatalogRouteUserId(boardAccount.get(publicId)),
+      Option.getOrNull(
+        decodeProfileHandle(profileHandle.get(accountId)?.handle),
+      ),
+    boardAccount: (publicId) =>
+      decodeCatalogRouteUserId(boardAccount.get(publicId)),
     setProfile: (accountId, handle) =>
       database.transaction(() => {
         removeProfiles.run(accountId);
-        insertProfile.run(handle, accountId, PublicDirectoryTimestampSchema.make(Date.now()));
+        insertProfile.run(
+          handle,
+          accountId,
+          PublicDirectoryTimestampSchema.make(Date.now()),
+        );
       })(),
     removeProfile: (accountId) => {
       removeProfiles.run(accountId);

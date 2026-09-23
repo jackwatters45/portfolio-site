@@ -1,13 +1,16 @@
-import { ArrowSquareOut, GlobeSimple } from "@phosphor-icons/react";
-import { useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { ArrowSquareOut, GlobeSimple } from '@phosphor-icons/react';
+import { useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 
-import type { BoardItem } from "../client/board/types";
+import type { BoardItem } from '../client/board/types';
 
 const WebsiteCardContent = ({ item }: { readonly item: BoardItem }) => {
   const [failedImage, setFailedImage] = useState<string | null>(null);
-  const imageAvailable = item.websiteImageUrl !== undefined && failedImage !== item.websiteImageUrl;
+  const imageAvailable =
+    item.websiteImageUrl !== undefined && failedImage !== item.websiteImageUrl;
   return (
-    <div className={`website-card${imageAvailable ? " has-preview" : " is-fallback"}`}>
+    <div
+      className={`website-card${imageAvailable ? ' has-preview' : ' is-fallback'}`}
+    >
       <div className="website-card-image">
         {imageAvailable ? (
           <img
@@ -22,11 +25,16 @@ const WebsiteCardContent = ({ item }: { readonly item: BoardItem }) => {
         )}
       </div>
       <div className="website-card-copy">
-        <span className="website-card-site">{item.websiteSiteLabel ?? "Website"}</span>
-        <strong>{item.websiteTitle ?? item.websiteSiteLabel ?? "Website"}</strong>
+        <span className="website-card-site">
+          {item.websiteSiteLabel ?? 'Website'}
+        </span>
+        <strong>
+          {item.websiteTitle ?? item.websiteSiteLabel ?? 'Website'}
+        </strong>
         {item.websiteDescription && <p>{item.websiteDescription}</p>}
         <span className="website-card-open">
-          Visit site <ArrowSquareOut size={14} weight="bold" aria-hidden="true" />
+          Visit site{' '}
+          <ArrowSquareOut size={14} weight="bold" aria-hidden="true" />
         </span>
       </div>
     </div>
@@ -44,7 +52,7 @@ export function WebsiteCard({
   if (editing || item.websiteUrl === undefined) return content;
 
   const activateSpace = (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
-    if (event.key !== " ") return;
+    if (event.key !== ' ') return;
     event.preventDefault();
     event.currentTarget.click();
   };
@@ -56,7 +64,7 @@ export function WebsiteCard({
       target="_blank"
       rel="noopener noreferrer"
       referrerPolicy="no-referrer"
-      aria-label={`Open ${item.websiteTitle ?? item.websiteSiteLabel ?? "website"} in a new tab`}
+      aria-label={`Open ${item.websiteTitle ?? item.websiteSiteLabel ?? 'website'} in a new tab`}
       draggable={false}
       onClick={(event) => {
         if (event.detail > 0) event.preventDefault();

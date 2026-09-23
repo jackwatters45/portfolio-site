@@ -1,3 +1,5 @@
-import { Schema } from "effect";
+import { Schema } from 'effect';
 
-export const NullableSqliteBooleanSchema = Schema.NullOr(Schema.Literals([0, 1]));
+export const NullableSqliteBooleanSchema = Schema.NullOr(
+  Schema.Literals([0, 1]),
+);

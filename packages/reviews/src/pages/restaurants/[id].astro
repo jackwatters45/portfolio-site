@@ -4,6 +4,7 @@ import { render } from 'astro:content';
 import Reviews from '../../components/reviews.astro';
 import Layout from '../../layouts/layout.astro';
 import { getRestaurants } from '../../lib/restaurants';
+import { reviewerName } from '../../lib/reviewers';
 
 export async function getStaticPaths() {
   return (await getRestaurants()).map((restaurant) => ({
@@ -20,19 +21,36 @@ const { data } = restaurant;
 const hasOverall = Object.values(data.ratings).some(
   ({ score, review }) => score !== null || review,
 );
+const hasBreadRating =
+  data.glutenFreeBread &&
+  Object.values(data.glutenFreeBread).some(
+    ({ score, review }) => score !== null || review,
+  );
+const guests = [
+  ...new Set(data.items.flatMap((item) => Object.keys(item.ratings))),
+].filter((person) => person !== 'meg' && person !== 'jack');
 const groups = [
   { id: 'shared', title: 'Shared dishes', items: [] as typeof data.items },
-  { id: 'meg-extras', title: 'Meg’s extras', items: [] as typeof data.items },
-  { id: 'jack-extras', title: 'Jack’s extras', items: [] as typeof data.items },
+  { id: 'meg-extras', title: 'Meg', items: [] as typeof data.items },
+  { id: 'jack-extras', title: 'Jack', items: [] as typeof data.items },
+  ...guests.map((person) => ({
+    id: `${person}-extras`,
+    title: reviewerName(person),
+    items: [] as typeof data.items,
+  })),
   { id: 'unrated', title: 'Not yet rated', items: [] as typeof data.items },
 ];
 for (const item of data.items.filter((item) => item.name)) {
-  const meg =
-    item.ratings.meg.score !== null || Boolean(item.ratings.meg.review);
-  const jack =
-    item.ratings.jack.score !== null || Boolean(item.ratings.jack.review);
-  const group = item.shared || (meg && jack) ? 0 : meg ? 1 : jack ? 2 : 3;
-  groups[group].items.push(item);
+  const reviewers = Object.entries(item.ratings)
+    .filter(([, rating]) => rating.score !== null || Boolean(rating.review))
+    .map(([person]) => person);
+  const groupId =
+    item.shared || reviewers.length > 1
+      ? 'shared'
+      : reviewers.length === 1
+        ? `${reviewers[0]}-extras`
+        : 'unrated';
+  groups.find((group) => group.id === groupId)!.items.push(item);
 }
 const { Content } = await render(restaurant);
 const visited =
@@ -74,8 +92,12 @@ const currency = new Intl.NumberFormat('en-AU', {
           </>}
         </div>
         {item.note && <p>{item.note}</p>}
-        <Reviews ratings={item.ratings} />
+        <Reviews ratings={item.ratings} showNames={group.id === 'shared' || group.id === 'unrated'} />
       </article>
     ))}
   </section>)}
+  {hasBreadRating && data.glutenFreeBread && <section class="section" aria-labelledby="gluten-free-bread">
+    <h2 id="gluten-free-bread">Gluten-free bread</h2>
+    <Reviews ratings={data.glutenFreeBread} showNames={false} />
+  </section>}
 </Layout>

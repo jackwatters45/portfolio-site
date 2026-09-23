@@ -1,4 +1,4 @@
-import { Clock, Context, Effect, Layer, Schema } from "effect";
+import { Clock, Context, Effect, Layer, Schema } from 'effect';
 
 import {
   hasValidMediaMagic,
@@ -22,38 +22,48 @@ import {
   type MediaReservationId,
   type MediaTimestamp,
   type MediaUploadResponse,
-} from "../lib/media";
-import { OptionalErrorCauseSchema } from "../lib/schema";
-import { SERVICE_DIRECT_MEDIA_CLIENT, type MediaQuotaClientId } from "./media-client-identity";
-import { MediaObjectStore, type MediaObjectRange } from "./media-object-store";
-import { type MediaAsset, MediaRepo, type PendingMediaAsset } from "./media-repo";
+} from '../lib/media';
+import { OptionalErrorCauseSchema } from '../lib/schema';
+import {
+  SERVICE_DIRECT_MEDIA_CLIENT,
+  type MediaQuotaClientId,
+} from './media-client-identity';
+import { MediaObjectStore, type MediaObjectRange } from './media-object-store';
+import {
+  type MediaAsset,
+  MediaRepo,
+  type PendingMediaAsset,
+} from './media-repo';
 
-export const DEFAULT_MEDIA_QUOTA_LIMITS = Schema.decodeUnknownSync(MediaQuotaLimitsSchema)({
+export const DEFAULT_MEDIA_QUOTA_LIMITS = Schema.decodeUnknownSync(
+  MediaQuotaLimitsSchema,
+)({
   requestsPerHour: 180,
   bytesPerDay: 256 * 1024 * 1024,
   managedBytes: 1024 * 1024 * 1024,
   reservationTtlMs: 10 * 60 * 1_000,
 });
 
-export const MEDIA_CLEANUP_AGE_MS: MediaDurationMillis = MediaDurationMillisSchema.make(
-  30 * 24 * 60 * 60 * 1_000,
-);
-export const MEDIA_CLEANUP_LEASE_MS: MediaDurationMillis = MediaDurationMillisSchema.make(
-  23 * 60 * 60 * 1_000,
-);
-export const MEDIA_CLEANUP_BATCH_SIZE: MediaCleanupBatchSize = MediaCleanupBatchSizeSchema.make(50);
+export const MEDIA_CLEANUP_AGE_MS: MediaDurationMillis =
+  MediaDurationMillisSchema.make(30 * 24 * 60 * 60 * 1_000);
+export const MEDIA_CLEANUP_LEASE_MS: MediaDurationMillis =
+  MediaDurationMillisSchema.make(23 * 60 * 60 * 1_000);
+export const MEDIA_CLEANUP_BATCH_SIZE: MediaCleanupBatchSize =
+  MediaCleanupBatchSizeSchema.make(50);
 
-export class MediaServiceError extends Schema.Error<MediaServiceError>("MediaServiceError")({
-  _tag: Schema.tag("MediaServiceError"),
+export class MediaServiceError extends Schema.Error<MediaServiceError>(
+  'MediaServiceError',
+)({
+  _tag: Schema.tag('MediaServiceError'),
   reason: Schema.Literals([
-    "Empty",
-    "TooLarge",
-    "InvalidContent",
-    "RequestQuota",
-    "ByteQuota",
-    "StorageQuota",
-    "Timeout",
-    "Persistence",
+    'Empty',
+    'TooLarge',
+    'InvalidContent',
+    'RequestQuota',
+    'ByteQuota',
+    'StorageQuota',
+    'Timeout',
+    'Persistence',
   ]),
   retryAfter: Schema.optional(RetryAfterSecondsSchema),
   cause: OptionalErrorCauseSchema,
@@ -66,7 +76,9 @@ export type ReadableMedia = {
 
 const randomHex = (): string => {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
+  return [...bytes]
+    .map((value) => value.toString(16).padStart(2, '0'))
+    .join('');
 };
 
 const randomMediaId = (): MediaId => MediaIdSchema.make(randomHex());
@@ -74,18 +86,18 @@ const mediaNow = Clock.currentTimeMillis.pipe(
   Effect.map((millis) => MediaTimestampSchema.make(millis)),
 );
 
-const sha256 = Effect.fn("MediaService.sha256")((bytes: Uint8Array) =>
+const sha256 = Effect.fn('MediaService.sha256')((bytes: Uint8Array) =>
   Effect.tryPromise({
     try: async () => {
       const copy = new Uint8Array(bytes.byteLength);
       copy.set(bytes);
-      const digest = await crypto.subtle.digest("SHA-256", copy.buffer);
+      const digest = await crypto.subtle.digest('SHA-256', copy.buffer);
       const hash = [...new Uint8Array(digest)]
-        .map((value) => value.toString(16).padStart(2, "0"))
-        .join("");
+        .map((value) => value.toString(16).padStart(2, '0'))
+        .join('');
       return MediaEtagSchema.make(hash);
     },
-    catch: (cause) => new MediaServiceError({ reason: "Persistence", cause }),
+    catch: (cause) => new MediaServiceError({ reason: 'Persistence', cause }),
   }),
 );
 
@@ -101,7 +113,9 @@ interface MediaServiceShape {
     bytes: Uint8Array,
     reservationId?: MediaReservationId,
   ) => Effect.Effect<MediaUploadResponse, MediaServiceError>;
-  readonly describe: (id: MediaId) => Effect.Effect<MediaAsset | null, MediaServiceError>;
+  readonly describe: (
+    id: MediaId,
+  ) => Effect.Effect<MediaAsset | null, MediaServiceError>;
   readonly read: (
     id: MediaId,
     range?: MediaObjectRange,
@@ -110,7 +124,9 @@ interface MediaServiceShape {
     olderThan: MediaTimestamp,
     limit?: MediaCleanupBatchSize,
   ) => Effect.Effect<number, MediaServiceError>;
-  readonly maintain: (now?: MediaTimestamp) => Effect.Effect<number, MediaServiceError>;
+  readonly maintain: (
+    now?: MediaTimestamp,
+  ) => Effect.Effect<number, MediaServiceError>;
 }
 
 const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
@@ -120,9 +136,9 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
       const repo = yield* MediaRepo;
       const objects = yield* MediaObjectStore;
       const persistenceError = (cause: unknown) =>
-        new MediaServiceError({ reason: "Persistence", cause });
+        new MediaServiceError({ reason: 'Persistence', cause });
 
-      const reserveUpload = Effect.fn("MediaService.reserveUpload")(function* (
+      const reserveUpload = Effect.fn('MediaService.reserveUpload')(function* (
         clientId: MediaQuotaClientId,
         byteLength: MediaByteLength,
       ) {
@@ -136,34 +152,34 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
           )
           .pipe(Effect.mapError(persistenceError));
         switch (result._tag) {
-          case "Reserved":
+          case 'Reserved':
             return result.id;
-          case "RequestLimit":
+          case 'RequestLimit':
             return yield* new MediaServiceError({
-              reason: "RequestQuota",
+              reason: 'RequestQuota',
               retryAfter: result.retryAfter,
             });
-          case "ByteLimit":
+          case 'ByteLimit':
             return yield* new MediaServiceError({
-              reason: "ByteQuota",
+              reason: 'ByteQuota',
               retryAfter: result.retryAfter,
             });
-          case "StorageFull":
-            return yield* new MediaServiceError({ reason: "StorageQuota" });
+          case 'StorageFull':
+            return yield* new MediaServiceError({ reason: 'StorageQuota' });
         }
       });
 
-      const releaseReservation = Effect.fn("MediaService.releaseReservation")(
+      const releaseReservation = Effect.fn('MediaService.releaseReservation')(
         (id: MediaReservationId) =>
           repo.releaseReservation(id).pipe(
             Effect.tapError((error) =>
-              Effect.logWarning("Media reservation release failed", error),
+              Effect.logWarning('Media reservation release failed', error),
             ),
             Effect.ignore,
           ),
       );
 
-      const uploadWithReservation = Effect.fn("MediaService.upload")(function* (
+      const uploadWithReservation = Effect.fn('MediaService.upload')(function* (
         kind: MediaKind,
         mimeType: MediaMimeType,
         bytes: Uint8Array,
@@ -171,10 +187,10 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
         reservationId: MediaReservationId,
       ) {
         if (byteLength > mediaByteLimit(kind)) {
-          return yield* new MediaServiceError({ reason: "TooLarge" });
+          return yield* new MediaServiceError({ reason: 'TooLarge' });
         }
         if (!hasValidMediaMagic(kind, mimeType, bytes)) {
-          return yield* new MediaServiceError({ reason: "InvalidContent" });
+          return yield* new MediaServiceError({ reason: 'InvalidContent' });
         }
 
         const id = randomMediaId();
@@ -190,16 +206,19 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
           createdAt: now,
         };
 
-        yield* repo.insertPending(asset).pipe(Effect.mapError(persistenceError));
-        const rollback = Effect.fn("MediaService.rollbackUpload")((error: MediaServiceError) =>
-          objects.delete(asset.storageKey).pipe(
-            Effect.andThen(repo.removePending(asset.id)),
-            Effect.tapError((cleanupError) =>
-              Effect.logWarning("Media upload rollback failed", cleanupError),
+        yield* repo
+          .insertPending(asset)
+          .pipe(Effect.mapError(persistenceError));
+        const rollback = Effect.fn('MediaService.rollbackUpload')(
+          (error: MediaServiceError) =>
+            objects.delete(asset.storageKey).pipe(
+              Effect.andThen(repo.removePending(asset.id)),
+              Effect.tapError((cleanupError) =>
+                Effect.logWarning('Media upload rollback failed', cleanupError),
+              ),
+              Effect.ignore,
+              Effect.andThen(Effect.fail(error)),
             ),
-            Effect.ignore,
-            Effect.andThen(Effect.fail(error)),
-          ),
         );
         yield* objects
           .put(asset.storageKey, bytes, mimeType, etag)
@@ -217,28 +236,35 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
         } satisfies MediaUploadResponse;
       });
 
-      const upload = Effect.fn("MediaService.uploadReserved")(function* (
+      const upload = Effect.fn('MediaService.uploadReserved')(function* (
         kind: MediaKind,
         mimeType: MediaMimeType,
         bytes: Uint8Array,
         suppliedReservation?: MediaReservationId,
       ) {
         if (bytes.length === 0) {
-          return yield* new MediaServiceError({ reason: "Empty" });
+          return yield* new MediaServiceError({ reason: 'Empty' });
         }
         const byteLength = MediaByteLengthSchema.make(bytes.length);
         const reservation =
-          suppliedReservation ?? (yield* reserveUpload(SERVICE_DIRECT_MEDIA_CLIENT, byteLength));
-        return yield* uploadWithReservation(kind, mimeType, bytes, byteLength, reservation).pipe(
-          Effect.ensuring(releaseReservation(reservation)),
-        );
+          suppliedReservation ??
+          (yield* reserveUpload(SERVICE_DIRECT_MEDIA_CLIENT, byteLength));
+        return yield* uploadWithReservation(
+          kind,
+          mimeType,
+          bytes,
+          byteLength,
+          reservation,
+        ).pipe(Effect.ensuring(releaseReservation(reservation)));
       });
 
-      const describe = Effect.fn("MediaService.describe")(function* (id: MediaId) {
+      const describe = Effect.fn('MediaService.describe')(function* (
+        id: MediaId,
+      ) {
         return yield* repo.getReady(id).pipe(Effect.mapError(persistenceError));
       });
 
-      const read = Effect.fn("MediaService.read")(function* (
+      const read = Effect.fn('MediaService.read')(function* (
         id: MediaId,
         range?: MediaObjectRange,
       ) {
@@ -248,11 +274,12 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
           .get(asset.storageKey, range)
           .pipe(Effect.mapError(persistenceError));
         const expectedLength = range?.length ?? asset.byteLength;
-        if (object === null || object.bytes.byteLength !== expectedLength) return null;
+        if (object === null || object.bytes.byteLength !== expectedLength)
+          return null;
         return { asset, bytes: object.bytes };
       });
 
-      const cleanupBatch = Effect.fn("MediaService.cleanupBatch")(function* (
+      const cleanupBatch = Effect.fn('MediaService.cleanupBatch')(function* (
         olderThan: MediaTimestamp,
         limit = MEDIA_CLEANUP_BATCH_SIZE,
       ) {
@@ -267,7 +294,9 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
               Effect.andThen(repo.completeDelete(asset.id)),
               Effect.as(true),
               Effect.catch((error) =>
-                Effect.logWarning("Media cleanup item failed", error).pipe(Effect.as(false)),
+                Effect.logWarning('Media cleanup item failed', error).pipe(
+                  Effect.as(false),
+                ),
               ),
             ),
           { concurrency: 4 },
@@ -278,16 +307,22 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
         };
       });
 
-      const cleanupUnreferenced = Effect.fn("MediaService.cleanupUnreferenced")(function* (
-        olderThan: MediaTimestamp,
-        limit = MEDIA_CLEANUP_BATCH_SIZE,
-      ) {
-        return (yield* cleanupBatch(olderThan, limit)).removed;
-      });
+      const cleanupUnreferenced = Effect.fn('MediaService.cleanupUnreferenced')(
+        function* (
+          olderThan: MediaTimestamp,
+          limit = MEDIA_CLEANUP_BATCH_SIZE,
+        ) {
+          return (yield* cleanupBatch(olderThan, limit)).removed;
+        },
+      );
 
-      const maintain = Effect.fn("MediaService.maintain")(function* (at?: MediaTimestamp) {
+      const maintain = Effect.fn('MediaService.maintain')(function* (
+        at?: MediaTimestamp,
+      ) {
         const maintenanceAt = at ?? (yield* mediaNow);
-        yield* repo.maintainQuota(maintenanceAt).pipe(Effect.mapError(persistenceError));
+        yield* repo
+          .maintainQuota(maintenanceAt)
+          .pipe(Effect.mapError(persistenceError));
         let removed = 0;
         for (let batch = 0; batch < 10; batch += 1) {
           const result = yield* cleanupBatch(
@@ -312,9 +347,11 @@ const makeLayer = (tag: typeof MediaService, limits: MediaQuotaLimits) =>
     }),
   ).pipe(Layer.provide(MediaRepo.layer));
 
-export class MediaService extends Context.Service<MediaService, MediaServiceShape>()(
-  "mood-board/MediaService",
-) {
+export class MediaService extends Context.Service<
+  MediaService,
+  MediaServiceShape
+>()('mood-board/MediaService') {
   static readonly layer = makeLayer(this, DEFAULT_MEDIA_QUOTA_LIMITS);
-  static readonly layerWith = (limits: MediaQuotaLimits) => makeLayer(this, limits);
+  static readonly layerWith = (limits: MediaQuotaLimits) =>
+    makeLayer(this, limits);
 }

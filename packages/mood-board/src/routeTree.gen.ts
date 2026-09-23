@@ -8,81 +8,81 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AtChar123handleChar125RouteImport } from './routes/@{$handle}'
-import { Route as DemoRouteImport } from './routes/demo'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as BoardsBoardIdRouteImport } from './routes/boards.$boardId'
-import { Route as SharePublicIdRouteImport } from './routes/share.$publicId'
+import { Route as AtChar123handleChar125RouteImport } from './routes/@{$handle}';
+import { Route as rootRouteImport } from './routes/__root';
+import { Route as BoardsBoardIdRouteImport } from './routes/boards.$boardId';
+import { Route as DemoRouteImport } from './routes/demo';
+import { Route as IndexRouteImport } from './routes/index';
+import { Route as LoginRouteImport } from './routes/login';
+import { Route as ProfileRouteImport } from './routes/profile';
+import { Route as SharePublicIdRouteImport } from './routes/share.$publicId';
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AtChar123handleChar125Route = AtChar123handleChar125RouteImport.update({
   id: '/@{$handle}',
   path: '/@{$handle}',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const BoardsBoardIdRoute = BoardsBoardIdRouteImport.update({
   id: '/boards/$boardId',
   path: '/boards/$boardId',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const SharePublicIdRoute = SharePublicIdRouteImport.update({
   id: '/share/$publicId',
   path: '/share/$publicId',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/@{$handle}': typeof AtChar123handleChar125Route
-  '/demo': typeof DemoRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
-  '/share/$publicId': typeof SharePublicIdRoute
+  '/': typeof IndexRoute;
+  '/@{$handle}': typeof AtChar123handleChar125Route;
+  '/demo': typeof DemoRoute;
+  '/login': typeof LoginRoute;
+  '/profile': typeof ProfileRoute;
+  '/boards/$boardId': typeof BoardsBoardIdRoute;
+  '/share/$publicId': typeof SharePublicIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/@{$handle}': typeof AtChar123handleChar125Route
-  '/demo': typeof DemoRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
-  '/share/$publicId': typeof SharePublicIdRoute
+  '/': typeof IndexRoute;
+  '/@{$handle}': typeof AtChar123handleChar125Route;
+  '/demo': typeof DemoRoute;
+  '/login': typeof LoginRoute;
+  '/profile': typeof ProfileRoute;
+  '/boards/$boardId': typeof BoardsBoardIdRoute;
+  '/share/$publicId': typeof SharePublicIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/@{$handle}': typeof AtChar123handleChar125Route
-  '/demo': typeof DemoRoute
-  '/login': typeof LoginRoute
-  '/profile': typeof ProfileRoute
-  '/boards/$boardId': typeof BoardsBoardIdRoute
-  '/share/$publicId': typeof SharePublicIdRoute
+  __root__: typeof rootRouteImport;
+  '/': typeof IndexRoute;
+  '/@{$handle}': typeof AtChar123handleChar125Route;
+  '/demo': typeof DemoRoute;
+  '/login': typeof LoginRoute;
+  '/profile': typeof ProfileRoute;
+  '/boards/$boardId': typeof BoardsBoardIdRoute;
+  '/share/$publicId': typeof SharePublicIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/@{$handle}'
@@ -90,8 +90,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/boards/$boardId'
-    | '/share/$publicId'
-  fileRoutesByTo: FileRoutesByTo
+    | '/share/$publicId';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/@{$handle}'
@@ -99,7 +99,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/boards/$boardId'
-    | '/share/$publicId'
+    | '/share/$publicId';
   id:
     | '__root__'
     | '/'
@@ -108,70 +108,70 @@ export interface FileRouteTypes {
     | '/login'
     | '/profile'
     | '/boards/$boardId'
-    | '/share/$publicId'
-  fileRoutesById: FileRoutesById
+    | '/share/$publicId';
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AtChar123handleChar125Route: typeof AtChar123handleChar125Route
-  DemoRoute: typeof DemoRoute
-  LoginRoute: typeof LoginRoute
-  ProfileRoute: typeof ProfileRoute
-  BoardsBoardIdRoute: typeof BoardsBoardIdRoute
-  SharePublicIdRoute: typeof SharePublicIdRoute
+  IndexRoute: typeof IndexRoute;
+  AtChar123handleChar125Route: typeof AtChar123handleChar125Route;
+  DemoRoute: typeof DemoRoute;
+  LoginRoute: typeof LoginRoute;
+  ProfileRoute: typeof ProfileRoute;
+  BoardsBoardIdRoute: typeof BoardsBoardIdRoute;
+  SharePublicIdRoute: typeof SharePublicIdRoute;
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/@{$handle}': {
-      id: '/@{$handle}'
-      path: '/@{$handle}'
-      fullPath: '/@{$handle}'
-      preLoaderRoute: typeof AtChar123handleChar125RouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/@{$handle}';
+      path: '/@{$handle}';
+      fullPath: '/@{$handle}';
+      preLoaderRoute: typeof AtChar123handleChar125RouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/demo';
+      path: '/demo';
+      fullPath: '/demo';
+      preLoaderRoute: typeof DemoRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/login';
+      path: '/login';
+      fullPath: '/login';
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/profile';
+      path: '/profile';
+      fullPath: '/profile';
+      preLoaderRoute: typeof ProfileRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/boards/$boardId': {
-      id: '/boards/$boardId'
-      path: '/boards/$boardId'
-      fullPath: '/boards/$boardId'
-      preLoaderRoute: typeof BoardsBoardIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/boards/$boardId';
+      path: '/boards/$boardId';
+      fullPath: '/boards/$boardId';
+      preLoaderRoute: typeof BoardsBoardIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/share/$publicId': {
-      id: '/share/$publicId'
-      path: '/share/$publicId'
-      fullPath: '/share/$publicId'
-      preLoaderRoute: typeof SharePublicIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/share/$publicId';
+      path: '/share/$publicId';
+      fullPath: '/share/$publicId';
+      preLoaderRoute: typeof SharePublicIdRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -183,7 +183,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   BoardsBoardIdRoute: BoardsBoardIdRoute,
   SharePublicIdRoute: SharePublicIdRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();

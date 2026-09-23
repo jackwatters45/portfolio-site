@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
+import { createHash } from 'node:crypto';
 
-import { Clock, Context, Effect, Layer, Schema } from "effect";
-import * as SqlClient from "effect/unstable/sql/SqlClient";
-import type { SqlError } from "effect/unstable/sql/SqlError";
+import { Clock, Context, Effect, Layer, Schema } from 'effect';
+import * as SqlClient from 'effect/unstable/sql/SqlClient';
+import type { SqlError } from 'effect/unstable/sql/SqlError';
 
 import {
   BoardColorSchema,
@@ -30,10 +30,10 @@ import {
   type ItemId,
   type MutationId,
   type RemoteBoardItem,
-} from "../lib/board-rpc";
-import { MediaIdSchema, MediaKindSchema, type MediaId } from "../lib/media";
-import { PositiveIntegerSchema, Sha256HexSchema } from "../lib/schema";
-import { NullableSqliteBooleanSchema } from "./sqlite";
+} from '../lib/board-rpc';
+import { MediaIdSchema, MediaKindSchema, type MediaId } from '../lib/media';
+import { PositiveIntegerSchema, Sha256HexSchema } from '../lib/schema';
+import { NullableSqliteBooleanSchema } from './sqlite';
 
 interface BoardRow {
   readonly id: unknown;
@@ -124,7 +124,9 @@ interface MediaValidationRow {
   readonly kind: unknown;
 }
 
-const MutationRequestHashSchema = Sha256HexSchema.pipe(Schema.brand("MutationRequestHash"));
+const MutationRequestHashSchema = Sha256HexSchema.pipe(
+  Schema.brand('MutationRequestHash'),
+);
 const MutationRowSchema = Schema.Struct({
   revision: BoardRevisionSchema,
   client_id: ClientIdSchema,
@@ -154,17 +156,17 @@ export interface CommitResult {
 }
 
 export type CommitRejected =
-  | { readonly _tag: "InvalidMutation" }
-  | { readonly _tag: "MutationConflict" }
-  | { readonly _tag: "TooManyItems" }
-  | { readonly _tag: "BoardTooLarge" }
-  | { readonly _tag: "InvalidMedia" };
+  | { readonly _tag: 'InvalidMutation' }
+  | { readonly _tag: 'MutationConflict' }
+  | { readonly _tag: 'TooManyItems' }
+  | { readonly _tag: 'BoardTooLarge' }
+  | { readonly _tag: 'InvalidMedia' };
 
 export type ManagementRejected =
-  | { readonly _tag: "BoardLimit" }
-  | { readonly _tag: "DeletedBoardId" }
-  | { readonly _tag: "InvalidOperation" }
-  | { readonly _tag: "LastBoard" };
+  | { readonly _tag: 'BoardLimit' }
+  | { readonly _tag: 'DeletedBoardId' }
+  | { readonly _tag: 'InvalidOperation' }
+  | { readonly _tag: 'LastBoard' };
 
 const mutationHash = (input: CommitInput) => {
   const legacyPayload = [
@@ -182,94 +184,118 @@ const mutationHash = (input: CommitInput) => {
         : { backgroundMediaId: input.backgroundMediaId }
       : input.backgroundMediaId === undefined
         ? { background: input.background }
-        : { background: input.background, backgroundMediaId: input.backgroundMediaId };
-  const payload = metadata === undefined ? legacyPayload : [...legacyPayload, metadata];
-  const hash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+        : {
+            background: input.background,
+            backgroundMediaId: input.backgroundMediaId,
+          };
+  const payload =
+    metadata === undefined ? legacyPayload : [...legacyPayload, metadata];
+  const hash = createHash('sha256')
+    .update(JSON.stringify(payload))
+    .digest('hex');
   return MutationRequestHashSchema.make(hash);
 };
 
 const itemBytes = (item: RemoteBoardItem) =>
   512 +
-  Buffer.byteLength(item.src ?? "", "utf8") +
-  Buffer.byteLength(item.mediaId ?? "", "utf8") +
-  Buffer.byteLength(item.href ?? "", "utf8") +
-  Buffer.byteLength(item.annotationTitle ?? "", "utf8") +
-  Buffer.byteLength(item.annotationDescription ?? "", "utf8") +
-  Buffer.byteLength(item.text ?? "", "utf8") +
-  Buffer.byteLength(item.color ?? "", "utf8") +
-  Buffer.byteLength(item.label ?? "", "utf8") +
-  Buffer.byteLength(item.websiteUrl ?? "", "utf8") +
-  Buffer.byteLength(item.websiteImageUrl ?? "", "utf8") +
-  Buffer.byteLength(item.websiteTitle ?? "", "utf8") +
-  Buffer.byteLength(item.websiteDescription ?? "", "utf8") +
-  Buffer.byteLength(item.websiteSiteLabel ?? "", "utf8") +
-  Buffer.byteLength(item.xAuthorName ?? "", "utf8") +
-  Buffer.byteLength(item.xAuthorHandle ?? "", "utf8") +
-  Buffer.byteLength(item.xPostText ?? "", "utf8") +
-  Buffer.byteLength(item.xPostDate ?? "", "utf8");
+  Buffer.byteLength(item.src ?? '', 'utf8') +
+  Buffer.byteLength(item.mediaId ?? '', 'utf8') +
+  Buffer.byteLength(item.href ?? '', 'utf8') +
+  Buffer.byteLength(item.annotationTitle ?? '', 'utf8') +
+  Buffer.byteLength(item.annotationDescription ?? '', 'utf8') +
+  Buffer.byteLength(item.text ?? '', 'utf8') +
+  Buffer.byteLength(item.color ?? '', 'utf8') +
+  Buffer.byteLength(item.label ?? '', 'utf8') +
+  Buffer.byteLength(item.websiteUrl ?? '', 'utf8') +
+  Buffer.byteLength(item.websiteImageUrl ?? '', 'utf8') +
+  Buffer.byteLength(item.websiteTitle ?? '', 'utf8') +
+  Buffer.byteLength(item.websiteDescription ?? '', 'utf8') +
+  Buffer.byteLength(item.websiteSiteLabel ?? '', 'utf8') +
+  Buffer.byteLength(item.xAuthorName ?? '', 'utf8') +
+  Buffer.byteLength(item.xAuthorHandle ?? '', 'utf8') +
+  Buffer.byteLength(item.xPostText ?? '', 'utf8') +
+  Buffer.byteLength(item.xPostDate ?? '', 'utf8');
 
-const normalizeLegacyItemMetadata = Effect.fn("BoardRepo.normalizeLegacyItemMetadata")(function* (
-  row: ItemRow,
-) {
+const normalizeLegacyItemMetadata = Effect.fn(
+  'BoardRepo.normalizeLegacyItemMetadata',
+)(function* (row: ItemRow) {
   const storedXHideThread =
-    row.kind === "x"
-      ? yield* Schema.decodeUnknownEffect(NullableSqliteBooleanSchema)(row.x_hide_thread).pipe(
-          Effect.orDie,
-        )
+    row.kind === 'x'
+      ? yield* Schema.decodeUnknownEffect(NullableSqliteBooleanSchema)(
+          row.x_hide_thread,
+        ).pipe(Effect.orDie)
       : null;
   const hasSource =
-    row.kind === "image" ||
-    row.kind === "spotify" ||
-    row.kind === "youtube" ||
-    row.kind === "audio" ||
-    row.kind === "x";
+    row.kind === 'image' ||
+    row.kind === 'spotify' ||
+    row.kind === 'youtube' ||
+    row.kind === 'audio' ||
+    row.kind === 'x';
   const hasLabel =
-    row.kind === "swatch" ||
-    row.kind === "spotify" ||
-    row.kind === "youtube" ||
-    row.kind === "audio";
+    row.kind === 'swatch' ||
+    row.kind === 'spotify' ||
+    row.kind === 'youtube' ||
+    row.kind === 'audio';
 
   return {
     ...(hasSource && row.src !== null ? { src: row.src } : {}),
-    ...((row.kind === "image" || row.kind === "audio") && row.media_id !== null
+    ...((row.kind === 'image' || row.kind === 'audio') && row.media_id !== null
       ? { mediaId: row.media_id }
       : {}),
-    ...(row.kind === "image" && row.href !== null ? { href: row.href } : {}),
-    ...(row.kind === "image" && row.annotation_title !== null
+    ...(row.kind === 'image' && row.href !== null ? { href: row.href } : {}),
+    ...(row.kind === 'image' && row.annotation_title !== null
       ? { annotationTitle: row.annotation_title }
       : {}),
-    ...(row.kind === "image" && row.annotation_description !== null
+    ...(row.kind === 'image' && row.annotation_description !== null
       ? { annotationDescription: row.annotation_description }
       : {}),
-    ...(row.kind === "note" ? { text: row.text === null ? "" : row.text } : {}),
-    ...(row.kind === "swatch" ? { color: row.color === null ? "#000000" : row.color } : {}),
+    ...(row.kind === 'note' ? { text: row.text === null ? '' : row.text } : {}),
+    ...(row.kind === 'swatch'
+      ? { color: row.color === null ? '#000000' : row.color }
+      : {}),
     ...(hasLabel && row.label !== null ? { label: row.label } : {}),
-    ...(row.kind === "website" && row.website_url !== null ? { websiteUrl: row.website_url } : {}),
-    ...(row.kind === "website" && row.website_image_url !== null
+    ...(row.kind === 'website' && row.website_url !== null
+      ? { websiteUrl: row.website_url }
+      : {}),
+    ...(row.kind === 'website' && row.website_image_url !== null
       ? { websiteImageUrl: row.website_image_url }
       : {}),
-    ...(row.kind === "website" && row.website_title !== null
+    ...(row.kind === 'website' && row.website_title !== null
       ? { websiteTitle: row.website_title }
       : {}),
-    ...(row.kind === "website" && row.website_description !== null
+    ...(row.kind === 'website' && row.website_description !== null
       ? { websiteDescription: row.website_description }
       : {}),
-    ...(row.kind === "website" && row.website_site_label !== null
+    ...(row.kind === 'website' && row.website_site_label !== null
       ? { websiteSiteLabel: row.website_site_label }
       : {}),
-    ...(row.kind === "x" && row.x_display !== null ? { xDisplay: row.x_display } : {}),
-    ...(row.kind === "x" && row.x_theme !== null ? { xTheme: row.x_theme } : {}),
-    ...(storedXHideThread === null ? {} : { xHideThread: storedXHideThread === 1 }),
-    ...(row.kind === "x" && row.x_author_name !== null ? { xAuthorName: row.x_author_name } : {}),
-    ...(row.kind === "x" && row.x_author_handle !== null
+    ...(row.kind === 'x' && row.x_display !== null
+      ? { xDisplay: row.x_display }
+      : {}),
+    ...(row.kind === 'x' && row.x_theme !== null
+      ? { xTheme: row.x_theme }
+      : {}),
+    ...(storedXHideThread === null
+      ? {}
+      : { xHideThread: storedXHideThread === 1 }),
+    ...(row.kind === 'x' && row.x_author_name !== null
+      ? { xAuthorName: row.x_author_name }
+      : {}),
+    ...(row.kind === 'x' && row.x_author_handle !== null
       ? { xAuthorHandle: row.x_author_handle }
       : {}),
-    ...(row.kind === "x" && row.x_post_text !== null ? { xPostText: row.x_post_text } : {}),
-    ...(row.kind === "x" && row.x_post_date !== null ? { xPostDate: row.x_post_date } : {}),
+    ...(row.kind === 'x' && row.x_post_text !== null
+      ? { xPostText: row.x_post_text }
+      : {}),
+    ...(row.kind === 'x' && row.x_post_date !== null
+      ? { xPostDate: row.x_post_date }
+      : {}),
   };
 });
 
-const decodeItemRow = Effect.fn("BoardRepo.decodeItemRow")(function* (row: ItemRow) {
+const decodeItemRow = Effect.fn('BoardRepo.decodeItemRow')(function* (
+  row: ItemRow,
+) {
   const metadata = yield* normalizeLegacyItemMetadata(row);
   return yield* Schema.decodeUnknownEffect(BoardItemSchema)({
     id: row.id,
@@ -284,7 +310,9 @@ const decodeItemRow = Effect.fn("BoardRepo.decodeItemRow")(function* (row: ItemR
   }).pipe(Effect.orDie);
 });
 
-const decodeSummary = Effect.fn("BoardRepo.decodeSummary")(function* (row: BoardSummaryRow) {
+const decodeSummary = Effect.fn('BoardRepo.decodeSummary')(function* (
+  row: BoardSummaryRow,
+) {
   return yield* Schema.decodeUnknownEffect(BoardSummarySchema)({
     id: row.id,
     title: row.title,
@@ -293,37 +321,61 @@ const decodeSummary = Effect.fn("BoardRepo.decodeSummary")(function* (row: Board
   }).pipe(Effect.orDie);
 });
 
-const decodeBoardRow = Effect.fn("BoardRepo.decodeBoardRow")(function* (row: BoardRow) {
-  return yield* Schema.decodeUnknownEffect(BoardRowSchema)(row).pipe(Effect.orDie);
-});
-
-const decodeCount = Effect.fn("BoardRepo.decodeCount")(function* (row: CountRow | undefined) {
-  if (row === undefined) return 0;
-  return (yield* Schema.decodeUnknownEffect(CountRowSchema)(row).pipe(Effect.orDie)).count;
-});
-
-const decodeTombstone = Effect.fn("BoardRepo.decodeTombstone")(function* (row: TombstoneRow) {
-  return yield* Schema.decodeUnknownEffect(TombstoneRowSchema)(row).pipe(Effect.orDie);
-});
-
-const decodeMutationRow = Effect.fn("BoardRepo.decodeMutationRow")(function* (row: MutationRow) {
-  return yield* Schema.decodeUnknownEffect(MutationRowSchema)(row).pipe(Effect.orDie);
-});
-
-const decodeItemSizeRow = Effect.fn("BoardRepo.decodeItemSizeRow")(function* (row: ItemSizeRow) {
-  return yield* Schema.decodeUnknownEffect(ItemSizeRowSchema)(row).pipe(Effect.orDie);
-});
-
-const decodeMediaValidationRow = Effect.fn("BoardRepo.decodeMediaValidationRow")(function* (
-  row: MediaValidationRow,
+const decodeBoardRow = Effect.fn('BoardRepo.decodeBoardRow')(function* (
+  row: BoardRow,
 ) {
-  return yield* Schema.decodeUnknownEffect(MediaValidationRowSchema)(row).pipe(Effect.orDie);
+  return yield* Schema.decodeUnknownEffect(BoardRowSchema)(row).pipe(
+    Effect.orDie,
+  );
+});
+
+const decodeCount = Effect.fn('BoardRepo.decodeCount')(function* (
+  row: CountRow | undefined,
+) {
+  if (row === undefined) return 0;
+  return (yield* Schema.decodeUnknownEffect(CountRowSchema)(row).pipe(
+    Effect.orDie,
+  )).count;
+});
+
+const decodeTombstone = Effect.fn('BoardRepo.decodeTombstone')(function* (
+  row: TombstoneRow,
+) {
+  return yield* Schema.decodeUnknownEffect(TombstoneRowSchema)(row).pipe(
+    Effect.orDie,
+  );
+});
+
+const decodeMutationRow = Effect.fn('BoardRepo.decodeMutationRow')(function* (
+  row: MutationRow,
+) {
+  return yield* Schema.decodeUnknownEffect(MutationRowSchema)(row).pipe(
+    Effect.orDie,
+  );
+});
+
+const decodeItemSizeRow = Effect.fn('BoardRepo.decodeItemSizeRow')(function* (
+  row: ItemSizeRow,
+) {
+  return yield* Schema.decodeUnknownEffect(ItemSizeRowSchema)(row).pipe(
+    Effect.orDie,
+  );
+});
+
+const decodeMediaValidationRow = Effect.fn(
+  'BoardRepo.decodeMediaValidationRow',
+)(function* (row: MediaValidationRow) {
+  return yield* Schema.decodeUnknownEffect(MediaValidationRowSchema)(row).pipe(
+    Effect.orDie,
+  );
 });
 
 interface BoardRepoShape {
   readonly list: () => Effect.Effect<ReadonlyArray<BoardSummary>, SqlError>;
   readonly exists: (boardId: BoardId) => Effect.Effect<boolean, SqlError>;
-  readonly getSnapshot: (boardId: BoardId) => Effect.Effect<BoardSnapshot | null, SqlError>;
+  readonly getSnapshot: (
+    boardId: BoardId,
+  ) => Effect.Effect<BoardSnapshot | null, SqlError>;
   readonly create: (
     boardId: BoardId,
     title: string,
@@ -333,14 +385,16 @@ interface BoardRepoShape {
     boardId: BoardId,
     title: string,
   ) => Effect.Effect<BoardSummary | ManagementRejected | null, SqlError>;
-  readonly delete: (boardId: BoardId) => Effect.Effect<BoardDeleted | ManagementRejected, SqlError>;
+  readonly delete: (
+    boardId: BoardId,
+  ) => Effect.Effect<BoardDeleted | ManagementRejected, SqlError>;
   readonly commit: (
     input: CommitInput,
   ) => Effect.Effect<CommitResult | CommitRejected | null, SqlError>;
 }
 
 export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
-  "mood-board/BoardRepo",
+  'mood-board/BoardRepo',
 ) {
   static readonly layer = Layer.effect(
     this,
@@ -348,7 +402,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
       const sql = yield* SqlClient.SqlClient;
       yield* sql`PRAGMA foreign_keys = ON`;
 
-      const getSummary = Effect.fn("BoardRepo.getSummary")(function* (boardId: BoardId) {
+      const getSummary = Effect.fn('BoardRepo.getSummary')(function* (
+        boardId: BoardId,
+      ) {
         const rows = yield* sql<BoardSummaryRow>`
           SELECT b.id, b.title, b.updated_at, COUNT(i.id) AS item_count
           FROM boards b
@@ -360,7 +416,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         return row === undefined ? null : yield* decodeSummary(row);
       });
 
-      const list = Effect.fn("BoardRepo.list")(function* () {
+      const list = Effect.fn('BoardRepo.list')(function* () {
         const rows = yield* sql<BoardSummaryRow>`
           SELECT b.id, b.title, b.updated_at, COUNT(i.id) AS item_count
           FROM boards b
@@ -372,7 +428,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         return yield* Effect.forEach(rows, decodeSummary);
       });
 
-      const exists = Effect.fn("BoardRepo.exists")(function* (boardId: BoardId) {
+      const exists = Effect.fn('BoardRepo.exists')(function* (
+        boardId: BoardId,
+      ) {
         const rows = yield* sql<{ readonly found: unknown }>`
           SELECT 1 AS found
           FROM boards
@@ -382,7 +440,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         return rows.length > 0;
       });
 
-      const getSnapshot = Effect.fn("BoardRepo.getSnapshot")(function* (boardId: BoardId) {
+      const getSnapshot = Effect.fn('BoardRepo.getSnapshot')(function* (
+        boardId: BoardId,
+      ) {
         const boards = yield* sql<BoardRow>`
           SELECT id, title, background_color, background_media_id, revision, updated_at
           FROM boards
@@ -404,13 +464,15 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         const items = yield* Effect.forEach(rows, decodeItemRow);
 
         return yield* Schema.decodeUnknownEffect(BoardSnapshotSchema)({
-          _tag: "Snapshot",
+          _tag: 'Snapshot',
           boardId,
           revision: board.revision,
           board: {
             version: 1,
             title: board.title,
-            ...(board.background_color === null ? {} : { background: board.background_color }),
+            ...(board.background_color === null
+              ? {}
+              : { background: board.background_color }),
             ...(board.background_media_id === null
               ? {}
               : { backgroundMediaId: board.background_media_id }),
@@ -420,7 +482,10 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         }).pipe(Effect.orDie);
       });
 
-      const create = Effect.fn("BoardRepo.create")(function* (boardId: BoardId, title: string) {
+      const create = Effect.fn('BoardRepo.create')(function* (
+        boardId: BoardId,
+        title: string,
+      ) {
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const existing = yield* getSummary(boardId);
@@ -431,17 +496,22 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               WHERE board_id = ${boardId}
             `;
             if (tombstones.length > 0) {
-              return { _tag: "DeletedBoardId" } satisfies ManagementRejected;
+              return { _tag: 'DeletedBoardId' } satisfies ManagementRejected;
             }
 
-            const counts = yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+            const counts =
+              yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
             const count = yield* decodeCount(counts[0]);
             const defaultExists =
-              boardId === DEFAULT_BOARD_ID ? false : yield* exists(DEFAULT_BOARD_ID);
+              boardId === DEFAULT_BOARD_ID
+                ? false
+                : yield* exists(DEFAULT_BOARD_ID);
             const limit =
-              defaultExists || boardId === DEFAULT_BOARD_ID ? MAX_BOARDS : MAX_BOARDS - 1;
+              defaultExists || boardId === DEFAULT_BOARD_ID
+                ? MAX_BOARDS
+                : MAX_BOARDS - 1;
             if (count >= limit) {
-              return { _tag: "BoardLimit" } satisfies ManagementRejected;
+              return { _tag: 'BoardLimit' } satisfies ManagementRejected;
             }
 
             const updatedAt = yield* boardNow;
@@ -459,13 +529,13 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         );
       });
 
-      const duplicate = Effect.fn("BoardRepo.duplicate")(function* (
+      const duplicate = Effect.fn('BoardRepo.duplicate')(function* (
         sourceBoardId: BoardId,
         boardId: BoardId,
         title: string,
       ) {
         if (sourceBoardId === boardId) {
-          return { _tag: "InvalidOperation" } satisfies ManagementRejected;
+          return { _tag: 'InvalidOperation' } satisfies ManagementRejected;
         }
 
         return yield* sql.withTransaction(
@@ -478,18 +548,19 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               WHERE board_id = ${boardId}
             `;
             if (tombstones.length > 0) {
-              return { _tag: "DeletedBoardId" } satisfies ManagementRejected;
+              return { _tag: 'DeletedBoardId' } satisfies ManagementRejected;
             }
 
             const source = yield* getSummary(sourceBoardId);
             if (source === null) return null;
 
-            const counts = yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+            const counts =
+              yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
             const count = yield* decodeCount(counts[0]);
             const defaultExists = yield* exists(DEFAULT_BOARD_ID);
             const limit = defaultExists ? MAX_BOARDS : MAX_BOARDS - 1;
             if (count >= limit) {
-              return { _tag: "BoardLimit" } satisfies ManagementRejected;
+              return { _tag: 'BoardLimit' } satisfies ManagementRejected;
             }
 
             const updatedAt = yield* boardNow;
@@ -528,9 +599,11 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         );
       });
 
-      const deleteBoard = Effect.fn("BoardRepo.delete")(function* (boardId: BoardId) {
+      const deleteBoard = Effect.fn('BoardRepo.delete')(function* (
+        boardId: BoardId,
+      ) {
         if (boardId === DEFAULT_BOARD_ID) {
-          return { _tag: "InvalidOperation" } satisfies ManagementRejected;
+          return { _tag: 'InvalidOperation' } satisfies ManagementRejected;
         }
         return yield* sql.withTransaction(
           Effect.gen(function* () {
@@ -550,7 +623,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               if (tombstoneRow !== undefined) {
                 const tombstone = yield* decodeTombstone(tombstoneRow);
                 return {
-                  _tag: "Deleted",
+                  _tag: 'Deleted',
                   boardId,
                   revision: tombstone.revision,
                   updatedAt: tombstone.deleted_at,
@@ -564,7 +637,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
                 VALUES (${boardId}, ${revision}, ${updatedAt})
               `;
               return {
-                _tag: "Deleted",
+                _tag: 'Deleted',
                 boardId,
                 revision,
                 updatedAt,
@@ -572,9 +645,10 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             }
             const board = yield* decodeBoardRow(boardRow);
 
-            const counts = yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
+            const counts =
+              yield* sql<CountRow>`SELECT COUNT(*) AS count FROM boards`;
             if ((yield* decodeCount(counts[0])) <= 1) {
-              return { _tag: "LastBoard" } satisfies ManagementRejected;
+              return { _tag: 'LastBoard' } satisfies ManagementRejected;
             }
 
             const updatedAt = yield* boardNow;
@@ -588,7 +662,7 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             `;
             yield* sql`DELETE FROM boards WHERE id = ${boardId}`;
             return {
-              _tag: "Deleted",
+              _tag: 'Deleted',
               boardId,
               revision,
               updatedAt,
@@ -597,10 +671,12 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
         );
       });
 
-      const commit = Effect.fn("BoardRepo.commit")(function* (input: CommitInput) {
+      const commit = Effect.fn('BoardRepo.commit')(function* (
+        input: CommitInput,
+      ) {
         const deletedIds = new Set(input.deletes);
         if (input.upserts.some((item) => deletedIds.has(item.id))) {
-          return { _tag: "InvalidMutation" } satisfies CommitRejected;
+          return { _tag: 'InvalidMutation' } satisfies CommitRejected;
         }
         const requestHash = mutationHash(input);
 
@@ -614,20 +690,23 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             `;
             const existingMutationRow = existingMutations[0];
             if (existingMutationRow !== undefined) {
-              const existingMutation = yield* decodeMutationRow(existingMutationRow);
+              const existingMutation =
+                yield* decodeMutationRow(existingMutationRow);
               if (existingMutation.request_hash !== requestHash) {
-                return { _tag: "MutationConflict" } satisfies CommitRejected;
+                return { _tag: 'MutationConflict' } satisfies CommitRejected;
               }
               return {
                 applied: false,
                 change: {
-                  _tag: "Change",
+                  _tag: 'Change',
                   boardId: input.boardId,
                   revision: existingMutation.revision,
                   clientId: existingMutation.client_id,
                   mutationId: input.mutationId,
                   ...(input.title === undefined ? {} : { title: input.title }),
-                  ...(input.background === undefined ? {} : { background: input.background }),
+                  ...(input.background === undefined
+                    ? {}
+                    : { background: input.background }),
                   ...(input.backgroundMediaId === undefined
                     ? {}
                     : { backgroundMediaId: input.backgroundMediaId }),
@@ -647,7 +726,10 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             if (boardRow === undefined) return null;
             const board = yield* decodeBoardRow(boardRow);
 
-            if (input.backgroundMediaId !== undefined && input.backgroundMediaId !== null) {
+            if (
+              input.backgroundMediaId !== undefined &&
+              input.backgroundMediaId !== null
+            ) {
               const mediaRows = yield* sql<MediaValidationRow>`
                 SELECT kind FROM media_assets
                 WHERE id = ${input.backgroundMediaId} AND ready_at IS NOT NULL
@@ -655,18 +737,22 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               `;
               const mediaRow = mediaRows[0];
               const media =
-                mediaRow === undefined ? null : yield* decodeMediaValidationRow(mediaRow);
-              if (media?.kind !== "image") {
-                return { _tag: "InvalidMedia" } satisfies CommitRejected;
+                mediaRow === undefined
+                  ? null
+                  : yield* decodeMediaValidationRow(mediaRow);
+              if (media?.kind !== 'image') {
+                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
               }
             }
 
             for (const item of input.upserts) {
               if (item.mediaId === undefined) continue;
               const expectedKind =
-                item.kind === "image" || item.kind === "audio" ? item.kind : null;
+                item.kind === 'image' || item.kind === 'audio'
+                  ? item.kind
+                  : null;
               if (expectedKind === null) {
-                return { _tag: "InvalidMedia" } satisfies CommitRejected;
+                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
               }
               const mediaRows = yield* sql<MediaValidationRow>`
                 SELECT kind FROM media_assets
@@ -675,9 +761,11 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               `;
               const mediaRow = mediaRows[0];
               const media =
-                mediaRow === undefined ? null : yield* decodeMediaValidationRow(mediaRow);
+                mediaRow === undefined
+                  ? null
+                  : yield* decodeMediaValidationRow(mediaRow);
               if (media?.kind !== expectedKind) {
-                return { _tag: "InvalidMedia" } satisfies CommitRejected;
+                return { _tag: 'InvalidMedia' } satisfies CommitRejected;
               }
             }
 
@@ -704,19 +792,25 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
               FROM items
               WHERE board_id = ${input.boardId}
             `;
-            const decodedItems = yield* Effect.forEach(existingItems, decodeItemSizeRow);
-            const projectedItems = new Map(decodedItems.map((item) => [item.id, item.bytes]));
+            const decodedItems = yield* Effect.forEach(
+              existingItems,
+              decodeItemSizeRow,
+            );
+            const projectedItems = new Map(
+              decodedItems.map((item) => [item.id, item.bytes]),
+            );
             for (const itemId of input.deletes) projectedItems.delete(itemId);
-            for (const item of input.upserts) projectedItems.set(item.id, itemBytes(item));
+            for (const item of input.upserts)
+              projectedItems.set(item.id, itemBytes(item));
             if (projectedItems.size > MAX_REMOTE_ITEMS) {
-              return { _tag: "TooManyItems" } satisfies CommitRejected;
+              return { _tag: 'TooManyItems' } satisfies CommitRejected;
             }
             const projectedBytes = [...projectedItems.values()].reduce(
               (total, bytes) => total + bytes,
               0,
             );
             if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
-              return { _tag: "BoardTooLarge" } satisfies CommitRejected;
+              return { _tag: 'BoardTooLarge' } satisfies CommitRejected;
             }
 
             for (const itemId of input.deletes) {
@@ -780,7 +874,9 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             const revision = BoardRevisionSchema.make(board.revision + 1);
             const updatedAt = yield* boardNow;
             const background =
-              input.background === undefined ? board.background_color : input.background;
+              input.background === undefined
+                ? board.background_color
+                : input.background;
             const backgroundMediaId =
               input.backgroundMediaId === undefined
                 ? board.background_media_id
@@ -806,13 +902,15 @@ export class BoardRepo extends Context.Service<BoardRepo, BoardRepoShape>()(
             return {
               applied: true,
               change: {
-                _tag: "Change",
+                _tag: 'Change',
                 boardId: input.boardId,
                 revision,
                 clientId: input.clientId,
                 mutationId: input.mutationId,
                 ...(input.title === undefined ? {} : { title: input.title }),
-                ...(input.background === undefined ? {} : { background: input.background }),
+                ...(input.background === undefined
+                  ? {}
+                  : { background: input.background }),
                 ...(input.backgroundMediaId === undefined
                   ? {}
                   : { backgroundMediaId: input.backgroundMediaId }),

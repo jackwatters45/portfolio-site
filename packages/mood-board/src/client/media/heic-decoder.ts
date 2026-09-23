@@ -1,25 +1,31 @@
 const HEIC_DECODE_TIMEOUT_MS = 30_000;
 
-const abortError = () => new DOMException("Image processing was cancelled.", "AbortError");
+const abortError = () =>
+  new DOMException('Image processing was cancelled.', 'AbortError');
 
 const resizeOptions = (width: number, height: number, longestEdge: number) => {
   if (Math.max(width, height) <= longestEdge) return {};
-  return width >= height ? { resizeWidth: longestEdge } : { resizeHeight: longestEdge };
+  return width >= height
+    ? { resizeWidth: longestEdge }
+    : { resizeHeight: longestEdge };
 };
 
 let decodeTail: Promise<void> = Promise.resolve();
 
-const waitForTurn = (turn: Promise<void>, signal?: AbortSignal): Promise<void> => {
+const waitForTurn = (
+  turn: Promise<void>,
+  signal?: AbortSignal,
+): Promise<void> => {
   if (signal?.aborted) return Promise.reject(abortError());
   if (signal === undefined) return turn;
   return new Promise((resolve, reject) => {
     const abort = () => {
-      signal.removeEventListener("abort", abort);
+      signal.removeEventListener('abort', abort);
       reject(abortError());
     };
-    signal.addEventListener("abort", abort, { once: true });
+    signal.addEventListener('abort', abort, { once: true });
     void turn.then(() => {
-      signal.removeEventListener("abort", abort);
+      signal.removeEventListener('abort', abort);
       resolve();
     });
   });
@@ -44,7 +50,10 @@ const withSingleNativeHeicDecoder = async <T>(
   }
 };
 
-const loadNativeHeic = (url: string, signal?: AbortSignal): Promise<HTMLImageElement> =>
+const loadNativeHeic = (
+  url: string,
+  signal?: AbortSignal,
+): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
       reject(abortError());
@@ -54,27 +63,28 @@ const loadNativeHeic = (url: string, signal?: AbortSignal): Promise<HTMLImageEle
     let settled = false;
     const cleanup = () => {
       window.clearTimeout(timeout);
-      signal?.removeEventListener("abort", abort);
+      signal?.removeEventListener('abort', abort);
     };
     const fail = (error: Error | DOMException) => {
       if (settled) return;
       settled = true;
       cleanup();
-      image.src = "";
+      image.src = '';
       reject(error);
     };
     const abort = () => fail(abortError());
     const timeout = window.setTimeout(() => {
-      fail(new Error("That HEIC image took too long to decode."));
+      fail(new Error('That HEIC image took too long to decode.'));
     }, HEIC_DECODE_TIMEOUT_MS);
-    signal?.addEventListener("abort", abort, { once: true });
+    signal?.addEventListener('abort', abort, { once: true });
     image.onload = () => {
       if (settled) return;
       settled = true;
       cleanup();
       resolve(image);
     };
-    image.onerror = () => fail(new Error("This browser cannot decode HEIC photos natively."));
+    image.onerror = () =>
+      fail(new Error('This browser cannot decode HEIC photos natively.'));
     image.src = url;
   });
 
@@ -89,12 +99,12 @@ const decodeNativeHeic = async (
     image = await loadNativeHeic(url, signal);
     if (signal?.aborted) throw abortError();
     return await createImageBitmap(image, {
-      imageOrientation: "from-image",
-      resizeQuality: "high",
+      imageOrientation: 'from-image',
+      resizeQuality: 'high',
       ...resizeOptions(image.naturalWidth, image.naturalHeight, longestEdge),
     });
   } finally {
-    if (image !== null) image.src = "";
+    if (image !== null) image.src = '';
     URL.revokeObjectURL(url);
   }
 };
@@ -107,7 +117,7 @@ const waitForFallbackBitmap = (
     let settled = false;
     const cleanup = () => {
       window.clearTimeout(timeout);
-      signal?.removeEventListener("abort", abort);
+      signal?.removeEventListener('abort', abort);
     };
     const fail = (error: Error | DOMException) => {
       if (settled) return;
@@ -117,10 +127,10 @@ const waitForFallbackBitmap = (
     };
     const abort = () => fail(abortError());
     const timeout = window.setTimeout(
-      () => fail(new Error("That HEIC image took too long to convert.")),
+      () => fail(new Error('That HEIC image took too long to convert.')),
       HEIC_DECODE_TIMEOUT_MS,
     );
-    signal?.addEventListener("abort", abort, { once: true });
+    signal?.addEventListener('abort', abort, { once: true });
     void operation.then(
       (bitmap) => {
         if (settled) {
@@ -133,7 +143,7 @@ const waitForFallbackBitmap = (
       },
       (cause: unknown) =>
         fail(
-          new Error("This browser could not convert that HEIC photo.", {
+          new Error('This browser could not convert that HEIC photo.', {
             cause,
           }),
         ),
@@ -147,15 +157,15 @@ const decodeFallbackHeic = async (
   longestEdge: number,
   signal?: AbortSignal,
 ): Promise<ImageBitmap> => {
-  const { heicTo } = await import("heic-to/csp");
+  const { heicTo } = await import('heic-to/csp');
   if (signal?.aborted) throw abortError();
   return waitForFallbackBitmap(
     heicTo({
       blob: file,
-      type: "bitmap",
+      type: 'bitmap',
       options: {
-        imageOrientation: "from-image",
-        resizeQuality: "high",
+        imageOrientation: 'from-image',
+        resizeQuality: 'high',
         ...resizeOptions(sourceWidth, sourceHeight, longestEdge),
       },
     }),
@@ -171,30 +181,41 @@ export const decodeHeicBitmap = (
   signal?: AbortSignal,
 ): Promise<ImageBitmap> =>
   withSingleNativeHeicDecoder(async () => {
-    if (typeof createImageBitmap !== "function") {
-      throw new Error("This browser cannot convert HEIC photos.");
+    if (typeof createImageBitmap !== 'function') {
+      throw new Error('This browser cannot convert HEIC photos.');
     }
     try {
       return await decodeNativeHeic(file, longestEdge, signal);
     } catch (nativeError) {
       if (
         signal?.aborted ||
-        (nativeError instanceof DOMException && nativeError.name === "AbortError")
+        (nativeError instanceof DOMException &&
+          nativeError.name === 'AbortError')
       ) {
         throw nativeError;
       }
       try {
-        return await decodeFallbackHeic(file, sourceWidth, sourceHeight, longestEdge, signal);
+        return await decodeFallbackHeic(
+          file,
+          sourceWidth,
+          sourceHeight,
+          longestEdge,
+          signal,
+        );
       } catch (fallbackError) {
         if (
           signal?.aborted ||
-          (fallbackError instanceof DOMException && fallbackError.name === "AbortError")
+          (fallbackError instanceof DOMException &&
+            fallbackError.name === 'AbortError')
         ) {
           throw fallbackError;
         }
-        throw new Error("That HEIC photo could not be decoded. Convert it to JPEG and try again.", {
-          cause: fallbackError,
-        });
+        throw new Error(
+          'That HEIC photo could not be decoded. Convert it to JPEG and try again.',
+          {
+            cause: fallbackError,
+          },
+        );
       }
     }
   }, signal);

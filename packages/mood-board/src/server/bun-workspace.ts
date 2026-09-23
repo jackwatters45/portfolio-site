@@ -1,27 +1,27 @@
-import { createHash } from "node:crypto";
-import { chmodSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { createHash } from 'node:crypto';
+import { chmodSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { Layer } from "effect";
-import * as HttpRouter from "effect/unstable/http/HttpRouter";
-import * as RpcSerialization from "effect/unstable/rpc/RpcSerialization";
-import * as RpcServer from "effect/unstable/rpc/RpcServer";
+import { Layer } from 'effect';
+import * as HttpRouter from 'effect/unstable/http/HttpRouter';
+import * as RpcSerialization from 'effect/unstable/rpc/RpcSerialization';
+import * as RpcServer from 'effect/unstable/rpc/RpcServer';
 
-import type { AccountId } from "../lib/account";
-import { BoardRpcs } from "../lib/board-rpc";
-import type { MediaQuotaLimits } from "../lib/media";
-import { BoardHandlers } from "./board-handlers";
-import { BoardService } from "./board-service";
-import { makeBunMediaObjectStore } from "./bun-media-object-store";
-import { BunWebsitePreviewFetcher } from "./bun-website-preview-fetcher";
-import { makeDatabaseLayer } from "./database";
-import { MediaClientIdentity } from "./media-client-identity";
-import { MediaHandlers } from "./media-handlers";
-import { MediaMaintenanceScheduler } from "./media-maintenance";
-import { MediaService } from "./media-service";
-import { PublicHandlers } from "./public-handlers";
-import { PublishingService } from "./publishing-service";
-import { WebsitePreviewService } from "./website-preview-service";
+import type { AccountId } from '../lib/account';
+import { BoardRpcs } from '../lib/board-rpc';
+import type { MediaQuotaLimits } from '../lib/media';
+import { BoardHandlers } from './board-handlers';
+import { BoardService } from './board-service';
+import { makeBunMediaObjectStore } from './bun-media-object-store';
+import { BunWebsitePreviewFetcher } from './bun-website-preview-fetcher';
+import { makeDatabaseLayer } from './database';
+import { MediaClientIdentity } from './media-client-identity';
+import { MediaHandlers } from './media-handlers';
+import { MediaMaintenanceScheduler } from './media-maintenance';
+import { MediaService } from './media-service';
+import { PublicHandlers } from './public-handlers';
+import { PublishingService } from './publishing-service';
+import { WebsitePreviewService } from './website-preview-service';
 
 export interface BunWorkspaceHandler {
   readonly fetch: (request: Request) => Promise<Response>;
@@ -41,15 +41,22 @@ export interface BunLegacyWorkspaceConfig {
 }
 
 export const workspaceDirectoryName = (accountId: AccountId): string =>
-  createHash("sha256").update(accountId).digest("hex");
+  createHash('sha256').update(accountId).digest('hex');
 
-export const makeBunWorkspaceHandler = (config: BunWorkspaceConfig): BunWorkspaceHandler => {
-  const directory = join(config.workspaceRoot, workspaceDirectoryName(config.accountId));
+export const makeBunWorkspaceHandler = (
+  config: BunWorkspaceConfig,
+): BunWorkspaceHandler => {
+  const directory = join(
+    config.workspaceRoot,
+    workspaceDirectoryName(config.accountId),
+  );
   mkdirSync(directory, { recursive: true, mode: 0o700 });
   chmodSync(directory, 0o700);
 
-  const database = makeDatabaseLayer(join(directory, "workspace.sqlite"));
-  const websitePreviews = WebsitePreviewService.layer.pipe(Layer.provide(BunWebsitePreviewFetcher));
+  const database = makeDatabaseLayer(join(directory, 'workspace.sqlite'));
+  const websitePreviews = WebsitePreviewService.layer.pipe(
+    Layer.provide(BunWebsitePreviewFetcher),
+  );
   const handlers = BoardHandlers.pipe(
     Layer.provide(BoardService.layer),
     Layer.provide(websitePreviews),
@@ -57,12 +64,12 @@ export const makeBunWorkspaceHandler = (config: BunWorkspaceConfig): BunWorkspac
   );
   const rpcServer = RpcServer.layerHttp({
     group: BoardRpcs,
-    path: "/rpc",
-    protocol: "http",
+    path: '/rpc',
+    protocol: 'http',
     disableFatalDefects: true,
   }).pipe(Layer.provide(handlers), Layer.provide(RpcSerialization.layerNdjson));
   const mediaService = MediaService.layerWith(config.mediaLimits).pipe(
-    Layer.provide(makeBunMediaObjectStore(join(directory, "media"))),
+    Layer.provide(makeBunMediaObjectStore(join(directory, 'media'))),
     Layer.provide(database),
   );
   const mediaServer = MediaHandlers.pipe(
@@ -73,7 +80,9 @@ export const makeBunWorkspaceHandler = (config: BunWorkspaceConfig): BunWorkspac
     Layer.provide(PublishingService.layer),
     Layer.provide(database),
   );
-  const maintenance = MediaMaintenanceScheduler.pipe(Layer.provide(mediaService));
+  const maintenance = MediaMaintenanceScheduler.pipe(
+    Layer.provide(mediaService),
+  );
   const web = HttpRouter.toWebHandler(
     Layer.mergeAll(rpcServer, publicServer, mediaServer, maintenance),
     { disableLogger: true },
@@ -85,7 +94,9 @@ export const makeBunLegacyWorkspaceHandler = (
   config: BunLegacyWorkspaceConfig,
 ): BunWorkspaceHandler => {
   const database = makeDatabaseLayer(config.databasePath);
-  const websitePreviews = WebsitePreviewService.layer.pipe(Layer.provide(BunWebsitePreviewFetcher));
+  const websitePreviews = WebsitePreviewService.layer.pipe(
+    Layer.provide(BunWebsitePreviewFetcher),
+  );
   const handlers = BoardHandlers.pipe(
     Layer.provide(BoardService.layer),
     Layer.provide(websitePreviews),
@@ -93,8 +104,8 @@ export const makeBunLegacyWorkspaceHandler = (
   );
   const rpcServer = RpcServer.layerHttp({
     group: BoardRpcs,
-    path: "/rpc",
-    protocol: "http",
+    path: '/rpc',
+    protocol: 'http',
     disableFatalDefects: true,
   }).pipe(Layer.provide(handlers), Layer.provide(RpcSerialization.layerNdjson));
   const mediaService = MediaService.layerWith(config.mediaLimits).pipe(
@@ -109,7 +120,9 @@ export const makeBunLegacyWorkspaceHandler = (
     Layer.provide(mediaService),
     Layer.provide(MediaClientIdentity.bun),
   );
-  const maintenance = MediaMaintenanceScheduler.pipe(Layer.provide(mediaService));
+  const maintenance = MediaMaintenanceScheduler.pipe(
+    Layer.provide(mediaService),
+  );
   const web = HttpRouter.toWebHandler(
     Layer.mergeAll(rpcServer, publicServer, mediaServer, maintenance),
     { disableLogger: true },
@@ -169,6 +182,8 @@ export class BunWorkspaceRegistry {
     clearInterval(this.#sweepTimer);
     const entries = [...this.#entries.values()];
     this.#entries.clear();
-    await Promise.all(entries.map(async (entry) => (await entry.handler).dispose()));
+    await Promise.all(
+      entries.map(async (entry) => (await entry.handler).dispose()),
+    );
   }
 }

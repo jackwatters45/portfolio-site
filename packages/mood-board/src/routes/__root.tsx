@@ -1,8 +1,8 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
+import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
 
 const Agentation = import.meta.env.DEV
-  ? lazy(async () => ({ default: (await import("agentation")).Agentation }))
+  ? lazy(async () => ({ default: (await import('agentation')).Agentation }))
   : null;
 
 function RootLayout() {

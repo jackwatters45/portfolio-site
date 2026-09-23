@@ -1,6 +1,6 @@
-import { Option, Schema } from "effect";
+import { Option, Schema } from 'effect';
 
-import { AccountIdSchema, type AccountId } from "../lib/account";
+import { AccountIdSchema, type AccountId } from '../lib/account';
 
 const CatalogRouteRowSchema = Schema.Struct({ userId: AccountIdSchema });
 const decodeCatalogRouteRow = Schema.decodeUnknownOption(CatalogRouteRowSchema);

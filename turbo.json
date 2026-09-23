@@ -20,6 +20,9 @@
       "dependsOn": ["^typecheck"],
       "outputs": [".astro/**"]
     },
+    "@personal-sites/comments#typecheck": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -31,7 +34,7 @@
     },
     "@personal-sites/mood-board#typecheck": {
       "dependsOn": ["^typecheck"],
-      "outputs": ["node_modules/.tmp/*.tsbuildinfo"]
+      "outputs": []
     }
   }
 }

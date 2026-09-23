@@ -8,6 +8,7 @@ export function reviewSite({ url, port, configUrl }) {
     site: url,
     srcDir: fileURLToPath(new URL('./src/', import.meta.url)),
     output: 'static',
+    compressHTML: true,
     integrations: [react(), sitemap()],
     server: { port },
     vite: {

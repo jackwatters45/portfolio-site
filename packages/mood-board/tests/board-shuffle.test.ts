@@ -1,15 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { shuffleBoardItems } from "../src/client/board/board-shuffle";
-import { boundsOverlap, rotatedItemBounds } from "../src/client/board/bulk-layout";
-import type { BoardItem } from "../src/client/board/types";
-import { ItemIdSchema } from "../src/lib/board-rpc";
+import { shuffleBoardItems } from '../src/client/board/board-shuffle';
+import {
+  boundsOverlap,
+  rotatedItemBounds,
+} from '../src/client/board/bulk-layout';
+import type { BoardItem } from '../src/client/board/types';
+import { ItemIdSchema } from '../src/lib/board-rpc';
 
 const items: BoardItem[] = [
   {
-    id: ItemIdSchema.make("landscape"),
-    kind: "image",
-    src: "landscape.jpg",
+    id: ItemIdSchema.make('landscape'),
+    kind: 'image',
+    src: 'landscape.jpg',
     x: -600,
     y: -300,
     width: 640,
@@ -18,9 +21,9 @@ const items: BoardItem[] = [
     order: 1,
   },
   {
-    id: ItemIdSchema.make("portrait"),
-    kind: "image",
-    src: "portrait.jpg",
+    id: ItemIdSchema.make('portrait'),
+    kind: 'image',
+    src: 'portrait.jpg',
     x: 80,
     y: -420,
     width: 360,
@@ -29,9 +32,9 @@ const items: BoardItem[] = [
     order: 2,
   },
   {
-    id: ItemIdSchema.make("note"),
-    kind: "note",
-    text: "Collected, not decorated.",
+    id: ItemIdSchema.make('note'),
+    kind: 'note',
+    text: 'Collected, not decorated.',
     x: -260,
     y: 180,
     width: 520,
@@ -40,9 +43,9 @@ const items: BoardItem[] = [
     order: 3,
   },
   {
-    id: ItemIdSchema.make("color"),
-    kind: "swatch",
-    color: "#8c3335",
+    id: ItemIdSchema.make('color'),
+    kind: 'swatch',
+    color: '#8c3335',
     x: 340,
     y: 230,
     width: 340,
@@ -69,17 +72,19 @@ const centerOf = (entries: ReadonlyArray<BoardItem>) => {
   return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
 };
 
-describe("shuffleBoardItems", () => {
-  it("rearranges items without changing their content, size, rotation, or layer order", () => {
+describe('shuffleBoardItems', () => {
+  it('rearranges items without changing their content, size, rotation, or layer order', () => {
     const shuffled = shuffleBoardItems(items, seededRandom(12));
 
     expect(shuffled.map(({ x: _x, y: _y, ...item }) => item)).toEqual(
       items.map(({ x: _x, y: _y, ...item }) => item),
     );
-    expect(shuffled.map(({ x, y }) => ({ x, y }))).not.toEqual(items.map(({ x, y }) => ({ x, y })));
+    expect(shuffled.map(({ x, y }) => ({ x, y }))).not.toEqual(
+      items.map(({ x, y }) => ({ x, y })),
+    );
   });
 
-  it("packs rotated item bounds without overlap and centers the new composition", () => {
+  it('packs rotated item bounds without overlap and centers the new composition', () => {
     const shuffled = shuffleBoardItems(items, seededRandom(84));
     const bounds = shuffled.map(rotatedItemBounds);
 
@@ -92,14 +97,16 @@ describe("shuffleBoardItems", () => {
     expect(centerOf(shuffled).y).toBeCloseTo(0);
   });
 
-  it("produces different arrangements from different random sequences", () => {
+  it('produces different arrangements from different random sequences', () => {
     const first = shuffleBoardItems(items, seededRandom(2));
     const second = shuffleBoardItems(items, seededRandom(3));
 
-    expect(first.map(({ x, y }) => ({ x, y }))).not.toEqual(second.map(({ x, y }) => ({ x, y })));
+    expect(first.map(({ x, y }) => ({ x, y }))).not.toEqual(
+      second.map(({ x, y }) => ({ x, y })),
+    );
   });
 
-  it("brings edge-positioned items back inside reload-safe coordinate bounds", () => {
+  it('brings edge-positioned items back inside reload-safe coordinate bounds', () => {
     const largeItems = items.slice(0, 2).map((item, index) => ({
       ...item,
       x: 20_000,
@@ -116,13 +123,16 @@ describe("shuffleBoardItems", () => {
     expect(shuffled.every((item) => Math.abs(item.y) <= 20_000)).toBe(true);
   });
 
-  it("rejects arrangements that cannot fit the available viewport", () => {
+  it('rejects arrangements that cannot fit the available viewport', () => {
     expect(() =>
-      shuffleBoardItems(items, seededRandom(7), { maxWidth: 400, maxHeight: 400 }),
-    ).toThrow("too large to shuffle without clipping");
+      shuffleBoardItems(items, seededRandom(7), {
+        maxWidth: 400,
+        maxHeight: 400,
+      }),
+    ).toThrow('too large to shuffle without clipping');
   });
 
-  it("leaves a one-item board in place", () => {
+  it('leaves a one-item board in place', () => {
     const shuffled = shuffleBoardItems(items.slice(0, 1), seededRandom(5));
 
     expect(shuffled).toEqual(items.slice(0, 1));

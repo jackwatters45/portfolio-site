@@ -24,8 +24,8 @@ import {
   Trash,
   X,
   XLogo,
-} from "@phosphor-icons/react";
-import { Link, useBlocker, useNavigate } from "@tanstack/react-router";
+} from '@phosphor-icons/react';
+import { Link, useBlocker, useNavigate } from '@tanstack/react-router';
 import {
   lazy,
   Suspense,
@@ -38,23 +38,27 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
-} from "react";
+} from 'react';
 
-import { authClient } from "../client/auth-client";
-import { createBoardCatalog, type BoardCatalog } from "../client/board-catalog";
-import { boardPath } from "../client/board-route";
-import { startBoardSync, type BoardSync, type CloudSyncState } from "../client/board-sync";
+import { authClient } from '../client/auth-client';
+import { createBoardCatalog, type BoardCatalog } from '../client/board-catalog';
+import { boardPath } from '../client/board-route';
+import {
+  startBoardSync,
+  type BoardSync,
+  type CloudSyncState,
+} from '../client/board-sync';
 import {
   createBoardArchive,
   importBoardFile,
   MAX_LEGACY_JSON_BYTES,
-} from "../client/board/board-archive";
+} from '../client/board/board-archive';
 import {
   reconcileRemoteBackgroundDraft,
   type BoardBackgroundDraft,
-} from "../client/board/board-background";
-import { normalizeImportedBoard } from "../client/board/board-import";
-import { shuffleBoardItems } from "../client/board/board-shuffle";
+} from '../client/board/board-background';
+import { normalizeImportedBoard } from '../client/board/board-import';
+import { shuffleBoardItems } from '../client/board/board-shuffle';
 import {
   accessibleFieldColors,
   blobToDataUrl,
@@ -73,7 +77,7 @@ import {
   screenToWorld,
   SWATCHES,
   zoomCamera,
-} from "../client/board/board-utils";
+} from '../client/board/board-utils';
 import {
   collectDroppedImageFiles,
   estimateItemBytes,
@@ -81,25 +85,32 @@ import {
   type BulkLayoutKind,
   type PreparedBulkImage,
   type TraversalFailure,
-} from "../client/board/bulk-image-import";
-import { layoutBulkImages, placeLayoutWithoutOverlap } from "../client/board/bulk-layout";
-import { deleteLocalBoard, loadDocument, saveDocument } from "../client/board/storage";
-import type { Board, BoardItem, Camera } from "../client/board/types";
-import { uploadMedia } from "../client/media-client";
-import { AudioPlaybackCoordinator } from "../client/media/audio-playback";
-import { IMAGE_FILE_ACCEPT } from "../client/media/image-preflight";
-import { MAX_X_POST_CARD_WIDTH } from "../client/media/x-post-measurement";
-import type { AccountId } from "../lib/account";
+} from '../client/board/bulk-image-import';
+import {
+  layoutBulkImages,
+  placeLayoutWithoutOverlap,
+} from '../client/board/bulk-layout';
+import {
+  deleteLocalBoard,
+  loadDocument,
+  saveDocument,
+} from '../client/board/storage';
+import type { Board, BoardItem, Camera } from '../client/board/types';
+import { uploadMedia } from '../client/media-client';
+import { AudioPlaybackCoordinator } from '../client/media/audio-playback';
+import { IMAGE_FILE_ACCEPT } from '../client/media/image-preflight';
+import { MAX_X_POST_CARD_WIDTH } from '../client/media/x-post-measurement';
+import type { AccountId } from '../lib/account';
 import {
   MIN_AUDIO_CARD_WIDTH,
   minimumAudioCardHeight,
   preferredAudioCardHeight,
-} from "../lib/audio-card-layout";
+} from '../lib/audio-card-layout';
 import {
   isLikelyAudioUrl,
   MAX_AUDIO_SOURCE_CHARACTERS,
   parseAudioSource,
-} from "../lib/audio-source";
+} from '../lib/audio-source';
 import {
   BoardTimestampSchema,
   DEFAULT_BOARD_ID,
@@ -108,15 +119,18 @@ import {
   type BoardId,
   type BoardSummary,
   type ItemId,
-} from "../lib/board-rpc";
+} from '../lib/board-rpc';
 import {
   MAX_IMAGE_ANNOTATION_DESCRIPTION_CHARACTERS,
   MAX_IMAGE_ANNOTATION_TITLE_CHARACTERS,
   normalizeImageAnnotationDescription,
   normalizeImageAnnotationTitle,
-} from "../lib/image-annotation";
-import { MAX_IMAGE_LINK_CHARACTERS, normalizeImageLink } from "../lib/image-link";
-import { MAX_AUDIO_UPLOAD_BYTES, normalizeMediaMimeType } from "../lib/media";
+} from '../lib/image-annotation';
+import {
+  MAX_IMAGE_LINK_CHARACTERS,
+  normalizeImageLink,
+} from '../lib/image-link';
+import { MAX_AUDIO_UPLOAD_BYTES, normalizeMediaMimeType } from '../lib/media';
 import {
   MAX_WEBSITE_SITE_LABEL_CHARACTERS,
   MAX_WEBSITE_URL_CHARACTERS,
@@ -124,30 +138,33 @@ import {
   WebsiteSiteLabelSchema,
   WebsiteTitleSchema,
   type WebsiteUrl,
-} from "../lib/website-preview";
+} from '../lib/website-preview';
 import {
   MAX_X_POST_INPUT_CHARACTERS,
   parseXPostInput,
   type XPostDisplay,
   type XPostTheme,
-} from "../lib/x-post";
-import { MenuAccountIdentity } from "./account-identity";
-import { BoardBackgroundControl } from "./board-background-control";
-import { BoardItemView } from "./board-item-view";
-import { CanvasBackground } from "./canvas-background";
-import { PresentationItemViewer, type PresentationItemOrigin } from "./presentation-image-viewer";
+} from '../lib/x-post';
+import { MenuAccountIdentity } from './account-identity';
+import { BoardBackgroundControl } from './board-background-control';
+import { BoardItemView } from './board-item-view';
+import { CanvasBackground } from './canvas-background';
+import {
+  PresentationItemViewer,
+  type PresentationItemOrigin,
+} from './presentation-image-viewer';
 
 type PanelState =
-  | { type: "menu" }
-  | { type: "boards" }
-  | { type: "images" }
-  | { type: "url" }
-  | { type: "imageLink"; itemId: ItemId }
-  | { type: "audio"; itemId?: ItemId }
-  | { type: "website"; itemId?: ItemId }
-  | { type: "x"; itemId: ItemId }
-  | { type: "note"; itemId?: ItemId }
-  | { type: "color"; itemId?: ItemId }
+  | { type: 'menu' }
+  | { type: 'boards' }
+  | { type: 'images' }
+  | { type: 'url' }
+  | { type: 'imageLink'; itemId: ItemId }
+  | { type: 'audio'; itemId?: ItemId }
+  | { type: 'website'; itemId?: ItemId }
+  | { type: 'x'; itemId: ItemId }
+  | { type: 'note'; itemId?: ItemId }
+  | { type: 'color'; itemId?: ItemId }
   | null;
 
 type Point = { x: number; y: number };
@@ -158,7 +175,7 @@ type BulkSession = {
   readonly truncated: boolean;
   readonly failures: ReadonlyArray<TraversalFailure>;
 };
-type SaveState = "saved" | "saving" | "error";
+type SaveState = 'saved' | 'saving' | 'error';
 type HistoryEntry = { board: Board; camera?: Camera };
 type CustomColorDraft = {
   hex: string;
@@ -166,10 +183,10 @@ type CustomColorDraft = {
   lastValidHex: string;
 };
 type AppStyle = CSSProperties & {
-  "--field": string;
-  "--field-foreground": string;
-  "--field-muted": string;
-  "--field-selection": string;
+  '--field': string;
+  '--field-foreground': string;
+  '--field-muted': string;
+  '--field-selection': string;
 };
 type CanvasGesture = {
   center: Point;
@@ -187,17 +204,17 @@ type PresentedItem = {
 };
 
 const BulkImageStager = lazy(async () => {
-  const module = await import("./bulk-image-stager");
+  const module = await import('./bulk-image-stager');
   return { default: module.BulkImageStager };
 });
 
 const editorPanelForItem = (item: BoardItem): PanelState => {
-  if (item.kind === "image") return { type: "imageLink", itemId: item.id };
-  if (item.kind === "note") return { type: "note", itemId: item.id };
-  if (item.kind === "swatch") return { type: "color", itemId: item.id };
-  if (item.kind === "website") return { type: "website", itemId: item.id };
-  if (item.kind === "x") return { type: "x", itemId: item.id };
-  return { type: "audio", itemId: item.id };
+  if (item.kind === 'image') return { type: 'imageLink', itemId: item.id };
+  if (item.kind === 'note') return { type: 'note', itemId: item.id };
+  if (item.kind === 'swatch') return { type: 'color', itemId: item.id };
+  if (item.kind === 'website') return { type: 'website', itemId: item.id };
+  if (item.kind === 'x') return { type: 'x', itemId: item.id };
+  return { type: 'audio', itemId: item.id };
 };
 
 const makeInitialBoard = (boardId: BoardId) =>
@@ -205,7 +222,7 @@ const makeInitialBoard = (boardId: BoardId) =>
 
 const localWebsiteMetadata = (url: WebsiteUrl) => {
   const normalizedLabel = new URL(url).hostname
-    .replace(/^www\./, "")
+    .replace(/^www\./, '')
     .slice(0, MAX_WEBSITE_SITE_LABEL_CHARACTERS);
   return {
     websiteTitle: WebsiteTitleSchema.make(normalizedLabel),
@@ -224,7 +241,7 @@ function IconButton({
   children,
   onClick,
   disabled = false,
-  className = "",
+  className = '',
 }: {
   label: string;
   children: ReactNode;
@@ -250,8 +267,9 @@ function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof Element)) return false;
   return (
     (target instanceof HTMLElement && target.isContentEditable) ||
-    target.closest("input, textarea, select, button, a, audio, video, .audio-card-controls") !==
-      null
+    target.closest(
+      'input, textarea, select, button, a, audio, video, .audio-card-controls',
+    ) !== null
   );
 }
 
@@ -314,16 +332,16 @@ function BoardWorkspace({
   const [editing, setEditing] = useState(true);
   const [selectedId, setSelectedId] = useState<ItemId | null>(null);
   const [panel, setPanel] = useState<PanelState>(null);
-  const [panelDraft, setPanelDraft] = useState("");
-  const [panelError, setPanelError] = useState("");
-  const [annotationTitle, setAnnotationTitle] = useState("");
-  const [annotationDescription, setAnnotationDescription] = useState("");
-  const [audioLabel, setAudioLabel] = useState("");
-  const [xDisplay, setXDisplay] = useState<XPostDisplay>("post");
-  const [xTheme, setXTheme] = useState<XPostTheme>("automatic");
+  const [panelDraft, setPanelDraft] = useState('');
+  const [panelError, setPanelError] = useState('');
+  const [annotationTitle, setAnnotationTitle] = useState('');
+  const [annotationDescription, setAnnotationDescription] = useState('');
+  const [audioLabel, setAudioLabel] = useState('');
+  const [xDisplay, setXDisplay] = useState<XPostDisplay>('post');
+  const [xTheme, setXTheme] = useState<XPostTheme>('automatic');
   const [customColor, setCustomColor] = useState<CustomColorDraft>({
     hex: DEFAULT_CUSTOM_COLOR,
-    label: "",
+    label: '',
     lastValidHex: DEFAULT_CUSTOM_COLOR,
   });
   const [backgroundDraft, setBackgroundDraft] = useState<BoardBackgroundDraft>({
@@ -331,23 +349,32 @@ function BoardWorkspace({
     lastValidHex: DEFAULT_BOARD_BACKGROUND,
   });
   const [backgroundUploading, setBackgroundUploading] = useState(false);
-  const [backgroundUploadError, setBackgroundUploadError] = useState("");
+  const [backgroundUploadError, setBackgroundUploadError] = useState('');
   const [backgroundConflict, setBackgroundConflict] = useState(false);
-  const [saveState, setSaveState] = useState<SaveState>("saved");
-  const [syncState, setSyncState] = useState<CloudSyncState>(localOnly ? "local" : "connecting");
-  const [boardSummaries, setBoardSummaries] = useState<ReadonlyArray<BoardSummary>>([]);
+  const [saveState, setSaveState] = useState<SaveState>('saved');
+  const [syncState, setSyncState] = useState<CloudSyncState>(
+    localOnly ? 'local' : 'connecting',
+  );
+  const [boardSummaries, setBoardSummaries] = useState<
+    ReadonlyArray<BoardSummary>
+  >([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
-  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
+  const [historyState, setHistoryState] = useState({
+    canUndo: false,
+    canRedo: false,
+  });
   const [spacePressed, setSpacePressed] = useState(false);
   const [draggingFiles, setDraggingFiles] = useState(false);
   const [bulkSession, setBulkSession] = useState<BulkSession | null>(null);
   const [collectingDrop, setCollectingDrop] = useState(false);
   const [working, setWorking] = useState(false);
-  const [imageIntakeStatus, setImageIntakeStatus] = useState("");
-  const [toast, setToast] = useState("");
-  const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(null);
+  const [imageIntakeStatus, setImageIntakeStatus] = useState('');
+  const [toast, setToast] = useState('');
+  const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(
+    null,
+  );
   const [signingOut, setSigningOut] = useState(false);
-  const [signOutError, setSignOutError] = useState("");
+  const [signOutError, setSignOutError] = useState('');
   const [shuffleAnimating, setShuffleAnimating] = useState(false);
 
   useEffect(() => {
@@ -391,23 +418,25 @@ function BoardWorkspace({
   const showToast = useCallback((message: string, duration = 2800) => {
     window.clearTimeout(toastTimer.current);
     setToast(message);
-    toastTimer.current = window.setTimeout(() => setToast(""), duration);
+    toastTimer.current = window.setTimeout(() => setToast(''), duration);
   }, []);
 
   const signOutAccount = useCallback(async () => {
     archiveOperationRef.current?.abort();
     setSigningOut(true);
-    setSignOutError("");
+    setSignOutError('');
     try {
       const result = await authClient.signOut();
       if (result.error) {
-        setSignOutError(result.error.message ?? "You could not be signed out.");
+        setSignOutError(result.error.message ?? 'You could not be signed out.');
         setSigningOut(false);
         return;
       }
-      await navigateRoute({ to: "/" });
+      await navigateRoute({ to: '/' });
     } catch (cause) {
-      setSignOutError(cause instanceof Error ? cause.message : "You could not be signed out.");
+      setSignOutError(
+        cause instanceof Error ? cause.message : 'You could not be signed out.',
+      );
       setSigningOut(false);
     }
   }, [navigateRoute]);
@@ -431,7 +460,7 @@ function BoardWorkspace({
     backgroundUploadRef.current?.abort();
     backgroundUploadRef.current = null;
     setBackgroundUploading(false);
-    setBackgroundUploadError("");
+    setBackgroundUploadError('');
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
   }, []);
@@ -439,7 +468,9 @@ function BoardWorkspace({
   const chooseBackgroundImage = useCallback(
     async (file: File) => {
       if (localOnly) {
-        setBackgroundUploadError("Sign in to upload a private background image.");
+        setBackgroundUploadError(
+          'Sign in to upload a private background image.',
+        );
         return;
       }
       const generation = ++backgroundUploadGenerationRef.current;
@@ -448,20 +479,32 @@ function BoardWorkspace({
       backgroundUploadRef.current = controller;
       backgroundDraftTouchedRef.current = true;
       setBackgroundUploading(true);
-      setBackgroundUploadError("");
-      setPanelError("");
+      setBackgroundUploadError('');
+      setPanelError('');
       beginWorking();
       try {
         const image = await ingestImageFile(file, controller.signal);
-        const uploaded = await uploadMedia(image.blob, "image", controller.signal);
-        if (controller.signal.aborted || generation !== backgroundUploadGenerationRef.current)
+        const uploaded = await uploadMedia(
+          image.blob,
+          'image',
+          controller.signal,
+        );
+        if (
+          controller.signal.aborted ||
+          generation !== backgroundUploadGenerationRef.current
+        )
           return;
-        setBackgroundDraft((current) => ({ ...current, mediaId: uploaded.mediaId }));
-        showToast("Background image ready — apply to save");
+        setBackgroundDraft((current) => ({
+          ...current,
+          mediaId: uploaded.mediaId,
+        }));
+        showToast('Background image ready — apply to save');
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
           setBackgroundUploadError(
-            error instanceof Error ? error.message : "That background image could not be prepared.",
+            error instanceof Error
+              ? error.message
+              : 'That background image could not be prepared.',
           );
         }
       } finally {
@@ -492,7 +535,7 @@ function BoardWorkspace({
     try {
       setBoardSummaries(await catalog.list());
     } catch {
-      showToast("The board library could not be refreshed.");
+      showToast('The board library could not be refreshed.');
     } finally {
       setCatalogLoading(false);
     }
@@ -503,10 +546,12 @@ function BoardWorkspace({
     if (!catalog) return;
     beginWorking();
     try {
-      const summary = await catalog.create(panelDraft.trim() || "Untitled mood");
+      const summary = await catalog.create(
+        panelDraft.trim() || 'Untitled mood',
+      );
       onNavigate(summary.id, false, true);
     } catch {
-      showToast("The new board could not be created.");
+      showToast('The new board could not be created.');
     } finally {
       endWorking();
     }
@@ -522,7 +567,7 @@ function BoardWorkspace({
         const duplicate = await catalog.duplicate(summary.id, title);
         onNavigate(duplicate.id, false, true);
       } catch {
-        showToast("That board could not be duplicated.");
+        showToast('That board could not be duplicated.');
       } finally {
         endWorking();
       }
@@ -533,7 +578,11 @@ function BoardWorkspace({
   const deleteBoard = useCallback(
     async (summary: BoardSummary) => {
       if (summary.id === DEFAULT_BOARD_ID) return;
-      if (!window.confirm(`Delete “${summary.title}”? This removes its server and local copies.`))
+      if (
+        !window.confirm(
+          `Delete “${summary.title}”? This removes its server and local copies.`,
+        )
+      )
         return;
       const catalog = catalogRef.current;
       if (!catalog) return;
@@ -549,17 +598,25 @@ function BoardWorkspace({
         await saveQueue.current.catch(() => undefined);
         await deleteLocalBoard(accountId, summary.id).catch(() => undefined);
       } catch {
-        if (!deletedOnServer) showToast("That board could not be deleted.");
+        if (!deletedOnServer) showToast('That board could not be deleted.');
       } finally {
         deletingBoardRef.current = null;
         endWorking();
       }
     },
-    [accountId, beginWorking, boardId, endWorking, onNavigate, refreshBoards, showToast],
+    [
+      accountId,
+      beginWorking,
+      boardId,
+      endWorking,
+      onNavigate,
+      refreshBoards,
+      showToast,
+    ],
   );
 
   useEffect(() => {
-    if (panel?.type === "boards") void refreshBoards();
+    if (panel?.type === 'boards') void refreshBoards();
   }, [panel?.type, refreshBoards]);
 
   const persistDocument = useCallback(
@@ -569,13 +626,17 @@ function BoardWorkspace({
       saveQueue.current = saveQueue.current
         .catch(() => undefined)
         .then(async () => {
-          if (generation !== saveGeneration.current || deletingBoardRef.current === boardId) return;
-          setSaveState("saving");
+          if (
+            generation !== saveGeneration.current ||
+            deletingBoardRef.current === boardId
+          )
+            return;
+          setSaveState('saving');
           try {
             await saveDocument(accountId, boardId, document);
-            if (generation === saveGeneration.current) setSaveState("saved");
+            if (generation === saveGeneration.current) setSaveState('saved');
           } catch {
-            if (generation === saveGeneration.current) setSaveState("error");
+            if (generation === saveGeneration.current) setSaveState('error');
           }
         });
     },
@@ -584,80 +645,110 @@ function BoardWorkspace({
 
   const reconcileSelection = useCallback((nextBoard: Board) => {
     setSelectedId((current) =>
-      current && nextBoard.items.some((item) => item.id === current) ? current : null,
+      current && nextBoard.items.some((item) => item.id === current)
+        ? current
+        : null,
     );
     setPanel((current) => {
       if (
         !current ||
-        current.type === "menu" ||
-        current.type === "boards" ||
-        current.type === "images" ||
-        current.type === "url" ||
+        current.type === 'menu' ||
+        current.type === 'boards' ||
+        current.type === 'images' ||
+        current.type === 'url' ||
         !current.itemId
       )
         return current;
-      return nextBoard.items.some((item) => item.id === current.itemId) ? current : null;
+      return nextBoard.items.some((item) => item.id === current.itemId)
+        ? current
+        : null;
     });
   }, []);
 
-  const applyBoard = useCallback((updater: Board | ((current: Board) => Board)) => {
-    const current = boardRef.current;
-    const next = typeof updater === "function" ? updater(current) : updater;
-    if (next === current) return;
-    undoStack.current = [...undoStack.current.slice(-49), { board: current }];
-    redoStack.current = [];
-    const stamped = { ...next, updatedAt: BoardTimestampSchema.make(Date.now()) };
-    boardRef.current = stamped;
-    setBoard(stamped);
-    syncRef.current?.commit(current, stamped);
-    setHistoryState({ canUndo: true, canRedo: false });
-  }, []);
+  const applyBoard = useCallback(
+    (updater: Board | ((current: Board) => Board)) => {
+      const current = boardRef.current;
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      if (next === current) return;
+      undoStack.current = [...undoStack.current.slice(-49), { board: current }];
+      redoStack.current = [];
+      const stamped = {
+        ...next,
+        updatedAt: BoardTimestampSchema.make(Date.now()),
+      };
+      boardRef.current = stamped;
+      setBoard(stamped);
+      syncRef.current?.commit(current, stamped);
+      setHistoryState({ canUndo: true, canRedo: false });
+    },
+    [],
+  );
 
-  const reconcileEmbeddedItemSize = useCallback((id: ItemId, width: number, height: number) => {
-    const current = boardRef.current;
-    const source = current.items.find((item) => item.id === id);
-    if (source === undefined) return;
-    const nextWidth = Math.min(
-      source.kind === "x" ? MAX_X_POST_CARD_WIDTH : 2_400,
-      Math.max(320, width),
-    );
-    const nextHeight =
-      source.kind === "x"
-        ? Math.min(2_000, Math.max(240, height))
-        : source.kind === "audio" || source.kind === "spotify" || source.kind === "youtube"
-          ? Math.min(2_400, Math.max(minimumAudioCardHeight(source.kind), height))
-          : undefined;
-    if (nextHeight === undefined) return;
-    if (Math.abs(source.width - nextWidth) < 1 && Math.abs(source.height - nextHeight) < 4) return;
-    const next = {
-      ...current,
-      updatedAt: BoardTimestampSchema.make(Date.now()),
-      items: current.items.map((item) =>
-        item.id === id ? { ...item, width: nextWidth, height: nextHeight } : item,
-      ),
-    };
-    boardRef.current = next;
-    setBoard(next);
-    syncRef.current?.commit(current, next);
-  }, []);
+  const reconcileEmbeddedItemSize = useCallback(
+    (id: ItemId, width: number, height: number) => {
+      const current = boardRef.current;
+      const source = current.items.find((item) => item.id === id);
+      if (source === undefined) return;
+      const nextWidth = Math.min(
+        source.kind === 'x' ? MAX_X_POST_CARD_WIDTH : 2_400,
+        Math.max(320, width),
+      );
+      const nextHeight =
+        source.kind === 'x'
+          ? Math.min(2_000, Math.max(240, height))
+          : source.kind === 'audio' ||
+              source.kind === 'spotify' ||
+              source.kind === 'youtube'
+            ? Math.min(
+                2_400,
+                Math.max(minimumAudioCardHeight(source.kind), height),
+              )
+            : undefined;
+      if (nextHeight === undefined) return;
+      if (
+        Math.abs(source.width - nextWidth) < 1 &&
+        Math.abs(source.height - nextHeight) < 4
+      )
+        return;
+      const next = {
+        ...current,
+        updatedAt: BoardTimestampSchema.make(Date.now()),
+        items: current.items.map((item) =>
+          item.id === id
+            ? { ...item, width: nextWidth, height: nextHeight }
+            : item,
+        ),
+      };
+      boardRef.current = next;
+      setBoard(next);
+      syncRef.current?.commit(current, next);
+    },
+    [],
+  );
 
-  const replaceDocument = useCallback((nextBoard: Board, nextCamera: Camera) => {
-    const current = boardRef.current;
-    undoStack.current = [
-      ...undoStack.current.slice(-49),
-      { board: current, camera: cameraRef.current },
-    ];
-    redoStack.current = [];
-    const stamped = { ...nextBoard, updatedAt: BoardTimestampSchema.make(Date.now()) };
-    boardRef.current = stamped;
-    cameraRef.current = nextCamera;
-    setBoard(stamped);
-    setCamera(nextCamera);
-    syncRef.current?.commit(current, stamped);
-    setSelectedId(null);
-    setPanel(null);
-    setHistoryState({ canUndo: true, canRedo: false });
-  }, []);
+  const replaceDocument = useCallback(
+    (nextBoard: Board, nextCamera: Camera) => {
+      const current = boardRef.current;
+      undoStack.current = [
+        ...undoStack.current.slice(-49),
+        { board: current, camera: cameraRef.current },
+      ];
+      redoStack.current = [];
+      const stamped = {
+        ...nextBoard,
+        updatedAt: BoardTimestampSchema.make(Date.now()),
+      };
+      boardRef.current = stamped;
+      cameraRef.current = nextCamera;
+      setBoard(stamped);
+      setCamera(nextCamera);
+      syncRef.current?.commit(current, stamped);
+      setSelectedId(null);
+      setPanel(null);
+      setHistoryState({ canUndo: true, canRedo: false });
+    },
+    [],
+  );
 
   const undo = useCallback(() => {
     const previous = undoStack.current.pop();
@@ -677,7 +768,9 @@ function BoardWorkspace({
     setBackgroundDraft({
       hex: background,
       lastValidHex: background,
-      ...(stamped.backgroundMediaId === undefined ? {} : { mediaId: stamped.backgroundMediaId }),
+      ...(stamped.backgroundMediaId === undefined
+        ? {}
+        : { mediaId: stamped.backgroundMediaId }),
     });
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
@@ -698,14 +791,19 @@ function BoardWorkspace({
       board: current,
       camera: next.camera ? cameraRef.current : undefined,
     });
-    const stamped = { ...next.board, updatedAt: BoardTimestampSchema.make(Date.now()) };
+    const stamped = {
+      ...next.board,
+      updatedAt: BoardTimestampSchema.make(Date.now()),
+    };
     boardRef.current = stamped;
     setBoard(stamped);
     const background = stamped.background ?? DEFAULT_BOARD_BACKGROUND;
     setBackgroundDraft({
       hex: background,
       lastValidHex: background,
-      ...(stamped.backgroundMediaId === undefined ? {} : { mediaId: stamped.backgroundMediaId }),
+      ...(stamped.backgroundMediaId === undefined
+        ? {}
+        : { mediaId: stamped.backgroundMediaId }),
     });
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
@@ -745,9 +843,16 @@ function BoardWorkspace({
       stopShuffleAnimation();
       setShuffleAnimating(true);
       replaceDocument({ ...current, items }, fitCamera(items));
-      shuffleAnimationTimerRef.current = window.setTimeout(stopShuffleAnimation, 480);
+      shuffleAnimationTimerRef.current = window.setTimeout(
+        stopShuffleAnimation,
+        480,
+      );
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "This board could not be shuffled.");
+      showToast(
+        error instanceof Error
+          ? error.message
+          : 'This board could not be shuffled.',
+      );
     }
   }, [replaceDocument, showToast, stopShuffleAnimation]);
 
@@ -766,55 +871,80 @@ function BoardWorkspace({
       cancelBackgroundUpload();
       if (nextPanel !== null) {
         previousFocus.current =
-          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
       }
-      setPanelError("");
-      if (nextPanel?.type === "imageLink") {
-        const item = boardRef.current.items.find((entry) => entry.id === nextPanel.itemId);
-        setPanelDraft(item?.kind === "image" ? (item.href ?? "") : "");
-        setAnnotationTitle(item?.kind === "image" ? (item.annotationTitle ?? "") : "");
-        setAnnotationDescription(item?.kind === "image" ? (item.annotationDescription ?? "") : "");
-      } else if (nextPanel?.type === "audio") {
+      setPanelError('');
+      if (nextPanel?.type === 'imageLink') {
+        const item = boardRef.current.items.find(
+          (entry) => entry.id === nextPanel.itemId,
+        );
+        setPanelDraft(item?.kind === 'image' ? (item.href ?? '') : '');
+        setAnnotationTitle(
+          item?.kind === 'image' ? (item.annotationTitle ?? '') : '',
+        );
+        setAnnotationDescription(
+          item?.kind === 'image' ? (item.annotationDescription ?? '') : '',
+        );
+      } else if (nextPanel?.type === 'audio') {
         const item = nextPanel.itemId
-          ? boardRef.current.items.find((entry) => entry.id === nextPanel.itemId)
+          ? boardRef.current.items.find(
+              (entry) => entry.id === nextPanel.itemId,
+            )
           : undefined;
         setPanelDraft(
-          item?.kind === "audio" || item?.kind === "spotify" || item?.kind === "youtube"
-            ? (item.src ?? "")
-            : "",
+          item?.kind === 'audio' ||
+            item?.kind === 'spotify' ||
+            item?.kind === 'youtube'
+            ? (item.src ?? '')
+            : '',
         );
         setAudioLabel(
-          item?.kind === "audio" || item?.kind === "spotify" || item?.kind === "youtube"
-            ? (item.label ?? "")
-            : "",
+          item?.kind === 'audio' ||
+            item?.kind === 'spotify' ||
+            item?.kind === 'youtube'
+            ? (item.label ?? '')
+            : '',
         );
-      } else if (nextPanel?.type === "website") {
+      } else if (nextPanel?.type === 'website') {
         const item = nextPanel.itemId
-          ? boardRef.current.items.find((entry) => entry.id === nextPanel.itemId)
+          ? boardRef.current.items.find(
+              (entry) => entry.id === nextPanel.itemId,
+            )
           : undefined;
-        setPanelDraft(item?.kind === "website" ? (item.websiteUrl ?? "") : "");
-      } else if (nextPanel?.type === "x") {
-        const item = boardRef.current.items.find((entry) => entry.id === nextPanel.itemId);
-        setPanelDraft(item?.kind === "x" ? (item.src ?? "") : "");
-        setXDisplay(item?.kind === "x" ? (item.xDisplay ?? "post") : "post");
-        setXTheme(item?.kind === "x" ? (item.xTheme ?? "automatic") : "automatic");
-      } else if (nextPanel?.type === "note" && nextPanel.itemId) {
+        setPanelDraft(item?.kind === 'website' ? (item.websiteUrl ?? '') : '');
+      } else if (nextPanel?.type === 'x') {
+        const item = boardRef.current.items.find(
+          (entry) => entry.id === nextPanel.itemId,
+        );
+        setPanelDraft(item?.kind === 'x' ? (item.src ?? '') : '');
+        setXDisplay(item?.kind === 'x' ? (item.xDisplay ?? 'post') : 'post');
+        setXTheme(
+          item?.kind === 'x' ? (item.xTheme ?? 'automatic') : 'automatic',
+        );
+      } else if (nextPanel?.type === 'note' && nextPanel.itemId) {
         setPanelDraft(
-          boardRef.current.items.find((item) => item.id === nextPanel.itemId)?.text ?? "",
+          boardRef.current.items.find((item) => item.id === nextPanel.itemId)
+            ?.text ?? '',
         );
-      } else if (nextPanel?.type === "color") {
+      } else if (nextPanel?.type === 'color') {
         const item = nextPanel.itemId
-          ? boardRef.current.items.find((entry) => entry.id === nextPanel.itemId)
+          ? boardRef.current.items.find(
+              (entry) => entry.id === nextPanel.itemId,
+            )
           : undefined;
-        const color = normalizeHexColor(item?.color ?? "") ?? DEFAULT_CUSTOM_COLOR;
+        const color =
+          normalizeHexColor(item?.color ?? '') ?? DEFAULT_CUSTOM_COLOR;
         setCustomColor({
           hex: color,
-          label: item?.label ?? "",
+          label: item?.label ?? '',
           lastValidHex: color,
         });
-        setPanelDraft("");
-      } else if (nextPanel?.type === "menu") {
-        const background = boardRef.current.background ?? DEFAULT_BOARD_BACKGROUND;
+        setPanelDraft('');
+      } else if (nextPanel?.type === 'menu') {
+        const background =
+          boardRef.current.background ?? DEFAULT_BOARD_BACKGROUND;
         setBackgroundDraft({
           hex: background,
           lastValidHex: background,
@@ -823,13 +953,13 @@ function BoardWorkspace({
             : { mediaId: boardRef.current.backgroundMediaId }),
         });
         setPanelDraft(boardRef.current.title);
-      } else if (nextPanel?.type === "boards") {
-        setPanelDraft("");
+      } else if (nextPanel?.type === 'boards') {
+        setPanelDraft('');
       } else {
-        setPanelDraft("");
-        if (nextPanel?.type === "url") {
-          setXDisplay("post");
-          setXTheme("automatic");
+        setPanelDraft('');
+        if (nextPanel?.type === 'url') {
+          setXDisplay('post');
+          setXTheme('automatic');
         }
       }
       setPanel(nextPanel);
@@ -841,16 +971,20 @@ function BoardWorkspace({
     if (!panel) return;
     if (previousFocus.current === null) {
       previousFocus.current =
-        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
     }
     const restoreTarget = previousFocus.current;
-    const restoreItemId = "itemId" in panel ? (panel.itemId ?? null) : null;
+    const restoreItemId = 'itemId' in panel ? (panel.itemId ?? null) : null;
     const viewportElement = viewportRef.current;
     const frame = window.requestAnimationFrame(() => {
       const focusTarget =
-        composerRef.current?.querySelector<HTMLElement>("[data-initial-focus], [autofocus]") ??
         composerRef.current?.querySelector<HTMLElement>(
-          "input, textarea, .color-grid button, button:not([disabled])",
+          '[data-initial-focus], [autofocus]',
+        ) ??
+        composerRef.current?.querySelector<HTMLElement>(
+          'input, textarea, .color-grid button, button:not([disabled])',
         );
       focusTarget?.focus();
     });
@@ -859,7 +993,9 @@ function BoardWorkspace({
       if (restoreTarget?.isConnected) restoreTarget.focus();
       else if (restoreItemId !== null) {
         viewportElement
-          ?.querySelector<HTMLElement>(`[data-item-id="${CSS.escape(restoreItemId)}"]`)
+          ?.querySelector<HTMLElement>(
+            `[data-item-id="${CSS.escape(restoreItemId)}"]`,
+          )
           ?.focus();
       }
       if (previousFocus.current === restoreTarget) previousFocus.current = null;
@@ -885,8 +1021,10 @@ function BoardWorkspace({
         if (!cancelled) {
           setCamera(fitCamera(initialBoard.items));
           setPersistenceEnabled(false);
-          setSaveState("error");
-          showToast("The saved board could not be opened. Its local copy was left untouched.");
+          setSaveState('error');
+          showToast(
+            'The saved board could not be opened. Its local copy was left untouched.',
+          );
         }
       })
       .finally(() => !cancelled && setReady(true));
@@ -940,7 +1078,10 @@ function BoardWorkspace({
       onBoard: applyRemoteBoard,
       onStatus: setSyncState,
       onUnavailable: (unavailableBoardId) => {
-        if (unavailableBoardId === boardId && deletingBoardRef.current !== unavailableBoardId)
+        if (
+          unavailableBoardId === boardId &&
+          deletingBoardRef.current !== unavailableBoardId
+        )
           onNavigate(DEFAULT_BOARD_ID, true, true);
       },
     });
@@ -971,13 +1112,13 @@ function BoardWorkspace({
         persistDocument({ board: boardRef.current, camera: cameraRef.current });
     };
     const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") flush();
+      if (document.visibilityState === 'hidden') flush();
     };
-    window.addEventListener("pagehide", flush);
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
-      window.removeEventListener("pagehide", flush);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [persistDocument, persistenceEnabled]);
 
@@ -1004,15 +1145,18 @@ function BoardWorkspace({
       }
     };
 
-    viewport.addEventListener("wheel", onWheel, { passive: false });
-    return () => viewport.removeEventListener("wheel", onWheel);
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    return () => viewport.removeEventListener('wheel', onWheel);
   }, []);
 
   const removeItem = useCallback(
     (id: ItemId) => {
       applyBoard((current) => {
         if (!current.items.some((item) => item.id === id)) return current;
-        return { ...current, items: current.items.filter((item) => item.id !== id) };
+        return {
+          ...current,
+          items: current.items.filter((item) => item.id !== id),
+        };
       });
       setSelectedId((current) => (current === id ? null : current));
     },
@@ -1041,15 +1185,19 @@ function BoardWorkspace({
   }, [applyBoard, selectedId]);
 
   const reorderItem = useCallback(
-    (id: ItemId, direction: "front" | "back") => {
+    (id: ItemId, direction: 'front' | 'back') => {
       applyBoard((current) => {
         if (!current.items.some((item) => item.id === id)) return current;
         const orders = current.items.map((item) => item.order);
         const order =
-          direction === "front" ? Math.max(0, ...orders) + 1 : Math.min(0, ...orders) - 1;
+          direction === 'front'
+            ? Math.max(0, ...orders) + 1
+            : Math.min(0, ...orders) - 1;
         return {
           ...current,
-          items: current.items.map((item) => (item.id === id ? { ...item, order } : item)),
+          items: current.items.map((item) =>
+            item.id === id ? { ...item, order } : item,
+          ),
         };
       });
     },
@@ -1057,7 +1205,7 @@ function BoardWorkspace({
   );
 
   const reorderSelected = useCallback(
-    (direction: "front" | "back") => {
+    (direction: 'front' | 'back') => {
       if (selectedId) reorderItem(selectedId, direction);
     },
     [reorderItem, selectedId],
@@ -1066,7 +1214,7 @@ function BoardWorkspace({
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
       if (bulkSession !== null) return;
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setSelectedId(null);
         cancelBackgroundUpload();
         setPanel(null);
@@ -1075,37 +1223,41 @@ function BoardWorkspace({
       if (isTypingTarget(event.target)) return;
       const command = event.metaKey || event.ctrlKey;
 
-      if (event.code === "Space") {
+      if (event.code === 'Space') {
         event.preventDefault();
         setSpacePressed(true);
-      } else if ((event.key === "Delete" || event.key === "Backspace") && selectedId && editing) {
+      } else if (
+        (event.key === 'Delete' || event.key === 'Backspace') &&
+        selectedId &&
+        editing
+      ) {
         event.preventDefault();
         removeSelected();
-      } else if (command && event.key.toLowerCase() === "z" && event.shiftKey) {
+      } else if (command && event.key.toLowerCase() === 'z' && event.shiftKey) {
         event.preventDefault();
         redo();
-      } else if (command && event.key.toLowerCase() === "z") {
+      } else if (command && event.key.toLowerCase() === 'z') {
         event.preventDefault();
         undo();
-      } else if (command && event.key === "0") {
+      } else if (command && event.key === '0') {
         event.preventDefault();
         fitToBoard();
-      } else if (event.key === "+" || event.key === "=") {
+      } else if (event.key === '+' || event.key === '=') {
         zoomAtCenter(1.2);
-      } else if (event.key === "-") {
+      } else if (event.key === '-') {
         zoomAtCenter(1 / 1.2);
       }
     };
 
     const keyUp = (event: KeyboardEvent) => {
-      if (event.code === "Space") setSpacePressed(false);
+      if (event.code === 'Space') setSpacePressed(false);
     };
 
-    window.addEventListener("keydown", keyDown);
-    window.addEventListener("keyup", keyUp);
+    window.addEventListener('keydown', keyDown);
+    window.addEventListener('keyup', keyUp);
     return () => {
-      window.removeEventListener("keydown", keyDown);
-      window.removeEventListener("keyup", keyUp);
+      window.removeEventListener('keydown', keyDown);
+      window.removeEventListener('keyup', keyUp);
     };
   }, [
     bulkSession,
@@ -1128,31 +1280,42 @@ function BoardWorkspace({
           return;
         }
         const convertingHeic =
-          /^image\/hei[cf]$/i.test(file.type) || /\.(?:heic|heif|hif)$/i.test(file.name);
-        setImageIntakeStatus(convertingHeic ? "Converting HEIC photo…" : "Preparing image…");
+          /^image\/hei[cf]$/i.test(file.type) ||
+          /\.(?:heic|heif|hif)$/i.test(file.name);
+        setImageIntakeStatus(
+          convertingHeic ? 'Converting HEIC photo…' : 'Preparing image…',
+        );
         const image = await ingestImageFile(file);
-        setImageIntakeStatus(localOnly ? "Saving image to this browser…" : "Uploading image…");
+        setImageIntakeStatus(
+          localOnly ? 'Saving image to this browser…' : 'Uploading image…',
+        );
         const source = localOnly
           ? { src: await blobToDataUrl(image.blob) }
-          : { mediaId: (await uploadMedia(image.blob, "image")).mediaId };
-        setImageIntakeStatus("Adding image to board…");
+          : { mediaId: (await uploadMedia(image.blob, 'image')).mediaId };
+        setImageIntakeStatus('Adding image to board…');
         const current = boardRef.current;
         if (current.items.length >= MAX_REMOTE_ITEMS) {
           showToast(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
           return;
         }
-        const point = screenPoint ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const point = screenPoint ?? {
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+        };
         const anchor = screenToWorld(point, cameraRef.current);
         const layout = placeLayoutWithoutOverlap(
-          layoutBulkImages([{ id: "single", width: image.width, height: image.height }], "loose"),
+          layoutBulkImages(
+            [{ id: 'single', width: image.width, height: image.height }],
+            'loose',
+          ),
           anchor,
           current.items,
         );
         const placed = layout.items[0];
-        if (!placed) throw new Error("The image could not be placed.");
+        if (!placed) throw new Error('The image could not be placed.');
         const item: BoardItem = {
           id: createId(),
-          kind: "image",
+          kind: 'image',
           ...source,
           x: placed.x,
           y: placed.y,
@@ -1168,17 +1331,22 @@ function BoardWorkspace({
         if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
           showToast(
             localOnly
-              ? "That image would make this browser board too large."
-              : "That image would exceed this board’s remote storage limit.",
+              ? 'That image would make this browser board too large.'
+              : 'That image would exceed this board’s remote storage limit.',
           );
           return;
         }
         applyBoard({ ...current, items: [...current.items, item] });
         setSelectedId(item.id);
       } catch (error) {
-        showToast(error instanceof Error ? error.message : "That image could not be added.", 8000);
+        showToast(
+          error instanceof Error
+            ? error.message
+            : 'That image could not be added.',
+          8000,
+        );
       } finally {
-        setImageIntakeStatus("");
+        setImageIntakeStatus('');
         endWorking();
       }
     },
@@ -1190,7 +1358,7 @@ function BoardWorkspace({
     const input = imageInputRef.current;
     if (input === null) return;
     imageSelectionFolderRef.current = false;
-    input.removeAttribute("webkitdirectory");
+    input.removeAttribute('webkitdirectory');
     input.click();
   }, [working]);
 
@@ -1199,7 +1367,7 @@ function BoardWorkspace({
     const input = imageInputRef.current;
     if (input === null) return;
     imageSelectionFolderRef.current = true;
-    input.setAttribute("webkitdirectory", "");
+    input.setAttribute('webkitdirectory', '');
     input.click();
   }, [working]);
 
@@ -1222,7 +1390,10 @@ function BoardWorkspace({
         if (workingStarted) endWorking();
         return;
       }
-      const point = screenPoint ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const point = screenPoint ?? {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+      };
       if (!workingStarted) beginWorking();
       const session: BulkSession = {
         files,
@@ -1246,7 +1417,10 @@ function BoardWorkspace({
     ) => {
       if (files.length > 0) setPanel(null);
       const file = files[0];
-      if (!shouldStageImageSelection(files.length, options.folder) && file !== undefined) {
+      if (
+        !shouldStageImageSelection(files.length, options.folder) &&
+        file !== undefined
+      ) {
         void addSingleImage(file, options.screenPoint);
       } else {
         openBulkStaging(files, options.screenPoint);
@@ -1269,17 +1443,24 @@ function BoardWorkspace({
     dropCollectionRef.current = null;
     setCollectingDrop(false);
     endWorking();
-    showToast("Folder reading cancelled");
+    showToast('Folder reading cancelled');
   }, [endWorking, showToast]);
 
   const commitBulkImages = useCallback(
-    (images: ReadonlyArray<PreparedBulkImage>, layoutKind: BulkLayoutKind): string | null => {
+    (
+      images: ReadonlyArray<PreparedBulkImage>,
+      layoutKind: BulkLayoutKind,
+    ): string | null => {
       const current = boardRef.current;
       if (current.items.length + images.length > MAX_REMOTE_ITEMS) {
         return `This board can hold ${MAX_REMOTE_ITEMS} items. Select fewer images.`;
       }
       const layout = layoutBulkImages(
-        images.map((image) => ({ id: image.entryId, width: image.width, height: image.height })),
+        images.map((image) => ({
+          id: image.entryId,
+          width: image.width,
+          height: image.height,
+        })),
         layoutKind,
       );
       let placed;
@@ -1290,17 +1471,22 @@ function BoardWorkspace({
           current.items,
         );
       } catch (error) {
-        return error instanceof Error ? error.message : "Open canvas space could not be found.";
+        return error instanceof Error
+          ? error.message
+          : 'Open canvas space could not be found.';
       }
       const prepared = new Map(images.map((image) => [image.entryId, image]));
       const topOrder = Math.max(0, ...current.items.map((item) => item.order));
       const additions = placed.items.map((item, index): BoardItem => {
         const image = prepared.get(item.id);
-        if (!image) throw new Error("A prepared image was missing from this import.");
+        if (!image)
+          throw new Error('A prepared image was missing from this import.');
         return {
           id: createId(),
-          kind: "image",
-          ...(image.mediaId === undefined ? { src: image.src } : { mediaId: image.mediaId }),
+          kind: 'image',
+          ...(image.mediaId === undefined
+            ? { src: image.src }
+            : { mediaId: image.mediaId }),
           x: item.x,
           y: item.y,
           width: item.width,
@@ -1315,12 +1501,14 @@ function BoardWorkspace({
       );
       if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
         return localOnly
-          ? "Those images would make this browser board too large. Select fewer images."
-          : "Those images would exceed this board’s remote storage limit. Select fewer images.";
+          ? 'Those images would make this browser board too large. Select fewer images.'
+          : 'Those images would exceed this board’s remote storage limit. Select fewer images.';
       }
       applyBoard({ ...current, items: [...current.items, ...additions] });
       window.setTimeout(() => setSelectedId(additions.at(-1)?.id ?? null), 0);
-      showToast(`${additions.length} ${additions.length === 1 ? "image" : "images"} added`);
+      showToast(
+        `${additions.length} ${additions.length === 1 ? 'image' : 'images'} added`,
+      );
       return null;
     },
     [applyBoard, bulkSession?.anchor, localOnly, showToast],
@@ -1335,35 +1523,39 @@ function BoardWorkspace({
         addImageSelection(files);
         return;
       }
-      const text = event.clipboardData?.getData("text/plain").trim();
+      const text = event.clipboardData?.getData('text/plain').trim();
       if (text && isLikelyAudioUrl(text)) {
         event.preventDefault();
         setPanelDraft(text);
-        setAudioLabel("");
-        setPanelError("");
-        setPanel({ type: "audio" });
-      } else if (text && (/^https?:\/\//i.test(text) || parseXPostInput(text) !== null)) {
+        setAudioLabel('');
+        setPanelError('');
+        setPanel({ type: 'audio' });
+      } else if (
+        text &&
+        (/^https?:\/\//i.test(text) || parseXPostInput(text) !== null)
+      ) {
         event.preventDefault();
         const xInput = parseXPostInput(text);
         setPanelDraft(text);
         if (xInput !== null) {
           setXDisplay(xInput.display);
-          setXTheme("automatic");
+          setXTheme('automatic');
         }
-        setPanelError("");
-        setPanel({ type: "url" });
+        setPanelError('');
+        setPanel({ type: 'url' });
       }
     };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
   }, [addImageSelection, bulkSession]);
 
   function setItemPreview(id: ItemId, point: Point) {
     const element = Array.from(
-      viewportRef.current?.querySelectorAll<HTMLElement>("[data-item-id]") ?? [],
+      viewportRef.current?.querySelectorAll<HTMLElement>('[data-item-id]') ??
+        [],
     ).find((candidate) => candidate.dataset.itemId === id);
-    element?.style.setProperty("--item-x", `${point.x}px`);
-    element?.style.setProperty("--item-y", `${point.y}px`);
+    element?.style.setProperty('--item-x', `${point.x}px`);
+    element?.style.setProperty('--item-y', `${point.y}px`);
   }
 
   function presentItem(itemId: ItemId, origin?: PresentationItemOrigin) {
@@ -1377,26 +1569,33 @@ function BoardWorkspace({
   }
 
   function handleCanvasPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (bulkSession !== null || (event.button !== 0 && event.button !== 1)) return;
+    if (bulkSession !== null || (event.button !== 0 && event.button !== 1))
+      return;
     stopShuffleAnimation();
     event.preventDefault();
     setPanel(null);
     const point = { x: event.clientX, y: event.clientY };
     const target = event.target as HTMLElement;
-    const itemElement = target.closest<HTMLElement>("[data-item-id]");
+    const itemElement = target.closest<HTMLElement>('[data-item-id]');
     const presentationDetailLink = editing
       ? null
-      : target.closest<HTMLAnchorElement>(".presentation-detail-link");
+      : target.closest<HTMLAnchorElement>('.presentation-detail-link');
     const presentationItem = editing
       ? null
-      : target.closest<HTMLElement>("[data-presentation-item-id]");
+      : target.closest<HTMLElement>('[data-presentation-item-id]');
     const presentationItemId = presentationItem?.dataset.presentationItemId;
     const item =
-      editing && event.pointerType === "touch"
-        ? boardRef.current.items.find((entry) => entry.id === itemElement?.dataset.itemId)
+      editing && event.pointerType === 'touch'
+        ? boardRef.current.items.find(
+            (entry) => entry.id === itemElement?.dataset.itemId,
+          )
         : undefined;
 
-    if (activePointers.current.size >= 1 && gesture.current?.itemId && gesture.current.itemOrigin) {
+    if (
+      activePointers.current.size >= 1 &&
+      gesture.current?.itemId &&
+      gesture.current.itemOrigin
+    ) {
       setItemPreview(gesture.current.itemId, gesture.current.itemOrigin);
     }
 
@@ -1434,8 +1633,12 @@ function BoardWorkspace({
   }
 
   function handleCanvasPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!activePointers.current.has(event.pointerId) || !gesture.current) return;
-    activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (!activePointers.current.has(event.pointerId) || !gesture.current)
+      return;
+    activePointers.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
     const pointers = [...activePointers.current.values()];
 
     if (pointers.length >= 2) {
@@ -1447,7 +1650,10 @@ function BoardWorkspace({
         const anchor = screenToWorld(previous.center, current);
         const z = Math.min(
           MAX_ZOOM,
-          Math.max(MIN_ZOOM, current.z * (distance / Math.max(1, previous.distance ?? distance))),
+          Math.max(
+            MIN_ZOOM,
+            current.z * (distance / Math.max(1, previous.distance ?? distance)),
+          ),
         );
         return { x: center.x / z - anchor.x, y: center.y / z - anchor.y, z };
       });
@@ -1457,8 +1663,12 @@ function BoardWorkspace({
       const previous = gesture.current;
       if (previous.itemId && previous.itemOrigin && previous.start) {
         const itemPosition = {
-          x: previous.itemOrigin.x + (point.x - previous.start.x) / cameraRef.current.z,
-          y: previous.itemOrigin.y + (point.y - previous.start.y) / cameraRef.current.z,
+          x:
+            previous.itemOrigin.x +
+            (point.x - previous.start.x) / cameraRef.current.z,
+          y:
+            previous.itemOrigin.y +
+            (point.y - previous.start.y) / cameraRef.current.z,
         };
         setItemPreview(previous.itemId, itemPosition);
         gesture.current = { ...previous, center: point, itemPosition };
@@ -1477,7 +1687,7 @@ function BoardWorkspace({
     const endingGesture = gesture.current;
     const wasOnlyPointer = activePointers.current.size === 1;
     if (wasOnlyPointer && endingGesture?.itemId && endingGesture.itemOrigin) {
-      if (event.type === "pointercancel") {
+      if (event.type === 'pointercancel') {
         setItemPreview(endingGesture.itemId, endingGesture.itemOrigin);
       } else if (endingGesture.itemPosition) {
         commitItemPosition(
@@ -1488,16 +1698,21 @@ function BoardWorkspace({
       }
     } else if (
       wasOnlyPointer &&
-      event.type !== "pointercancel" &&
+      event.type !== 'pointercancel' &&
       endingGesture?.start !== undefined &&
-      Math.hypot(event.clientX - endingGesture.start.x, event.clientY - endingGesture.start.y) < 6
+      Math.hypot(
+        event.clientX - endingGesture.start.x,
+        event.clientY - endingGesture.start.y,
+      ) < 6
     ) {
       if (endingGesture.presentationItemId !== undefined) {
         const items = boardRef.current.items;
-        const item = items.find((entry) => entry.id === endingGesture.presentationItemId);
+        const item = items.find(
+          (entry) => entry.id === endingGesture.presentationItemId,
+        );
         if (item !== undefined) presentItem(item.id, endingGesture.start);
       } else if (endingGesture.linkHref !== undefined) {
-        window.open(endingGesture.linkHref, "_blank", "noopener,noreferrer");
+        window.open(endingGesture.linkHref, '_blank', 'noopener,noreferrer');
       }
     }
 
@@ -1511,7 +1726,8 @@ function BoardWorkspace({
   function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDraggingFiles(false);
-    if (bulkSessionRef.current !== null || dropCollectionRef.current !== null) return;
+    if (bulkSessionRef.current !== null || dropCollectionRef.current !== null)
+      return;
     const screenPoint = { x: event.clientX, y: event.clientY };
     const generation = ++dropGenerationRef.current;
     const controller = new AbortController();
@@ -1528,7 +1744,10 @@ function BoardWorkspace({
         setCollectingDrop(false);
         if (collection.files.length === 0) {
           endWorking();
-          showToast(collection.failures[0]?.message ?? "No files were found in that drop.");
+          showToast(
+            collection.failures[0]?.message ??
+              'No files were found in that drop.',
+          );
         } else if (
           collection.hadDirectory ||
           collection.files.length > 1 ||
@@ -1549,7 +1768,11 @@ function BoardWorkspace({
         setCollectingDrop(false);
         endWorking();
         if (!controller.signal.aborted) {
-          showToast(error instanceof Error ? error.message : "That folder could not be read.");
+          showToast(
+            error instanceof Error
+              ? error.message
+              : 'That folder could not be read.',
+          );
         }
       });
   }
@@ -1560,7 +1783,9 @@ function BoardWorkspace({
       if (!source || (source.x === x && source.y === y)) return current;
       return {
         ...current,
-        items: current.items.map((item) => (item.id === id ? { ...item, x, y } : item)),
+        items: current.items.map((item) =>
+          item.id === id ? { ...item, x, y } : item,
+        ),
       };
     });
   }
@@ -1568,10 +1793,13 @@ function BoardWorkspace({
   function commitItemSize(id: ItemId, width: number, height: number) {
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === id);
-      if (!source || (source.width === width && source.height === height)) return current;
+      if (!source || (source.width === width && source.height === height))
+        return current;
       return {
         ...current,
-        items: current.items.map((item) => (item.id === id ? { ...item, width, height } : item)),
+        items: current.items.map((item) =>
+          item.id === id ? { ...item, width, height } : item,
+        ),
       };
     });
   }
@@ -1580,7 +1808,10 @@ function BoardWorkspace({
     parsed: NonNullable<ReturnType<typeof parseXPostInput>>,
     editingId?: string,
   ) {
-    if (editingId === undefined && boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
+    if (
+      editingId === undefined &&
+      boardRef.current.items.length >= MAX_REMOTE_ITEMS
+    ) {
       setPanelError(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       return;
     }
@@ -1589,28 +1820,39 @@ function BoardWorkspace({
       const existing =
         editingId === undefined
           ? undefined
-          : boardRef.current.items.find((item) => item.id === editingId && item.kind === "x");
+          : boardRef.current.items.find(
+              (item) => item.id === editingId && item.kind === 'x',
+            );
       if (editingId !== undefined && existing === undefined) {
-        throw new Error("That X card is no longer on this board.");
+        throw new Error('That X card is no longer on this board.');
       }
-      let preview: Awaited<ReturnType<BoardSync["resolveXPostPreview"]>> | undefined;
+      let preview:
+        | Awaited<ReturnType<BoardSync['resolveXPostPreview']>>
+        | undefined;
       const sync = syncRef.current;
-      if (sync !== null && syncState === "live") {
-        preview = await sync.resolveXPostPreview(parsed.src).catch(() => undefined);
+      if (sync !== null && syncState === 'live') {
+        preview = await sync
+          .resolveXPostPreview(parsed.src)
+          .catch(() => undefined);
       }
       const sameSource = existing?.src === parsed.src;
       const snapshot = {
-        xAuthorName: preview?.authorName ?? (sameSource ? existing?.xAuthorName : undefined),
+        xAuthorName:
+          preview?.authorName ??
+          (sameSource ? existing?.xAuthorName : undefined),
         xAuthorHandle:
-          preview?.authorHandle ?? (sameSource ? existing?.xAuthorHandle : parsed.handle),
-        xPostText: preview?.text ?? (sameSource ? existing?.xPostText : undefined),
-        xPostDate: preview?.date ?? (sameSource ? existing?.xPostDate : undefined),
+          preview?.authorHandle ??
+          (sameSource ? existing?.xAuthorHandle : parsed.handle),
+        xPostText:
+          preview?.text ?? (sameSource ? existing?.xPostText : undefined),
+        xPostDate:
+          preview?.date ?? (sameSource ? existing?.xPostDate : undefined),
       };
       if (existing !== undefined) {
         applyBoard((current) => ({
           ...current,
           items: current.items.map((item) =>
-            item.id === editingId && item.kind === "x"
+            item.id === editingId && item.kind === 'x'
               ? {
                   ...item,
                   src: parsed.src,
@@ -1623,7 +1865,9 @@ function BoardWorkspace({
           ),
         }));
         setPanel(null);
-        showToast(preview === undefined ? "X card updated" : "X card refreshed");
+        showToast(
+          preview === undefined ? 'X card updated' : 'X card refreshed',
+        );
         return;
       }
       if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
@@ -1633,11 +1877,11 @@ function BoardWorkspace({
         { x: window.innerWidth / 2, y: window.innerHeight / 2 },
         cameraRef.current,
       );
-      const width = xDisplay === "media" ? 560 : 550;
-      const height = xDisplay === "media" ? 390 : 620;
+      const width = xDisplay === 'media' ? 560 : 550;
+      const height = xDisplay === 'media' ? 390 : 620;
       const item: BoardItem = {
         id: createId(),
-        kind: "x",
+        kind: 'x',
         src: parsed.src,
         xDisplay,
         xTheme,
@@ -1648,14 +1892,23 @@ function BoardWorkspace({
         width,
         height,
         rotation: 0,
-        order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+        order:
+          Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+          1,
       };
-      applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+      applyBoard((current) => ({
+        ...current,
+        items: [...current.items, item],
+      }));
       setSelectedId(item.id);
       setPanel(null);
-      showToast(xDisplay === "media" ? "X media added" : "X post added");
+      showToast(xDisplay === 'media' ? 'X media added' : 'X post added');
     } catch (error) {
-      setPanelError(error instanceof Error ? error.message : "That X post could not be added.");
+      setPanelError(
+        error instanceof Error
+          ? error.message
+          : 'That X post could not be added.',
+      );
     } finally {
       endWorking();
     }
@@ -1663,7 +1916,7 @@ function BoardWorkspace({
 
   async function submitLink(event: FormEvent) {
     event.preventDefault();
-    setPanelError("");
+    setPanelError('');
     const xInput = parseXPostInput(panelDraft);
     if (xInput !== null) {
       await saveXPost(xInput);
@@ -1671,7 +1924,9 @@ function BoardWorkspace({
     }
     const linkUrl = normalizeWebsiteUrl(panelDraft);
     if (linkUrl === null) {
-      setPanelError("Use a public HTTPS URL without credentials or a custom port.");
+      setPanelError(
+        'Use a public HTTPS URL without credentials or a custom port.',
+      );
       return;
     }
     if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
@@ -1696,7 +1951,7 @@ function BoardWorkspace({
       const height = width / ratio;
       const item: BoardItem = {
         id: createId(),
-        kind: "image",
+        kind: 'image',
         src,
         ...(href === undefined ? {} : { href }),
         x: point.x - width / 2,
@@ -1704,9 +1959,14 @@ function BoardWorkspace({
         width,
         height,
         rotation: 0,
-        order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+        order:
+          Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+          1,
       };
-      applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+      applyBoard((current) => ({
+        ...current,
+        items: [...current.items, item],
+      }));
       setSelectedId(item.id);
       setPanel(null);
     };
@@ -1731,7 +1991,7 @@ function BoardWorkspace({
         const height = 360;
         const item: BoardItem = {
           id: createId(),
-          kind: "website",
+          kind: 'website',
           websiteUrl: linkUrl,
           ...metadata,
           x: point.x - width / 2,
@@ -1739,25 +1999,35 @@ function BoardWorkspace({
           width,
           height,
           rotation: 0,
-          order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+          order:
+            Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+            1,
         };
-        applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+        applyBoard((current) => ({
+          ...current,
+          items: [...current.items, item],
+        }));
         setSelectedId(item.id);
         setPanel(null);
-        showToast("Link added locally");
+        showToast('Link added locally');
         return;
       }
 
       const sync = syncRef.current;
-      if (sync === null || syncState !== "live") {
-        throw new Error("Connect to the board server before resolving this link.");
+      if (sync === null || syncState !== 'live') {
+        throw new Error(
+          'Connect to the board server before resolving this link.',
+        );
       }
       const preview = await sync.resolveWebsitePreview(linkUrl);
-      if (preview.preferredLayout === "image" && preview.imageUrl !== undefined) {
+      if (
+        preview.preferredLayout === 'image' &&
+        preview.imageUrl !== undefined
+      ) {
         try {
           const image = await inspectImageUrl(preview.imageUrl);
           addImage(preview.imageUrl, image, preview.url);
-          showToast("Linked image added");
+          showToast('Linked image added');
           return;
         } catch {
           // Keep a durable link card when a remote preview image refuses hotlinking.
@@ -1775,7 +2045,7 @@ function BoardWorkspace({
       const height = 360;
       const item: BoardItem = {
         id: createId(),
-        kind: "website",
+        kind: 'website',
         websiteUrl: preview.url,
         websiteImageUrl: preview.imageUrl,
         websiteTitle: preview.title,
@@ -1786,14 +2056,23 @@ function BoardWorkspace({
         width,
         height,
         rotation: 0,
-        order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+        order:
+          Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+          1,
       };
-      applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+      applyBoard((current) => ({
+        ...current,
+        items: [...current.items, item],
+      }));
       setSelectedId(item.id);
       setPanel(null);
-      showToast("Link added");
+      showToast('Link added');
     } catch (error) {
-      setPanelError(error instanceof Error ? error.message : "That link could not be added.");
+      setPanelError(
+        error instanceof Error
+          ? error.message
+          : 'That link could not be added.',
+      );
     } finally {
       endWorking();
     }
@@ -1801,20 +2080,22 @@ function BoardWorkspace({
 
   async function submitWebsite(event: FormEvent) {
     event.preventDefault();
-    setPanelError("");
+    setPanelError('');
     const websiteUrl = normalizeWebsiteUrl(panelDraft);
     if (websiteUrl === null) {
-      setPanelError("Use a public HTTPS website URL without credentials or a custom port.");
+      setPanelError(
+        'Use a public HTTPS website URL without credentials or a custom port.',
+      );
       return;
     }
     if (localOnly) {
       const metadata = localWebsiteMetadata(websiteUrl);
-      const editingId = panel?.type === "website" ? panel.itemId : undefined;
+      const editingId = panel?.type === 'website' ? panel.itemId : undefined;
       if (editingId !== undefined) {
         applyBoard((current) => ({
           ...current,
           items: current.items.map((item) =>
-            item.id === editingId && item.kind === "website"
+            item.id === editingId && item.kind === 'website'
               ? {
                   ...item,
                   websiteUrl,
@@ -1826,7 +2107,7 @@ function BoardWorkspace({
           ),
         }));
         setPanel(null);
-        showToast("Website link updated");
+        showToast('Website link updated');
         return;
       }
       const point = screenToWorld(
@@ -1837,7 +2118,7 @@ function BoardWorkspace({
       const height = 360;
       const item: BoardItem = {
         id: createId(),
-        kind: "website",
+        kind: 'website',
         websiteUrl,
         ...metadata,
         x: point.x - width / 2,
@@ -1845,30 +2126,37 @@ function BoardWorkspace({
         width,
         height,
         rotation: 0,
-        order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+        order:
+          Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+          1,
       };
-      applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+      applyBoard((current) => ({
+        ...current,
+        items: [...current.items, item],
+      }));
       setSelectedId(item.id);
       setPanel(null);
-      showToast("Website link added");
+      showToast('Website link added');
       return;
     }
 
     const sync = syncRef.current;
-    if (sync === null || syncState !== "live") {
-      setPanelError("Connect to the board server before creating a website preview.");
+    if (sync === null || syncState !== 'live') {
+      setPanelError(
+        'Connect to the board server before creating a website preview.',
+      );
       return;
     }
 
     beginWorking();
     try {
       const preview = await sync.resolveWebsitePreview(websiteUrl);
-      const editingId = panel?.type === "website" ? panel.itemId : undefined;
+      const editingId = panel?.type === 'website' ? panel.itemId : undefined;
       if (editingId !== undefined) {
         applyBoard((current) => ({
           ...current,
           items: current.items.map((item) =>
-            item.id === editingId && item.kind === "website"
+            item.id === editingId && item.kind === 'website'
               ? {
                   ...item,
                   websiteUrl: preview.url,
@@ -1883,7 +2171,7 @@ function BoardWorkspace({
           ),
         }));
         setPanel(null);
-        showToast("Website preview refreshed");
+        showToast('Website preview refreshed');
         return;
       }
 
@@ -1898,7 +2186,7 @@ function BoardWorkspace({
       const height = 360;
       const item: BoardItem = {
         id: createId(),
-        kind: "website",
+        kind: 'website',
         websiteUrl: preview.url,
         websiteImageUrl: preview.imageUrl,
         websiteTitle: preview.title,
@@ -1909,15 +2197,22 @@ function BoardWorkspace({
         width,
         height,
         rotation: 0,
-        order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+        order:
+          Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+          1,
       };
-      applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+      applyBoard((current) => ({
+        ...current,
+        items: [...current.items, item],
+      }));
       setSelectedId(item.id);
       setPanel(null);
-      showToast("Website added");
+      showToast('Website added');
     } catch (error) {
       setPanelError(
-        error instanceof Error ? error.message : "That website preview could not be created.",
+        error instanceof Error
+          ? error.message
+          : 'That website preview could not be created.',
       );
     } finally {
       endWorking();
@@ -1928,18 +2223,22 @@ function BoardWorkspace({
     event.preventDefault();
     const source = parseAudioSource(panelDraft);
     if (source === null) {
-      setPanelError("Use a supported Spotify or YouTube link, or a hosted HTTPS audio file URL.");
+      setPanelError(
+        'Use a supported Spotify or YouTube link, or a hosted HTTPS audio file URL.',
+      );
       return;
     }
     const label = audioLabel.trim() || undefined;
-    const editingId = panel?.type === "audio" ? panel.itemId : undefined;
+    const editingId = panel?.type === 'audio' ? panel.itemId : undefined;
     if (editingId) {
       playbackCoordinatorRef.current.pauseAll();
       applyBoard((current) => ({
         ...current,
         items: current.items.map((item) =>
           item.id === editingId &&
-          (item.kind === "audio" || item.kind === "spotify" || item.kind === "youtube")
+          (item.kind === 'audio' ||
+            item.kind === 'spotify' ||
+            item.kind === 'youtube')
             ? {
                 ...item,
                 kind: source.kind,
@@ -1956,7 +2255,7 @@ function BoardWorkspace({
         ),
       }));
       setPanel(null);
-      showToast("Audio card updated");
+      showToast('Audio card updated');
       return;
     }
 
@@ -1976,61 +2275,66 @@ function BoardWorkspace({
       width,
       height,
       rotation: 0,
-      order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+      order:
+        Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
     setPanel(null);
     showToast(
-      source.kind === "spotify"
-        ? "Spotify card added"
-        : source.kind === "youtube"
-          ? "YouTube card added"
-          : "Audio card added",
+      source.kind === 'spotify'
+        ? 'Spotify card added'
+        : source.kind === 'youtube'
+          ? 'YouTube card added'
+          : 'Audio card added',
     );
   }
 
   async function addLocalAudio(file: File) {
-    setPanelError("");
+    setPanelError('');
     if (localOnly) {
-      setPanelError("Sign in to upload audio files to a private workspace.");
+      setPanelError('Sign in to upload audio files to a private workspace.');
       return;
     }
-    const mimeType = normalizeMediaMimeType("audio", file.type);
+    const mimeType = normalizeMediaMimeType('audio', file.type);
     if (mimeType === null) {
-      setPanelError("Choose an MP3, M4A, WAV, Ogg, or WebM audio file.");
+      setPanelError('Choose an MP3, M4A, WAV, Ogg, or WebM audio file.');
       return;
     }
     if (file.size === 0 || file.size > MAX_AUDIO_UPLOAD_BYTES) {
-      setPanelError("Local audio must be non-empty and no larger than 25 MB.");
+      setPanelError('Local audio must be non-empty and no larger than 25 MB.');
       return;
     }
-    const editingId = panel?.type === "audio" ? panel.itemId : undefined;
+    const editingId = panel?.type === 'audio' ? panel.itemId : undefined;
     if (!editingId && boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
       setPanelError(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
       return;
     }
     beginWorking();
     try {
-      const uploaded = await uploadMedia(file, "audio");
+      const uploaded = await uploadMedia(file, 'audio');
       const label =
-        audioLabel.trim() || file.name.replace(/\.[^.]+$/, "").slice(0, 120) || undefined;
+        audioLabel.trim() ||
+        file.name.replace(/\.[^.]+$/, '').slice(0, 120) ||
+        undefined;
       if (editingId) {
         playbackCoordinatorRef.current.pauseAll();
         applyBoard((current) => ({
           ...current,
           items: current.items.map((item) =>
             item.id === editingId &&
-            (item.kind === "audio" || item.kind === "spotify" || item.kind === "youtube")
+            (item.kind === 'audio' ||
+              item.kind === 'spotify' ||
+              item.kind === 'youtube')
               ? {
                   ...item,
-                  kind: "audio",
+                  kind: 'audio',
                   src: undefined,
                   mediaId: uploaded.mediaId,
                   label,
                   width: Math.max(MIN_AUDIO_CARD_WIDTH, item.width),
                   height: preferredAudioCardHeight(
-                    "audio",
+                    'audio',
                     Math.max(MIN_AUDIO_CARD_WIDTH, item.width),
                   ),
                 }
@@ -2043,10 +2347,10 @@ function BoardWorkspace({
           cameraRef.current,
         );
         const width = 520;
-        const height = preferredAudioCardHeight("audio", width);
+        const height = preferredAudioCardHeight('audio', width);
         const item: BoardItem = {
           id: createId(),
-          kind: "audio",
+          kind: 'audio',
           mediaId: uploaded.mediaId,
           label,
           x: point.x - width / 2,
@@ -2054,42 +2358,54 @@ function BoardWorkspace({
           width,
           height,
           rotation: 0,
-          order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+          order:
+            Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
+            1,
         };
-        applyBoard((current) => ({ ...current, items: [...current.items, item] }));
+        applyBoard((current) => ({
+          ...current,
+          items: [...current.items, item],
+        }));
         setSelectedId(item.id);
       }
       setPanel(null);
-      showToast(editingId ? "Audio card updated" : "Local audio added");
+      showToast(editingId ? 'Audio card updated' : 'Local audio added');
     } catch (error) {
       setPanelError(
-        error instanceof Error ? error.message : "That audio file could not be uploaded.",
+        error instanceof Error
+          ? error.message
+          : 'That audio file could not be uploaded.',
       );
     } finally {
-      if (audioInputRef.current) audioInputRef.current.value = "";
+      if (audioInputRef.current) audioInputRef.current.value = '';
       endWorking();
     }
   }
 
   function submitImageLink(event: FormEvent) {
     event.preventDefault();
-    if (panel?.type !== "imageLink") return;
+    if (panel?.type !== 'imageLink') return;
     const rawTitle = annotationTitle.trim();
     const rawDescription = annotationDescription.trim();
     const title = normalizeImageAnnotationTitle(rawTitle);
     const description = normalizeImageAnnotationDescription(rawDescription);
-    if ((rawTitle && title === undefined) || (rawDescription && description === undefined)) {
-      setPanelError("Image details exceed the supported length.");
+    if (
+      (rawTitle && title === undefined) ||
+      (rawDescription && description === undefined)
+    ) {
+      setPanelError('Image details exceed the supported length.');
       return;
     }
     const href = panelDraft.trim() ? normalizeImageLink(panelDraft) : undefined;
     if (href === null) {
-      setPanelError("Use a full http or https page URL without a username or password.");
+      setPanelError(
+        'Use a full http or https page URL without a username or password.',
+      );
       return;
     }
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === panel.itemId);
-      if (source?.kind !== "image") return current;
+      if (source?.kind !== 'image') return current;
       if (
         source.annotationTitle === title &&
         source.annotationDescription === description &&
@@ -2112,15 +2428,19 @@ function BoardWorkspace({
       };
     });
     setPanel(null);
-    showToast(title || description || href ? "Image details saved" : "Image details cleared");
+    showToast(
+      title || description || href
+        ? 'Image details saved'
+        : 'Image details cleared',
+    );
   }
 
   function removeImageLink() {
-    if (panel?.type !== "imageLink") return;
+    if (panel?.type !== 'imageLink') return;
     applyBoard((current) => {
       const source = current.items.find((item) => item.id === panel.itemId);
       if (
-        source?.kind !== "image" ||
+        source?.kind !== 'image' ||
         (source.href === undefined &&
           source.annotationTitle === undefined &&
           source.annotationDescription === undefined)
@@ -2139,20 +2459,22 @@ function BoardWorkspace({
       };
     });
     setPanel(null);
-    showToast("Image details removed");
+    showToast('Image details removed');
   }
 
   function copyImageLink() {
-    if (panel?.type !== "imageLink") return;
-    const item = boardRef.current.items.find((entry) => entry.id === panel.itemId);
+    if (panel?.type !== 'imageLink') return;
+    const item = boardRef.current.items.find(
+      (entry) => entry.id === panel.itemId,
+    );
     if (item?.href === undefined) return;
     if (!navigator.clipboard) {
-      showToast("Copy is not available in this browser");
+      showToast('Copy is not available in this browser');
       return;
     }
     void navigator.clipboard.writeText(item.href).then(
-      () => showToast("Image link copied"),
-      () => showToast("The image link could not be copied"),
+      () => showToast('Image link copied'),
+      () => showToast('The image link could not be copied'),
     );
   }
 
@@ -2160,15 +2482,17 @@ function BoardWorkspace({
     event.preventDefault();
     const text = panelDraft.trim();
     if (!text) {
-      setPanelError("Write a few words first.");
+      setPanelError('Write a few words first.');
       return;
     }
 
-    const editingId = panel?.type === "note" ? panel.itemId : undefined;
+    const editingId = panel?.type === 'note' ? panel.itemId : undefined;
     if (editingId) {
       applyBoard((current) => ({
         ...current,
-        items: current.items.map((item) => (item.id === editingId ? { ...item, text } : item)),
+        items: current.items.map((item) =>
+          item.id === editingId ? { ...item, text } : item,
+        ),
       }));
       setPanel(null);
       return;
@@ -2180,14 +2504,15 @@ function BoardWorkspace({
     );
     const item: BoardItem = {
       id: createId(),
-      kind: "note",
+      kind: 'note',
       text,
       x: point.x - 260,
       y: point.y - 165,
       width: 520,
       height: 330,
       rotation: 0,
-      order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+      order:
+        Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
@@ -2198,7 +2523,7 @@ function BoardWorkspace({
     event.preventDefault();
     const color = normalizeHexColor(customColor.hex);
     if (color === null) {
-      setPanelError("Use a six-digit hex value such as #C85A3D.");
+      setPanelError('Use a six-digit hex value such as #C85A3D.');
       return;
     }
     addSwatch(color, customColor.label);
@@ -2206,18 +2531,23 @@ function BoardWorkspace({
 
   function applyBackground() {
     if (backgroundConflict) {
-      setPanelError("Close and reopen this panel before applying the latest background.");
+      setPanelError(
+        'Close and reopen this panel before applying the latest background.',
+      );
       return;
     }
     const color = normalizeHexColor(backgroundDraft.hex);
     if (color === null) {
-      setPanelError("Use a six-digit hex value such as #EDEDED.");
+      setPanelError('Use a six-digit hex value such as #EDEDED.');
       return;
     }
     const background = color === DEFAULT_BOARD_BACKGROUND ? undefined : color;
     const backgroundMediaId = backgroundDraft.mediaId;
     applyBoard((current) => {
-      if (current.background === background && current.backgroundMediaId === backgroundMediaId)
+      if (
+        current.background === background &&
+        current.backgroundMediaId === backgroundMediaId
+      )
         return current;
       const next = { ...current };
       if (background === undefined) delete next.background;
@@ -2229,25 +2559,29 @@ function BoardWorkspace({
     setBackgroundDraft({
       hex: color,
       lastValidHex: color,
-      ...(backgroundMediaId === undefined ? {} : { mediaId: backgroundMediaId }),
+      ...(backgroundMediaId === undefined
+        ? {}
+        : { mediaId: backgroundMediaId }),
     });
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
-    setPanelError("");
-    setBackgroundUploadError("");
+    setPanelError('');
+    setBackgroundUploadError('');
     showToast(
-      backgroundMediaId === undefined ? "Board background updated" : "Background image applied",
+      backgroundMediaId === undefined
+        ? 'Board background updated'
+        : 'Background image applied',
     );
   }
 
   function addSwatch(color: string, label?: string) {
     const normalizedColor = normalizeHexColor(color);
     if (normalizedColor === null) {
-      setPanelError("Use a six-digit hex value such as #C85A3D.");
+      setPanelError('Use a six-digit hex value such as #C85A3D.');
       return;
     }
     const normalizedLabel = label?.trim() || undefined;
-    const editingId = panel?.type === "color" ? panel.itemId : undefined;
+    const editingId = panel?.type === 'color' ? panel.itemId : undefined;
     if (editingId) {
       applyBoard((current) => ({
         ...current,
@@ -2267,7 +2601,7 @@ function BoardWorkspace({
     );
     const item: BoardItem = {
       id: createId(),
-      kind: "swatch",
+      kind: 'swatch',
       color: normalizedColor,
       label: normalizedLabel,
       x: point.x - 175,
@@ -2275,7 +2609,8 @@ function BoardWorkspace({
       width: 350,
       height: 450,
       rotation: 0,
-      order: Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
+      order:
+        Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) + 1,
     };
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
@@ -2288,7 +2623,9 @@ function BoardWorkspace({
       current.backgroundMediaId !== undefined ||
       current.items.some((item) => item.mediaId !== undefined);
     if (localOnly && hasManagedMedia) {
-      showToast("This guest board contains unsupported managed media and was not exported.");
+      showToast(
+        'This guest board contains unsupported managed media and was not exported.',
+      );
       return;
     }
     archiveOperationRef.current?.abort();
@@ -2303,36 +2640,49 @@ function BoardWorkspace({
         : new Blob(
             [
               JSON.stringify(
-                { format: "moodboard", board: current, camera: cameraRef.current },
+                {
+                  format: 'moodboard',
+                  board: current,
+                  camera: cameraRef.current,
+                },
                 null,
                 2,
               ),
             ],
-            { type: "application/json" },
+            { type: 'application/json' },
           );
       if (controller.signal.aborted) return;
       if (!hasManagedMedia && blob.size > MAX_LEGACY_JSON_BYTES) {
         throw new Error(
-          "This legacy JSON board is larger than 50 MB. Remove some embedded images first.",
+          'This legacy JSON board is larger than 50 MB. Remove some embedded images first.',
         );
       }
       const slug =
         current.title
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "") || "mood";
-      const link = document.createElement("a");
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '') || 'mood';
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `${slug}${hasManagedMedia ? ".moodboard" : ".moodboard.json"}`;
+      link.download = `${slug}${hasManagedMedia ? '.moodboard' : '.moodboard.json'}`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-      showToast(hasManagedMedia ? "Portable board archive downloaded" : "Board file downloaded");
+      showToast(
+        hasManagedMedia
+          ? 'Portable board archive downloaded'
+          : 'Board file downloaded',
+      );
     } catch (error) {
       if (!controller.signal.aborted) {
-        showToast(error instanceof Error ? error.message : "That board could not be exported.");
+        showToast(
+          error instanceof Error
+            ? error.message
+            : 'That board could not be exported.',
+        );
       }
     } finally {
-      if (archiveOperationRef.current === controller) archiveOperationRef.current = null;
+      if (archiveOperationRef.current === controller)
+        archiveOperationRef.current = null;
       endWorking();
     }
   }
@@ -2349,7 +2699,7 @@ function BoardWorkspace({
           ? {
               upload: async () => {
                 throw new Error(
-                  "The guest demo imports JSON boards only. Sign in to import managed media archives.",
+                  'The guest demo imports JSON boards only. Sign in to import managed media archives.',
                 );
               },
             }
@@ -2360,14 +2710,19 @@ function BoardWorkspace({
       setPersistenceEnabled(true);
       replaceDocument(imported.board, nextCamera);
       setPanel(null);
-      showToast("Board imported");
+      showToast('Board imported');
     } catch (error) {
       if (!controller.signal.aborted) {
-        showToast(error instanceof Error ? error.message : "That board could not be imported.");
+        showToast(
+          error instanceof Error
+            ? error.message
+            : 'That board could not be imported.',
+        );
       }
     } finally {
-      if (archiveOperationRef.current === controller) archiveOperationRef.current = null;
-      if (importInputRef.current) importInputRef.current.value = "";
+      if (archiveOperationRef.current === controller)
+        archiveOperationRef.current = null;
+      if (importInputRef.current) importInputRef.current.value = '';
       endWorking();
     }
   }
@@ -2383,8 +2738,10 @@ function BoardWorkspace({
       ? undefined
       : board.items.find((item) => item.id === presentedItem.itemId);
   const imageLinkItem =
-    panel?.type === "imageLink"
-      ? board.items.find((item) => item.id === panel.itemId && item.kind === "image")
+    panel?.type === 'imageLink'
+      ? board.items.find(
+          (item) => item.id === panel.itemId && item.kind === 'image',
+        )
       : undefined;
   const normalizedCustomColor = normalizeHexColor(customColor.hex);
   const customPreviewColor = normalizedCustomColor ?? customColor.lastValidHex;
@@ -2395,25 +2752,27 @@ function BoardWorkspace({
     (normalizedBackgroundDraft !== savedBackground ||
       backgroundDraft.mediaId !== board.backgroundMediaId);
   const effectiveBackground =
-    panel?.type === "menu"
+    panel?.type === 'menu'
       ? (normalizedBackgroundDraft ?? backgroundDraft.lastValidHex)
       : savedBackground;
   const effectiveBackgroundMediaId =
-    panel?.type === "menu" ? backgroundDraft.mediaId : board.backgroundMediaId;
+    panel?.type === 'menu' ? backgroundDraft.mediaId : board.backgroundMediaId;
   const fieldColors = accessibleFieldColors(effectiveBackground);
   const appStyle: AppStyle = {
-    "--field": effectiveBackground,
-    "--field-foreground": fieldColors.foreground,
-    "--field-muted": fieldColors.muted,
-    "--field-selection": fieldColors.selection,
+    '--field': effectiveBackground,
+    '--field-foreground': fieldColors.foreground,
+    '--field-muted': fieldColors.muted,
+    '--field-selection': fieldColors.selection,
   };
   const { canUndo, canRedo } = historyState;
   const detectedXInput =
-    panel?.type === "url" || panel?.type === "x" ? parseXPostInput(panelDraft) : null;
+    panel?.type === 'url' || panel?.type === 'x'
+      ? parseXPostInput(panelDraft)
+      : null;
 
   return (
     <main
-      className={`app-shell${spacePressed ? " is-space-panning" : ""}${!editing ? " is-presenting" : ""}${shuffleAnimating ? " is-shuffling" : ""}${effectiveBackgroundMediaId === undefined ? "" : " has-background-image"}`}
+      className={`app-shell${spacePressed ? ' is-space-panning' : ''}${!editing ? ' is-presenting' : ''}${shuffleAnimating ? ' is-shuffling' : ''}${effectiveBackgroundMediaId === undefined ? '' : ' has-background-image'}`}
       style={appStyle}
     >
       <div
@@ -2425,7 +2784,8 @@ function BoardWorkspace({
         onPointerCancel={handleCanvasPointerEnd}
         onDragEnter={(event) => {
           event.preventDefault();
-          if (event.dataTransfer.types.includes("Files")) setDraggingFiles(true);
+          if (event.dataTransfer.types.includes('Files'))
+            setDraggingFiles(true);
         }}
         onDragOver={(event) => event.preventDefault()}
         onDragLeave={(event) => {
@@ -2436,12 +2796,12 @@ function BoardWorkspace({
         <CanvasBackground mediaId={effectiveBackgroundMediaId} />
         <div
           className="canvas-world"
-          role={editing ? "group" : undefined}
-          aria-label={editing ? "Mood board canvas items" : undefined}
+          role={editing ? 'group' : undefined}
+          aria-label={editing ? 'Mood board canvas items' : undefined}
           style={
             {
               transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)`,
-              "--camera-zoom": camera.z,
+              '--camera-zoom': camera.z,
             } as CSSProperties
           }
         >
@@ -2483,21 +2843,23 @@ function BoardWorkspace({
             <span />
           </div>
           <h1>Drop images anywhere</h1>
-          <p>Add references, a few words, and the colors you keep coming back to.</p>
+          <p>
+            Add references, a few words, and the colors you keep coming back to.
+          </p>
           <button
             type="button"
             className="text-button"
             disabled={working}
             onClick={openImagePicker}
           >
-            {imageIntakeStatus || "Choose images"}
+            {imageIntakeStatus || 'Choose images'}
           </button>
         </div>
       )}
 
       {presentedBoardItem && presentedItem && (
         <PresentationItemViewer
-          key={`${presentedBoardItem.id}:${presentedBoardItem.mediaId ?? presentedBoardItem.src ?? "item"}`}
+          key={`${presentedBoardItem.id}:${presentedBoardItem.mediaId ?? presentedBoardItem.src ?? 'item'}`}
           item={presentedBoardItem}
           origin={presentedItem.origin}
           onClose={() => setPresentedItem(null)}
@@ -2519,23 +2881,27 @@ function BoardWorkspace({
 
       {(imageIntakeStatus || toast) && (
         <div className="toast" role="status" aria-live="polite">
-          {imageIntakeStatus && <span className="toast-progress-dot" aria-hidden="true" />}
+          {imageIntakeStatus && (
+            <span className="toast-progress-dot" aria-hidden="true" />
+          )}
           {imageIntakeStatus || toast}
         </div>
       )}
 
       {editing && selectedItem && !panel && (
         <div className="selection-toolbar" aria-label="Selected item actions">
-          {selectedItem.kind === "image" ? (
+          {selectedItem.kind === 'image' ? (
             <IconButton
               label={
                 selectedItem.href ||
                 selectedItem.annotationTitle ||
                 selectedItem.annotationDescription
-                  ? "Edit image details"
-                  : "Add image details"
+                  ? 'Edit image details'
+                  : 'Add image details'
               }
-              onClick={() => selectPanel({ type: "imageLink", itemId: selectedItem.id })}
+              onClick={() =>
+                selectPanel({ type: 'imageLink', itemId: selectedItem.id })
+              }
             >
               <NotePencil size={17} />
             </IconButton>
@@ -2547,16 +2913,26 @@ function BoardWorkspace({
               <PencilSimple size={17} />
             </IconButton>
           )}
-          <IconButton label="Send backward" onClick={() => reorderSelected("back")}>
+          <IconButton
+            label="Send backward"
+            onClick={() => reorderSelected('back')}
+          >
             <ArrowDown size={17} />
           </IconButton>
-          <IconButton label="Bring forward" onClick={() => reorderSelected("front")}>
+          <IconButton
+            label="Bring forward"
+            onClick={() => reorderSelected('front')}
+          >
             <ArrowUp size={17} />
           </IconButton>
           <IconButton label="Duplicate" onClick={duplicateSelected}>
             <Copy size={17} />
           </IconButton>
-          <IconButton label="Delete" className="danger-button" onClick={removeSelected}>
+          <IconButton
+            label="Delete"
+            className="danger-button"
+            onClick={removeSelected}
+          >
             <Trash size={17} />
           </IconButton>
         </div>
@@ -2573,41 +2949,46 @@ function BoardWorkspace({
           <div className="composer-heading">
             <div>
               <span className="eyebrow">
-                {panel.type === "menu" && "Moodboard"}
-                {panel.type === "boards" && "Library"}
-                {panel.type === "imageLink" && "Image details"}
-                {panel.type === "audio" && "Sound reference"}
-                {panel.type === "x" && "X reference"}
-                {panel.type !== "menu" &&
-                  panel.type !== "boards" &&
-                  panel.type !== "imageLink" &&
-                  panel.type !== "audio" &&
-                  panel.type !== "x" &&
-                  (localOnly && panel.type === "website" ? "Local link" : "Add to board")}
+                {panel.type === 'menu' && 'Moodboard'}
+                {panel.type === 'boards' && 'Library'}
+                {panel.type === 'imageLink' && 'Image details'}
+                {panel.type === 'audio' && 'Sound reference'}
+                {panel.type === 'x' && 'X reference'}
+                {panel.type !== 'menu' &&
+                  panel.type !== 'boards' &&
+                  panel.type !== 'imageLink' &&
+                  panel.type !== 'audio' &&
+                  panel.type !== 'x' &&
+                  (localOnly && panel.type === 'website'
+                    ? 'Local link'
+                    : 'Add to board')}
               </span>
               <h2>
-                {panel.type === "menu" && "This board"}
-                {panel.type === "boards" && "Your boards"}
-                {panel.type === "images" && "Images from your device"}
-                {panel.type === "url" && "Add a link"}
-                {panel.type === "imageLink" &&
+                {panel.type === 'menu' && 'This board'}
+                {panel.type === 'boards' && 'Your boards'}
+                {panel.type === 'images' && 'Images from your device'}
+                {panel.type === 'url' && 'Add a link'}
+                {panel.type === 'imageLink' &&
                   (imageLinkItem?.href ||
                   imageLinkItem?.annotationTitle ||
                   imageLinkItem?.annotationDescription
-                    ? "Edit details"
-                    : "Add details")}
-                {panel.type === "audio" && (panel.itemId ? "Edit audio card" : "Add audio")}
-                {panel.type === "website" &&
+                    ? 'Edit details'
+                    : 'Add details')}
+                {panel.type === 'audio' &&
+                  (panel.itemId ? 'Edit audio card' : 'Add audio')}
+                {panel.type === 'website' &&
                   (localOnly
                     ? panel.itemId
-                      ? "Edit website link"
-                      : "Add website link"
+                      ? 'Edit website link'
+                      : 'Add website link'
                     : panel.itemId
-                      ? "Refresh website card"
-                      : "Add website")}
-                {panel.type === "x" && "Edit X card"}
-                {panel.type === "note" && (panel.itemId ? "Edit note" : "A few words")}
-                {panel.type === "color" && (panel.itemId ? "Change color" : "Color study")}
+                      ? 'Refresh website card'
+                      : 'Add website')}
+                {panel.type === 'x' && 'Edit X card'}
+                {panel.type === 'note' &&
+                  (panel.itemId ? 'Edit note' : 'A few words')}
+                {panel.type === 'color' &&
+                  (panel.itemId ? 'Change color' : 'Color study')}
               </h2>
             </div>
             <IconButton
@@ -2621,7 +3002,7 @@ function BoardWorkspace({
             </IconButton>
           </div>
 
-          {panel.type === "menu" && (
+          {panel.type === 'menu' && (
             <div className="menu-panel-content">
               <MenuAccountIdentity
                 user={localOnly ? undefined : session.data?.user}
@@ -2637,12 +3018,12 @@ function BoardWorkspace({
                   maxLength={120}
                   onChange={(event) => setPanelDraft(event.target.value)}
                   onBlur={() => {
-                    const title = panelDraft.trim() || "Untitled mood";
+                    const title = panelDraft.trim() || 'Untitled mood';
                     if (title !== boardRef.current.title)
                       applyBoard((current) => ({ ...current, title }));
                   }}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") event.currentTarget.blur();
+                    if (event.key === 'Enter') event.currentTarget.blur();
                   }}
                 />
               </label>
@@ -2654,20 +3035,20 @@ function BoardWorkspace({
                 dirty={backgroundDirty && !backgroundConflict}
                 error={
                   backgroundConflict
-                    ? "The background changed on another client. Close and reopen this panel to use the latest version."
+                    ? 'The background changed on another client. Close and reopen this panel to use the latest version.'
                     : backgroundUploadError || panelError
                 }
                 imageEnabled={!localOnly}
                 onDraftChange={(nextDraft) => {
                   backgroundDraftTouchedRef.current = true;
-                  setPanelError("");
-                  setBackgroundUploadError("");
+                  setPanelError('');
+                  setBackgroundUploadError('');
                   setBackgroundDraft(nextDraft);
                 }}
                 onChooseImage={(file) => void chooseBackgroundImage(file)}
                 onRemoveImage={() => {
                   backgroundDraftTouchedRef.current = true;
-                  setBackgroundUploadError("");
+                  setBackgroundUploadError('');
                   setBackgroundDraft((current) => {
                     const next = { ...current };
                     delete next.mediaId;
@@ -2676,8 +3057,8 @@ function BoardWorkspace({
                 }}
                 onReset={() => {
                   backgroundDraftTouchedRef.current = true;
-                  setPanelError("");
-                  setBackgroundUploadError("");
+                  setPanelError('');
+                  setBackgroundUploadError('');
                   setBackgroundDraft({
                     hex: DEFAULT_BOARD_BACKGROUND,
                     lastValidHex: DEFAULT_BOARD_BACKGROUND,
@@ -2687,29 +3068,40 @@ function BoardWorkspace({
               />
               <div className="save-line" role="status" aria-live="polite">
                 <span className={`save-dot save-dot--${saveState}`} />
-                {saveState === "saved" && localOnly && "Saved in this browser"}
-                {saveState === "saved" &&
+                {saveState === 'saved' && localOnly && 'Saved in this browser'}
+                {saveState === 'saved' &&
                   !localOnly &&
-                  syncState === "live" &&
-                  "Saved locally · Live sync"}
-                {saveState === "saved" &&
+                  syncState === 'live' &&
+                  'Saved locally · Live sync'}
+                {saveState === 'saved' &&
                   !localOnly &&
-                  syncState === "connecting" &&
-                  "Saved locally · Connecting…"}
-                {saveState === "saved" &&
+                  syncState === 'connecting' &&
+                  'Saved locally · Connecting…'}
+                {saveState === 'saved' &&
                   !localOnly &&
-                  syncState === "local" &&
-                  "Saved locally · Reconnecting…"}
-                {saveState === "saved" && syncState === "error" && "Saved locally · Cloud pending"}
-                {saveState === "saving" && "Saving locally…"}
-                {saveState === "error" && "Could not save locally"}
+                  syncState === 'local' &&
+                  'Saved locally · Reconnecting…'}
+                {saveState === 'saved' &&
+                  syncState === 'error' &&
+                  'Saved locally · Cloud pending'}
+                {saveState === 'saving' && 'Saving locally…'}
+                {saveState === 'error' && 'Could not save locally'}
               </div>
-              <div className="mobile-menu-tools" aria-label="Mobile board tools">
-                <button type="button" onClick={() => selectPanel({ type: "url" })}>
+              <div
+                className="mobile-menu-tools"
+                aria-label="Mobile board tools"
+              >
+                <button
+                  type="button"
+                  onClick={() => selectPanel({ type: 'url' })}
+                >
                   <LinkSimple size={18} />
                   <span>Link</span>
                 </button>
-                <button type="button" onClick={() => selectPanel({ type: "color" })}>
+                <button
+                  type="button"
+                  onClick={() => selectPanel({ type: 'color' })}
+                >
                   <Palette size={18} />
                   <span>Color</span>
                 </button>
@@ -2747,7 +3139,7 @@ function BoardWorkspace({
                     type="button"
                     className="action-row"
                     disabled={working}
-                    onClick={() => selectPanel({ type: "boards" })}
+                    onClick={() => selectPanel({ type: 'boards' })}
                   >
                     <SquaresFour size={18} />
                     <span>
@@ -2759,29 +3151,29 @@ function BoardWorkspace({
                 <button
                   type="button"
                   className="action-row"
-                  onClick={() => selectPanel({ type: "url" })}
+                  onClick={() => selectPanel({ type: 'url' })}
                 >
                   <LinkSimple size={18} />
                   <span>
                     <strong>Add a link</strong>
                     <small>
-                      Images, Instagram, X posts, embed code, and websites are recognized
-                      automatically
+                      Images, Instagram, X posts, embed code, and websites are
+                      recognized automatically
                     </small>
                   </span>
                 </button>
                 <button
                   type="button"
                   className="action-row"
-                  onClick={() => selectPanel({ type: "audio" })}
+                  onClick={() => selectPanel({ type: 'audio' })}
                 >
                   <SpeakerHigh size={18} />
                   <span>
                     <strong>Add audio, Spotify, or YouTube</strong>
                     <small>
                       {localOnly
-                        ? "Paste a hosted audio or supported player link"
-                        : "Upload a file or paste a supported player link"}
+                        ? 'Paste a hosted audio or supported player link'
+                        : 'Upload a file or paste a supported player link'}
                     </small>
                   </span>
                 </button>
@@ -2789,7 +3181,7 @@ function BoardWorkspace({
                   type="button"
                   className="action-row"
                   disabled={working}
-                  onClick={() => selectPanel({ type: "images" })}
+                  onClick={() => selectPanel({ type: 'images' })}
                 >
                   <ImageSquare size={18} />
                   <span>
@@ -2808,8 +3200,8 @@ function BoardWorkspace({
                     <strong>Download portable board</strong>
                     <small>
                       {localOnly
-                        ? "Keep a backup before clearing this browser"
-                        : "Managed images and audio travel in a .moodboard archive"}
+                        ? 'Keep a backup before clearing this browser'
+                        : 'Managed images and audio travel in a .moodboard archive'}
                     </small>
                   </span>
                 </button>
@@ -2823,30 +3215,40 @@ function BoardWorkspace({
                     <strong>Import board file</strong>
                     <small>
                       {localOnly
-                        ? "Open a JSON board saved without managed media"
-                        : "Open a .moodboard archive or legacy JSON file"}
+                        ? 'Open a JSON board saved without managed media'
+                        : 'Open a .moodboard archive or legacy JSON file'}
                     </small>
                   </span>
                 </button>
               </div>
               <div className="menu-footer-actions">
-                <button type="button" onClick={() => replaceBoard(createEmptyBoard())}>
+                <button
+                  type="button"
+                  onClick={() => replaceBoard(createEmptyBoard())}
+                >
                   Clear this board
                 </button>
-                <button type="button" onClick={() => replaceBoard(createDemoBoard())}>
+                <button
+                  type="button"
+                  onClick={() => replaceBoard(createDemoBoard())}
+                >
                   Restore sample
                 </button>
               </div>
               <p className="local-note">
                 {localOnly
-                  ? "This guest board stays only in this browser. Download it before clearing site data, or sign in for a persistent private workspace."
-                  : "The board is backed up in this browser and syncs live through your private workspace."}
+                  ? 'This guest board stays only in this browser. Download it before clearing site data, or sign in for a persistent private workspace.'
+                  : 'The board is backed up in this browser and syncs live through your private workspace.'}
               </p>
               {!localOnly && session.data?.user !== undefined && (
                 <div className="menu-sign-out">
-                  <button type="button" disabled={signingOut} onClick={() => void signOutAccount()}>
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    onClick={() => void signOutAccount()}
+                  >
                     <SignOut size={16} />
-                    {signingOut ? "Signing out…" : "Sign out"}
+                    {signingOut ? 'Signing out…' : 'Sign out'}
                   </button>
                   {signOutError && <p role="alert">{signOutError}</p>}
                 </div>
@@ -2854,7 +3256,7 @@ function BoardWorkspace({
             </div>
           )}
 
-          {panel.type === "boards" && (
+          {panel.type === 'boards' && (
             <div className="board-library">
               <form
                 className="board-create-row"
@@ -2872,7 +3274,11 @@ function BoardWorkspace({
                     onChange={(event) => setPanelDraft(event.target.value)}
                   />
                 </label>
-                <button type="submit" aria-label="Create board" disabled={working}>
+                <button
+                  type="submit"
+                  aria-label="Create board"
+                  disabled={working}
+                >
                   <Plus size={18} />
                 </button>
               </form>
@@ -2887,23 +3293,27 @@ function BoardWorkspace({
                 {boardSummaries.map((summary) => (
                   <div
                     key={summary.id}
-                    className={`board-list-row${summary.id === boardId ? " is-active" : ""}`}
+                    className={`board-list-row${summary.id === boardId ? ' is-active' : ''}`}
                   >
                     <button
                       type="button"
                       className="board-list-open"
-                      aria-current={summary.id === boardId ? "page" : undefined}
+                      aria-current={summary.id === boardId ? 'page' : undefined}
                       disabled={working}
                       onClick={() => onNavigate(summary.id)}
                     >
-                      <strong>{summary.title || "Untitled mood"}</strong>
+                      <strong>{summary.title || 'Untitled mood'}</strong>
                       <small>
-                        {summary.itemCount} {summary.itemCount === 1 ? "item" : "items"}
+                        {summary.itemCount}{' '}
+                        {summary.itemCount === 1 ? 'item' : 'items'}
                         <span aria-hidden="true"> · </span>
-                        {new Date(summary.updatedAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {new Date(summary.updatedAt).toLocaleDateString(
+                          undefined,
+                          {
+                            month: 'short',
+                            day: 'numeric',
+                          },
+                        )}
                       </small>
                     </button>
                     <div className="board-list-actions">
@@ -2917,7 +3327,7 @@ function BoardWorkspace({
                       <IconButton
                         label={
                           summary.id === DEFAULT_BOARD_ID
-                            ? "The default board cannot be deleted"
+                            ? 'The default board cannot be deleted'
                             : `Delete ${summary.title}`
                         }
                         className="danger-button"
@@ -2931,12 +3341,13 @@ function BoardWorkspace({
                 ))}
               </div>
               <p className="local-note">
-                Each board keeps its own local backup, camera position, and offline edit queue.
+                Each board keeps its own local backup, camera position, and
+                offline edit queue.
               </p>
             </div>
           )}
 
-          {panel.type === "images" && (
+          {panel.type === 'images' && (
             <div className="image-source-panel">
               <button
                 type="button"
@@ -2951,7 +3362,11 @@ function BoardWorkspace({
                   <small>One adds immediately; multiple open review</small>
                 </span>
               </button>
-              <button type="button" className="action-row" onClick={openFolderPicker}>
+              <button
+                type="button"
+                className="action-row"
+                onClick={openFolderPicker}
+              >
                 <FolderOpen size={18} />
                 <span>
                   <strong>Choose a folder</strong>
@@ -2959,13 +3374,13 @@ function BoardWorkspace({
                 </span>
               </button>
               <p className="local-note">
-                JPEG, PNG, GIF, WebP, and iPhone HEIC photos stay local while they are checked and
-                compressed.
+                JPEG, PNG, GIF, WebP, and iPhone HEIC photos stay local while
+                they are checked and compressed.
               </p>
             </div>
           )}
 
-          {panel.type === "url" && (
+          {panel.type === 'url' && (
             <form onSubmit={(event) => void submitLink(event)}>
               <label className="field-block">
                 <span>URL or X embed code</span>
@@ -2982,12 +3397,12 @@ function BoardWorkspace({
                     const parsed = parseXPostInput(value);
                     setPanelDraft(value);
                     if (parsed !== null) setXDisplay(parsed.display);
-                    setPanelError("");
+                    setPanelError('');
                   }}
                 />
                 <small>
-                  Images, Instagram, X posts, and websites are recognized. X embed HTML is parsed,
-                  never stored or executed.
+                  Images, Instagram, X posts, and websites are recognized. X
+                  embed HTML is parsed, never stored or executed.
                 </small>
               </label>
               {detectedXInput !== null && (
@@ -2995,21 +3410,23 @@ function BoardWorkspace({
                   <div className="x-detected">
                     <XLogo size={16} weight="bold" />
                     {detectedXInput.fromEmbedCode
-                      ? detectedXInput.display === "media"
-                        ? "X video/media embed detected"
-                        : "X post embed detected"
-                      : "X post URL detected"}
+                      ? detectedXInput.display === 'media'
+                        ? 'X video/media embed detected'
+                        : 'X post embed detected'
+                      : 'X post URL detected'}
                   </div>
                   <small className="x-detection-note">
                     {detectedXInput.fromEmbedCode
-                      ? "The official embed code determines the card format. Viewing it contacts X and shares viewer IP/browser information."
-                      : "X URLs use the complete post format. Viewing it contacts X and shares viewer IP/browser information."}
+                      ? 'The official embed code determines the card format. Viewing it contacts X and shares viewer IP/browser information.'
+                      : 'X URLs use the complete post format. Viewing it contacts X and shares viewer IP/browser information.'}
                   </small>
                   <label className="field-block">
                     <span>Theme</span>
                     <select
                       value={xTheme}
-                      onChange={(event) => setXTheme(event.target.value as XPostTheme)}
+                      onChange={(event) =>
+                        setXTheme(event.target.value as XPostTheme)
+                      }
                     >
                       <option value="automatic">Automatic</option>
                       <option value="light">Light</option>
@@ -3023,13 +3440,21 @@ function BoardWorkspace({
                   {panelError}
                 </p>
               )}
-              <button className="primary-button" disabled={working} type="submit">
-                {working ? "Reading link…" : detectedXInput ? "Add X card" : "Add link"}
+              <button
+                className="primary-button"
+                disabled={working}
+                type="submit"
+              >
+                {working
+                  ? 'Reading link…'
+                  : detectedXInput
+                    ? 'Add X card'
+                    : 'Add link'}
               </button>
             </form>
           )}
 
-          {panel.type === "website" && (
+          {panel.type === 'website' && (
             <form onSubmit={(event) => void submitWebsite(event)}>
               <label className="field-block">
                 <span>Website URL</span>
@@ -3043,13 +3468,13 @@ function BoardWorkspace({
                   value={panelDraft}
                   onChange={(event) => {
                     setPanelDraft(event.target.value);
-                    setPanelError("");
+                    setPanelError('');
                   }}
                 />
                 <small>
                   {localOnly
-                    ? "The demo saves a simple hostname card without contacting the preview server."
-                    : "We’ll save the site’s preview image and text, not a live webpage."}
+                    ? 'The demo saves a simple hostname card without contacting the preview server.'
+                    : 'We’ll save the site’s preview image and text, not a live webpage.'}
                 </small>
               </label>
               {panelError && (
@@ -3057,28 +3482,34 @@ function BoardWorkspace({
                   {panelError}
                 </p>
               )}
-              <button className="primary-button" disabled={working} type="submit">
+              <button
+                className="primary-button"
+                disabled={working}
+                type="submit"
+              >
                 {working
-                  ? "Reading website…"
+                  ? 'Reading website…'
                   : localOnly
                     ? panel.itemId
-                      ? "Update website link"
-                      : "Add website link"
+                      ? 'Update website link'
+                      : 'Add website link'
                     : panel.itemId
-                      ? "Refresh website card"
-                      : "Add website card"}
+                      ? 'Refresh website card'
+                      : 'Add website card'}
               </button>
             </form>
           )}
 
-          {panel.type === "x" && (
+          {panel.type === 'x' && (
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                setPanelError("");
+                setPanelError('');
                 const parsed = parseXPostInput(panelDraft);
                 if (parsed === null) {
-                  setPanelError("Use an X or Twitter status URL, or official post embed code.");
+                  setPanelError(
+                    'Use an X or Twitter status URL, or official post embed code.',
+                  );
                   return;
                 }
                 void saveXPost(parsed, panel.itemId);
@@ -3096,14 +3527,14 @@ function BoardWorkspace({
                     const parsed = parseXPostInput(value);
                     setPanelDraft(value);
                     if (parsed !== null) setXDisplay(parsed.display);
-                    setPanelError("");
+                    setPanelError('');
                   }}
                 />
               </label>
               <div className="x-card-options" aria-label="X card options">
                 <div className="x-detected">
                   <XLogo size={16} weight="bold" />
-                  {xDisplay === "media" ? "Video/media embed" : "Complete post"}
+                  {xDisplay === 'media' ? 'Video/media embed' : 'Complete post'}
                 </div>
                 <small className="x-detection-note">
                   Paste official embed code to change the saved format.
@@ -3112,7 +3543,9 @@ function BoardWorkspace({
                   <span>Theme</span>
                   <select
                     value={xTheme}
-                    onChange={(event) => setXTheme(event.target.value as XPostTheme)}
+                    onChange={(event) =>
+                      setXTheme(event.target.value as XPostTheme)
+                    }
                   >
                     <option value="automatic">Automatic</option>
                     <option value="light">Light</option>
@@ -3122,25 +3555,29 @@ function BoardWorkspace({
               </div>
               <small className="x-editor-note">
                 {localOnly
-                  ? "The demo keeps the X source locally. The official widget loads for viewers and contacts X."
-                  : "Saving refreshes the safe author/text snapshot when the server is available. X’s official widget loads automatically for viewers; pasted embed HTML is never stored."}
+                  ? 'The demo keeps the X source locally. The official widget loads for viewers and contacts X.'
+                  : 'Saving refreshes the safe author/text snapshot when the server is available. X’s official widget loads automatically for viewers; pasted embed HTML is never stored.'}
               </small>
               {panelError && (
                 <p className="field-error" role="alert">
                   {panelError}
                 </p>
               )}
-              <button className="primary-button" disabled={working} type="submit">
+              <button
+                className="primary-button"
+                disabled={working}
+                type="submit"
+              >
                 {localOnly
-                  ? "Save X card locally"
+                  ? 'Save X card locally'
                   : working
-                    ? "Refreshing X post…"
-                    : "Save and refresh"}
+                    ? 'Refreshing X post…'
+                    : 'Save and refresh'}
               </button>
             </form>
           )}
 
-          {panel.type === "audio" && (
+          {panel.type === 'audio' && (
             <form onSubmit={submitAudio}>
               <label className="field-block">
                 <span>Spotify, YouTube, or hosted audio URL</span>
@@ -3154,12 +3591,13 @@ function BoardWorkspace({
                   value={panelDraft}
                   onChange={(event) => {
                     setPanelDraft(event.target.value);
-                    setPanelError("");
+                    setPanelError('');
                   }}
                 />
                 <small>
-                  Spotify and YouTube players load automatically for viewers and contact their
-                  provider. Direct audio must use a playable hosted HTTPS file URL.
+                  Spotify and YouTube players load automatically for viewers and
+                  contact their provider. Direct audio must use a playable
+                  hosted HTTPS file URL.
                 </small>
               </label>
               <label className="field-block audio-label-field">
@@ -3183,15 +3621,15 @@ function BoardWorkspace({
                     disabled={working}
                     onClick={() => audioInputRef.current?.click()}
                   >
-                    {working ? "Uploading audio…" : "Choose local audio"}
+                    {working ? 'Uploading audio…' : 'Choose local audio'}
                   </button>
                   <small>MP3, M4A, WAV, Ogg, or WebM · up to 25 MB</small>
                 </div>
               )}
               {localOnly && (
                 <small className="local-demo-help">
-                  Hosted audio, Spotify, and YouTube work in the demo. Sign in to upload audio
-                  files.
+                  Hosted audio, Spotify, and YouTube work in the demo. Sign in
+                  to upload audio files.
                 </small>
               )}
               {panelError && (
@@ -3199,16 +3637,21 @@ function BoardWorkspace({
                   {panelError}
                 </p>
               )}
-              <button className="primary-button" disabled={working} type="submit">
-                {panel.itemId ? "Save URL source" : "Add URL source"}
+              <button
+                className="primary-button"
+                disabled={working}
+                type="submit"
+              >
+                {panel.itemId ? 'Save URL source' : 'Add URL source'}
               </button>
             </form>
           )}
 
-          {panel.type === "imageLink" && (
+          {panel.type === 'imageLink' && (
             <form className="annotation-form" onSubmit={submitImageLink}>
               <p className="annotation-form-intro">
-                These details appear when the image is hovered or focused in present mode.
+                These details appear when the image is hovered or focused in
+                present mode.
               </p>
               <label className="field-block">
                 <span>Title</span>
@@ -3227,7 +3670,9 @@ function BoardWorkspace({
                   maxLength={MAX_IMAGE_ANNOTATION_DESCRIPTION_CHARACTERS}
                   placeholder="Why it belongs here, where it came from, or anything worth remembering…"
                   value={annotationDescription}
-                  onChange={(event) => setAnnotationDescription(event.target.value)}
+                  onChange={(event) =>
+                    setAnnotationDescription(event.target.value)
+                  }
                 />
               </label>
               <label className="field-block">
@@ -3243,10 +3688,12 @@ function BoardWorkspace({
                   value={panelDraft}
                   onChange={(event) => {
                     setPanelDraft(event.target.value);
-                    setPanelError("");
+                    setPanelError('');
                   }}
                 />
-                <small>Use a product page, source, booking, or related link.</small>
+                <small>
+                  Use a product page, source, booking, or related link.
+                </small>
               </label>
               {panelError && (
                 <p className="field-error" role="alert">
@@ -3261,7 +3708,11 @@ function BoardWorkspace({
                 imageLinkItem?.annotationDescription) && (
                 <div className="image-link-actions">
                   {imageLinkItem.href && (
-                    <button type="button" className="text-button" onClick={copyImageLink}>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={copyImageLink}
+                    >
                       Copy URL
                     </button>
                   )}
@@ -3277,7 +3728,7 @@ function BoardWorkspace({
             </form>
           )}
 
-          {panel.type === "note" && (
+          {panel.type === 'note' && (
             <form onSubmit={submitNote}>
               <label className="field-block">
                 <span>Note</span>
@@ -3296,12 +3747,12 @@ function BoardWorkspace({
                 </p>
               )}
               <button className="primary-button" type="submit">
-                {panel.itemId ? "Save note" : "Add note"}
+                {panel.itemId ? 'Save note' : 'Add note'}
               </button>
             </form>
           )}
 
-          {panel.type === "color" && (
+          {panel.type === 'color' && (
             <div className="color-panel-content">
               <div className="color-grid" aria-label="Curated colors">
                 {SWATCHES.map((swatch) => (
@@ -3320,7 +3771,9 @@ function BoardWorkspace({
               <form className="custom-color-form" onSubmit={submitCustomColor}>
                 <div className="custom-color-heading">
                   <span>Custom color</span>
-                  <small>Choose visually or enter an exact six-digit value.</small>
+                  <small>
+                    Choose visually or enter an exact six-digit value.
+                  </small>
                 </div>
                 <div className="custom-color-controls">
                   <label className="field-block color-picker-field">
@@ -3330,7 +3783,7 @@ function BoardWorkspace({
                       value={customPreviewColor}
                       aria-label={`Choose a custom color. Current value ${customPreviewColor}`}
                       onChange={(event) => {
-                        setPanelError("");
+                        setPanelError('');
                         const hex = event.target.value.toUpperCase();
                         setCustomColor((current) => ({
                           ...current,
@@ -3354,7 +3807,7 @@ function BoardWorkspace({
                       aria-invalid={normalizedCustomColor === null}
                       aria-describedby="custom-color-help"
                       onChange={(event) => {
-                        setPanelError("");
+                        setPanelError('');
                         const hex = formatHexColorInput(event.target.value);
                         const validHex = normalizeHexColor(hex);
                         setCustomColor((current) => ({
@@ -3374,7 +3827,7 @@ function BoardWorkspace({
                   <input
                     type="text"
                     maxLength={120}
-                    placeholder={normalizedCustomColor ?? "Optional name"}
+                    placeholder={normalizedCustomColor ?? 'Optional name'}
                     value={customColor.label}
                     onChange={(event) =>
                       setCustomColor((current) => ({
@@ -3389,7 +3842,7 @@ function BoardWorkspace({
                   role="img"
                   aria-label={
                     normalizedCustomColor === null
-                      ? `Custom color preview remains ${customPreviewColor}. ${customColor.hex || "Empty value"} is incomplete or invalid.`
+                      ? `Custom color preview remains ${customPreviewColor}. ${customColor.hex || 'Empty value'} is incomplete or invalid.`
                       : `Custom color preview: ${customColor.label.trim() || customPreviewColor}, ${customPreviewColor}`
                   }
                 >
@@ -3399,10 +3852,13 @@ function BoardWorkspace({
                   />
                   <span>
                     <strong>
-                      {customColor.label.trim() || normalizedCustomColor || "Incomplete hex value"}
+                      {customColor.label.trim() ||
+                        normalizedCustomColor ||
+                        'Incomplete hex value'}
                     </strong>
                     <small>
-                      {normalizedCustomColor ?? `${customColor.hex || "Empty value"} · not saved`}
+                      {normalizedCustomColor ??
+                        `${customColor.hex || 'Empty value'} · not saved`}
                     </small>
                   </span>
                 </div>
@@ -3421,7 +3877,7 @@ function BoardWorkspace({
                   type="submit"
                   disabled={normalizedCustomColor === null}
                 >
-                  {panel.itemId ? "Save custom color" : "Add custom color"}
+                  {panel.itemId ? 'Save custom color' : 'Add custom color'}
                 </button>
               </form>
             </div>
@@ -3429,11 +3885,13 @@ function BoardWorkspace({
         </section>
       )}
 
-      <header className={`bottom-dock${editing ? "" : " bottom-dock--present"}`}>
+      <header
+        className={`bottom-dock${editing ? '' : ' bottom-dock--present'}`}
+      >
         <IconButton
-          label={editing ? "Board menu" : "Edit board"}
+          label={editing ? 'Board menu' : 'Edit board'}
           onClick={() => {
-            if (editing) selectPanel({ type: "menu" });
+            if (editing) selectPanel({ type: 'menu' });
             else {
               setPresentedItem(null);
               setEditing(true);
@@ -3450,7 +3908,7 @@ function BoardWorkspace({
                 <IconButton
                   label="All boards"
                   disabled={working}
-                  onClick={() => selectPanel({ type: "boards" })}
+                  onClick={() => selectPanel({ type: 'boards' })}
                 >
                   <SquaresFour size={18} />
                 </IconButton>
@@ -3460,35 +3918,51 @@ function BoardWorkspace({
             <IconButton
               label="Add images"
               disabled={working}
-              onClick={() => selectPanel({ type: "images" })}
+              onClick={() => selectPanel({ type: 'images' })}
             >
               <ImageSquare size={18} />
             </IconButton>
-            <IconButton label="Add link" onClick={() => selectPanel({ type: "url" })}>
+            <IconButton
+              label="Add link"
+              onClick={() => selectPanel({ type: 'url' })}
+            >
               <LinkSimple size={18} />
             </IconButton>
             <IconButton
               label="Add audio"
               className="mobile-optional"
-              onClick={() => selectPanel({ type: "audio" })}
+              onClick={() => selectPanel({ type: 'audio' })}
             >
               <SpeakerHigh size={18} />
             </IconButton>
-            <IconButton label="Add note" onClick={() => selectPanel({ type: "note" })}>
+            <IconButton
+              label="Add note"
+              onClick={() => selectPanel({ type: 'note' })}
+            >
               <NotePencil size={18} />
             </IconButton>
             <IconButton
               label="Add color"
               className="mobile-optional"
-              onClick={() => selectPanel({ type: "color" })}
+              onClick={() => selectPanel({ type: 'color' })}
             >
               <Palette size={18} />
             </IconButton>
             <span className="dock-separator mobile-optional" />
-            <IconButton label="Undo" className="mobile-optional" disabled={!canUndo} onClick={undo}>
+            <IconButton
+              label="Undo"
+              className="mobile-optional"
+              disabled={!canUndo}
+              onClick={undo}
+            >
               <ArrowUUpLeft size={18} />
             </IconButton>
-            <IconButton label="Redo" className="mobile-optional" disabled={!canRedo} onClick={redo}>
+            <IconButton
+              label="Redo"
+              className="mobile-optional"
+              disabled={!canRedo}
+              onClick={redo}
+            >
               <ArrowUDownLeft size={18} />
             </IconButton>
             <IconButton
@@ -3510,7 +3984,11 @@ function BoardWorkspace({
             <IconButton label="Zoom in" onClick={() => zoomAtCenter(1.2)}>
               <Plus size={18} />
             </IconButton>
-            <IconButton label="Fit board" className="mobile-optional" onClick={fitToBoard}>
+            <IconButton
+              label="Fit board"
+              className="mobile-optional"
+              onClick={fitToBoard}
+            >
               <FrameCorners size={18} />
             </IconButton>
             <span className="dock-separator" />
@@ -3545,7 +4023,7 @@ function BoardWorkspace({
             aria-modal="true"
             aria-labelledby="bulk-collector-title"
             onKeyDown={(event) => {
-              if (event.key === "Escape") {
+              if (event.key === 'Escape') {
                 event.preventDefault();
                 event.stopPropagation();
                 cancelDropCollection();
@@ -3565,13 +4043,22 @@ function BoardWorkspace({
       )}
 
       {working && bulkSession === null && !collectingDrop && (
-        <div className="working-indicator" role="status" aria-live="polite" aria-label="Working" />
+        <div
+          className="working-indicator"
+          role="status"
+          aria-live="polite"
+          aria-label="Working"
+        />
       )}
 
       {bulkSession && (
         <Suspense
           fallback={
-            <div className="bulk-collector-backdrop" role="status" aria-live="polite">
+            <div
+              className="bulk-collector-backdrop"
+              role="status"
+              aria-live="polite"
+            >
               <div className="bulk-collector-status">
                 <ImageSquare size={24} weight="light" />
                 <div>
@@ -3607,8 +4094,8 @@ function BoardWorkspace({
           const folder = imageSelectionFolderRef.current;
           const files = Array.from(event.currentTarget.files ?? []);
           imageSelectionFolderRef.current = false;
-          event.currentTarget.removeAttribute("webkitdirectory");
-          event.currentTarget.value = "";
+          event.currentTarget.removeAttribute('webkitdirectory');
+          event.currentTarget.value = '';
           addImageSelection(files, { folder });
         }}
       />
@@ -3632,8 +4119,8 @@ function BoardWorkspace({
         type="file"
         accept={
           localOnly
-            ? ".moodboard.json,.json,application/json"
-            : ".moodboard,.moodboard.json,.json,application/json,application/zip,application/vnd.moodboard+zip"
+            ? '.moodboard.json,.json,application/json'
+            : '.moodboard,.moodboard.json,.json,application/json,application/zip,application/vnd.moodboard+zip'
         }
         tabIndex={-1}
         aria-hidden="true"
@@ -3669,7 +4156,7 @@ export default function BoardEditor({
       if (localOnly || (navigationBlocked.current && !force)) return;
       if (force) navigationBlocked.current = false;
       void navigateRoute({
-        to: "/boards/$boardId",
+        to: '/boards/$boardId',
         params: { boardId: nextBoardId },
         replace,
       });

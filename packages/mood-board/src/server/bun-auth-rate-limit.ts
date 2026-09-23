@@ -1,12 +1,13 @@
-import { Schema } from "effect";
+import { Schema } from 'effect';
 
-import { NonNegativeIntegerSchema } from "../lib/schema";
-import type { MagicLinkRateLimitEmail } from "./magic-link";
+import { NonNegativeIntegerSchema } from '../lib/schema';
+import type { MagicLinkRateLimitEmail } from './magic-link';
 
 export const MagicLinkRateLimitTimestampSchema = NonNegativeIntegerSchema.pipe(
-  Schema.brand("MagicLinkRateLimitTimestamp"),
+  Schema.brand('MagicLinkRateLimitTimestamp'),
 );
-export type MagicLinkRateLimitTimestamp = typeof MagicLinkRateLimitTimestampSchema.Type;
+export type MagicLinkRateLimitTimestamp =
+  typeof MagicLinkRateLimitTimestampSchema.Type;
 
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 5;
@@ -19,7 +20,9 @@ export class BunMagicLinkRateLimiter {
     email: MagicLinkRateLimitEmail,
     now: MagicLinkRateLimitTimestamp,
   ): boolean {
-    return this.#allow(`ip:${address}`, now) && this.#allow(`email:${email}`, now);
+    return (
+      this.#allow(`ip:${address}`, now) && this.#allow(`email:${email}`, now)
+    );
   }
 
   #allow(key: string, now: MagicLinkRateLimitTimestamp): boolean {

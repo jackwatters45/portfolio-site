@@ -1,6 +1,6 @@
-import type { MediaId } from "../../lib/media";
-import { DEFAULT_BOARD_BACKGROUND } from "./board-utils";
-import type { Board } from "./types";
+import type { MediaId } from '../../lib/media';
+import { DEFAULT_BOARD_BACKGROUND } from './board-utils';
+import type { Board } from './types';
 
 export type BoardBackgroundDraft = {
   readonly hex: string;
@@ -8,12 +8,16 @@ export type BoardBackgroundDraft = {
   readonly mediaId?: MediaId | undefined;
 };
 
-export const backgroundDraftFromBoard = (board: Board): BoardBackgroundDraft => {
+export const backgroundDraftFromBoard = (
+  board: Board,
+): BoardBackgroundDraft => {
   const hex = board.background ?? DEFAULT_BOARD_BACKGROUND;
   return {
     hex,
     lastValidHex: hex,
-    ...(board.backgroundMediaId === undefined ? {} : { mediaId: board.backgroundMediaId }),
+    ...(board.backgroundMediaId === undefined
+      ? {}
+      : { mediaId: board.backgroundMediaId }),
   };
 };
 

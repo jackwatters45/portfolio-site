@@ -1,11 +1,11 @@
-import { Schema } from "effect";
+import { Schema } from 'effect';
 
-import { HttpStatusCodeSchema, OptionalErrorCauseSchema } from "../lib/schema";
+import { HttpStatusCodeSchema, OptionalErrorCauseSchema } from '../lib/schema';
 
 export const RemoteClientFailureReasonSchema = Schema.Literals([
-  "Transport",
-  "Http",
-  "InvalidPayload",
+  'Transport',
+  'Http',
+  'InvalidPayload',
 ]);
 
 export const RemoteClientErrorFields = {

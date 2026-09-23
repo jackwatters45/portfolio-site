@@ -1,6 +1,6 @@
-import { D1Client } from "@effect/sql-d1";
-import { Context, Effect, Layer, Schema } from "effect";
-import type { SqlError } from "effect/unstable/sql/SqlError";
+import { D1Client } from '@effect/sql-d1';
+import { Context, Effect, Layer, Schema } from 'effect';
+import type { SqlError } from 'effect/unstable/sql/SqlError';
 
 import {
   BoardSummarySchema,
@@ -8,9 +8,9 @@ import {
   type BoardDeleted,
   type BoardRevision,
   type BoardSummary,
-} from "../lib/board-rpc";
+} from '../lib/board-rpc';
 
-export const DEFAULT_WORKSPACE_ID = "public-preview";
+export const DEFAULT_WORKSPACE_ID = 'public-preview';
 
 interface DirectoryRow {
   readonly board_id: unknown;
@@ -30,18 +30,21 @@ interface CatalogProjectionShape {
     revision: BoardRevision,
   ) => Effect.Effect<void, SqlError>;
   readonly tombstone: (event: BoardDeleted) => Effect.Effect<void, SqlError>;
-  readonly reconcile: (entries: ReadonlyArray<CatalogEntry>) => Effect.Effect<void, SqlError>;
+  readonly reconcile: (
+    entries: ReadonlyArray<CatalogEntry>,
+  ) => Effect.Effect<void, SqlError>;
   readonly list: () => Effect.Effect<ReadonlyArray<BoardSummary>, SqlError>;
 }
 
-export class CatalogProjection extends Context.Service<CatalogProjection, CatalogProjectionShape>()(
-  "mood-board/cloudflare/CatalogProjection",
-) {
+export class CatalogProjection extends Context.Service<
+  CatalogProjection,
+  CatalogProjectionShape
+>()('mood-board/cloudflare/CatalogProjection') {
   static layerFor(workspaceId: string) {
     return Layer.effect(
       this,
       D1Client.D1Client.use((sql) => {
-        const upsert = Effect.fn("CatalogProjection.upsert")(function* (
+        const upsert = Effect.fn('CatalogProjection.upsert')(function* (
           summary: BoardSummary,
           revision: BoardRevision,
         ) {
@@ -62,7 +65,9 @@ export class CatalogProjection extends Context.Service<CatalogProjection, Catalo
           `;
         });
 
-        const tombstone = Effect.fn("CatalogProjection.tombstone")(function* (event: BoardDeleted) {
+        const tombstone = Effect.fn('CatalogProjection.tombstone')(function* (
+          event: BoardDeleted,
+        ) {
           yield* sql`
             INSERT INTO board_directory (
               workspace_id, board_id, title, item_count, revision, updated_at, deleted
@@ -78,7 +83,7 @@ export class CatalogProjection extends Context.Service<CatalogProjection, Catalo
           `;
         });
 
-        const reconcile = Effect.fn("CatalogProjection.reconcile")(function* (
+        const reconcile = Effect.fn('CatalogProjection.reconcile')(function* (
           entries: ReadonlyArray<CatalogEntry>,
         ) {
           yield* sql`
@@ -86,23 +91,27 @@ export class CatalogProjection extends Context.Service<CatalogProjection, Catalo
             SET deleted = 1
             WHERE workspace_id = ${workspaceId}
           `;
-          yield* Effect.forEach(entries, (entry) => upsert(entry.summary, entry.revision), {
-            discard: true,
-          });
+          yield* Effect.forEach(
+            entries,
+            (entry) => upsert(entry.summary, entry.revision),
+            {
+              discard: true,
+            },
+          );
         });
 
-        const decodeSummary = Effect.fn("CatalogProjection.decodeSummary")(function* (
-          row: DirectoryRow,
-        ) {
-          return yield* Schema.decodeUnknownEffect(BoardSummarySchema)({
-            id: row.board_id,
-            title: row.title,
-            itemCount: row.item_count,
-            updatedAt: row.updated_at,
-          }).pipe(Effect.orDie);
-        });
+        const decodeSummary = Effect.fn('CatalogProjection.decodeSummary')(
+          function* (row: DirectoryRow) {
+            return yield* Schema.decodeUnknownEffect(BoardSummarySchema)({
+              id: row.board_id,
+              title: row.title,
+              itemCount: row.item_count,
+              updatedAt: row.updated_at,
+            }).pipe(Effect.orDie);
+          },
+        );
 
-        const list = Effect.fn("CatalogProjection.list")(function* () {
+        const list = Effect.fn('CatalogProjection.list')(function* () {
           const rows = yield* sql<DirectoryRow>`
             SELECT board_id, title, item_count, updated_at
             FROM board_directory

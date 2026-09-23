@@ -1,10 +1,10 @@
-import { dirname } from "node:path";
+import { dirname } from 'node:path';
 
-import { BunFileSystem } from "@effect/platform-bun";
-import { SqliteClient, SqliteMigrator } from "@effect/sql-sqlite-bun";
-import { Effect, FileSystem, Layer } from "effect";
+import { BunFileSystem } from '@effect/platform-bun';
+import { SqliteClient, SqliteMigrator } from '@effect/sql-sqlite-bun';
+import { Effect, FileSystem, Layer } from 'effect';
 
-import { migrationLoader } from "./migrations";
+import { migrationLoader } from './migrations';
 
 export const makeDatabaseLayer = (filename: string) => {
   const sqlite = Layer.unwrap(
@@ -15,5 +15,7 @@ export const makeDatabaseLayer = (filename: string) => {
     ),
   ).pipe(Layer.provide(BunFileSystem.layer));
 
-  return SqliteMigrator.layer({ loader: migrationLoader }).pipe(Layer.provideMerge(sqlite));
+  return SqliteMigrator.layer({ loader: migrationLoader }).pipe(
+    Layer.provideMerge(sqlite),
+  );
 };

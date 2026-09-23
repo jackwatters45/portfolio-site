@@ -1,4 +1,4 @@
-import type { D1Database } from "@cloudflare/workers-types";
+import type { D1Database } from '@cloudflare/workers-types';
 
 import {
   configuredGoogle,
@@ -9,7 +9,7 @@ import {
   validateAuthSecret,
   type Auth,
   type AuthCleanupTimestamp,
-} from "../server/auth";
+} from '../server/auth';
 
 export interface CloudflareAuthEnv {
   readonly CATALOG: D1Database;
@@ -26,12 +26,19 @@ export interface CloudflareAuthEnv {
 const authCache = new WeakMap<object, Map<string, Auth>>();
 
 export const cloudflareGoogleEnabled = (env: CloudflareAuthEnv): boolean =>
-  configuredGoogle(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET) !== undefined;
+  configuredGoogle(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET) !==
+  undefined;
 
-export const makeCloudflareAuth = (env: CloudflareAuthEnv, requestOrigin: string): Auth => {
-  const local = env.IS_LOCAL === "true";
+export const makeCloudflareAuth = (
+  env: CloudflareAuthEnv,
+  requestOrigin: string,
+): Auth => {
+  const local = env.IS_LOCAL === 'true';
   const secret = validateAuthSecret(env.BETTER_AUTH_SECRET, local);
-  const baseURL = validateAuthBaseURL(env.BETTER_AUTH_URL?.trim() || requestOrigin, local);
+  const baseURL = validateAuthBaseURL(
+    env.BETTER_AUTH_URL?.trim() || requestOrigin,
+    local,
+  );
   let byOrigin = authCache.get(env.CATALOG);
   if (byOrigin === undefined) {
     byOrigin = new Map();
@@ -48,7 +55,7 @@ export const makeCloudflareAuth = (env: CloudflareAuthEnv, requestOrigin: string
     secret,
     baseURL,
     trustedOrigins,
-    useSecureCookies: !baseURL.startsWith("http://"),
+    useSecureCookies: !baseURL.startsWith('http://'),
     builtInRateLimit: false,
     magicLinkRateLimit: 100,
     google: configuredGoogle(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET),
@@ -71,7 +78,9 @@ export const pruneExpiredCloudflareAuth = async (
   now: AuthCleanupTimestamp,
 ): Promise<void> => {
   await database.batch([
-    database.prepare('DELETE FROM "verification" WHERE "expiresAt" < ?').bind(now),
+    database
+      .prepare('DELETE FROM "verification" WHERE "expiresAt" < ?')
+      .bind(now),
     database.prepare('DELETE FROM "session" WHERE "expiresAt" < ?').bind(now),
   ]);
 };

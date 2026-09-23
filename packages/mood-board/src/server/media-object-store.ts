@@ -1,5 +1,5 @@
-import type { Effect } from "effect";
-import { Context, Schema } from "effect";
+import type { Effect } from 'effect';
+import { Context, Schema } from 'effect';
 
 import type {
   MediaByteLength,
@@ -7,12 +7,14 @@ import type {
   MediaEtag,
   MediaId,
   MediaMimeType,
-} from "../lib/media";
-import { OptionalErrorCauseSchema } from "../lib/schema";
+} from '../lib/media';
+import { OptionalErrorCauseSchema } from '../lib/schema';
 
-export class MediaStorageError extends Schema.Error<MediaStorageError>("MediaStorageError")({
-  _tag: Schema.tag("MediaStorageError"),
-  operation: Schema.Literals(["read", "write", "delete"]),
+export class MediaStorageError extends Schema.Error<MediaStorageError>(
+  'MediaStorageError',
+)({
+  _tag: Schema.tag('MediaStorageError'),
+  operation: Schema.Literals(['read', 'write', 'delete']),
   cause: OptionalErrorCauseSchema,
 }) {}
 
@@ -39,6 +41,7 @@ interface MediaObjectStoreShape {
   readonly delete: (key: MediaId) => Effect.Effect<void, MediaStorageError>;
 }
 
-export class MediaObjectStore extends Context.Service<MediaObjectStore, MediaObjectStoreShape>()(
-  "mood-board/MediaObjectStore",
-) {}
+export class MediaObjectStore extends Context.Service<
+  MediaObjectStore,
+  MediaObjectStoreShape
+>()('mood-board/MediaObjectStore') {}

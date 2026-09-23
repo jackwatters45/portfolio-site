@@ -1,6 +1,6 @@
-import { Option, Schema } from "effect";
+import { Option, Schema } from 'effect';
 
-import type { AccountId } from "../../lib/account";
+import type { AccountId } from '../../lib/account';
 import {
   BoardIdSchema,
   BoardMutationPayloadSchema,
@@ -10,16 +10,20 @@ import {
   MutationIdSchema,
   type BoardId,
   type MutationId,
-} from "../../lib/board-rpc";
-import { isRecord } from "../../lib/type-guards";
-import { CameraSchema } from "./camera";
-import type { BoardMutation, PendingBoardMutation, SavedDocument } from "./types";
+} from '../../lib/board-rpc';
+import { isRecord } from '../../lib/type-guards';
+import { CameraSchema } from './camera';
+import type {
+  BoardMutation,
+  PendingBoardMutation,
+  SavedDocument,
+} from './types';
 
-const DATABASE = "moodboard-studio";
-const DOCUMENT_STORE = "documents";
-const SYNC_STORE = "sync";
-const LEGACY_ACTIVE_DOCUMENT = "active";
-const LEGACY_OUTBOX = "outbox";
+const DATABASE = 'moodboard-studio';
+const DOCUMENT_STORE = 'documents';
+const SYNC_STORE = 'sync';
+const LEGACY_ACTIVE_DOCUMENT = 'active';
+const LEGACY_OUTBOX = 'outbox';
 
 const documentKey = (accountId: AccountId, boardId: BoardId) =>
   `account:${accountId}:board:${boardId}`;
@@ -37,12 +41,19 @@ const SavedDocumentSchema = Schema.Struct({
   camera: CameraSchema,
 });
 
-const decodePendingMutation = Schema.decodeUnknownOption(PendingBoardMutationSchema);
-const decodeSavedDocumentValue = Schema.decodeUnknownOption(SavedDocumentSchema);
+const decodePendingMutation = Schema.decodeUnknownOption(
+  PendingBoardMutationSchema,
+);
+const decodeSavedDocumentValue =
+  Schema.decodeUnknownOption(SavedDocumentSchema);
 
-const toBoardMutation = (mutation: typeof BoardMutationPayloadSchema.Type): BoardMutation => ({
+const toBoardMutation = (
+  mutation: typeof BoardMutationPayloadSchema.Type,
+): BoardMutation => ({
   ...(mutation.title === undefined ? {} : { title: mutation.title }),
-  ...(mutation.background === undefined ? {} : { background: mutation.background }),
+  ...(mutation.background === undefined
+    ? {}
+    : { background: mutation.background }),
   ...(mutation.backgroundMediaId === undefined
     ? {}
     : { backgroundMediaId: mutation.backgroundMediaId }),
@@ -59,7 +70,10 @@ const toPendingMutation = (
   mutation: toBoardMutation(value.mutation),
 });
 
-const decodePendingMutations = (value: unknown, boardId: BoardId): PendingBoardMutation[] => {
+const decodePendingMutations = (
+  value: unknown,
+  boardId: BoardId,
+): PendingBoardMutation[] => {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry) => {
     const decoded = decodePendingMutation(entry);
@@ -101,18 +115,28 @@ function openDatabase(): Promise<IDBDatabase> {
         const legacyDocument = documents.get(LEGACY_ACTIVE_DOCUMENT);
         legacyDocument.onsuccess = () => {
           if (legacyDocument.result !== undefined) {
-            documents.put(legacyDocument.result, `legacy:board:${DEFAULT_BOARD_ID}`);
+            documents.put(
+              legacyDocument.result,
+              `legacy:board:${DEFAULT_BOARD_ID}`,
+            );
             documents.delete(LEGACY_ACTIVE_DOCUMENT);
           }
         };
 
         const legacyOutbox = sync.get(LEGACY_OUTBOX);
         legacyOutbox.onsuccess = () => {
-          const rawEntries = Array.isArray(legacyOutbox.result) ? legacyOutbox.result : [];
+          const rawEntries = Array.isArray(legacyOutbox.result)
+            ? legacyOutbox.result
+            : [];
           const entries = rawEntries.flatMap((entry) => {
             if (!isRecord(entry)) return [];
-            const decoded = decodePendingMutation({ ...entry, boardId: DEFAULT_BOARD_ID });
-            return Option.isSome(decoded) ? [toPendingMutation(decoded.value)] : [];
+            const decoded = decodePendingMutation({
+              ...entry,
+              boardId: DEFAULT_BOARD_ID,
+            });
+            return Option.isSome(decoded)
+              ? [toPendingMutation(decoded.value)]
+              : [];
           });
           if (entries.length > 0) {
             sync.put(entries, `legacy:outbox:${DEFAULT_BOARD_ID}`);
@@ -134,8 +158,10 @@ export async function loadDocument(
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction(DOCUMENT_STORE, "readonly");
-    const request = transaction.objectStore(DOCUMENT_STORE).get(documentKey(accountId, boardId));
+    const transaction = database.transaction(DOCUMENT_STORE, 'readonly');
+    const request = transaction
+      .objectStore(DOCUMENT_STORE)
+      .get(documentKey(accountId, boardId));
 
     request.onsuccess = () => resolve(decodeSavedDocument(request.result));
     request.onerror = () => reject(request.error);
@@ -155,8 +181,10 @@ export async function saveDocument(
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction(DOCUMENT_STORE, "readwrite");
-    transaction.objectStore(DOCUMENT_STORE).put(document, documentKey(accountId, boardId));
+    const transaction = database.transaction(DOCUMENT_STORE, 'readwrite');
+    transaction
+      .objectStore(DOCUMENT_STORE)
+      .put(document, documentKey(accountId, boardId));
     transaction.oncomplete = () => {
       database.close();
       resolve();
@@ -175,10 +203,13 @@ export async function loadPendingMutations(
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction(SYNC_STORE, "readonly");
-    const request = transaction.objectStore(SYNC_STORE).get(outboxKey(accountId, boardId));
+    const transaction = database.transaction(SYNC_STORE, 'readonly');
+    const request = transaction
+      .objectStore(SYNC_STORE)
+      .get(outboxKey(accountId, boardId));
 
-    request.onsuccess = () => resolve(decodePendingMutations(request.result, boardId));
+    request.onsuccess = () =>
+      resolve(decodePendingMutations(request.result, boardId));
     request.onerror = () => reject(request.error);
     transaction.oncomplete = () => database.close();
     transaction.onerror = () => {
@@ -195,12 +226,12 @@ export async function appendPendingMutations(
 ): Promise<void> {
   if (entries.length === 0) return;
   if (entries.some((entry) => entry.boardId !== boardId)) {
-    throw new Error("A pending mutation cannot be stored under another board.");
+    throw new Error('A pending mutation cannot be stored under another board.');
   }
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction(SYNC_STORE, "readwrite");
+    const transaction = database.transaction(SYNC_STORE, 'readwrite');
     const store = transaction.objectStore(SYNC_STORE);
     const key = outboxKey(accountId, boardId);
     const request = store.get(key);
@@ -237,7 +268,7 @@ export async function removePendingMutations(
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction(SYNC_STORE, "readwrite");
+    const transaction = database.transaction(SYNC_STORE, 'readwrite');
     const store = transaction.objectStore(SYNC_STORE);
     const key = outboxKey(accountId, boardId);
     const request = store.get(key);
@@ -262,12 +293,20 @@ export async function removePendingMutations(
   });
 }
 
-export async function deleteLocalBoard(accountId: AccountId, boardId: BoardId): Promise<void> {
+export async function deleteLocalBoard(
+  accountId: AccountId,
+  boardId: BoardId,
+): Promise<void> {
   const database = await openDatabase();
 
   return new Promise((resolve, reject) => {
-    const transaction = database.transaction([DOCUMENT_STORE, SYNC_STORE], "readwrite");
-    transaction.objectStore(DOCUMENT_STORE).delete(documentKey(accountId, boardId));
+    const transaction = database.transaction(
+      [DOCUMENT_STORE, SYNC_STORE],
+      'readwrite',
+    );
+    transaction
+      .objectStore(DOCUMENT_STORE)
+      .delete(documentKey(accountId, boardId));
     transaction.objectStore(SYNC_STORE).delete(outboxKey(accountId, boardId));
     transaction.oncomplete = () => {
       database.close();

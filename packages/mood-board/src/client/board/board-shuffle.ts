@@ -1,5 +1,5 @@
-import { rotatedItemBounds } from "./bulk-layout";
-import type { BoardItem } from "./types";
+import { rotatedItemBounds } from './bulk-layout';
+import type { BoardItem } from './types';
 
 export type RandomSource = () => number;
 
@@ -30,7 +30,10 @@ const randomUnit = (random: RandomSource): number => {
   return Math.min(0.999_999, Math.max(0, value));
 };
 
-const shuffledCopy = <Value>(values: ReadonlyArray<Value>, random: RandomSource): Value[] => {
+const shuffledCopy = <Value>(
+  values: ReadonlyArray<Value>,
+  random: RandomSource,
+): Value[] => {
   const shuffled = [...values];
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(randomUnit(random) * (index + 1));
@@ -66,7 +69,10 @@ const packRows = (
     0,
   );
   const longest = Math.max(...sources.map(primarySize));
-  const targetSpan = Math.max(longest, Math.sqrt(totalArea) * (0.9 + randomUnit(random) * 0.65));
+  const targetSpan = Math.max(
+    longest,
+    Math.sqrt(totalArea) * (0.9 + randomUnit(random) * 0.65),
+  );
 
   const rows: ShuffleSource[][] = [];
   let row: ShuffleSource[] = [];
@@ -89,8 +95,10 @@ const packRows = (
     const rowSecondarySpan = Math.max(...sourcesInRow.map(secondarySize));
     let primaryCursor = 0;
     for (const [index, source] of sourcesInRow.entries()) {
-      if (index > 0) primaryCursor += MIN_GAP + randomUnit(random) * VARIABLE_GAP;
-      const secondaryOffset = (rowSecondarySpan - secondarySize(source)) * randomUnit(random);
+      if (index > 0)
+        primaryCursor += MIN_GAP + randomUnit(random) * VARIABLE_GAP;
+      const secondaryOffset =
+        (rowSecondarySpan - secondarySize(source)) * randomUnit(random);
       const primary = primaryCursor;
       const secondary = secondaryCursor + secondaryOffset;
       packed.push({
@@ -100,7 +108,8 @@ const packRows = (
       });
       primaryCursor += primarySize(source);
     }
-    secondaryCursor += rowSecondarySpan + MIN_GAP + randomUnit(random) * VARIABLE_GAP;
+    secondaryCursor +=
+      rowSecondarySpan + MIN_GAP + randomUnit(random) * VARIABLE_GAP;
   }
   return packed;
 };
@@ -114,9 +123,17 @@ const shuffledBounds = (items: ReadonlyArray<BoardItem>) => {
   return { width: maxX - minX, height: maxY - minY };
 };
 
-const withinLimits = (items: ReadonlyArray<BoardItem>, limits: ShuffleLimits): boolean => {
+const withinLimits = (
+  items: ReadonlyArray<BoardItem>,
+  limits: ShuffleLimits,
+): boolean => {
   const maxCoordinate = limits.maxCoordinate ?? MAX_ITEM_COORDINATE;
-  if (items.some((item) => Math.abs(item.x) > maxCoordinate || Math.abs(item.y) > maxCoordinate))
+  if (
+    items.some(
+      (item) =>
+        Math.abs(item.x) > maxCoordinate || Math.abs(item.y) > maxCoordinate,
+    )
+  )
     return false;
   const bounds = shuffledBounds(items);
   return (
@@ -138,16 +155,28 @@ export function shuffleBoardItems(
     const packed = packRows(sources, randomUnit(random) < 0.5, random);
     const minX = Math.min(...packed.map((item) => item.footprintX));
     const minY = Math.min(...packed.map((item) => item.footprintY));
-    const maxX = Math.max(...packed.map((item) => item.footprintX + item.footprintWidth));
-    const maxY = Math.max(...packed.map((item) => item.footprintY + item.footprintHeight));
+    const maxX = Math.max(
+      ...packed.map((item) => item.footprintX + item.footprintWidth),
+    );
+    const maxY = Math.max(
+      ...packed.map((item) => item.footprintY + item.footprintHeight),
+    );
     const offsetX = -(minX + maxX) / 2;
     const offsetY = -(minY + maxY) / 2;
     const positions = new Map(
       packed.map((entry) => [
         entry.item.id,
         {
-          x: entry.footprintX + offsetX + entry.footprintWidth / 2 - entry.item.width / 2,
-          y: entry.footprintY + offsetY + entry.footprintHeight / 2 - entry.item.height / 2,
+          x:
+            entry.footprintX +
+            offsetX +
+            entry.footprintWidth / 2 -
+            entry.item.width / 2,
+          y:
+            entry.footprintY +
+            offsetY +
+            entry.footprintHeight / 2 -
+            entry.item.height / 2,
         },
       ]),
     );
@@ -158,5 +187,5 @@ export function shuffleBoardItems(
     if (withinLimits(shuffled, limits)) return shuffled;
   }
 
-  throw new Error("This board is too large to shuffle without clipping items.");
+  throw new Error('This board is too large to shuffle without clipping items.');
 }

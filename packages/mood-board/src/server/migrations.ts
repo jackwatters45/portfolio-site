@@ -1,6 +1,6 @@
-import { Effect } from "effect";
-import * as Migrator from "effect/unstable/sql/Migrator";
-import * as SqlClient from "effect/unstable/sql/SqlClient";
+import { Effect } from 'effect';
+import * as Migrator from 'effect/unstable/sql/Migrator';
+import * as SqlClient from 'effect/unstable/sql/SqlClient';
 
 const initialSchema = SqlClient.SqlClient.use((sql) =>
   Effect.gen(function* () {
@@ -69,7 +69,9 @@ const boardBackground = SqlClient.SqlClient.use(
   (sql) => sql`ALTER TABLE boards ADD COLUMN background_color TEXT`,
 );
 
-const itemHref = SqlClient.SqlClient.use((sql) => sql`ALTER TABLE items ADD COLUMN href TEXT`);
+const itemHref = SqlClient.SqlClient.use(
+  (sql) => sql`ALTER TABLE items ADD COLUMN href TEXT`,
+);
 
 const audioItemKinds = SqlClient.SqlClient.use((sql) =>
   Effect.gen(function* () {
@@ -816,18 +818,18 @@ const publicPublishing = SqlClient.SqlClient.use((sql) =>
 );
 
 export const migrationLoader = Migrator.fromRecord({
-  "1_initial_schema": initialSchema,
-  "2_board_tombstones": boardTombstones,
-  "3_board_background": boardBackground,
-  "4_item_href": itemHref,
-  "5_audio_item_kinds": audioItemKinds,
-  "6_public_publishing": publicPublishing,
-  "7_website_item_kind": websiteItemKind,
-  "8_managed_media": managedMedia,
-  "9_managed_media_lifecycle": managedMediaLifecycle,
-  "10_media_guardrails": mediaGuardrails,
-  "11_board_background_media": boardBackgroundMedia,
-  "12_youtube_item_kind": youtubeItemKind,
-  "13_image_annotations": imageAnnotations,
-  "14_x_post_item_kind": xPostItemKind,
+  '1_initial_schema': initialSchema,
+  '2_board_tombstones': boardTombstones,
+  '3_board_background': boardBackground,
+  '4_item_href': itemHref,
+  '5_audio_item_kinds': audioItemKinds,
+  '6_public_publishing': publicPublishing,
+  '7_website_item_kind': websiteItemKind,
+  '8_managed_media': managedMedia,
+  '9_managed_media_lifecycle': managedMediaLifecycle,
+  '10_media_guardrails': mediaGuardrails,
+  '11_board_background_media': boardBackgroundMedia,
+  '12_youtube_item_kind': youtubeItemKind,
+  '13_image_annotations': imageAnnotations,
+  '14_x_post_item_kind': xPostItemKind,
 });

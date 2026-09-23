@@ -1,22 +1,22 @@
-import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { createRoot } from "react-dom/client";
+import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { createRoot } from 'react-dom/client';
 
-import { routeTree } from "./routeTree.gen";
+import { routeTree } from './routeTree.gen';
 
-import "./styles.css";
+import './styles.css';
 
 const router = createRouter({
   routeTree,
-  defaultPreload: "intent",
+  defaultPreload: 'intent',
 });
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }
 }
 
-const rootElement = document.getElementById("root");
-if (rootElement === null) throw new Error("Missing application root.");
+const rootElement = document.getElementById('root');
+if (rootElement === null) throw new Error('Missing application root.');
 
 createRoot(rootElement).render(<RouterProvider router={router} />);

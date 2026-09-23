@@ -1,6 +1,6 @@
-import { Context, Effect, Layer, Schema } from "effect";
-import * as SqlClient from "effect/unstable/sql/SqlClient";
-import type { SqlError } from "effect/unstable/sql/SqlError";
+import { Context, Effect, Layer, Schema } from 'effect';
+import * as SqlClient from 'effect/unstable/sql/SqlClient';
+import type { SqlError } from 'effect/unstable/sql/SqlError';
 
 import {
   MediaByteCountSchema,
@@ -25,8 +25,8 @@ import {
   type MediaReservationId,
   type MediaTimestamp,
   type RetryAfterSeconds,
-} from "../lib/media";
-import type { MediaQuotaClientId } from "./media-client-identity";
+} from '../lib/media';
+import type { MediaQuotaClientId } from './media-client-identity';
 
 export type MediaAsset = {
   readonly id: MediaId;
@@ -39,7 +39,7 @@ export type MediaAsset = {
   readonly readyAt: MediaTimestamp;
 };
 
-export type PendingMediaAsset = Omit<MediaAsset, "readyAt">;
+export type PendingMediaAsset = Omit<MediaAsset, 'readyAt'>;
 
 export type MediaCleanupAsset = PendingMediaAsset & {
   readonly readyAt: MediaTimestamp | null;
@@ -71,7 +71,10 @@ const MediaRowSchema = Schema.Struct({
   Schema.makeFilter((row) =>
     normalizeMediaMimeType(row.kind, row.mime_type) === row.mime_type
       ? undefined
-      : { path: ["mime_type"], issue: "Media MIME type does not match its kind" },
+      : {
+          path: ['mime_type'],
+          issue: 'Media MIME type does not match its kind',
+        },
   ),
 );
 
@@ -84,7 +87,10 @@ const ReservationRowSchema = Schema.Struct({
 });
 
 type RequestQuotaRow = { readonly count: unknown; readonly oldest: unknown };
-type UploadEventRow = { readonly byte_length: unknown; readonly created_at: unknown };
+type UploadEventRow = {
+  readonly byte_length: unknown;
+  readonly created_at: unknown;
+};
 type QuotaStateRow = { readonly managed: unknown; readonly reserved: unknown };
 type MediaIdRow = { readonly id: unknown };
 
@@ -105,24 +111,32 @@ const ZERO_MEDIA_REQUEST_COUNT = MediaRequestCountSchema.make(0);
 const MediaIdRowSchema = Schema.Struct({ id: MediaIdSchema });
 
 const MEDIA_REQUEST_WINDOW_MS = MediaDurationMillisSchema.make(60 * 60 * 1_000);
-const MEDIA_BYTE_WINDOW_MS = MediaDurationMillisSchema.make(24 * 60 * 60 * 1_000);
-const MEDIA_EVENT_RETENTION_MS = MediaDurationMillisSchema.make(25 * 60 * 60 * 1_000);
+const MEDIA_BYTE_WINDOW_MS = MediaDurationMillisSchema.make(
+  24 * 60 * 60 * 1_000,
+);
+const MEDIA_EVENT_RETENTION_MS = MediaDurationMillisSchema.make(
+  25 * 60 * 60 * 1_000,
+);
 
 export class MediaRepoInvariantError extends Schema.Error<MediaRepoInvariantError>(
-  "MediaRepoInvariantError",
+  'MediaRepoInvariantError',
 )({
-  _tag: Schema.tag("MediaRepoInvariantError"),
-  reason: Schema.Literals(["PendingAssetMissing", "ReservationMissing"]),
+  _tag: Schema.tag('MediaRepoInvariantError'),
+  reason: Schema.Literals(['PendingAssetMissing', 'ReservationMissing']),
 }) {}
 
 export type ReservationResult =
-  | { readonly _tag: "Reserved"; readonly id: MediaReservationId }
-  | { readonly _tag: "RequestLimit"; readonly retryAfter: RetryAfterSeconds }
-  | { readonly _tag: "ByteLimit"; readonly retryAfter: RetryAfterSeconds }
-  | { readonly _tag: "StorageFull" };
+  | { readonly _tag: 'Reserved'; readonly id: MediaReservationId }
+  | { readonly _tag: 'RequestLimit'; readonly retryAfter: RetryAfterSeconds }
+  | { readonly _tag: 'ByteLimit'; readonly retryAfter: RetryAfterSeconds }
+  | { readonly _tag: 'StorageFull' };
 
-const decodeCleanupAsset = Effect.fn("MediaRepo.decodeCleanupAsset")(function* (row: MediaRow) {
-  const decoded = yield* Schema.decodeUnknownEffect(MediaRowSchema)(row).pipe(Effect.orDie);
+const decodeCleanupAsset = Effect.fn('MediaRepo.decodeCleanupAsset')(function* (
+  row: MediaRow,
+) {
+  const decoded = yield* Schema.decodeUnknownEffect(MediaRowSchema)(row).pipe(
+    Effect.orDie,
+  );
   return {
     id: decoded.id,
     kind: decoded.kind,
@@ -135,7 +149,9 @@ const decodeCleanupAsset = Effect.fn("MediaRepo.decodeCleanupAsset")(function* (
   } satisfies MediaCleanupAsset;
 });
 
-const decodeReadyAsset = Effect.fn("MediaRepo.decodeReadyAsset")(function* (row: MediaRow) {
+const decodeReadyAsset = Effect.fn('MediaRepo.decodeReadyAsset')(function* (
+  row: MediaRow,
+) {
   const asset = yield* decodeCleanupAsset(row);
   if (asset.readyAt === null) return null;
   return { ...asset, readyAt: asset.readyAt } satisfies MediaAsset;
@@ -146,10 +162,14 @@ const retryAfter = (
   windowMs: MediaDurationMillis,
   now: MediaTimestamp,
 ): RetryAfterSeconds =>
-  RetryAfterSecondsSchema.make(Math.max(1, Math.ceil((oldest + windowMs - now) / 1_000)));
+  RetryAfterSecondsSchema.make(
+    Math.max(1, Math.ceil((oldest + windowMs - now) / 1_000)),
+  );
 
 interface MediaRepoShape {
-  readonly getReady: (id: MediaId) => Effect.Effect<MediaAsset | null, SqlError>;
+  readonly getReady: (
+    id: MediaId,
+  ) => Effect.Effect<MediaAsset | null, SqlError>;
   readonly reserveUpload: (
     id: MediaReservationId,
     clientId: MediaQuotaClientId,
@@ -157,8 +177,12 @@ interface MediaRepoShape {
     now: MediaTimestamp,
     limits: MediaQuotaLimits,
   ) => Effect.Effect<ReservationResult, SqlError>;
-  readonly releaseReservation: (id: MediaReservationId) => Effect.Effect<void, SqlError>;
-  readonly insertPending: (asset: PendingMediaAsset) => Effect.Effect<void, SqlError>;
+  readonly releaseReservation: (
+    id: MediaReservationId,
+  ) => Effect.Effect<void, SqlError>;
+  readonly insertPending: (
+    asset: PendingMediaAsset,
+  ) => Effect.Effect<void, SqlError>;
   readonly markReady: (
     id: MediaId,
     readyAt: MediaTimestamp,
@@ -173,11 +197,13 @@ interface MediaRepoShape {
     leaseMs: MediaDurationMillis,
   ) => Effect.Effect<ReadonlyArray<MediaCleanupAsset>, SqlError>;
   readonly completeDelete: (id: MediaId) => Effect.Effect<void, SqlError>;
-  readonly maintainQuota: (now: MediaTimestamp) => Effect.Effect<void, SqlError>;
+  readonly maintainQuota: (
+    now: MediaTimestamp,
+  ) => Effect.Effect<void, SqlError>;
 }
 
 export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
-  "mood-board/MediaRepo",
+  'mood-board/MediaRepo',
 ) {
   static readonly layer = Layer.effect(
     this,
@@ -185,34 +211,35 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
       const sql = yield* SqlClient.SqlClient;
       yield* sql`PRAGMA foreign_keys = ON`;
 
-      const expireReservations = Effect.fn("MediaRepo.expireReservations")(function* (
-        now: MediaTimestamp,
-      ) {
-        const expired = yield* sql<NumberRow>`
+      const expireReservations = Effect.fn('MediaRepo.expireReservations')(
+        function* (now: MediaTimestamp) {
+          const expired = yield* sql<NumberRow>`
           SELECT COALESCE(SUM(byte_length), 0) AS value
           FROM media_upload_events
           WHERE status = 'reserved' AND expires_at <= ${now}
         `;
-        const aggregate = expired[0];
-        const bytes =
-          aggregate === undefined
-            ? ZERO_MEDIA_BYTE_COUNT
-            : (yield* Schema.decodeUnknownEffect(NumberRowSchema)(aggregate).pipe(Effect.orDie))
-                .value;
-        if (bytes > 0) {
-          yield* sql`
+          const aggregate = expired[0];
+          const bytes =
+            aggregate === undefined
+              ? ZERO_MEDIA_BYTE_COUNT
+              : (yield* Schema.decodeUnknownEffect(NumberRowSchema)(
+                  aggregate,
+                ).pipe(Effect.orDie)).value;
+          if (bytes > 0) {
+            yield* sql`
             UPDATE media_quota_state
             SET reserved_bytes = MAX(0, reserved_bytes - ${bytes})
             WHERE singleton = 1
           `;
-          yield* sql`
+            yield* sql`
             UPDATE media_upload_events SET status = 'expired'
             WHERE status = 'reserved' AND expires_at <= ${now}
           `;
-        }
-      });
+          }
+        },
+      );
 
-      const getReady = Effect.fn("MediaRepo.getReady")(function* (id: MediaId) {
+      const getReady = Effect.fn('MediaRepo.getReady')(function* (id: MediaId) {
         const rows = yield* sql<MediaRow>`
           SELECT id, kind, mime_type, byte_length, etag, storage_key, created_at,
             ready_at, unreferenced_at
@@ -224,7 +251,7 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
         return row === undefined ? null : yield* decodeReadyAsset(row);
       });
 
-      const reserveUpload = Effect.fn("MediaRepo.reserveUpload")(function* (
+      const reserveUpload = Effect.fn('MediaRepo.reserveUpload')(function* (
         id: MediaReservationId,
         clientId: MediaQuotaClientId,
         byteLength: MediaByteLength,
@@ -245,13 +272,20 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             const requests =
               requestRow === undefined
                 ? undefined
-                : yield* Schema.decodeUnknownEffect(RequestQuotaRowSchema)(requestRow).pipe(
-                    Effect.orDie,
-                  );
-            if ((requests?.count ?? ZERO_MEDIA_REQUEST_COUNT) >= limits.requestsPerHour) {
+                : yield* Schema.decodeUnknownEffect(RequestQuotaRowSchema)(
+                    requestRow,
+                  ).pipe(Effect.orDie);
+            if (
+              (requests?.count ?? ZERO_MEDIA_REQUEST_COUNT) >=
+              limits.requestsPerHour
+            ) {
               return {
-                _tag: "RequestLimit",
-                retryAfter: retryAfter(requests?.oldest ?? now, MEDIA_REQUEST_WINDOW_MS, now),
+                _tag: 'RequestLimit',
+                retryAfter: retryAfter(
+                  requests?.oldest ?? now,
+                  MEDIA_REQUEST_WINDOW_MS,
+                  now,
+                ),
               } as const;
             }
             const byteRows = yield* sql<UploadEventRow>`
@@ -263,10 +297,16 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             ORDER BY created_at ASC, id ASC
           `;
             const byteEvents = yield* Effect.forEach(byteRows, (row) =>
-              Schema.decodeUnknownEffect(UploadEventRowSchema)(row).pipe(Effect.orDie),
+              Schema.decodeUnknownEffect(UploadEventRowSchema)(row).pipe(
+                Effect.orDie,
+              ),
             );
-            const uploadedBytes = byteEvents.reduce((total, row) => total + row.byte_length, 0);
-            const bytesToRelease = uploadedBytes + byteLength - limits.bytesPerDay;
+            const uploadedBytes = byteEvents.reduce(
+              (total, row) => total + row.byte_length,
+              0,
+            );
+            const bytesToRelease =
+              uploadedBytes + byteLength - limits.bytesPerDay;
             if (bytesToRelease > 0) {
               let released = 0;
               let retryAt = now + MEDIA_BYTE_WINDOW_MS;
@@ -276,7 +316,7 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
                 if (released >= bytesToRelease) break;
               }
               return {
-                _tag: "ByteLimit",
+                _tag: 'ByteLimit',
                 retryAfter: RetryAfterSecondsSchema.make(
                   Math.max(1, Math.ceil((retryAt - now) / 1_000)),
                 ),
@@ -289,12 +329,18 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             const quotaRow = quota[0];
             const state =
               quotaRow === undefined
-                ? { managed: ZERO_MEDIA_BYTE_COUNT, reserved: ZERO_MEDIA_BYTE_COUNT }
-                : yield* Schema.decodeUnknownEffect(QuotaStateRowSchema)(quotaRow).pipe(
-                    Effect.orDie,
-                  );
-            if (state.managed + state.reserved + byteLength > limits.managedBytes) {
-              return { _tag: "StorageFull" } as const;
+                ? {
+                    managed: ZERO_MEDIA_BYTE_COUNT,
+                    reserved: ZERO_MEDIA_BYTE_COUNT,
+                  }
+                : yield* Schema.decodeUnknownEffect(QuotaStateRowSchema)(
+                    quotaRow,
+                  ).pipe(Effect.orDie);
+            if (
+              state.managed + state.reserved + byteLength >
+              limits.managedBytes
+            ) {
+              return { _tag: 'StorageFull' } as const;
             }
             yield* sql`
             INSERT INTO media_upload_events (
@@ -309,40 +355,40 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             SET reserved_bytes = reserved_bytes + ${byteLength}
             WHERE singleton = 1
           `;
-            return { _tag: "Reserved", id } as const;
+            return { _tag: 'Reserved', id } as const;
           }),
         );
       });
 
-      const releaseReservation = Effect.fn("MediaRepo.releaseReservation")(function* (
-        id: MediaReservationId,
-      ) {
-        yield* sql.withTransaction(
-          Effect.gen(function* () {
-            const released = yield* sql<ReservationRow>`
+      const releaseReservation = Effect.fn('MediaRepo.releaseReservation')(
+        function* (id: MediaReservationId) {
+          yield* sql.withTransaction(
+            Effect.gen(function* () {
+              const released = yield* sql<ReservationRow>`
             UPDATE media_upload_events SET status = 'failed'
             WHERE id = ${id} AND status = 'reserved'
             RETURNING byte_length
           `;
-            const releasedRow = released[0];
-            const bytes =
-              releasedRow === undefined
-                ? undefined
-                : (yield* Schema.decodeUnknownEffect(ReservationRowSchema)(releasedRow).pipe(
-                    Effect.orDie,
-                  )).byte_length;
-            if (bytes !== undefined) {
-              yield* sql`
+              const releasedRow = released[0];
+              const bytes =
+                releasedRow === undefined
+                  ? undefined
+                  : (yield* Schema.decodeUnknownEffect(ReservationRowSchema)(
+                      releasedRow,
+                    ).pipe(Effect.orDie)).byte_length;
+              if (bytes !== undefined) {
+                yield* sql`
               UPDATE media_quota_state
               SET reserved_bytes = MAX(0, reserved_bytes - ${bytes})
               WHERE singleton = 1
             `;
-            }
-          }),
-        );
-      });
+              }
+            }),
+          );
+        },
+      );
 
-      const insertPending = Effect.fn("MediaRepo.insertPending")(function* (
+      const insertPending = Effect.fn('MediaRepo.insertPending')(function* (
         asset: PendingMediaAsset,
       ) {
         yield* sql`
@@ -356,7 +402,7 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
         `;
       });
 
-      const markReady = Effect.fn("MediaRepo.markReady")(function* (
+      const markReady = Effect.fn('MediaRepo.markReady')(function* (
         id: MediaId,
         readyAt: MediaTimestamp,
         reservationId: MediaReservationId,
@@ -375,12 +421,12 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             const bytes =
               completedRow === undefined
                 ? undefined
-                : (yield* Schema.decodeUnknownEffect(ReservationRowSchema)(completedRow).pipe(
-                    Effect.orDie,
-                  )).byte_length;
+                : (yield* Schema.decodeUnknownEffect(ReservationRowSchema)(
+                    completedRow,
+                  ).pipe(Effect.orDie)).byte_length;
             if (bytes === undefined) {
               return yield* new MediaRepoInvariantError({
-                reason: "ReservationMissing",
+                reason: 'ReservationMissing',
               });
             }
             const rows = yield* sql<MediaIdRow>`
@@ -392,15 +438,15 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
           `;
             if (rows.length !== 1) {
               return yield* new MediaRepoInvariantError({
-                reason: "PendingAssetMissing",
+                reason: 'PendingAssetMissing',
               });
             }
-            const updated = yield* Schema.decodeUnknownEffect(MediaIdRowSchema)(rows[0]).pipe(
-              Effect.orDie,
-            );
+            const updated = yield* Schema.decodeUnknownEffect(MediaIdRowSchema)(
+              rows[0],
+            ).pipe(Effect.orDie);
             if (updated.id !== id) {
               return yield* new MediaRepoInvariantError({
-                reason: "PendingAssetMissing",
+                reason: 'PendingAssetMissing',
               });
             }
             yield* sql`
@@ -412,7 +458,9 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
         );
       });
 
-      const removePending = Effect.fn("MediaRepo.removePending")(function* (id: MediaId) {
+      const removePending = Effect.fn('MediaRepo.removePending')(function* (
+        id: MediaId,
+      ) {
         yield* sql`
           DELETE FROM media_assets WHERE id = ${id} AND ready_at IS NULL
             AND NOT EXISTS (SELECT 1 FROM items i WHERE i.media_id = ${id})
@@ -422,15 +470,16 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
         `;
       });
 
-      const claimUnreferenced = Effect.fn("MediaRepo.claimUnreferenced")(function* (
-        olderThan: MediaTimestamp,
-        limit: MediaCleanupBatchSize,
-        now: MediaTimestamp,
-        leaseMs: MediaDurationMillis,
-      ) {
-        return yield* sql.withTransaction(
-          Effect.gen(function* () {
-            const candidates = yield* sql<MediaRow>`
+      const claimUnreferenced = Effect.fn('MediaRepo.claimUnreferenced')(
+        function* (
+          olderThan: MediaTimestamp,
+          limit: MediaCleanupBatchSize,
+          now: MediaTimestamp,
+          leaseMs: MediaDurationMillis,
+        ) {
+          return yield* sql.withTransaction(
+            Effect.gen(function* () {
+              const candidates = yield* sql<MediaRow>`
             SELECT id, kind, mime_type, byte_length, etag, storage_key, created_at,
               ready_at, unreferenced_at
             FROM media_assets m
@@ -443,10 +492,10 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
             ORDER BY m.unreferenced_at ASC, m.id ASC
             LIMIT ${Math.max(1, Math.min(50, Math.trunc(limit)))}
           `;
-            const claimed: MediaCleanupAsset[] = [];
-            for (const row of candidates) {
-              const candidate = yield* decodeCleanupAsset(row);
-              const marked = yield* sql<MediaIdRow>`
+              const claimed: MediaCleanupAsset[] = [];
+              for (const row of candidates) {
+                const candidate = yield* decodeCleanupAsset(row);
+                const marked = yield* sql<MediaIdRow>`
               UPDATE media_assets
               SET ready_at = NULL, cleanup_lease_until = ${now + leaseMs},
                 cleanup_attempts = cleanup_attempts + 1
@@ -458,19 +507,22 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
                 )
               RETURNING id
             `;
-              const markedRow = marked[0];
-              if (markedRow === undefined) continue;
-              const markedId = yield* Schema.decodeUnknownEffect(MediaIdRowSchema)(markedRow).pipe(
-                Effect.orDie,
-              );
-              if (markedId.id === candidate.id) claimed.push(candidate);
-            }
-            return claimed;
-          }),
-        );
-      });
+                const markedRow = marked[0];
+                if (markedRow === undefined) continue;
+                const markedId = yield* Schema.decodeUnknownEffect(
+                  MediaIdRowSchema,
+                )(markedRow).pipe(Effect.orDie);
+                if (markedId.id === candidate.id) claimed.push(candidate);
+              }
+              return claimed;
+            }),
+          );
+        },
+      );
 
-      const completeDelete = Effect.fn("MediaRepo.completeDelete")(function* (id: MediaId) {
+      const completeDelete = Effect.fn('MediaRepo.completeDelete')(function* (
+        id: MediaId,
+      ) {
         yield* sql`
           DELETE FROM media_assets WHERE id = ${id} AND ready_at IS NULL
             AND NOT EXISTS (SELECT 1 FROM items i WHERE i.media_id = ${id})
@@ -480,7 +532,9 @@ export class MediaRepo extends Context.Service<MediaRepo, MediaRepoShape>()(
         `;
       });
 
-      const maintainQuota = Effect.fn("MediaRepo.maintainQuota")(function* (now: MediaTimestamp) {
+      const maintainQuota = Effect.fn('MediaRepo.maintainQuota')(function* (
+        now: MediaTimestamp,
+      ) {
         yield* sql.withTransaction(
           Effect.gen(function* () {
             yield* expireReservations(now);

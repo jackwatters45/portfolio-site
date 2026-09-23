@@ -1,0 +1,17 @@
+:root {
+  --paper: #f5f0e2;
+  --ink: #343b32;
+  --accent: #355744;
+  --muted: #66695b;
+  --rule: #c6c5af;
+  --ochre: #855b3a;
+  --comment-field: #fffcf4;
+  --comment-error: #8d302a;
+  --comments-surface: var(--paper);
+  --comments-input: var(--comment-field);
+  --comments-text: var(--ink);
+  --comments-muted: var(--muted);
+  --comments-border: var(--rule);
+  --comments-accent: var(--accent);
+  --comments-error: var(--comment-error);
+}

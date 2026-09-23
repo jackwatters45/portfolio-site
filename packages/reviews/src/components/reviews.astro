@@ -1,17 +1,25 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { reviewerName } from '../lib/reviewers';
 
 interface Props {
   ratings: CollectionEntry<'restaurants'>['data']['ratings'];
+  showNames?: boolean;
 }
-const { ratings } = Astro.props;
+const { ratings, showNames = true } = Astro.props;
+const entries = Object.entries(ratings).filter(
+  ([, rating]) => rating.score !== null || rating.review,
+);
+const hasGuests = entries.some(
+  ([person]) => person !== 'meg' && person !== 'jack',
+);
 ---
 
-<div class="reviews">
-  {(['meg', 'jack'] as const).filter((person) => ratings[person].score !== null || ratings[person].review).map((person) => (
-    <section data-person={person} aria-label={`${person === 'meg' ? 'Meg' : 'Jack'}’s review`}>
-      <div class="scores"><strong>{person === 'meg' ? 'Meg' : 'Jack'}{ratings[person].score !== null && ` · ${ratings[person].score}/10`}</strong></div>
-      {ratings[person].review && <p>{ratings[person].review}</p>}
+<div class:list={['reviews', { 'guest-reviews': hasGuests }]}>
+  {entries.map(([person, rating]) => (
+    <section data-person={person} aria-label={`${reviewerName(person)}’s review`}>
+      {(showNames || rating.score !== null) && <div class="scores"><strong>{showNames && reviewerName(person)}{rating.score !== null && `${showNames ? ' · ' : ''}${rating.score}/10`}</strong></div>}
+      {rating.review && <p>{rating.review}</p>}
     </section>
   ))}
 </div>

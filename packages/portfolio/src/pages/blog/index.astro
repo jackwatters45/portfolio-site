@@ -26,7 +26,7 @@ import { formatDateString } from '@/lib/utils';
 		{
 			sortedPosts.map((post) => (
 				<li class="py-8">
-					<a class="space-y-2" href={`/blog/${post.slug}`}>
+					<a class="space-y-2" href={`/blog/${post.id}`}>
 						<h3 class="strikethrough underline-offset-4 decoration-foreground hover:decoration-2 hover:decoration-muted-foreground transition-all">
 							{post.data.title}
 						</h3>

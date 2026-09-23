@@ -23,7 +23,14 @@ pnpm-debug.log*
 
 # environment variables
 .env
-.env.production
+.env.*
+!.env.example
+
+# local app data and agent scratch files
+packages/mood-board/data/
+.pi-subagents/
+.auto/
+*.local
 
 # macOS-specific files
 .DS_Store

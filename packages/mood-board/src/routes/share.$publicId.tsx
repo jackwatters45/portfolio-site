@@ -1,5 +1,11 @@
-import { Copy, CornersOut, Minus, Plus, ShareNetwork } from "@phosphor-icons/react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import {
+  Copy,
+  CornersOut,
+  Minus,
+  Plus,
+  ShareNetwork,
+} from '@phosphor-icons/react';
+import { createFileRoute, Link, notFound } from '@tanstack/react-router';
 import {
   useEffect,
   useMemo,
@@ -7,9 +13,9 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
-} from "react";
+} from 'react';
 
-import { parsePublicId } from "../client/board-route";
+import { parsePublicId } from '../client/board-route';
 import {
   accessibleFieldColors,
   fitCamera,
@@ -17,21 +23,21 @@ import {
   MIN_ZOOM,
   screenToWorld,
   zoomCamera,
-} from "../client/board/board-utils";
-import type { BoardItem, Camera } from "../client/board/types";
-import { publicMediaUrl } from "../client/media-url";
-import { AudioPlaybackCoordinator } from "../client/media/audio-playback";
-import { loadPublicBoard, PublicApiError } from "../client/public-api-client";
-import { BoardItemView } from "../components/board-item-view";
-import { CanvasBackground } from "../components/canvas-background";
+} from '../client/board/board-utils';
+import type { BoardItem, Camera } from '../client/board/types';
+import { publicMediaUrl } from '../client/media-url';
+import { AudioPlaybackCoordinator } from '../client/media/audio-playback';
+import { loadPublicBoard, PublicApiError } from '../client/public-api-client';
+import { BoardItemView } from '../components/board-item-view';
+import { CanvasBackground } from '../components/canvas-background';
 import {
   PresentationItemViewer,
   type PresentationItemOrigin,
-} from "../components/presentation-image-viewer";
-import { ItemIdSchema, type ItemId } from "../lib/board-rpc";
-import type { PublicBoard } from "../lib/public-api";
+} from '../components/presentation-image-viewer';
+import { ItemIdSchema, type ItemId } from '../lib/board-rpc';
+import type { PublicBoard } from '../lib/public-api';
 
-export const Route = createFileRoute("/share/$publicId")({
+export const Route = createFileRoute('/share/$publicId')({
   params: {
     parse: ({ publicId }) => {
       const parsed = parsePublicId(publicId);
@@ -44,14 +50,14 @@ export const Route = createFileRoute("/share/$publicId")({
 });
 
 interface PublicBoardStyle extends CSSProperties {
-  "--field": string;
-  "--field-foreground": string;
-  "--field-muted": string;
-  "--field-selection": string;
+  '--field': string;
+  '--field-foreground': string;
+  '--field-muted': string;
+  '--field-selection': string;
 }
 
 interface PublicWorldStyle extends CSSProperties {
-  "--camera-zoom": number;
+  '--camera-zoom': number;
 }
 
 type Point = { readonly x: number; readonly y: number };
@@ -68,32 +74,37 @@ type PresentedItem = {
 };
 
 const shareCurrentPage = async (title: string): Promise<string> => {
-  if (typeof navigator.share === "function") {
+  if (typeof navigator.share === 'function') {
     try {
       await navigator.share({ title, url: window.location.href });
-      return "Share sheet opened";
+      return 'Share sheet opened';
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return "";
+      if (error instanceof DOMException && error.name === 'AbortError')
+        return '';
     }
   }
   await navigator.clipboard.writeText(window.location.href);
-  return "Board link copied";
+  return 'Board link copied';
 };
 
 function PublicBoardPage() {
   const { publicId } = Route.useParams();
   const [snapshot, setSnapshot] = useState<PublicBoard | null>(null);
   const [itemSizeOverrides, setItemSizeOverrides] = useState<
-    Readonly<Record<string, { readonly width: number; readonly height: number }>>
+    Readonly<
+      Record<string, { readonly width: number; readonly height: number }>
+    >
   >({});
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [camera, setCamera] = useState<Camera>({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
     z: 1,
   });
-  const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(null);
+  const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(
+    null,
+  );
   const [playback] = useState(() => new AudioPlaybackCoordinator());
   const viewportRef = useRef<HTMLDivElement>(null);
   const pointersRef = useRef(new Map<number, Point>());
@@ -134,8 +145,8 @@ function PublicBoardPage() {
         if (!active) return;
         setError(
           reason instanceof PublicApiError && reason.status === 404
-            ? "This board is private, unpublished, or does not exist."
-            : "The public board could not be loaded.",
+            ? 'This board is private, unpublished, or does not exist.'
+            : 'The public board could not be loaded.',
         );
       },
     );
@@ -149,8 +160,8 @@ function PublicBoardPage() {
     if (snapshot === null) return;
     const refit = () => setCamera(fitCamera(itemsRef.current));
     refit();
-    window.addEventListener("resize", refit);
-    return () => window.removeEventListener("resize", refit);
+    window.addEventListener('resize', refit);
+    return () => window.removeEventListener('resize', refit);
   }, [snapshot]);
 
   const reconcileItemSize = (id: ItemId, width: number, height: number) => {
@@ -187,8 +198,8 @@ function PublicBoardPage() {
         }));
       }
     };
-    viewport.addEventListener("wheel", onWheel, { passive: false });
-    return () => viewport.removeEventListener("wheel", onWheel);
+    viewport.addEventListener('wheel', onWheel, { passive: false });
+    return () => viewport.removeEventListener('wheel', onWheel);
   }, [snapshot]);
 
   const presentItem = (itemId: ItemId, origin?: PresentationItemOrigin) => {
@@ -203,13 +214,17 @@ function PublicBoardPage() {
   const beginPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 && event.button !== 1) return;
     const target = event.target as Element;
-    const presentationDetailLink = target.closest<HTMLAnchorElement>(".presentation-detail-link");
-    const presentationItem = target.closest<HTMLElement>("[data-presentation-item-id]");
+    const presentationDetailLink = target.closest<HTMLAnchorElement>(
+      '.presentation-detail-link',
+    );
+    const presentationItem = target.closest<HTMLElement>(
+      '[data-presentation-item-id]',
+    );
     const presentationItemId = presentationItem?.dataset.presentationItemId;
     if (
       presentationDetailLink === null &&
       presentationItemId === undefined &&
-      target.closest("button, a, audio, video, .audio-card-controls") !== null
+      target.closest('button, a, audio, video, .audio-card-controls') !== null
     )
       return;
     event.preventDefault();
@@ -239,17 +254,26 @@ function PublicBoardPage() {
   const movePointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current;
     if (gesture === null || !pointersRef.current.has(event.pointerId)) return;
-    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    pointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
     const pointers = [...pointersRef.current.values()];
     if (pointers.length >= 2) {
       const [left, right] = pointers;
       const center = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2 };
-      const distance = Math.max(1, Math.hypot(left.x - right.x, left.y - right.y));
+      const distance = Math.max(
+        1,
+        Math.hypot(left.x - right.x, left.y - right.y),
+      );
       setCamera((current) => {
         const anchor = screenToWorld(gesture.center, current);
         const z = Math.min(
           MAX_ZOOM,
-          Math.max(MIN_ZOOM, current.z * (distance / Math.max(1, gesture.distance ?? distance))),
+          Math.max(
+            MIN_ZOOM,
+            current.z * (distance / Math.max(1, gesture.distance ?? distance)),
+          ),
         );
         return { x: center.x / z - anchor.x, y: center.y / z - anchor.y, z };
       });
@@ -270,15 +294,20 @@ function PublicBoardPage() {
     const gesture = gestureRef.current;
     if (
       pointersRef.current.size === 1 &&
-      event.type !== "pointercancel" &&
+      event.type !== 'pointercancel' &&
       gesture?.start !== undefined &&
-      Math.hypot(event.clientX - gesture.start.x, event.clientY - gesture.start.y) < 6
+      Math.hypot(
+        event.clientX - gesture.start.x,
+        event.clientY - gesture.start.y,
+      ) < 6
     ) {
       if (gesture.presentationItemId !== undefined) {
-        const item = items.find((item) => item.id === gesture.presentationItemId);
+        const item = items.find(
+          (item) => item.id === gesture.presentationItemId,
+        );
         if (item !== undefined) presentItem(item.id, gesture.start);
       } else if (gesture.linkHref !== undefined) {
-        window.open(gesture.linkHref, "_blank", "noopener,noreferrer");
+        window.open(gesture.linkHref, '_blank', 'noopener,noreferrer');
       }
     }
     pointersRef.current.delete(event.pointerId);
@@ -307,21 +336,23 @@ function PublicBoardPage() {
     );
   }
 
-  const background = snapshot.board.background ?? "#EDEDED";
+  const background = snapshot.board.background ?? '#EDEDED';
   const colors = accessibleFieldColors(background);
   const style: PublicBoardStyle = {
-    "--field": background,
-    "--field-foreground": colors.foreground,
-    "--field-muted": colors.muted,
-    "--field-selection": colors.selection,
+    '--field': background,
+    '--field-foreground': colors.foreground,
+    '--field-muted': colors.muted,
+    '--field-selection': colors.selection,
   };
 
   const worldStyle: PublicWorldStyle = {
     transform: `scale(${camera.z}) translate3d(${camera.x}px, ${camera.y}px, 0)`,
-    "--camera-zoom": camera.z,
+    '--camera-zoom': camera.z,
   };
   const presentedBoardItem =
-    presentedItem === null ? undefined : items.find((item) => item.id === presentedItem.itemId);
+    presentedItem === null
+      ? undefined
+      : items.find((item) => item.id === presentedItem.itemId);
 
   return (
     <main className="app-shell is-presenting public-board-page" style={style}>
@@ -373,7 +404,7 @@ function PublicBoardPage() {
 
       {presentedBoardItem && presentedItem && (
         <PresentationItemViewer
-          key={`${presentedBoardItem.id}:${presentedBoardItem.mediaId ?? presentedBoardItem.src ?? "item"}`}
+          key={`${presentedBoardItem.id}:${presentedBoardItem.mediaId ?? presentedBoardItem.src ?? 'item'}`}
           item={presentedBoardItem}
           origin={presentedItem.origin}
           onClose={() => setPresentedItem(null)}
@@ -382,13 +413,18 @@ function PublicBoardPage() {
 
       <header className="public-board-header">
         <div>
-          <h1>{snapshot.board.title || "Untitled mood"}</h1>
+          <h1>{snapshot.board.title || 'Untitled mood'}</h1>
           <Link to="/@{$handle}" params={{ handle: snapshot.owner.handle }}>
-            by {snapshot.owner.displayName} <span>@{snapshot.owner.handle}</span>
+            by {snapshot.owner.displayName}{' '}
+            <span>@{snapshot.owner.handle}</span>
           </Link>
         </div>
         <div className="public-board-actions">
-          <button type="button" aria-label="Fit board" onClick={() => setCamera(fitCamera(items))}>
+          <button
+            type="button"
+            aria-label="Fit board"
+            onClick={() => setCamera(fitCamera(items))}
+          >
             <CornersOut size={18} />
           </button>
           <button
@@ -427,11 +463,11 @@ function PublicBoardPage() {
             aria-label="Share board"
             onClick={() => {
               void shareCurrentPage(snapshot.board.title).then(setNotice, () =>
-                setNotice("Could not copy this link"),
+                setNotice('Could not copy this link'),
               );
             }}
           >
-            {typeof navigator.share === "function" ? (
+            {typeof navigator.share === 'function' ? (
               <ShareNetwork size={18} />
             ) : (
               <Copy size={18} />

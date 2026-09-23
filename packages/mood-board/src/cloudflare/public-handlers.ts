@@ -1,1 +1,1 @@
-export { PublicHandlers as CloudflarePublicHandlers } from "../server/public-handlers";
+export { PublicHandlers as CloudflarePublicHandlers } from '../server/public-handlers';

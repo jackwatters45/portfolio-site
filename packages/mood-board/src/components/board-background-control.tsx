@@ -1,14 +1,14 @@
-import { ImageSquare, SpinnerGap } from "@phosphor-icons/react";
-import { useRef, type FormEvent } from "react";
+import { ImageSquare, SpinnerGap } from '@phosphor-icons/react';
+import { useRef, type FormEvent } from 'react';
 
-import type { BoardBackgroundDraft } from "../client/board/board-background";
+import type { BoardBackgroundDraft } from '../client/board/board-background';
 import {
   BOARD_BACKGROUNDS,
   formatHexColorInput,
   normalizeHexColor,
-} from "../client/board/board-utils";
-import { IMAGE_FILE_ACCEPT } from "../client/media/image-preflight";
-import { CanvasBackground } from "./canvas-background";
+} from '../client/board/board-utils';
+import { IMAGE_FILE_ACCEPT } from '../client/media/image-preflight';
+import { CanvasBackground } from './canvas-background';
 
 type Props = {
   readonly draft: BoardBackgroundDraft;
@@ -57,14 +57,14 @@ export function BoardBackgroundControl({
         <span id="board-background-title">Board background</span>
         <small>
           {imageEnabled
-            ? "Layer an image over a fallback color, then apply both together."
-            : "Choose a quiet fallback color for this browser-only demo."}
+            ? 'Layer an image over a fallback color, then apply both together.'
+            : 'Choose a quiet fallback color for this browser-only demo.'}
         </small>
       </div>
 
       {imageEnabled && (
         <div
-          className={`background-image-control${uploading ? " is-uploading" : ""}`}
+          className={`background-image-control${uploading ? ' is-uploading' : ''}`}
           aria-busy={uploading}
         >
           {draft.mediaId === undefined ? (
@@ -76,12 +76,18 @@ export function BoardBackgroundControl({
               onClick={chooseImage}
             >
               {uploading ? (
-                <SpinnerGap className="background-image-spinner" size={22} aria-hidden="true" />
+                <SpinnerGap
+                  className="background-image-spinner"
+                  size={22}
+                  aria-hidden="true"
+                />
               ) : (
                 <ImageSquare size={22} weight="light" aria-hidden="true" />
               )}
               <span>
-                <strong>{uploading ? "Preparing image…" : "Add background image"}</strong>
+                <strong>
+                  {uploading ? 'Preparing image…' : 'Add background image'}
+                </strong>
                 <small>JPG, PNG, WebP, GIF, or HEIC</small>
               </span>
             </button>
@@ -91,8 +97,16 @@ export function BoardBackgroundControl({
                 <CanvasBackground mediaId={draft.mediaId} />
                 <span>Viewport cover</span>
                 {uploading && (
-                  <div className="background-image-busy" role="status" aria-live="polite">
-                    <SpinnerGap className="background-image-spinner" size={20} aria-hidden="true" />
+                  <div
+                    className="background-image-busy"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <SpinnerGap
+                      className="background-image-spinner"
+                      size={20}
+                      aria-hidden="true"
+                    />
                     Preparing replacement…
                   </div>
                 )}
@@ -127,7 +141,7 @@ export function BoardBackgroundControl({
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
               if (file !== undefined) onChooseImage(file);
-              event.currentTarget.value = "";
+              event.currentTarget.value = '';
             }}
           />
         </div>
@@ -138,7 +152,7 @@ export function BoardBackgroundControl({
           <button
             key={preset.color}
             type="button"
-            className={normalizedHex === preset.color ? "is-active" : ""}
+            className={normalizedHex === preset.color ? 'is-active' : ''}
             aria-label={`Preview ${preset.label}, ${preset.color}`}
             aria-pressed={normalizedHex === preset.color}
             onClick={() =>
@@ -204,7 +218,12 @@ export function BoardBackgroundControl({
         </p>
       )}
       <div className="background-actions">
-        <button type="button" className="text-button" disabled={uploading} onClick={onReset}>
+        <button
+          type="button"
+          className="text-button"
+          disabled={uploading}
+          onClick={onReset}
+        >
           Reset all
         </button>
         <button
@@ -217,7 +236,8 @@ export function BoardBackgroundControl({
       </div>
       {imageEnabled && (
         <small className="background-image-note">
-          Images stay fixed to the viewport while you move around the infinite canvas.
+          Images stay fixed to the viewport while you move around the infinite
+          canvas.
         </small>
       )}
     </form>

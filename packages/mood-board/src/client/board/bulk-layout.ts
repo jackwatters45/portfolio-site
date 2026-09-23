@@ -1,5 +1,5 @@
-import type { BulkLayoutKind } from "./bulk-image-import";
-import type { BoardItem } from "./types";
+import type { BulkLayoutKind } from './bulk-image-import';
+import type { BoardItem } from './types';
 
 export type LayoutSource = {
   readonly id: string;
@@ -31,7 +31,7 @@ const MAX_ROW_WIDTH = 1_240;
 const ratio = (item: LayoutSource) => {
   const value = item.width / item.height;
   if (!Number.isFinite(value) || value < 0.125 || value > 8) {
-    throw new Error("Bulk layouts require image ratios between 1:8 and 8:1.");
+    throw new Error('Bulk layouts require image ratios between 1:8 and 8:1.');
   }
   return value;
 };
@@ -77,17 +77,27 @@ const looseLayout = (sources: ReadonlyArray<LayoutSource>): LayoutResult => {
   let y = 0;
   rows.forEach((sourcesInRow, rowIndex) => {
     const naturalWidth =
-      sourcesInRow.reduce((sum, source) => sum + TARGET_HEIGHT * ratio(source), 0) +
+      sourcesInRow.reduce(
+        (sum, source) => sum + TARGET_HEIGHT * ratio(source),
+        0,
+      ) +
       GAP * Math.max(0, sourcesInRow.length - 1);
-    const available = Math.max(200, MAX_ROW_WIDTH - GAP * Math.max(0, sourcesInRow.length - 1));
+    const available = Math.max(
+      200,
+      MAX_ROW_WIDTH - GAP * Math.max(0, sourcesInRow.length - 1),
+    );
     const height =
       rowIndex === rows.length - 1
         ? TARGET_HEIGHT
         : Math.min(
             TARGET_HEIGHT,
-            available / sourcesInRow.reduce((sum, source) => sum + ratio(source), 0),
+            available /
+              sourcesInRow.reduce((sum, source) => sum + ratio(source), 0),
           );
-    let x = Math.max(0, (MAX_ROW_WIDTH - Math.min(MAX_ROW_WIDTH, naturalWidth)) / 2);
+    let x = Math.max(
+      0,
+      (MAX_ROW_WIDTH - Math.min(MAX_ROW_WIDTH, naturalWidth)) / 2,
+    );
     for (const source of sourcesInRow) {
       const width = height * ratio(source);
       placed.push({ ...source, x, y, width, height });
@@ -103,7 +113,10 @@ const contactLayout = (sources: ReadonlyArray<LayoutSource>): LayoutResult => {
   const cellWidth = 300;
   const cellHeight = 260;
   const placed = sources.map((source, index): LayoutItem => {
-    const scale = Math.min(cellWidth / source.width, cellHeight / source.height);
+    const scale = Math.min(
+      cellWidth / source.width,
+      cellHeight / source.height,
+    );
     const width = source.width * scale;
     const height = source.height * scale;
     const column = index % columns;
@@ -120,7 +133,10 @@ const contactLayout = (sources: ReadonlyArray<LayoutSource>): LayoutResult => {
 };
 
 const masonryLayout = (sources: ReadonlyArray<LayoutSource>): LayoutResult => {
-  const columns = Math.max(1, Math.min(5, Math.ceil(Math.sqrt(sources.length))));
+  const columns = Math.max(
+    1,
+    Math.min(5, Math.ceil(Math.sqrt(sources.length))),
+  );
   const columnWidth = 300;
   const heights = Array.from({ length: columns }, () => 0);
   const placed = sources.map((source): LayoutItem => {
@@ -146,20 +162,23 @@ export function layoutBulkImages(
   sources: ReadonlyArray<LayoutSource>,
   kind: BulkLayoutKind,
 ): LayoutResult {
-  if (sources.length === 0) return { items: [], bounds: { x: 0, y: 0, width: 0, height: 0 } };
-  if (kind === "contact") return contactLayout(sources);
-  if (kind === "masonry") return masonryLayout(sources);
+  if (sources.length === 0)
+    return { items: [], bounds: { x: 0, y: 0, width: 0, height: 0 } };
+  if (kind === 'contact') return contactLayout(sources);
+  if (kind === 'masonry') return masonryLayout(sources);
   return looseLayout(sources);
 }
 
 export function rotatedItemBounds(
-  item: Pick<BoardItem, "x" | "y" | "width" | "height" | "rotation">,
+  item: Pick<BoardItem, 'x' | 'y' | 'width' | 'height' | 'rotation'>,
 ): Bounds {
   const radians = (item.rotation * Math.PI) / 180;
   const width =
-    Math.abs(item.width * Math.cos(radians)) + Math.abs(item.height * Math.sin(radians));
+    Math.abs(item.width * Math.cos(radians)) +
+    Math.abs(item.height * Math.sin(radians));
   const height =
-    Math.abs(item.width * Math.sin(radians)) + Math.abs(item.height * Math.cos(radians));
+    Math.abs(item.width * Math.sin(radians)) +
+    Math.abs(item.height * Math.cos(radians));
   const centerX = item.x + item.width / 2;
   const centerY = item.y + item.height / 2;
   return { x: centerX - width / 2, y: centerY - height / 2, width, height };
@@ -184,7 +203,9 @@ function* squareSpiral(step: number): Generator<readonly [number, number]> {
 export function placeLayoutWithoutOverlap(
   layout: LayoutResult,
   anchor: { readonly x: number; readonly y: number },
-  existing: ReadonlyArray<Pick<BoardItem, "x" | "y" | "width" | "height" | "rotation">>,
+  existing: ReadonlyArray<
+    Pick<BoardItem, 'x' | 'y' | 'width' | 'height' | 'rotation'>
+  >,
 ): LayoutResult {
   const baseX = anchor.x - layout.bounds.width / 2;
   const baseY = anchor.y - layout.bounds.height / 2;
@@ -197,7 +218,9 @@ export function placeLayoutWithoutOverlap(
       width: layout.bounds.width,
       height: layout.bounds.height,
     };
-    if (!obstacles.some((obstacle) => boundsOverlap(groupBounds, obstacle, GAP))) {
+    if (
+      !obstacles.some((obstacle) => boundsOverlap(groupBounds, obstacle, GAP))
+    ) {
       return {
         bounds: groupBounds,
         items: layout.items.map((item) => ({
@@ -208,7 +231,8 @@ export function placeLayoutWithoutOverlap(
       };
     }
     attempts += 1;
-    if (attempts >= 20_000) throw new Error("Could not find open canvas space for this import.");
+    if (attempts >= 20_000)
+      throw new Error('Could not find open canvas space for this import.');
   }
-  throw new Error("Could not find open canvas space for this import.");
+  throw new Error('Could not find open canvas space for this import.');
 }

@@ -1,8 +1,8 @@
-import { SignIn, UserCircle } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
+import { SignIn, UserCircle } from '@phosphor-icons/react';
+import { Link } from '@tanstack/react-router';
 
-import { accountDisplayName, accountInitials } from "../client/account-profile";
-import type { AccountUser } from "../client/auth-client";
+import { accountDisplayName, accountInitials } from '../client/account-profile';
+import type { AccountUser } from '../client/auth-client';
 
 function AccountAvatar({ user }: { readonly user: AccountUser }) {
   return <span aria-hidden="true">{accountInitials(user)}</span>;
@@ -20,7 +20,13 @@ export function HomeAccountIdentity({
   readonly onRetry: () => void;
 }) {
   if (pending) {
-    return <span className="home-account-loading" aria-label="Loading profile" aria-busy="true" />;
+    return (
+      <span
+        className="home-account-loading"
+        aria-label="Loading profile"
+        aria-busy="true"
+      />
+    );
   }
   if (error) {
     return (
@@ -31,7 +37,7 @@ export function HomeAccountIdentity({
   }
   if (user === undefined) {
     return (
-      <Link className="home-sign-in" to="/login" search={{ returnTo: "/" }}>
+      <Link className="home-sign-in" to="/login" search={{ returnTo: '/' }}>
         Sign in
       </Link>
     );
@@ -77,7 +83,10 @@ export function MenuAccountIdentity({
   }
   if (error) {
     return (
-      <section className="menu-account-card is-error" aria-label="Account unavailable">
+      <section
+        className="menu-account-card is-error"
+        aria-label="Account unavailable"
+      >
         <UserCircle size={28} weight="thin" aria-hidden="true" />
         <div>
           <strong>Profile unavailable</strong>
@@ -105,7 +114,11 @@ export function MenuAccountIdentity({
     );
   }
   return (
-    <Link className="menu-account-card is-member" to="/profile" aria-label="Open your profile">
+    <Link
+      className="menu-account-card is-member"
+      to="/profile"
+      aria-label="Open your profile"
+    >
       <span className="account-avatar">
         <AccountAvatar user={user} />
       </span>

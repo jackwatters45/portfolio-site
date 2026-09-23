@@ -1,0 +1,28 @@
+{
+  "name": "@personal-sites/nz",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "typecheck": "astro check",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "14.3.2",
+    "@effect/platform-browser": "4.0.0-rc.117",
+    "@personal-sites/comments": "workspace:*",
+    "astro": "7.3.3",
+    "effect": "4.0.0-rc.117",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@astrojs/react": "6.0.6",
+    "@cloudflare/workers-types": "5.20260922.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "agentation": "^3.0.2"
+  }
+}

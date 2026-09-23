@@ -1,19 +1,23 @@
-import { ArrowLeft, EnvelopeSimple, GoogleLogo } from "@phosphor-icons/react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { ArrowLeft, EnvelopeSimple, GoogleLogo } from '@phosphor-icons/react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState, type FormEvent } from 'react';
 
-import { authClient } from "../client/auth-client";
-import { safeReturnTo } from "../client/auth-route";
+import { authClient } from '../client/auth-client';
+import { safeReturnTo } from '../client/auth-route';
 
 type LoginSearch = {
   readonly returnTo: string;
   readonly error?: string;
 };
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute('/login')({
   validateSearch: (search: Record<string, unknown>): LoginSearch => {
-    const returnTo = safeReturnTo(typeof search.returnTo === "string" ? search.returnTo : null);
-    return typeof search.error === "string" ? { returnTo, error: search.error } : { returnTo };
+    const returnTo = safeReturnTo(
+      typeof search.returnTo === 'string' ? search.returnTo : null,
+    );
+    return typeof search.error === 'string'
+      ? { returnTo, error: search.error }
+      : { returnTo };
   },
   component: LoginPage,
 });
@@ -22,29 +26,31 @@ function LoginPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
   const session = authClient.useSession();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [googleEnabled, setGoogleEnabled] = useState(false);
-  const [pending, setPending] = useState<"google" | "email" | null>(null);
-  const [sentTo, setSentTo] = useState("");
+  const [pending, setPending] = useState<'google' | 'email' | null>(null);
+  const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState(() =>
-    search.error === undefined ? "" : "That sign-in link could not be used. Please try again.",
+    search.error === undefined
+      ? ''
+      : 'That sign-in link could not be used. Please try again.',
   );
   const returnTo = search.returnTo;
 
   useEffect(() => {
-    document.title = "Sign in — Moodboard";
+    document.title = 'Sign in — Moodboard';
     let active = true;
-    void fetch("/api/auth/providers", {
-      headers: { accept: "application/json" },
+    void fetch('/api/auth/providers', {
+      headers: { accept: 'application/json' },
     })
       .then(async (response) => {
         if (!response.ok) return;
         const value: unknown = await response.json();
         if (
           active &&
-          typeof value === "object" &&
+          typeof value === 'object' &&
           value !== null &&
-          "google" in value &&
+          'google' in value &&
           value.google === true
         ) {
           setGoogleEnabled(true);
@@ -63,20 +69,26 @@ function LoginPage() {
   }, [navigate, returnTo, session.data]);
 
   const signInWithGoogle = async () => {
-    setPending("google");
-    setError("");
+    setPending('google');
+    setError('');
     try {
       const result = await authClient.signIn.social({
-        provider: "google",
+        provider: 'google',
         callbackURL: returnTo,
         errorCallbackURL: `/login?returnTo=${encodeURIComponent(returnTo)}`,
       });
       if (result.error) {
-        setError(result.error.message ?? "Google sign in could not be started.");
+        setError(
+          result.error.message ?? 'Google sign in could not be started.',
+        );
         setPending(null);
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Google sign in could not be started.");
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Google sign in could not be started.',
+      );
       setPending(null);
     }
   };
@@ -85,9 +97,9 @@ function LoginPage() {
     event.preventDefault();
     const address = email.trim();
     if (!address || pending !== null) return;
-    setPending("email");
-    setError("");
-    setSentTo("");
+    setPending('email');
+    setError('');
+    setSentTo('');
     try {
       const result = await authClient.signIn.magicLink({
         email: address,
@@ -95,20 +107,30 @@ function LoginPage() {
         errorCallbackURL: `/login?returnTo=${encodeURIComponent(returnTo)}`,
       });
       if (result.error) {
-        setError(result.error.message ?? "The magic link could not be sent.");
+        setError(result.error.message ?? 'The magic link could not be sent.');
         setPending(null);
         return;
       }
       setSentTo(address);
       setPending(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The magic link could not be sent.");
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'The magic link could not be sent.',
+      );
       setPending(null);
     }
   };
 
   if (session.isPending || session.data) {
-    return <main className="login-page" aria-label="Loading profile" aria-busy="true" />;
+    return (
+      <main
+        className="login-page"
+        aria-label="Loading profile"
+        aria-busy="true"
+      />
+    );
   }
 
   return (
@@ -123,8 +145,8 @@ function LoginPage() {
         <h1 id="login-title">Sign in.</h1>
         <p className="login-intro">
           {googleEnabled
-            ? "Continue with Google or ask for a one-time link. No password to remember."
-            : "Ask for a one-time sign-in link. No password to remember."}
+            ? 'Continue with Google or ask for a one-time link. No password to remember.'
+            : 'Ask for a one-time sign-in link. No password to remember.'}
         </p>
 
         {googleEnabled && (
@@ -136,7 +158,9 @@ function LoginPage() {
               onClick={() => void signInWithGoogle()}
             >
               <GoogleLogo size={18} weight="bold" />
-              {pending === "google" ? "Opening Google…" : "Continue with Google"}
+              {pending === 'google'
+                ? 'Opening Google…'
+                : 'Continue with Google'}
             </button>
             <div className="login-divider">
               <span>or</span>
@@ -144,7 +168,10 @@ function LoginPage() {
           </>
         )}
 
-        <form className="login-email-form" onSubmit={(event) => void sendMagicLink(event)}>
+        <form
+          className="login-email-form"
+          onSubmit={(event) => void sendMagicLink(event)}
+        >
           <label htmlFor="login-email">Email address</label>
           <div>
             <EnvelopeSimple size={17} aria-hidden="true" />
@@ -159,11 +186,11 @@ function LoginPage() {
             />
           </div>
           <button type="submit" disabled={pending !== null}>
-            {pending === "email"
-              ? "Sending…"
+            {pending === 'email'
+              ? 'Sending…'
               : sentTo
-                ? "Send another link"
-                : "Email me a magic link"}
+                ? 'Send another link'
+                : 'Email me a magic link'}
           </button>
         </form>
 
@@ -179,11 +206,14 @@ function LoginPage() {
         )}
         {session.error != null && (
           <p className="login-error" role="alert">
-            The current account state could not be checked. You can retry sign-in below.
+            The current account state could not be checked. You can retry
+            sign-in below.
           </p>
         )}
 
-        <p className="login-footnote">Sign in to open your private workspace.</p>
+        <p className="login-footnote">
+          Sign in to open your private workspace.
+        </p>
       </section>
     </main>
   );

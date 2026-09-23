@@ -4,9 +4,9 @@ import type {
   ItemId,
   RemoteBoard,
   RemoteBoardItem,
-} from "../lib/board-rpc";
-import type { MediaId } from "../lib/media";
-import type { Board, BoardItem, BoardMutation } from "./board/types";
+} from '../lib/board-rpc';
+import type { MediaId } from '../lib/media';
+import type { Board, BoardItem, BoardMutation } from './board/types';
 
 const MAX_MUTATION_CHARACTERS = 8 * 1024 * 1024;
 
@@ -22,7 +22,9 @@ const cloneItem = (item: RemoteBoardItem): BoardItem => ({
   ...(item.src === undefined ? {} : { src: item.src }),
   ...(item.mediaId === undefined ? {} : { mediaId: item.mediaId }),
   ...(item.href === undefined ? {} : { href: item.href }),
-  ...(item.annotationTitle === undefined ? {} : { annotationTitle: item.annotationTitle }),
+  ...(item.annotationTitle === undefined
+    ? {}
+    : { annotationTitle: item.annotationTitle }),
   ...(item.annotationDescription === undefined
     ? {}
     : { annotationDescription: item.annotationDescription }),
@@ -30,15 +32,25 @@ const cloneItem = (item: RemoteBoardItem): BoardItem => ({
   ...(item.color === undefined ? {} : { color: item.color }),
   ...(item.label === undefined ? {} : { label: item.label }),
   ...(item.websiteUrl === undefined ? {} : { websiteUrl: item.websiteUrl }),
-  ...(item.websiteImageUrl === undefined ? {} : { websiteImageUrl: item.websiteImageUrl }),
-  ...(item.websiteTitle === undefined ? {} : { websiteTitle: item.websiteTitle }),
-  ...(item.websiteDescription === undefined ? {} : { websiteDescription: item.websiteDescription }),
-  ...(item.websiteSiteLabel === undefined ? {} : { websiteSiteLabel: item.websiteSiteLabel }),
+  ...(item.websiteImageUrl === undefined
+    ? {}
+    : { websiteImageUrl: item.websiteImageUrl }),
+  ...(item.websiteTitle === undefined
+    ? {}
+    : { websiteTitle: item.websiteTitle }),
+  ...(item.websiteDescription === undefined
+    ? {}
+    : { websiteDescription: item.websiteDescription }),
+  ...(item.websiteSiteLabel === undefined
+    ? {}
+    : { websiteSiteLabel: item.websiteSiteLabel }),
   ...(item.xDisplay === undefined ? {} : { xDisplay: item.xDisplay }),
   ...(item.xTheme === undefined ? {} : { xTheme: item.xTheme }),
   ...(item.xHideThread === undefined ? {} : { xHideThread: item.xHideThread }),
   ...(item.xAuthorName === undefined ? {} : { xAuthorName: item.xAuthorName }),
-  ...(item.xAuthorHandle === undefined ? {} : { xAuthorHandle: item.xAuthorHandle }),
+  ...(item.xAuthorHandle === undefined
+    ? {}
+    : { xAuthorHandle: item.xAuthorHandle }),
   ...(item.xPostText === undefined ? {} : { xPostText: item.xPostText }),
   ...(item.xPostDate === undefined ? {} : { xPostDate: item.xPostDate }),
 });
@@ -47,7 +59,9 @@ export const toLocalBoard = (board: RemoteBoard): Board => ({
   version: 1,
   title: board.title,
   ...(board.background === undefined ? {} : { background: board.background }),
-  ...(board.backgroundMediaId === undefined ? {} : { backgroundMediaId: board.backgroundMediaId }),
+  ...(board.backgroundMediaId === undefined
+    ? {}
+    : { backgroundMediaId: board.backgroundMediaId }),
   items: board.items.map(cloneItem),
   updatedAt: board.updatedAt,
 });
@@ -94,7 +108,9 @@ const applyMutation = (
   updatedAt: BoardTimestamp,
 ): Board => {
   const deleted = new Set(mutation.deletes);
-  const upserts = new Map(mutation.upserts.map((item) => [item.id, cloneItem(item)]));
+  const upserts = new Map(
+    mutation.upserts.map((item) => [item.id, cloneItem(item)]),
+  );
   const items = board.items
     .filter((item) => !deleted.has(item.id))
     .map((item) => upserts.get(item.id) ?? item);
@@ -103,10 +119,15 @@ const applyMutation = (
   for (const item of upserts.values()) {
     if (!known.has(item.id)) items.push(item);
   }
-  items.sort((left, right) => left.order - right.order || left.id.localeCompare(right.id));
+  items.sort(
+    (left, right) =>
+      left.order - right.order || left.id.localeCompare(right.id),
+  );
 
   const background =
-    mutation.background === undefined ? board.background : (mutation.background ?? undefined);
+    mutation.background === undefined
+      ? board.background
+      : (mutation.background ?? undefined);
   const backgroundMediaId =
     mutation.backgroundMediaId === undefined
       ? board.backgroundMediaId
@@ -122,8 +143,10 @@ const applyMutation = (
   };
 };
 
-export const applyBoardMutation = (board: Board, mutation: BoardMutation): Board =>
-  applyMutation(board, mutation, board.updatedAt);
+export const applyBoardMutation = (
+  board: Board,
+  mutation: BoardMutation,
+): Board => applyMutation(board, mutation, board.updatedAt);
 
 export const applyBoardChange = (board: Board, change: BoardChange): Board =>
   applyMutation(board, change, change.updatedAt);
@@ -148,17 +171,23 @@ const itemSize = (item: BoardItem) =>
   (item.xPostText?.length ?? 0) +
   (item.xPostDate?.length ?? 0);
 
-export const diffBoards = (previous: Board, next: Board): ReadonlyArray<BoardMutation> => {
+export const diffBoards = (
+  previous: Board,
+  next: Board,
+): ReadonlyArray<BoardMutation> => {
   const previousById = new Map(previous.items.map((item) => [item.id, item]));
   const nextIds = new Set(next.items.map((item) => item.id));
   const changed = next.items.filter((item) => {
     const oldItem = previousById.get(item.id);
     return oldItem === undefined || !sameItem(oldItem, item);
   });
-  const deletes = previous.items.filter((item) => !nextIds.has(item.id)).map((item) => item.id);
+  const deletes = previous.items
+    .filter((item) => !nextIds.has(item.id))
+    .map((item) => item.id);
   const title = previous.title === next.title ? undefined : next.title;
   const backgroundChanged = previous.background !== next.background;
-  const backgroundMediaChanged = previous.backgroundMediaId !== next.backgroundMediaId;
+  const backgroundMediaChanged =
+    previous.backgroundMediaId !== next.backgroundMediaId;
 
   if (
     changed.length === 0 &&
@@ -173,13 +202,18 @@ export const diffBoards = (previous: Board, next: Board): ReadonlyArray<BoardMut
   let upserts: BoardItem[] = [];
   let size = 0;
   let metadataPending =
-    title !== undefined || backgroundChanged || backgroundMediaChanged || deletes.length > 0;
+    title !== undefined ||
+    backgroundChanged ||
+    backgroundMediaChanged ||
+    deletes.length > 0;
 
   const flush = () => {
     if (upserts.length === 0 && !metadataPending) return;
     drafts.push({
       ...(metadataPending && title !== undefined ? { title } : {}),
-      ...(metadataPending && backgroundChanged ? { background: next.background ?? null } : {}),
+      ...(metadataPending && backgroundChanged
+        ? { background: next.background ?? null }
+        : {}),
       ...(metadataPending && backgroundMediaChanged
         ? { backgroundMediaId: next.backgroundMediaId ?? null }
         : {}),
@@ -193,7 +227,8 @@ export const diffBoards = (previous: Board, next: Board): ReadonlyArray<BoardMut
 
   for (const item of changed) {
     const nextSize = itemSize(item);
-    if (upserts.length > 0 && size + nextSize > MAX_MUTATION_CHARACTERS) flush();
+    if (upserts.length > 0 && size + nextSize > MAX_MUTATION_CHARACTERS)
+      flush();
     upserts.push(item);
     size += nextSize;
     if (size >= MAX_MUTATION_CHARACTERS) flush();

@@ -1,0 +1,4 @@
+# Upload only public assets. Alchemy bundles the Astro server separately.
+_worker.js/
+_routes.json
+_redirects

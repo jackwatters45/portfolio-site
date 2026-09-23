@@ -1,14 +1,14 @@
-import { ArrowRight, Copy, ShareNetwork } from "@phosphor-icons/react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useEffect, useState, type CSSProperties } from "react";
+import { ArrowRight, Copy, ShareNetwork } from '@phosphor-icons/react';
+import { createFileRoute, Link, notFound } from '@tanstack/react-router';
+import { useEffect, useState, type CSSProperties } from 'react';
 
-import { parseProfileHandle, profilePath } from "../client/board-route";
-import { accessibleFieldColors } from "../client/board/board-utils";
-import { publicMediaUrl } from "../client/media-url";
-import { loadPublicProfile, PublicApiError } from "../client/public-api-client";
-import type { PublicProfile } from "../lib/public-api";
+import { parseProfileHandle, profilePath } from '../client/board-route';
+import { accessibleFieldColors } from '../client/board/board-utils';
+import { publicMediaUrl } from '../client/media-url';
+import { loadPublicProfile, PublicApiError } from '../client/public-api-client';
+import type { PublicProfile } from '../lib/public-api';
 
-export const Route = createFileRoute("/@{$handle}")({
+export const Route = createFileRoute('/@{$handle}')({
   params: {
     parse: ({ handle }) => {
       const parsed = parseProfileHandle(handle);
@@ -21,27 +21,31 @@ export const Route = createFileRoute("/@{$handle}")({
 });
 
 interface PublicCardStyle extends CSSProperties {
-  "--public-card-muted": string;
+  '--public-card-muted': string;
 }
 
-const shareUrl = async (title: string, url: string): Promise<"shared" | "copied" | "cancelled"> => {
-  if (typeof navigator.share === "function") {
+const shareUrl = async (
+  title: string,
+  url: string,
+): Promise<'shared' | 'copied' | 'cancelled'> => {
+  if (typeof navigator.share === 'function') {
     try {
       await navigator.share({ title, url });
-      return "shared";
+      return 'shared';
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return "cancelled";
+      if (error instanceof DOMException && error.name === 'AbortError')
+        return 'cancelled';
     }
   }
   await navigator.clipboard.writeText(url);
-  return "copied";
+  return 'copied';
 };
 
 function PublicProfilePage() {
   const { handle } = Route.useParams();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -53,8 +57,8 @@ function PublicProfilePage() {
         if (!active) return;
         setError(
           reason instanceof PublicApiError && reason.status === 404
-            ? "This profile is private or does not exist."
-            : "The profile could not be loaded.",
+            ? 'This profile is private or does not exist.'
+            : 'The profile could not be loaded.',
         );
       },
     );
@@ -81,7 +85,10 @@ function PublicProfilePage() {
     );
   }
 
-  const profileUrl = new URL(profilePath(profile.owner.handle), window.location.origin).toString();
+  const profileUrl = new URL(
+    profilePath(profile.owner.handle),
+    window.location.origin,
+  ).toString();
 
   return (
     <main className="public-profile-page">
@@ -90,7 +97,9 @@ function PublicProfilePage() {
           <span className="public-mark">Moodboard publisher</span>
           <h1>{profile.owner.displayName}</h1>
           <p className="public-handle">@{profile.owner.handle}</p>
-          {profile.owner.bio && <p className="public-bio">{profile.owner.bio}</p>}
+          {profile.owner.bio && (
+            <p className="public-bio">{profile.owner.bio}</p>
+          )}
         </div>
         <button
           type="button"
@@ -99,23 +108,30 @@ function PublicProfilePage() {
             void shareUrl(profile.owner.displayName, profileUrl).then(
               (result) => {
                 setNotice(
-                  result === "copied"
-                    ? "Profile link copied"
-                    : result === "shared"
-                      ? "Share sheet opened"
-                      : "",
+                  result === 'copied'
+                    ? 'Profile link copied'
+                    : result === 'shared'
+                      ? 'Share sheet opened'
+                      : '',
                 );
               },
-              () => setNotice("Could not copy this profile link"),
+              () => setNotice('Could not copy this profile link'),
             );
           }}
         >
-          {typeof navigator.share === "function" ? <ShareNetwork size={18} /> : <Copy size={18} />}
+          {typeof navigator.share === 'function' ? (
+            <ShareNetwork size={18} />
+          ) : (
+            <Copy size={18} />
+          )}
           Share profile
         </button>
       </header>
 
-      <section className="public-gallery" aria-labelledby="public-gallery-title">
+      <section
+        className="public-gallery"
+        aria-labelledby="public-gallery-title"
+      >
         <div className="public-gallery-heading">
           <h2 id="public-gallery-title">Published boards</h2>
           <span>{profile.boards.length}</span>
@@ -125,18 +141,20 @@ function PublicProfilePage() {
         ) : (
           <div className="public-board-grid">
             {profile.boards.map((board) => {
-              const background = board.background ?? "#EDEDED";
+              const background = board.background ?? '#EDEDED';
               const colors = accessibleFieldColors(background);
               const hasBackgroundImage = board.backgroundMediaId !== undefined;
               const cardStyle: PublicCardStyle = {
                 backgroundColor: background,
-                color: hasBackgroundImage ? "#F8F7F3" : colors.foreground,
-                "--public-card-muted": hasBackgroundImage ? "#F8F7F3" : colors.muted,
+                color: hasBackgroundImage ? '#F8F7F3' : colors.foreground,
+                '--public-card-muted': hasBackgroundImage
+                  ? '#F8F7F3'
+                  : colors.muted,
               };
               return (
                 <Link
                   key={board.publicId}
-                  className={`public-board-card${hasBackgroundImage ? " has-background-image" : ""}`}
+                  className={`public-board-card${hasBackgroundImage ? ' has-background-image' : ''}`}
                   to="/share/$publicId"
                   params={{ publicId: board.publicId }}
                   style={cardStyle}
@@ -144,7 +162,10 @@ function PublicProfilePage() {
                   {board.backgroundMediaId !== undefined && (
                     <img
                       className="public-board-card-image"
-                      src={publicMediaUrl(board.publicId, board.backgroundMediaId)}
+                      src={publicMediaUrl(
+                        board.publicId,
+                        board.backgroundMediaId,
+                      )}
                       alt=""
                       loading="lazy"
                       decoding="async"
@@ -154,9 +175,10 @@ function PublicProfilePage() {
                     />
                   )}
                   <span>
-                    {board.itemCount} {board.itemCount === 1 ? "piece" : "pieces"}
+                    {board.itemCount}{' '}
+                    {board.itemCount === 1 ? 'piece' : 'pieces'}
                   </span>
-                  <strong>{board.title || "Untitled mood"}</strong>
+                  <strong>{board.title || 'Untitled mood'}</strong>
                   <small>
                     View board <ArrowRight size={14} />
                   </small>

@@ -1,16 +1,19 @@
-import { XLogo } from "@phosphor-icons/react";
+import { XLogo } from '@phosphor-icons/react';
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
-} from "react";
+} from 'react';
 
-import type { BoardItem } from "../client/board/types";
-import { loadXWidgets } from "../client/media/x-embed";
-import { measureRenderedXPostHeight, xPostVisualScale } from "../client/media/x-post-measurement";
-import { parseXPostUrl } from "../lib/x-post";
+import type { BoardItem } from '../client/board/types';
+import { loadXWidgets } from '../client/media/x-embed';
+import {
+  measureRenderedXPostHeight,
+  xPostVisualScale,
+} from '../client/media/x-post-measurement';
+import { parseXPostUrl } from '../lib/x-post';
 
 type Props = {
   readonly item: BoardItem;
@@ -18,22 +21,29 @@ type Props = {
   readonly onHeight?: (height: number) => void;
 };
 
-const stopPointer = (event: ReactPointerEvent<HTMLElement>) => event.stopPropagation();
+const stopPointer = (event: ReactPointerEvent<HTMLElement>) =>
+  event.stopPropagation();
 
-const useResolvedTheme = (theme: BoardItem["xTheme"]): "light" | "dark" => {
-  const [automatic, setAutomatic] = useState<"light" | "dark">("light");
+const useResolvedTheme = (theme: BoardItem['xTheme']): 'light' | 'dark' => {
+  const [automatic, setAutomatic] = useState<'light' | 'dark'>('light');
   useEffect(() => {
-    if (theme !== "automatic") return;
-    const query = window.matchMedia("(prefers-color-scheme: dark)");
-    const update = () => setAutomatic(query.matches ? "dark" : "light");
+    if (theme !== 'automatic') return;
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setAutomatic(query.matches ? 'dark' : 'light');
     update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
   }, [theme]);
-  return theme === "dark" ? "dark" : theme === "light" ? "light" : automatic;
+  return theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : automatic;
 };
 
-function XPostSnapshot({ item, author }: { readonly item: BoardItem; readonly author: string }) {
+function XPostSnapshot({
+  item,
+  author,
+}: {
+  readonly item: BoardItem;
+  readonly author: string;
+}) {
   return (
     <div className="x-post-fallback">
       <span className="x-post-mark" aria-hidden="true">
@@ -41,9 +51,13 @@ function XPostSnapshot({ item, author }: { readonly item: BoardItem; readonly au
       </span>
       <div className="x-post-snapshot">
         <strong>{author}</strong>
-        {item.xAuthorHandle && item.xAuthorName && <small>@{item.xAuthorHandle}</small>}
+        {item.xAuthorHandle && item.xAuthorName && (
+          <small>@{item.xAuthorHandle}</small>
+        )}
         {item.xPostText && <p>{item.xPostText}</p>}
-        {item.xPostDate && <time dateTime={item.xPostDate}>{item.xPostDate}</time>}
+        {item.xPostDate && (
+          <time dateTime={item.xPostDate}>{item.xPostDate}</time>
+        )}
       </div>
     </div>
   );
@@ -57,35 +71,45 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
   useEffect(() => {
     onHeightRef.current = onHeight;
   }, [onHeight]);
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
-  const [error, setError] = useState("");
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
+    'loading',
+  );
+  const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   const theme = useResolvedTheme(item.xTheme);
-  const source = parseXPostUrl(item.src ?? "");
+  const source = parseXPostUrl(item.src ?? '');
   const sourceSrc = source?.src;
   const sourceHandle = source?.handle;
 
   const scaleCurrentIframe = useCallback(() => {
     const mount = mountRef.current;
-    const iframe = mount?.querySelector("iframe");
-    if (mount === null || mount === undefined || iframe === null || iframe === undefined)
+    const iframe = mount?.querySelector('iframe');
+    if (
+      mount === null ||
+      mount === undefined ||
+      iframe === null ||
+      iframe === undefined
+    )
       return false;
     const scale = xPostVisualScale(iframe.offsetWidth, mount.clientWidth);
     if (scale === null || iframe.offsetHeight < 100) return false;
-    iframe.style.transform = scale === 1 ? "" : `scale(${scale})`;
-    iframe.style.transformOrigin = "top center";
+    iframe.style.transform = scale === 1 ? '' : `scale(${scale})`;
+    iframe.style.transformOrigin = 'top center';
     mount.style.height = `${Math.ceil(iframe.offsetHeight * scale)}px`;
     return true;
   }, []);
 
   const reconcileCurrentHeight = useCallback(() => {
     const root = rootRef.current;
-    const iframe = mountRef.current?.querySelector("iframe");
+    const iframe = mountRef.current?.querySelector('iframe');
     if (root === null || iframe == null) return false;
     // offsetHeight is unscaled; getBoundingClientRect() is distorted by the canvas zoom transform.
     const next = measureRenderedXPostHeight(iframe, root);
     if (next === null) return false;
-    if (Math.abs(next - itemHeightRef.current) >= 4 && onHeightRef.current !== undefined) {
+    if (
+      Math.abs(next - itemHeightRef.current) >= 4 &&
+      onHeightRef.current !== undefined
+    ) {
       itemHeightRef.current = next;
       onHeightRef.current(next);
     }
@@ -98,7 +122,12 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
   }, [item.height, reconcileCurrentHeight]);
 
   useEffect(() => {
-    if (sourceSrc === undefined || sourceHandle === undefined || mountRef.current === null) return;
+    if (
+      sourceSrc === undefined ||
+      sourceHandle === undefined ||
+      mountRef.current === null
+    )
+      return;
     let active = true;
     let mutationObserver: MutationObserver | null = null;
     let iframeObserver: ResizeObserver | null = null;
@@ -106,28 +135,33 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
     let observedIframe: HTMLIFrameElement | null = null;
     let renderTimeout: number | undefined;
     const mount = mountRef.current;
-    setStatus("loading");
-    setError("");
-    mount.style.height = "";
+    setStatus('loading');
+    setError('');
+    mount.style.height = '';
     mount.replaceChildren();
 
     const finishRendered = () => {
-      const iframe = mount.querySelector("iframe");
-      if (!active || iframe === null || iframe.offsetHeight < 100 || !scaleCurrentIframe())
+      const iframe = mount.querySelector('iframe');
+      if (
+        !active ||
+        iframe === null ||
+        iframe.offsetHeight < 100 ||
+        !scaleCurrentIframe()
+      )
         return false;
       if (renderTimeout !== undefined) {
         window.clearTimeout(renderTimeout);
         renderTimeout = undefined;
       }
       mutationObserver?.disconnect();
-      setError("");
-      setStatus("loaded");
+      setError('');
+      setStatus('loaded');
       requestAnimationFrame(reconcileCurrentHeight);
       return true;
     };
 
     const observeIframe = () => {
-      const iframe = mount.querySelector("iframe");
+      const iframe = mount.querySelector('iframe');
       if (iframe === null) return false;
       if (iframe !== observedIframe) {
         iframeObserver?.disconnect();
@@ -142,20 +176,21 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
     void loadXWidgets()
       .then((api) => {
         if (!active) return;
-        const quote = document.createElement("blockquote");
-        quote.className = "twitter-tweet";
-        quote.dataset.dnt = "true";
+        const quote = document.createElement('blockquote');
+        quote.className = 'twitter-tweet';
+        quote.dataset.dnt = 'true';
         quote.dataset.theme = theme;
-        if (item.xDisplay === "media") {
+        if (item.xDisplay === 'media') {
           quote.dataset.mediaMaxWidth = String(
             Math.round(Math.min(1_920, Math.max(560, item.width))),
           );
         } else {
-          quote.dataset.conversation = "none";
+          quote.dataset.conversation = 'none';
         }
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = sourceSrc;
-        link.textContent = item.xPostText ?? `Post by @${item.xAuthorHandle ?? sourceHandle}`;
+        link.textContent =
+          item.xPostText ?? `Post by @${item.xAuthorHandle ?? sourceHandle}`;
         quote.append(link);
         mount.replaceChildren(quote);
 
@@ -171,15 +206,17 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
           iframeObserver?.disconnect();
           rootObserver?.disconnect();
           mount.replaceChildren();
-          setStatus("error");
-          setError("This X post could not be displayed here.");
+          setStatus('error');
+          setError('This X post could not be displayed here.');
         }, 20_000);
       })
       .catch((reason: unknown) => {
         if (active) {
           mount.replaceChildren();
-          setStatus("error");
-          setError(reason instanceof Error ? reason.message : "X could not be loaded.");
+          setStatus('error');
+          setError(
+            reason instanceof Error ? reason.message : 'X could not be loaded.',
+          );
         }
       });
 
@@ -189,7 +226,7 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
       iframeObserver?.disconnect();
       rootObserver?.disconnect();
       if (renderTimeout !== undefined) window.clearTimeout(renderTimeout);
-      mount.style.height = "";
+      mount.style.height = '';
       mount.replaceChildren();
     };
   }, [
@@ -207,19 +244,26 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
 
   const author =
     item.xAuthorName ||
-    (item.xAuthorHandle ? `@${item.xAuthorHandle}` : source ? `@${source.handle}` : "X post");
+    (item.xAuthorHandle
+      ? `@${item.xAuthorHandle}`
+      : source
+        ? `@${source.handle}`
+        : 'X post');
   return (
-    <div ref={rootRef} className={`x-post-card is-${status}${editing ? " is-editing" : ""}`}>
-      {status !== "loaded" && <XPostSnapshot item={item} author={author} />}
+    <div
+      ref={rootRef}
+      className={`x-post-card is-${status}${editing ? ' is-editing' : ''}`}
+    >
+      {status !== 'loaded' && <XPostSnapshot item={item} author={author} />}
       <div
         className="x-embed-mount"
         ref={mountRef}
-        hidden={status === "error"}
+        hidden={status === 'error'}
         inert={editing ? true : undefined}
         onPointerDown={editing ? undefined : stopPointer}
-        aria-label={`${item.xDisplay === "media" ? "X media" : "X post"} by ${author}`}
+        aria-label={`${item.xDisplay === 'media' ? 'X media' : 'X post'} by ${author}`}
       />
-      {status === "error" && (
+      {status === 'error' && (
         <div
           className="x-post-error"
           role="status"
@@ -230,8 +274,8 @@ export function XPostCard({ item, editing = false, onHeight }: Props) {
           <button
             type="button"
             onClick={() => {
-              setError("");
-              setStatus("loading");
+              setError('');
+              setStatus('loading');
               setAttempt((value) => value + 1);
             }}
           >

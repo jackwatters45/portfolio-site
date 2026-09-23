@@ -1,8 +1,8 @@
-import { Effect, Stream } from "effect";
+import { Effect, Stream } from 'effect';
 
-import { BoardRpcs } from "../lib/board-rpc";
-import { BoardService } from "./board-service";
-import { WebsitePreviewService } from "./website-preview-service";
+import { BoardRpcs } from '../lib/board-rpc';
+import { BoardService } from './board-service';
+import { WebsitePreviewService } from './website-preview-service';
 
 export const BoardHandlers = BoardRpcs.toLayer(
   Effect.gen(function* () {
@@ -17,7 +17,9 @@ export const BoardHandlers = BoardRpcs.toLayer(
         boards.duplicate(sourceBoardId, boardId, title),
       DeleteBoard: ({ boardId }) => boards.delete(boardId),
       SubscribeBoard: ({ boardId }) =>
-        boards.subscribe(boardId).pipe(Stream.interruptWhen(Effect.sleep("5 minutes"))),
+        boards
+          .subscribe(boardId)
+          .pipe(Stream.interruptWhen(Effect.sleep('5 minutes'))),
       ResolveWebsitePreview: ({ url }) => websitePreviews.resolve(url),
       ResolveXPostPreview: ({ url }) => websitePreviews.resolveXPost(url),
       CommitBoard: (input) => boards.commit(input),

@@ -1,19 +1,19 @@
-import { Effect, Exit, Schema } from "effect";
-import { describe, expect, it } from "vitest";
+import { Effect, Exit, Schema } from 'effect';
+import { describe, expect, it } from 'vitest';
 
 import {
   normalizeProfileHandle,
   PublicBoardSchema,
   PublicIdSchema,
   PublicProfileSchema,
-} from "../../src/lib/public-api";
+} from '../../src/lib/public-api';
 
-const publicId = "0123456789abcdef0123456789abcdef";
+const publicId = '0123456789abcdef0123456789abcdef';
 
 const owner = {
-  handle: "studio-notes",
-  displayName: "Studio Notes",
-  bio: "Materials, rooms, and sounds.",
+  handle: 'studio-notes',
+  displayName: 'Studio Notes',
+  bio: 'Materials, rooms, and sounds.',
 };
 
 const board = {
@@ -21,75 +21,75 @@ const board = {
   owner,
   board: {
     version: 1,
-    title: "Quiet rooms",
-    background: "#EDEDED",
-    backgroundMediaId: "0123456789abcdef0123456789abcdef",
+    title: 'Quiet rooms',
+    background: '#EDEDED',
+    backgroundMediaId: '0123456789abcdef0123456789abcdef',
     items: [
       {
-        kind: "image",
+        kind: 'image',
         x: 0,
         y: 0,
         width: 320,
         height: 240,
         rotation: 0,
         order: 1,
-        src: "https://images.example/room.jpg",
-        href: "https://source.example/room",
-        annotationTitle: "Waxed field jacket",
-        annotationDescription: "Weathered cotton with a corduroy collar.",
+        src: 'https://images.example/room.jpg',
+        href: 'https://source.example/room',
+        annotationTitle: 'Waxed field jacket',
+        annotationDescription: 'Weathered cotton with a corduroy collar.',
       },
       {
-        kind: "website",
+        kind: 'website',
         x: 360,
         y: 0,
         width: 540,
         height: 360,
         rotation: 0,
         order: 2,
-        websiteUrl: "https://example.com/story",
-        websiteImageUrl: "https://cdn.example.com/story.jpg",
-        websiteTitle: "A collected room",
-        websiteDescription: "Light, stone, and quiet objects.",
-        websiteSiteLabel: "example.com",
+        websiteUrl: 'https://example.com/story',
+        websiteImageUrl: 'https://cdn.example.com/story.jpg',
+        websiteTitle: 'A collected room',
+        websiteDescription: 'Light, stone, and quiet objects.',
+        websiteSiteLabel: 'example.com',
       },
       {
-        kind: "youtube",
+        kind: 'youtube',
         x: 0,
         y: 300,
         width: 520,
         height: 400,
         rotation: 0,
         order: 3,
-        src: "https://www.youtube.com/watch?v=ryig6M3rZYU",
-        label: "Reference film",
+        src: 'https://www.youtube.com/watch?v=ryig6M3rZYU',
+        label: 'Reference film',
       },
       {
-        kind: "audio",
+        kind: 'audio',
         x: 560,
         y: 300,
         width: 520,
         height: 220,
         rotation: 0,
         order: 4,
-        mediaId: "fedcba9876543210fedcba9876543210",
-        label: "Room tone",
+        mediaId: 'fedcba9876543210fedcba9876543210',
+        label: 'Room tone',
       },
       {
-        kind: "x",
+        kind: 'x',
         x: 0,
         y: 560,
         width: 550,
         height: 620,
         rotation: 0,
         order: 5,
-        src: "https://x.com/sheherenow_/status/2082226100764369045",
-        xDisplay: "post",
-        xTheme: "automatic",
+        src: 'https://x.com/sheherenow_/status/2082226100764369045',
+        xDisplay: 'post',
+        xTheme: 'automatic',
         xHideThread: true,
-        xAuthorName: "Jem",
-        xAuthorHandle: "sheherenow_",
-        xPostText: "Cooking inspiration",
-        xPostDate: "2026-07-28",
+        xAuthorName: 'Jem',
+        xAuthorHandle: 'sheherenow_',
+        xPostText: 'Cooking inspiration',
+        xPostDate: '2026-07-28',
       },
     ],
     updatedAt: 10,
@@ -97,19 +97,21 @@ const board = {
   publishedAt: 11,
 };
 
-describe("public API contracts", () => {
-  it("accepts opaque 128-bit public ids and normalized handles", () => {
-    expect(Effect.runSync(Schema.decodeUnknownEffect(PublicIdSchema)(publicId))).toBe(publicId);
-    expect(normalizeProfileHandle(" Studio-Notes ")).toBe("studio-notes");
+describe('public API contracts', () => {
+  it('accepts opaque 128-bit public ids and normalized handles', () => {
+    expect(
+      Effect.runSync(Schema.decodeUnknownEffect(PublicIdSchema)(publicId)),
+    ).toBe(publicId);
+    expect(normalizeProfileHandle(' Studio-Notes ')).toBe('studio-notes');
   });
 
-  it("decodes read-only board and profile DTOs without owner board ids", () => {
+  it('decodes read-only board and profile DTOs without owner board ids', () => {
     const decodedBoard = Effect.runSync(
       Schema.decodeUnknownEffect(PublicBoardSchema)({
         ...board,
-        boardId: "default",
+        boardId: 'default',
         revision: 99,
-        clientId: "private-client",
+        clientId: 'private-client',
       }),
     );
     const decodedProfile = Effect.runSync(
@@ -118,56 +120,60 @@ describe("public API contracts", () => {
         boards: [
           {
             publicId,
-            title: "Quiet rooms",
+            title: 'Quiet rooms',
             itemCount: 1,
             updatedAt: 10,
             publishedAt: 11,
-            backgroundMediaId: "0123456789abcdef0123456789abcdef",
+            backgroundMediaId: '0123456789abcdef0123456789abcdef',
           },
         ],
       }),
     );
 
-    expect("boardId" in decodedBoard).toBe(false);
-    expect("revision" in decodedBoard).toBe(false);
-    expect("clientId" in decodedBoard).toBe(false);
+    expect('boardId' in decodedBoard).toBe(false);
+    expect('revision' in decodedBoard).toBe(false);
+    expect('clientId' in decodedBoard).toBe(false);
     expect(decodedProfile.boards[0]).toMatchObject({
       publicId,
-      backgroundMediaId: "0123456789abcdef0123456789abcdef",
+      backgroundMediaId: '0123456789abcdef0123456789abcdef',
     });
-    expect(decodedBoard.board.backgroundMediaId).toBe("0123456789abcdef0123456789abcdef");
+    expect(decodedBoard.board.backgroundMediaId).toBe(
+      '0123456789abcdef0123456789abcdef',
+    );
     expect(decodedBoard.board.items[0]).toMatchObject({
-      annotationTitle: "Waxed field jacket",
-      annotationDescription: "Weathered cotton with a corduroy collar.",
+      annotationTitle: 'Waxed field jacket',
+      annotationDescription: 'Weathered cotton with a corduroy collar.',
     });
     expect(decodedBoard.board.items[1]).toMatchObject({
-      kind: "website",
-      websiteTitle: "A collected room",
+      kind: 'website',
+      websiteTitle: 'A collected room',
     });
     expect(decodedBoard.board.items[2]).toMatchObject({
-      kind: "youtube",
-      src: "https://www.youtube.com/watch?v=ryig6M3rZYU",
+      kind: 'youtube',
+      src: 'https://www.youtube.com/watch?v=ryig6M3rZYU',
     });
     expect(decodedBoard.board.items[4]).toMatchObject({
-      kind: "x",
-      xAuthorHandle: "sheherenow_",
-      xPostText: "Cooking inspiration",
+      kind: 'x',
+      xAuthorHandle: 'sheherenow_',
+      xPostText: 'Cooking inspiration',
     });
     expect(decodedBoard.board.items[3]).toMatchObject({
-      kind: "audio",
-      mediaId: "fedcba9876543210fedcba9876543210",
+      kind: 'audio',
+      mediaId: 'fedcba9876543210fedcba9876543210',
     });
   });
 
-  it("rejects board ids, unsafe links, malformed handles, and malformed public ids", () => {
-    const invalidId = Effect.runSyncExit(Schema.decodeUnknownEffect(PublicIdSchema)("default"));
-    const invalidHandle = normalizeProfileHandle("../owner");
+  it('rejects board ids, unsafe links, malformed handles, and malformed public ids', () => {
+    const invalidId = Effect.runSyncExit(
+      Schema.decodeUnknownEffect(PublicIdSchema)('default'),
+    );
+    const invalidHandle = normalizeProfileHandle('../owner');
     const unsafeBoard = Effect.runSyncExit(
       Schema.decodeUnknownEffect(PublicBoardSchema)({
         ...board,
         board: {
           ...board.board,
-          items: [{ ...board.board.items[0], href: "javascript:alert(1)" }],
+          items: [{ ...board.board.items[0], href: 'javascript:alert(1)' }],
         },
       }),
     );
@@ -179,7 +185,9 @@ describe("public API contracts", () => {
         ...board,
         board: {
           ...board.board,
-          items: [{ ...board.board.items[1], websiteUrl: "https://127.0.0.1/admin" }],
+          items: [
+            { ...board.board.items[1], websiteUrl: 'https://127.0.0.1/admin' },
+          ],
         },
       }),
     );

@@ -1,8 +1,8 @@
-import { Clock, Context, Effect, Layer, Schema } from "effect";
-import * as SqlClient from "effect/unstable/sql/SqlClient";
-import type { SqlError } from "effect/unstable/sql/SqlError";
+import { Clock, Context, Effect, Layer, Schema } from 'effect';
+import * as SqlClient from 'effect/unstable/sql/SqlClient';
+import type { SqlError } from 'effect/unstable/sql/SqlError';
 
-import { BoardTimestampSchema, type BoardId } from "../lib/board-rpc";
+import { BoardTimestampSchema, type BoardId } from '../lib/board-rpc';
 import {
   PublicBoardItemSchema,
   PublicBoardSchema,
@@ -17,8 +17,8 @@ import {
   type PublicId,
   type PublicOwner,
   type PublicProfile,
-} from "../lib/public-api";
-import { NullableSqliteBooleanSchema } from "./sqlite";
+} from '../lib/public-api';
+import { NullableSqliteBooleanSchema } from './sqlite';
 
 interface ProfileRow {
   readonly handle: unknown;
@@ -79,7 +79,9 @@ interface PublicationRow {
   readonly public_id: unknown;
 }
 
-const decodeOwnerRow = Effect.fn("PublishingRepo.decodeOwnerRow")(function* (row: ProfileRow) {
+const decodeOwnerRow = Effect.fn('PublishingRepo.decodeOwnerRow')(function* (
+  row: ProfileRow,
+) {
   return yield* Schema.decodeUnknownEffect(PublicOwnerSchema)({
     handle: row.handle,
     displayName: row.display_name,
@@ -87,22 +89,30 @@ const decodeOwnerRow = Effect.fn("PublishingRepo.decodeOwnerRow")(function* (row
   }).pipe(Effect.orDie);
 });
 
-const decodeSummaryRow = Effect.fn("PublishingRepo.decodeSummaryRow")(function* (row: SummaryRow) {
-  return yield* Schema.decodeUnknownEffect(PublicBoardSummarySchema)({
-    publicId: row.public_id,
-    title: row.title,
-    itemCount: row.item_count,
-    updatedAt: row.updated_at,
-    publishedAt: row.published_at,
-    ...(row.background_color === null ? {} : { background: row.background_color }),
-    ...(row.background_media_id === null ? {} : { backgroundMediaId: row.background_media_id }),
-  }).pipe(Effect.orDie);
-});
+const decodeSummaryRow = Effect.fn('PublishingRepo.decodeSummaryRow')(
+  function* (row: SummaryRow) {
+    return yield* Schema.decodeUnknownEffect(PublicBoardSummarySchema)({
+      publicId: row.public_id,
+      title: row.title,
+      itemCount: row.item_count,
+      updatedAt: row.updated_at,
+      publishedAt: row.published_at,
+      ...(row.background_color === null
+        ? {}
+        : { background: row.background_color }),
+      ...(row.background_media_id === null
+        ? {}
+        : { backgroundMediaId: row.background_media_id }),
+    }).pipe(Effect.orDie);
+  },
+);
 
-const decodeItemRow = Effect.fn("PublishingRepo.decodeItemRow")(function* (row: ItemRow) {
-  const storedXHideThread = yield* Schema.decodeUnknownEffect(NullableSqliteBooleanSchema)(
-    row.x_hide_thread,
-  ).pipe(Effect.orDie);
+const decodeItemRow = Effect.fn('PublishingRepo.decodeItemRow')(function* (
+  row: ItemRow,
+) {
+  const storedXHideThread = yield* Schema.decodeUnknownEffect(
+    NullableSqliteBooleanSchema,
+  )(row.x_hide_thread).pipe(Effect.orDie);
   return yield* Schema.decodeUnknownEffect(PublicBoardItemSchema)({
     kind: row.kind,
     x: row.x,
@@ -114,7 +124,9 @@ const decodeItemRow = Effect.fn("PublishingRepo.decodeItemRow")(function* (row: 
     ...(row.src === null ? {} : { src: row.src }),
     ...(row.media_id === null ? {} : { mediaId: row.media_id }),
     ...(row.href === null ? {} : { href: row.href }),
-    ...(row.annotation_title === null ? {} : { annotationTitle: row.annotation_title }),
+    ...(row.annotation_title === null
+      ? {}
+      : { annotationTitle: row.annotation_title }),
     ...(row.annotation_description === null
       ? {}
       : { annotationDescription: row.annotation_description }),
@@ -122,15 +134,25 @@ const decodeItemRow = Effect.fn("PublishingRepo.decodeItemRow")(function* (row: 
     ...(row.color === null ? {} : { color: row.color }),
     ...(row.label === null ? {} : { label: row.label }),
     ...(row.website_url === null ? {} : { websiteUrl: row.website_url }),
-    ...(row.website_image_url === null ? {} : { websiteImageUrl: row.website_image_url }),
+    ...(row.website_image_url === null
+      ? {}
+      : { websiteImageUrl: row.website_image_url }),
     ...(row.website_title === null ? {} : { websiteTitle: row.website_title }),
-    ...(row.website_description === null ? {} : { websiteDescription: row.website_description }),
-    ...(row.website_site_label === null ? {} : { websiteSiteLabel: row.website_site_label }),
+    ...(row.website_description === null
+      ? {}
+      : { websiteDescription: row.website_description }),
+    ...(row.website_site_label === null
+      ? {}
+      : { websiteSiteLabel: row.website_site_label }),
     ...(row.x_display === null ? {} : { xDisplay: row.x_display }),
     ...(row.x_theme === null ? {} : { xTheme: row.x_theme }),
-    ...(storedXHideThread === null ? {} : { xHideThread: storedXHideThread === 1 }),
+    ...(storedXHideThread === null
+      ? {}
+      : { xHideThread: storedXHideThread === 1 }),
     ...(row.x_author_name === null ? {} : { xAuthorName: row.x_author_name }),
-    ...(row.x_author_handle === null ? {} : { xAuthorHandle: row.x_author_handle }),
+    ...(row.x_author_handle === null
+      ? {}
+      : { xAuthorHandle: row.x_author_handle }),
     ...(row.x_post_text === null ? {} : { xPostText: row.x_post_text }),
     ...(row.x_post_date === null ? {} : { xPostDate: row.x_post_date }),
   }).pipe(Effect.orDie);
@@ -147,26 +169,32 @@ interface PublishingRepoShape {
     publicId: PublicId,
   ) => Effect.Effect<PublicId | null, SqlError>;
   readonly unpublish: (boardId: BoardId) => Effect.Effect<boolean, SqlError>;
-  readonly getProfile: (handle: ProfileHandle) => Effect.Effect<PublicProfile | null, SqlError>;
-  readonly getBoard: (publicId: PublicId) => Effect.Effect<PublicBoard | null, SqlError>;
+  readonly getProfile: (
+    handle: ProfileHandle,
+  ) => Effect.Effect<PublicProfile | null, SqlError>;
+  readonly getBoard: (
+    publicId: PublicId,
+  ) => Effect.Effect<PublicBoard | null, SqlError>;
 }
 
-export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRepoShape>()(
-  "mood-board/PublishingRepo",
-) {
+export class PublishingRepo extends Context.Service<
+  PublishingRepo,
+  PublishingRepoShape
+>()('mood-board/PublishingRepo') {
   static readonly layer = Layer.effect(
     this,
     Effect.gen(function* () {
       const sql = yield* SqlClient.SqlClient;
       yield* sql`PRAGMA foreign_keys = ON`;
 
-      const upsertProfile = Effect.fn("PublishingRepo.upsertProfile")(function* (
-        handle: ProfileHandle,
-        displayName: ProfileDisplayName,
-        bio: ProfileBio,
-      ) {
-        const updatedAt = yield* Clock.currentTimeMillis;
-        yield* sql`
+      const upsertProfile = Effect.fn('PublishingRepo.upsertProfile')(
+        function* (
+          handle: ProfileHandle,
+          displayName: ProfileDisplayName,
+          bio: ProfileBio,
+        ) {
+          const updatedAt = yield* Clock.currentTimeMillis;
+          yield* sql`
           INSERT INTO publisher_profile (singleton, handle, display_name, bio, updated_at)
           VALUES (1, ${handle}, ${displayName}, ${bio}, ${updatedAt})
           ON CONFLICT(singleton) DO UPDATE SET
@@ -175,10 +203,11 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
             bio = excluded.bio,
             updated_at = excluded.updated_at
         `;
-        return { handle, displayName, bio } satisfies PublicOwner;
-      });
+          return { handle, displayName, bio } satisfies PublicOwner;
+        },
+      );
 
-      const publish = Effect.fn("PublishingRepo.publish")(function* (
+      const publish = Effect.fn('PublishingRepo.publish')(function* (
         boardId: BoardId,
         publicId: PublicId,
       ) {
@@ -188,9 +217,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
               SELECT public_id FROM board_publications WHERE board_id = ${boardId}
             `;
             if (existing[0] !== undefined) {
-              return yield* Schema.decodeUnknownEffect(PublicIdSchema)(existing[0].public_id).pipe(
-                Effect.orDie,
-              );
+              return yield* Schema.decodeUnknownEffect(PublicIdSchema)(
+                existing[0].public_id,
+              ).pipe(Effect.orDie);
             }
             const boards = yield* sql<{ readonly found: unknown }>`
               SELECT 1 AS found FROM boards WHERE id = ${boardId} LIMIT 1
@@ -200,7 +229,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
               SELECT 1 AS found FROM publisher_profile WHERE singleton = 1 LIMIT 1
             `;
             if (profiles.length === 0) return null;
-            const publishedAt = BoardTimestampSchema.make(yield* Clock.currentTimeMillis);
+            const publishedAt = BoardTimestampSchema.make(
+              yield* Clock.currentTimeMillis,
+            );
             yield* sql`
               INSERT INTO board_publications (board_id, public_id, published_at)
               VALUES (${boardId}, ${publicId}, ${publishedAt})
@@ -210,7 +241,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
         );
       });
 
-      const unpublish = Effect.fn("PublishingRepo.unpublish")(function* (boardId: BoardId) {
+      const unpublish = Effect.fn('PublishingRepo.unpublish')(function* (
+        boardId: BoardId,
+      ) {
         const removed = yield* sql<PublicationRow>`
           DELETE FROM board_publications
           WHERE board_id = ${boardId}
@@ -219,7 +252,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
         return removed.length > 0;
       });
 
-      const getProfile = Effect.fn("PublishingRepo.getProfile")(function* (handle: ProfileHandle) {
+      const getProfile = Effect.fn('PublishingRepo.getProfile')(function* (
+        handle: ProfileHandle,
+      ) {
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const profiles = yield* sql<ProfileRow>`
@@ -256,7 +291,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
         );
       });
 
-      const getBoard = Effect.fn("PublishingRepo.getBoard")(function* (publicId: PublicId) {
+      const getBoard = Effect.fn('PublishingRepo.getBoard')(function* (
+        publicId: PublicId,
+      ) {
         return yield* sql.withTransaction(
           Effect.gen(function* () {
             const boards = yield* sql<PublicBoardRow>`
@@ -296,7 +333,9 @@ export class PublishingRepo extends Context.Service<PublishingRepo, PublishingRe
               board: {
                 version: 1,
                 title: board.title,
-                ...(board.background_color === null ? {} : { background: board.background_color }),
+                ...(board.background_color === null
+                  ? {}
+                  : { background: board.background_color }),
                 ...(board.background_media_id === null
                   ? {}
                   : { backgroundMediaId: board.background_media_id }),

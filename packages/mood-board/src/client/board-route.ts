@@ -1,12 +1,12 @@
-import { Option, Schema } from "effect";
+import { Option, Schema } from 'effect';
 
-import { BoardIdSchema, type BoardId } from "../lib/board-rpc";
+import { BoardIdSchema, type BoardId } from '../lib/board-rpc';
 import {
   normalizeProfileHandle,
   PublicIdSchema,
   type ProfileHandle,
   type PublicId,
-} from "../lib/public-api";
+} from '../lib/public-api';
 
 const decodeBoardId = Schema.decodeUnknownOption(BoardIdSchema);
 const decodePublicId = Schema.decodeUnknownOption(PublicIdSchema);
@@ -20,8 +20,11 @@ export const parsePublicId = (value: string): PublicId | null =>
 export const parseProfileHandle = (value: string): ProfileHandle | null =>
   normalizeProfileHandle(value);
 
-export const boardPath = (boardId: BoardId) => `/boards/${encodeURIComponent(boardId)}`;
+export const boardPath = (boardId: BoardId) =>
+  `/boards/${encodeURIComponent(boardId)}`;
 
-export const profilePath = (handle: ProfileHandle) => `/@${encodeURIComponent(handle)}`;
+export const profilePath = (handle: ProfileHandle) =>
+  `/@${encodeURIComponent(handle)}`;
 
-export const sharePath = (publicId: PublicId) => `/share/${encodeURIComponent(publicId)}`;
+export const sharePath = (publicId: PublicId) =>
+  `/share/${encodeURIComponent(publicId)}`;
