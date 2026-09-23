@@ -43,10 +43,6 @@ import {
 import { authClient } from '../client/auth-client';
 import { boardPath } from '../client/board-route';
 import {
-  createBoardArchive,
-  importBoardFile,
-} from '../client/board/board-archive';
-import {
   accessibleFieldColors,
   DEFAULT_BOARD_BACKGROUND,
   DEFAULT_CUSTOM_COLOR,
@@ -56,33 +52,15 @@ import {
   SWATCHES,
   type BoardBackgroundDraft,
 } from '../client/board/board-background';
-import {
-  createBoardCatalog,
-  type BoardCatalog,
-} from '../client/board/board-catalog';
+import type { BoardDocumentChange } from '../client/board/board-document';
+import { useBoardDocument } from '../client/board/board-editor-state';
 import {
   createDemoBoard,
   createEmptyBoard,
   createId,
 } from '../client/board/board-factory';
+import { useBoardFiles } from '../client/board/board-file-intake';
 import { shuffleBoardItems } from '../client/board/board-shuffle';
-import {
-  startBoardSync,
-  type BoardSync,
-  type CloudSyncState,
-} from '../client/board/board-sync';
-import {
-  collectDroppedImageFiles,
-  estimateItemBytes,
-  shouldStageImageSelection,
-  type BulkLayoutKind,
-  type PreparedBulkImage,
-  type TraversalFailure,
-} from '../client/board/bulk-image-import';
-import {
-  layoutBulkImages,
-  placeLayoutWithoutOverlap,
-} from '../client/board/bulk-layout';
 import {
   fitCamera,
   MAX_ZOOM,
@@ -90,25 +68,15 @@ import {
   screenToWorld,
   zoomCamera,
 } from '../client/board/camera';
-import {
-  deleteLocalBoard,
-  loadDocument,
-  saveDocument,
-} from '../client/board/storage';
-import type { Board, BoardItem, Camera } from '../client/board/types';
+import type { Board, BoardItem } from '../client/board/types';
 import { AudioPlaybackCoordinator } from '../client/media/audio-playback';
 import {
-  blobToDataUrl,
   IMAGE_FILE_ACCEPT,
-  ingestImageFile,
   inspectImageUrl,
 } from '../client/media/image-processing';
-import { uploadMedia } from '../client/media/media-client';
-import { MAX_X_POST_CARD_WIDTH } from '../client/media/x-post-measurement';
 import type { AccountId } from '../lib/account';
 import {
   MIN_AUDIO_CARD_WIDTH,
-  minimumAudioCardHeight,
   preferredAudioCardHeight,
 } from '../lib/audio-card-layout';
 import {
@@ -117,9 +85,7 @@ import {
   parseAudioSource,
 } from '../lib/audio-source';
 import {
-  BoardTimestampSchema,
   DEFAULT_BOARD_ID,
-  MAX_REMOTE_BOARD_BYTES,
   MAX_REMOTE_ITEMS,
   type BoardId,
   type BoardSummary,
@@ -135,7 +101,7 @@ import {
   MAX_IMAGE_LINK_CHARACTERS,
   normalizeImageLink,
 } from '../lib/image-link';
-import { MAX_AUDIO_UPLOAD_BYTES, normalizeMediaMimeType } from '../lib/media';
+import type { MediaId } from '../lib/media';
 import {
   MAX_WEBSITE_SITE_LABEL_CHARACTERS,
   MAX_WEBSITE_URL_CHARACTERS,
@@ -149,6 +115,7 @@ import {
   parseXPostInput,
   type XPostDisplay,
   type XPostTheme,
+  type XPostPreview,
 } from '../lib/x-post';
 import { MenuAccountIdentity } from './account-identity';
 import { BoardBackgroundControl } from './board-background-control';
@@ -173,15 +140,6 @@ type PanelState =
   | null;
 
 type Point = { x: number; y: number };
-type BulkSession = {
-  readonly files: ReadonlyArray<File>;
-  readonly anchor: Point;
-  readonly omitted: number;
-  readonly truncated: boolean;
-  readonly failures: ReadonlyArray<TraversalFailure>;
-};
-type SaveState = 'saved' | 'saving' | 'error';
-type HistoryEntry = { board: Board; camera?: Camera };
 type CustomColorDraft = {
   hex: string;
   label: string;
@@ -222,9 +180,6 @@ const editorPanelForItem = (item: BoardItem): PanelState => {
   return { type: 'audio', itemId: item.id };
 };
 
-const makeInitialBoard = (boardId: BoardId) =>
-  boardId === DEFAULT_BOARD_ID ? createDemoBoard() : createEmptyBoard();
-
 const localWebsiteMetadata = (url: WebsiteUrl) => {
   const normalizedLabel = new URL(url).hostname
     .replace(/^www\./, '')
@@ -234,12 +189,6 @@ const localWebsiteMetadata = (url: WebsiteUrl) => {
     websiteSiteLabel: WebsiteSiteLabelSchema.make(normalizedLabel),
   };
 };
-
-const makeInitialCamera = (): Camera => ({
-  x: window.innerWidth / 2,
-  y: window.innerHeight / 2,
-  z: 0.45,
-});
 
 function IconButton({
   label,
@@ -293,47 +242,17 @@ function BoardWorkspace({
 }) {
   const navigateRoute = useNavigate();
   const session = authClient.useSession();
-  const initialBoardRef = useRef(makeInitialBoard(boardId));
-  const initialCameraRef = useRef(makeInitialCamera());
-  const initialBoard = initialBoardRef.current;
-  const initialCamera = initialCameraRef.current;
   const viewportRef = useRef<HTMLDivElement>(null);
-  const boardRef = useRef(initialBoard);
-  const cameraRef = useRef(initialCamera);
   const playbackCoordinatorRef = useRef(new AudioPlaybackCoordinator());
-  const undoStack = useRef<HistoryEntry[]>([]);
-  const redoStack = useRef<HistoryEntry[]>([]);
   const activePointers = useRef(new Map<number, Point>());
   const gesture = useRef<CanvasGesture | null>(null);
-  const bulkSessionRef = useRef<BulkSession | null>(null);
-  const dropCollectionRef = useRef<{
-    readonly generation: number;
-    readonly controller: AbortController;
-  } | null>(null);
-  const dropGenerationRef = useRef(0);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const imageSelectionFolderRef = useRef(false);
-  const audioInputRef = useRef<HTMLInputElement>(null);
-  const importInputRef = useRef<HTMLInputElement>(null);
-  const backgroundUploadRef = useRef<AbortController | null>(null);
-  const archiveOperationRef = useRef<AbortController | null>(null);
   const shuffleAnimationTimerRef = useRef<number | null>(null);
-  const backgroundUploadGenerationRef = useRef(0);
   const backgroundDraftTouchedRef = useRef(false);
   const composerRef = useRef<HTMLElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
-  const saveGeneration = useRef(0);
-  const saveQueue = useRef<Promise<void>>(Promise.resolve());
-  const syncRef = useRef<BoardSync | null>(null);
-  const catalogRef = useRef<BoardCatalog | null>(null);
-  const deletingBoardRef = useRef<BoardId | null>(null);
   const workingCountRef = useRef(0);
 
-  const [board, setBoard] = useState(initialBoard);
-  const [camera, setCamera] = useState(initialCamera);
-  const [ready, setReady] = useState(false);
-  const [persistenceEnabled, setPersistenceEnabled] = useState(true);
   const [editing, setEditing] = useState(true);
   const [selectedId, setSelectedId] = useState<ItemId | null>(null);
   const [panel, setPanel] = useState<PanelState>(null);
@@ -353,27 +272,14 @@ function BoardWorkspace({
     hex: DEFAULT_BOARD_BACKGROUND,
     lastValidHex: DEFAULT_BOARD_BACKGROUND,
   });
-  const [backgroundUploading, setBackgroundUploading] = useState(false);
-  const [backgroundUploadError, setBackgroundUploadError] = useState('');
   const [backgroundConflict, setBackgroundConflict] = useState(false);
-  const [saveState, setSaveState] = useState<SaveState>('saved');
-  const [syncState, setSyncState] = useState<CloudSyncState>(
-    localOnly ? 'local' : 'connecting',
-  );
   const [boardSummaries, setBoardSummaries] = useState<
     ReadonlyArray<BoardSummary>
   >([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
-  const [historyState, setHistoryState] = useState({
-    canUndo: false,
-    canRedo: false,
-  });
   const [spacePressed, setSpacePressed] = useState(false);
   const [draggingFiles, setDraggingFiles] = useState(false);
-  const [bulkSession, setBulkSession] = useState<BulkSession | null>(null);
-  const [collectingDrop, setCollectingDrop] = useState(false);
   const [working, setWorking] = useState(false);
-  const [imageIntakeStatus, setImageIntakeStatus] = useState('');
   const [toast, setToast] = useState('');
   const [presentedItem, setPresentedItem] = useState<PresentedItem | null>(
     null,
@@ -383,19 +289,7 @@ function BoardWorkspace({
   const [shuffleAnimating, setShuffleAnimating] = useState(false);
 
   useEffect(() => {
-    boardRef.current = board;
-  }, [board]);
-
-  useEffect(() => {
     return () => {
-      dropGenerationRef.current += 1;
-      dropCollectionRef.current?.controller.abort();
-      dropCollectionRef.current = null;
-      backgroundUploadGenerationRef.current += 1;
-      backgroundUploadRef.current?.abort();
-      backgroundUploadRef.current = null;
-      archiveOperationRef.current?.abort();
-      archiveOperationRef.current = null;
       if (shuffleAnimationTimerRef.current !== null) {
         window.clearTimeout(shuffleAnimationTimerRef.current);
       }
@@ -412,22 +306,169 @@ function BoardWorkspace({
     return () => coordinator.pauseAll();
   }, []);
 
-  useEffect(() => {
-    cameraRef.current = camera;
-  }, [camera]);
-
-  useEffect(() => {
-    document.title = `${board.title} — Moodboard`;
-  }, [board.title]);
-
   const showToast = useCallback((message: string, duration = 2800) => {
     window.clearTimeout(toastTimer.current);
     setToast(message);
     toastTimer.current = window.setTimeout(() => setToast(''), duration);
   }, []);
 
+  const reconcileSelection = useCallback((nextBoard: Board) => {
+    setSelectedId((current) =>
+      current && nextBoard.items.some((item) => item.id === current)
+        ? current
+        : null,
+    );
+    setPanel((current) => {
+      if (!current || !('itemId' in current) || !current.itemId) return current;
+      return nextBoard.items.some((item) => item.id === current.itemId)
+        ? current
+        : null;
+    });
+  }, []);
+
+  const onDocumentChange = useCallback(
+    ({ type, previous, next }: BoardDocumentChange) => {
+      if (type === 'replace') {
+        setSelectedId(null);
+        setPanel(null);
+        return;
+      }
+      if (type === 'remote') {
+        const reconciliation = reconcileRemoteBackgroundDraft(
+          previous,
+          next,
+          backgroundDraftTouchedRef.current,
+        );
+        if (reconciliation.draft !== undefined)
+          setBackgroundDraft(reconciliation.draft);
+        setBackgroundConflict(
+          (existing) =>
+            reconcileRemoteBackgroundDraft(
+              previous,
+              next,
+              backgroundDraftTouchedRef.current,
+              existing,
+            ).conflict,
+        );
+      } else {
+        const background = next.background ?? DEFAULT_BOARD_BACKGROUND;
+        setBackgroundDraft({
+          hex: background,
+          lastValidHex: background,
+          ...(next.backgroundMediaId === undefined
+            ? {}
+            : { mediaId: next.backgroundMediaId }),
+        });
+        backgroundDraftTouchedRef.current = false;
+        setBackgroundConflict(false);
+      }
+      reconcileSelection(next);
+    },
+    [reconcileSelection],
+  );
+
+  const {
+    board,
+    camera,
+    ready,
+    saveState,
+    syncState,
+    historyState,
+    boardRef,
+    cameraRef,
+    applyBoard,
+    replaceDocument,
+    setCamera,
+    undo,
+    redo,
+    reconcileEmbeddedItemSize,
+    listBoards,
+    createBoard: createCatalogBoard,
+    duplicateBoard: duplicateCatalogBoard,
+    deleteBoard: deleteCatalogBoard,
+    resolveWebsitePreview,
+    resolveXPostPreview,
+  } = useBoardDocument({
+    accountId,
+    boardId,
+    localOnly,
+    onNavigate,
+    onChange: onDocumentChange,
+    showToast,
+  });
+
+  useEffect(() => {
+    document.title = `${board.title} — Moodboard`;
+  }, [board.title]);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  const beginWorking = useCallback(() => {
+    workingCountRef.current += 1;
+    setWorking(true);
+    onWorkingChange(boardId, true);
+  }, [boardId, onWorkingChange]);
+
+  const endWorking = useCallback(() => {
+    workingCountRef.current = Math.max(0, workingCountRef.current - 1);
+    if (workingCountRef.current === 0) {
+      setWorking(false);
+      onWorkingChange(boardId, false);
+    }
+  }, [boardId, onWorkingChange]);
+
+  const closePanel = useCallback(() => setPanel(null), []);
+  const startBackgroundDraft = useCallback(() => {
+    backgroundDraftTouchedRef.current = true;
+    setPanelError('');
+  }, []);
+  const acceptBackgroundImage = useCallback((mediaId: MediaId) => {
+    setBackgroundDraft((current) => ({ ...current, mediaId }));
+  }, []);
+  const pauseAudio = useCallback(
+    () => playbackCoordinatorRef.current.pauseAll(),
+    [],
+  );
+  const {
+    bulkSession,
+    collectingDrop,
+    imageIntakeStatus,
+    backgroundUploading,
+    backgroundUploadError,
+    imageInputRef,
+    imageSelectionFolderRef,
+    audioInputRef,
+    importInputRef,
+    addImageSelection,
+    collectDroppedFiles,
+    closeBulkStaging,
+    cancelDropCollection,
+    commitBulkImages,
+    chooseBackgroundImage,
+    cancelBackgroundTransfer,
+    clearBackgroundError,
+    addLocalAudio,
+    exportBoard,
+    importBoard,
+    cancelArchive,
+  } = useBoardFiles({
+    localOnly,
+    boardRef,
+    cameraRef,
+    applyBoard,
+    replaceDocument,
+    beginWorking,
+    endWorking,
+    showToast,
+    onSelect: setSelectedId,
+    onClosePanel: closePanel,
+    onPanelError: setPanelError,
+    onBackgroundStart: startBackgroundDraft,
+    onBackgroundReady: acceptBackgroundImage,
+    pauseAudio,
+  });
+
   const signOutAccount = useCallback(async () => {
-    archiveOperationRef.current?.abort();
+    cancelArchive();
     setSigningOut(true);
     setSignOutError('');
     try {
@@ -444,114 +485,31 @@ function BoardWorkspace({
       );
       setSigningOut(false);
     }
-  }, [navigateRoute]);
-
-  const beginWorking = useCallback(() => {
-    workingCountRef.current += 1;
-    setWorking(true);
-    onWorkingChange(boardId, true);
-  }, [boardId, onWorkingChange]);
-
-  const endWorking = useCallback(() => {
-    workingCountRef.current = Math.max(0, workingCountRef.current - 1);
-    if (workingCountRef.current === 0) {
-      setWorking(false);
-      onWorkingChange(boardId, false);
-    }
-  }, [boardId, onWorkingChange]);
+  }, [cancelArchive, navigateRoute]);
 
   const cancelBackgroundUpload = useCallback(() => {
-    backgroundUploadGenerationRef.current += 1;
-    backgroundUploadRef.current?.abort();
-    backgroundUploadRef.current = null;
-    setBackgroundUploading(false);
-    setBackgroundUploadError('');
+    cancelBackgroundTransfer();
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
-  }, []);
-
-  const chooseBackgroundImage = useCallback(
-    async (file: File) => {
-      if (localOnly) {
-        setBackgroundUploadError(
-          'Sign in to upload a private background image.',
-        );
-        return;
-      }
-      const generation = ++backgroundUploadGenerationRef.current;
-      backgroundUploadRef.current?.abort();
-      const controller = new AbortController();
-      backgroundUploadRef.current = controller;
-      backgroundDraftTouchedRef.current = true;
-      setBackgroundUploading(true);
-      setBackgroundUploadError('');
-      setPanelError('');
-      beginWorking();
-      try {
-        const image = await ingestImageFile(file, controller.signal);
-        const uploaded = await uploadMedia(
-          image.blob,
-          'image',
-          controller.signal,
-        );
-        if (
-          controller.signal.aborted ||
-          generation !== backgroundUploadGenerationRef.current
-        )
-          return;
-        setBackgroundDraft((current) => ({
-          ...current,
-          mediaId: uploaded.mediaId,
-        }));
-        showToast('Background image ready — apply to save');
-      } catch (error) {
-        if (!(error instanceof DOMException && error.name === 'AbortError')) {
-          setBackgroundUploadError(
-            error instanceof Error
-              ? error.message
-              : 'That background image could not be prepared.',
-          );
-        }
-      } finally {
-        if (generation === backgroundUploadGenerationRef.current) {
-          backgroundUploadRef.current = null;
-          setBackgroundUploading(false);
-        }
-        endWorking();
-      }
-    },
-    [beginWorking, endWorking, localOnly, showToast],
-  );
-
-  useEffect(() => {
-    if (localOnly) return;
-    const catalog = createBoardCatalog();
-    catalogRef.current = catalog;
-    return () => {
-      if (catalogRef.current === catalog) catalogRef.current = null;
-      void catalog.close();
-    };
-  }, [localOnly]);
+  }, [cancelBackgroundTransfer]);
 
   const refreshBoards = useCallback(async () => {
-    const catalog = catalogRef.current;
-    if (!catalog) return;
+    if (localOnly) return;
     setCatalogLoading(true);
     try {
-      setBoardSummaries(await catalog.list());
+      setBoardSummaries(await listBoards());
     } catch {
       showToast('The board library could not be refreshed.');
     } finally {
       setCatalogLoading(false);
     }
-  }, [showToast]);
+  }, [listBoards, localOnly, showToast]);
 
   const createNewBoard = useCallback(async () => {
-    const catalog = catalogRef.current;
-    if (!catalog) return;
+    if (localOnly) return;
     beginWorking();
     try {
-      const summary = await catalog.create(
+      const summary = await createCatalogBoard(
         panelDraft.trim() || 'Untitled mood',
       );
       onNavigate(summary.id, false, true);
@@ -560,16 +518,26 @@ function BoardWorkspace({
     } finally {
       endWorking();
     }
-  }, [beginWorking, endWorking, onNavigate, panelDraft, showToast]);
+  }, [
+    beginWorking,
+    createCatalogBoard,
+    endWorking,
+    localOnly,
+    onNavigate,
+    panelDraft,
+    showToast,
+  ]);
 
   const duplicateBoard = useCallback(
     async (summary: BoardSummary) => {
-      const catalog = catalogRef.current;
-      if (!catalog) return;
+      if (localOnly) return;
       beginWorking();
       try {
         const title = `${summary.title} — copy`.slice(0, 120);
-        const duplicate = await catalog.duplicate(summary.id, title);
+        const duplicate = await duplicateCatalogBoard({
+          id: summary.id,
+          title,
+        });
         onNavigate(duplicate.id, false, true);
       } catch {
         showToast('That board could not be duplicated.');
@@ -577,7 +545,14 @@ function BoardWorkspace({
         endWorking();
       }
     },
-    [beginWorking, endWorking, onNavigate, showToast],
+    [
+      beginWorking,
+      duplicateCatalogBoard,
+      endWorking,
+      localOnly,
+      onNavigate,
+      showToast,
+    ],
   );
 
   const deleteBoard = useCallback(
@@ -589,241 +564,31 @@ function BoardWorkspace({
         )
       )
         return;
-      const catalog = catalogRef.current;
-      if (!catalog) return;
+      if (localOnly) return;
       beginWorking();
-      deletingBoardRef.current = summary.id;
-      let deletedOnServer = false;
       try {
-        await catalog.delete(summary.id);
-        deletedOnServer = true;
-        if (summary.id === boardId) onNavigate(DEFAULT_BOARD_ID, true, true);
-        else await refreshBoards();
-
-        await saveQueue.current.catch(() => undefined);
-        await deleteLocalBoard(accountId, summary.id).catch(() => undefined);
+        await deleteCatalogBoard(summary.id);
+        if (summary.id !== boardId) await refreshBoards();
       } catch {
-        if (!deletedOnServer) showToast('That board could not be deleted.');
+        showToast('That board could not be deleted.');
       } finally {
-        deletingBoardRef.current = null;
         endWorking();
       }
     },
     [
-      accountId,
       beginWorking,
       boardId,
+      deleteCatalogBoard,
       endWorking,
-      onNavigate,
+      localOnly,
       refreshBoards,
       showToast,
     ],
   );
 
-  useEffect(() => {
-    if (panel?.type === 'boards') void refreshBoards();
-  }, [panel?.type, refreshBoards]);
-
-  const persistDocument = useCallback(
-    (document: { board: Board; camera: Camera }) => {
-      if (deletingBoardRef.current === boardId) return;
-      const generation = ++saveGeneration.current;
-      saveQueue.current = saveQueue.current
-        .catch(() => undefined)
-        .then(async () => {
-          if (
-            generation !== saveGeneration.current ||
-            deletingBoardRef.current === boardId
-          )
-            return;
-          setSaveState('saving');
-          try {
-            await saveDocument(accountId, boardId, document);
-            if (generation === saveGeneration.current) setSaveState('saved');
-          } catch {
-            if (generation === saveGeneration.current) setSaveState('error');
-          }
-        });
-    },
-    [accountId, boardId],
-  );
-
-  const reconcileSelection = useCallback((nextBoard: Board) => {
-    setSelectedId((current) =>
-      current && nextBoard.items.some((item) => item.id === current)
-        ? current
-        : null,
-    );
-    setPanel((current) => {
-      if (
-        !current ||
-        current.type === 'menu' ||
-        current.type === 'boards' ||
-        current.type === 'images' ||
-        current.type === 'url' ||
-        !current.itemId
-      )
-        return current;
-      return nextBoard.items.some((item) => item.id === current.itemId)
-        ? current
-        : null;
-    });
-  }, []);
-
-  const applyBoard = useCallback(
-    (updater: Board | ((current: Board) => Board)) => {
-      const current = boardRef.current;
-      const next = typeof updater === 'function' ? updater(current) : updater;
-      if (next === current) return;
-      undoStack.current = [...undoStack.current.slice(-49), { board: current }];
-      redoStack.current = [];
-      const stamped = {
-        ...next,
-        updatedAt: BoardTimestampSchema.make(Date.now()),
-      };
-      boardRef.current = stamped;
-      setBoard(stamped);
-      syncRef.current?.commit(current, stamped);
-      setHistoryState({ canUndo: true, canRedo: false });
-    },
-    [],
-  );
-
-  const reconcileEmbeddedItemSize = useCallback(
-    (id: ItemId, width: number, height: number) => {
-      const current = boardRef.current;
-      const source = current.items.find((item) => item.id === id);
-      if (source === undefined) return;
-      const nextWidth = Math.min(
-        source.kind === 'x' ? MAX_X_POST_CARD_WIDTH : 2_400,
-        Math.max(320, width),
-      );
-      const nextHeight =
-        source.kind === 'x'
-          ? Math.min(2_000, Math.max(240, height))
-          : source.kind === 'audio' ||
-              source.kind === 'spotify' ||
-              source.kind === 'youtube'
-            ? Math.min(
-                2_400,
-                Math.max(minimumAudioCardHeight(source.kind), height),
-              )
-            : undefined;
-      if (nextHeight === undefined) return;
-      if (
-        Math.abs(source.width - nextWidth) < 1 &&
-        Math.abs(source.height - nextHeight) < 4
-      )
-        return;
-      const next = {
-        ...current,
-        updatedAt: BoardTimestampSchema.make(Date.now()),
-        items: current.items.map((item) =>
-          item.id === id
-            ? { ...item, width: nextWidth, height: nextHeight }
-            : item,
-        ),
-      };
-      boardRef.current = next;
-      setBoard(next);
-      syncRef.current?.commit(current, next);
-    },
-    [],
-  );
-
-  const replaceDocument = useCallback(
-    (nextBoard: Board, nextCamera: Camera) => {
-      const current = boardRef.current;
-      undoStack.current = [
-        ...undoStack.current.slice(-49),
-        { board: current, camera: cameraRef.current },
-      ];
-      redoStack.current = [];
-      const stamped = {
-        ...nextBoard,
-        updatedAt: BoardTimestampSchema.make(Date.now()),
-      };
-      boardRef.current = stamped;
-      cameraRef.current = nextCamera;
-      setBoard(stamped);
-      setCamera(nextCamera);
-      syncRef.current?.commit(current, stamped);
-      setSelectedId(null);
-      setPanel(null);
-      setHistoryState({ canUndo: true, canRedo: false });
-    },
-    [],
-  );
-
-  const undo = useCallback(() => {
-    const previous = undoStack.current.pop();
-    if (!previous) return;
-    const current = boardRef.current;
-    redoStack.current.push({
-      board: current,
-      camera: previous.camera ? cameraRef.current : undefined,
-    });
-    const stamped = {
-      ...previous.board,
-      updatedAt: BoardTimestampSchema.make(Date.now()),
-    };
-    boardRef.current = stamped;
-    setBoard(stamped);
-    const background = stamped.background ?? DEFAULT_BOARD_BACKGROUND;
-    setBackgroundDraft({
-      hex: background,
-      lastValidHex: background,
-      ...(stamped.backgroundMediaId === undefined
-        ? {}
-        : { mediaId: stamped.backgroundMediaId }),
-    });
-    backgroundDraftTouchedRef.current = false;
-    setBackgroundConflict(false);
-    syncRef.current?.commit(current, stamped);
-    if (previous.camera) {
-      cameraRef.current = previous.camera;
-      setCamera(previous.camera);
-    }
-    reconcileSelection(stamped);
-    setHistoryState({ canUndo: undoStack.current.length > 0, canRedo: true });
-  }, [reconcileSelection]);
-
-  const redo = useCallback(() => {
-    const next = redoStack.current.pop();
-    if (!next) return;
-    const current = boardRef.current;
-    undoStack.current.push({
-      board: current,
-      camera: next.camera ? cameraRef.current : undefined,
-    });
-    const stamped = {
-      ...next.board,
-      updatedAt: BoardTimestampSchema.make(Date.now()),
-    };
-    boardRef.current = stamped;
-    setBoard(stamped);
-    const background = stamped.background ?? DEFAULT_BOARD_BACKGROUND;
-    setBackgroundDraft({
-      hex: background,
-      lastValidHex: background,
-      ...(stamped.backgroundMediaId === undefined
-        ? {}
-        : { mediaId: stamped.backgroundMediaId }),
-    });
-    backgroundDraftTouchedRef.current = false;
-    setBackgroundConflict(false);
-    syncRef.current?.commit(current, stamped);
-    if (next.camera) {
-      cameraRef.current = next.camera;
-      setCamera(next.camera);
-    }
-    reconcileSelection(stamped);
-    setHistoryState({ canUndo: true, canRedo: redoStack.current.length > 0 });
-  }, [reconcileSelection]);
-
   const fitToBoard = useCallback(() => {
     setCamera(fitCamera(boardRef.current.items));
-  }, []);
+  }, [boardRef, setCamera]);
 
   const stopShuffleAnimation = useCallback(() => {
     if (shuffleAnimationTimerRef.current !== null) {
@@ -859,17 +624,20 @@ function BoardWorkspace({
           : 'This board could not be shuffled.',
       );
     }
-  }, [replaceDocument, showToast, stopShuffleAnimation]);
+  }, [boardRef, replaceDocument, showToast, stopShuffleAnimation]);
 
-  const zoomAtCenter = useCallback((factor: number) => {
-    setCamera((current) =>
-      zoomCamera(
-        current,
-        { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-        current.z * factor,
-      ),
-    );
-  }, []);
+  const zoomAtCenter = useCallback(
+    (factor: number) => {
+      setCamera((current) =>
+        zoomCamera(
+          current,
+          { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+          current.z * factor,
+        ),
+      );
+    },
+    [setCamera],
+  );
 
   const selectPanel = useCallback(
     (nextPanel: PanelState) => {
@@ -960,6 +728,7 @@ function BoardWorkspace({
         setPanelDraft(boardRef.current.title);
       } else if (nextPanel?.type === 'boards') {
         setPanelDraft('');
+        void refreshBoards();
       } else {
         setPanelDraft('');
         if (nextPanel?.type === 'url') {
@@ -969,7 +738,7 @@ function BoardWorkspace({
       }
       setPanel(nextPanel);
     },
-    [cancelBackgroundUpload],
+    [boardRef, cancelBackgroundUpload, refreshBoards],
   );
 
   useEffect(() => {
@@ -1008,130 +777,6 @@ function BoardWorkspace({
   }, [panel]);
 
   useEffect(() => {
-    let cancelled = false;
-    loadDocument(accountId, boardId)
-      .then((document) => {
-        if (cancelled) return;
-        if (document?.board) {
-          if (
-            localOnly &&
-            (document.board.backgroundMediaId !== undefined ||
-              document.board.items.some((item) => item.mediaId !== undefined))
-          ) {
-            throw new Error('The guest demo cannot load managed media.');
-          }
-          setBoard(document.board);
-          setCamera(document.camera);
-        } else {
-          setCamera(fitCamera(initialBoard.items));
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setCamera(fitCamera(initialBoard.items));
-          setPersistenceEnabled(false);
-          setSaveState('error');
-          showToast(
-            'The saved board could not be opened. Its local copy was left untouched.',
-          );
-        }
-      })
-      .finally(() => !cancelled && setReady(true));
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(toastTimer.current);
-    };
-  }, [accountId, boardId, initialBoard, localOnly, showToast]);
-
-  const applyRemoteBoard = useCallback(
-    (next: Board, remoteDivergence: boolean) => {
-      const previous = boardRef.current;
-      const backgroundReconciliation = reconcileRemoteBackgroundDraft(
-        previous,
-        next,
-        backgroundDraftTouchedRef.current,
-      );
-      if (backgroundReconciliation.draft !== undefined) {
-        setBackgroundDraft(backgroundReconciliation.draft);
-      }
-      setBackgroundConflict(
-        (existing) =>
-          reconcileRemoteBackgroundDraft(
-            previous,
-            next,
-            backgroundDraftTouchedRef.current,
-            existing,
-          ).conflict,
-      );
-      boardRef.current = next;
-      setBoard(next);
-      reconcileSelection(next);
-
-      if (remoteDivergence) {
-        undoStack.current = [];
-        redoStack.current = [];
-        setHistoryState({ canUndo: false, canRedo: false });
-      }
-    },
-    [reconcileSelection],
-  );
-
-  useEffect(() => {
-    if (!ready) return;
-    if (localOnly) return;
-    const sync = startBoardSync({
-      accountId,
-      boardId,
-      initialBoard: boardRef.current,
-      onBoard: applyRemoteBoard,
-      onStatus: setSyncState,
-      onUnavailable: (unavailableBoardId) => {
-        if (
-          unavailableBoardId === boardId &&
-          deletingBoardRef.current !== unavailableBoardId
-        )
-          onNavigate(DEFAULT_BOARD_ID, true, true);
-      },
-    });
-    syncRef.current = sync;
-
-    return () => {
-      if (syncRef.current === sync) syncRef.current = null;
-      void sync.close();
-    };
-  }, [accountId, applyRemoteBoard, boardId, localOnly, onNavigate, ready]);
-
-  useEffect(() => {
-    if (!ready || !persistenceEnabled) return;
-    persistDocument({ board, camera: cameraRef.current });
-  }, [board, persistDocument, persistenceEnabled, ready]);
-
-  useEffect(() => {
-    if (!ready || !persistenceEnabled) return;
-    const timeout = window.setTimeout(() => {
-      persistDocument({ board: boardRef.current, camera });
-    }, 550);
-    return () => window.clearTimeout(timeout);
-  }, [camera, persistDocument, persistenceEnabled, ready]);
-
-  useEffect(() => {
-    const flush = () => {
-      if (persistenceEnabled)
-        persistDocument({ board: boardRef.current, camera: cameraRef.current });
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') flush();
-    };
-    window.addEventListener('pagehide', flush);
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => {
-      window.removeEventListener('pagehide', flush);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [persistDocument, persistenceEnabled]);
-
-  useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
@@ -1156,7 +801,7 @@ function BoardWorkspace({
 
     viewport.addEventListener('wheel', onWheel, { passive: false });
     return () => viewport.removeEventListener('wheel', onWheel);
-  }, []);
+  }, [setCamera]);
 
   const removeItem = useCallback(
     (id: ItemId) => {
@@ -1280,88 +925,6 @@ function BoardWorkspace({
     zoomAtCenter,
   ]);
 
-  const addSingleImage = useCallback(
-    async (file: File, screenPoint?: Point, workingStarted = false) => {
-      if (!workingStarted) beginWorking();
-      try {
-        if (boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
-          showToast(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
-          return;
-        }
-        const convertingHeic =
-          /^image\/hei[cf]$/i.test(file.type) ||
-          /\.(?:heic|heif|hif)$/i.test(file.name);
-        setImageIntakeStatus(
-          convertingHeic ? 'Converting HEIC photo…' : 'Preparing image…',
-        );
-        const image = await ingestImageFile(file);
-        setImageIntakeStatus(
-          localOnly ? 'Saving image to this browser…' : 'Uploading image…',
-        );
-        const source = localOnly
-          ? { src: await blobToDataUrl(image.blob) }
-          : { mediaId: (await uploadMedia(image.blob, 'image')).mediaId };
-        setImageIntakeStatus('Adding image to board…');
-        const current = boardRef.current;
-        if (current.items.length >= MAX_REMOTE_ITEMS) {
-          showToast(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
-          return;
-        }
-        const point = screenPoint ?? {
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-        };
-        const anchor = screenToWorld(point, cameraRef.current);
-        const layout = placeLayoutWithoutOverlap(
-          layoutBulkImages(
-            [{ id: 'single', width: image.width, height: image.height }],
-            'loose',
-          ),
-          anchor,
-          current.items,
-        );
-        const placed = layout.items[0];
-        if (!placed) throw new Error('The image could not be placed.');
-        const item: BoardItem = {
-          id: createId(),
-          kind: 'image',
-          ...source,
-          x: placed.x,
-          y: placed.y,
-          width: placed.width,
-          height: placed.height,
-          rotation: 0,
-          order: Math.max(0, ...current.items.map((entry) => entry.order)) + 1,
-        };
-        const projectedBytes = [...current.items, item].reduce(
-          (total, entry) => total + estimateItemBytes(entry),
-          0,
-        );
-        if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
-          showToast(
-            localOnly
-              ? 'That image would make this browser board too large.'
-              : 'That image would exceed this board’s remote storage limit.',
-          );
-          return;
-        }
-        applyBoard({ ...current, items: [...current.items, item] });
-        setSelectedId(item.id);
-      } catch (error) {
-        showToast(
-          error instanceof Error
-            ? error.message
-            : 'That image could not be added.',
-          8000,
-        );
-      } finally {
-        setImageIntakeStatus('');
-        endWorking();
-      }
-    },
-    [applyBoard, beginWorking, endWorking, localOnly, showToast],
-  );
-
   const openImagePicker = useCallback(() => {
     if (working) return;
     const input = imageInputRef.current;
@@ -1369,7 +932,7 @@ function BoardWorkspace({
     imageSelectionFolderRef.current = false;
     input.removeAttribute('webkitdirectory');
     input.click();
-  }, [working]);
+  }, [imageInputRef, imageSelectionFolderRef, working]);
 
   const openFolderPicker = useCallback(() => {
     if (working) return;
@@ -1378,150 +941,7 @@ function BoardWorkspace({
     imageSelectionFolderRef.current = true;
     input.setAttribute('webkitdirectory', '');
     input.click();
-  }, [working]);
-
-  const openBulkStaging = useCallback(
-    (
-      files: ReadonlyArray<File>,
-      screenPoint?: Point,
-      workingStarted = false,
-      intake: {
-        readonly omitted?: number;
-        readonly truncated?: boolean;
-        readonly failures?: ReadonlyArray<TraversalFailure>;
-      } = {},
-    ) => {
-      if (
-        files.length === 0 ||
-        bulkSessionRef.current !== null ||
-        (!workingStarted && dropCollectionRef.current !== null)
-      ) {
-        if (workingStarted) endWorking();
-        return;
-      }
-      const point = screenPoint ?? {
-        x: window.innerWidth / 2,
-        y: window.innerHeight / 2,
-      };
-      if (!workingStarted) beginWorking();
-      const session: BulkSession = {
-        files,
-        anchor: screenToWorld(point, cameraRef.current),
-        omitted: intake.omitted ?? 0,
-        truncated: intake.truncated ?? false,
-        failures: intake.failures ?? [],
-      };
-      bulkSessionRef.current = session;
-      setPanel(null);
-      setSelectedId(null);
-      setBulkSession(session);
-    },
-    [beginWorking, endWorking],
-  );
-
-  const addImageSelection = useCallback(
-    (
-      files: ReadonlyArray<File>,
-      options: { readonly folder?: boolean; readonly screenPoint?: Point } = {},
-    ) => {
-      if (files.length > 0) setPanel(null);
-      const file = files[0];
-      if (
-        !shouldStageImageSelection(files.length, options.folder) &&
-        file !== undefined
-      ) {
-        void addSingleImage(file, options.screenPoint);
-      } else {
-        openBulkStaging(files, options.screenPoint);
-      }
-    },
-    [addSingleImage, openBulkStaging],
-  );
-
-  const closeBulkStaging = useCallback(() => {
-    bulkSessionRef.current = null;
-    setBulkSession(null);
-    endWorking();
-  }, [endWorking]);
-
-  const cancelDropCollection = useCallback(() => {
-    const collection = dropCollectionRef.current;
-    if (collection === null) return;
-    dropGenerationRef.current += 1;
-    collection.controller.abort();
-    dropCollectionRef.current = null;
-    setCollectingDrop(false);
-    endWorking();
-    showToast('Folder reading cancelled');
-  }, [endWorking, showToast]);
-
-  const commitBulkImages = useCallback(
-    (
-      images: ReadonlyArray<PreparedBulkImage>,
-      layoutKind: BulkLayoutKind,
-    ): string | null => {
-      const current = boardRef.current;
-      if (current.items.length + images.length > MAX_REMOTE_ITEMS) {
-        return `This board can hold ${MAX_REMOTE_ITEMS} items. Select fewer images.`;
-      }
-      const layout = layoutBulkImages(
-        images.map((image) => ({
-          id: image.entryId,
-          width: image.width,
-          height: image.height,
-        })),
-        layoutKind,
-      );
-      let placed;
-      try {
-        placed = placeLayoutWithoutOverlap(
-          layout,
-          bulkSession?.anchor ?? { x: 0, y: 0 },
-          current.items,
-        );
-      } catch (error) {
-        return error instanceof Error
-          ? error.message
-          : 'Open canvas space could not be found.';
-      }
-      const prepared = new Map(images.map((image) => [image.entryId, image]));
-      const topOrder = Math.max(0, ...current.items.map((item) => item.order));
-      const additions = placed.items.map((item, index): BoardItem => {
-        const image = prepared.get(item.id);
-        if (!image)
-          throw new Error('A prepared image was missing from this import.');
-        return {
-          id: createId(),
-          kind: 'image',
-          ...(image.mediaId === undefined
-            ? { src: image.src }
-            : { mediaId: image.mediaId }),
-          x: item.x,
-          y: item.y,
-          width: item.width,
-          height: item.height,
-          rotation: 0,
-          order: topOrder + index + 1,
-        };
-      });
-      const projectedBytes = [...current.items, ...additions].reduce(
-        (total, item) => total + estimateItemBytes(item),
-        0,
-      );
-      if (projectedBytes > MAX_REMOTE_BOARD_BYTES) {
-        return localOnly
-          ? 'Those images would make this browser board too large. Select fewer images.'
-          : 'Those images would exceed this board’s remote storage limit. Select fewer images.';
-      }
-      applyBoard({ ...current, items: [...current.items, ...additions] });
-      window.setTimeout(() => setSelectedId(additions.at(-1)?.id ?? null), 0);
-      showToast(
-        `${additions.length} ${additions.length === 1 ? 'image' : 'images'} added`,
-      );
-      return null;
-    },
-    [applyBoard, bulkSession?.anchor, localOnly, showToast],
-  );
+  }, [imageInputRef, imageSelectionFolderRef, working]);
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
@@ -1735,55 +1155,10 @@ function BoardWorkspace({
   function handleDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDraggingFiles(false);
-    if (bulkSessionRef.current !== null || dropCollectionRef.current !== null)
-      return;
-    const screenPoint = { x: event.clientX, y: event.clientY };
-    const generation = ++dropGenerationRef.current;
-    const controller = new AbortController();
-    dropCollectionRef.current = { generation, controller };
-    setCollectingDrop(true);
-    beginWorking();
-    void collectDroppedImageFiles(event.dataTransfer, {
-      limit: 150,
-      signal: controller.signal,
-    })
-      .then((collection) => {
-        if (dropCollectionRef.current?.generation !== generation) return;
-        dropCollectionRef.current = null;
-        setCollectingDrop(false);
-        if (collection.files.length === 0) {
-          endWorking();
-          showToast(
-            collection.failures[0]?.message ??
-              'No files were found in that drop.',
-          );
-        } else if (
-          collection.hadDirectory ||
-          collection.files.length > 1 ||
-          collection.failures.length > 0 ||
-          collection.omitted > 0 ||
-          collection.truncated
-        ) {
-          openBulkStaging(collection.files, screenPoint, true, collection);
-        } else {
-          const file = collection.files[0];
-          if (file === undefined) endWorking();
-          else void addSingleImage(file, screenPoint, true);
-        }
-      })
-      .catch((error) => {
-        if (dropCollectionRef.current?.generation !== generation) return;
-        dropCollectionRef.current = null;
-        setCollectingDrop(false);
-        endWorking();
-        if (!controller.signal.aborted) {
-          showToast(
-            error instanceof Error
-              ? error.message
-              : 'That folder could not be read.',
-          );
-        }
-      });
+    collectDroppedFiles(event.dataTransfer, {
+      x: event.clientX,
+      y: event.clientY,
+    });
   }
 
   function commitItemPosition(id: ItemId, x: number, y: number) {
@@ -1835,14 +1210,9 @@ function BoardWorkspace({
       if (editingId !== undefined && existing === undefined) {
         throw new Error('That X card is no longer on this board.');
       }
-      let preview:
-        | Awaited<ReturnType<BoardSync['resolveXPostPreview']>>
-        | undefined;
-      const sync = syncRef.current;
-      if (sync !== null && syncState === 'live') {
-        preview = await sync
-          .resolveXPostPreview(parsed.src)
-          .catch(() => undefined);
+      let preview: XPostPreview | undefined;
+      if (syncState === 'live') {
+        preview = await resolveXPostPreview(parsed.src).catch(() => undefined);
       }
       const sameSource = existing?.src === parsed.src;
       const snapshot = {
@@ -2022,13 +1392,12 @@ function BoardWorkspace({
         return;
       }
 
-      const sync = syncRef.current;
-      if (sync === null || syncState !== 'live') {
+      if (syncState !== 'live') {
         throw new Error(
           'Connect to the board server before resolving this link.',
         );
       }
-      const preview = await sync.resolveWebsitePreview(linkUrl);
+      const preview = await resolveWebsitePreview(linkUrl);
       if (
         preview.preferredLayout === 'image' &&
         preview.imageUrl !== undefined
@@ -2149,8 +1518,7 @@ function BoardWorkspace({
       return;
     }
 
-    const sync = syncRef.current;
-    if (sync === null || syncState !== 'live') {
+    if (syncState !== 'live') {
       setPanelError(
         'Connect to the board server before creating a website preview.',
       );
@@ -2159,7 +1527,7 @@ function BoardWorkspace({
 
     beginWorking();
     try {
-      const preview = await sync.resolveWebsitePreview(websiteUrl);
+      const preview = await resolveWebsitePreview(websiteUrl);
       const editingId = panel?.type === 'website' ? panel.itemId : undefined;
       if (editingId !== undefined) {
         applyBoard((current) => ({
@@ -2297,98 +1665,6 @@ function BoardWorkspace({
           ? 'YouTube card added'
           : 'Audio card added',
     );
-  }
-
-  async function addLocalAudio(file: File) {
-    setPanelError('');
-    if (localOnly) {
-      setPanelError('Sign in to upload audio files to a private workspace.');
-      return;
-    }
-    const mimeType = normalizeMediaMimeType('audio', file.type);
-    if (mimeType === null) {
-      setPanelError('Choose an MP3, M4A, WAV, Ogg, or WebM audio file.');
-      return;
-    }
-    if (file.size === 0 || file.size > MAX_AUDIO_UPLOAD_BYTES) {
-      setPanelError('Local audio must be non-empty and no larger than 25 MB.');
-      return;
-    }
-    const editingId = panel?.type === 'audio' ? panel.itemId : undefined;
-    if (!editingId && boardRef.current.items.length >= MAX_REMOTE_ITEMS) {
-      setPanelError(`This board can hold ${MAX_REMOTE_ITEMS} items.`);
-      return;
-    }
-    beginWorking();
-    try {
-      const uploaded = await uploadMedia(file, 'audio');
-      const label =
-        audioLabel.trim() ||
-        file.name.replace(/\.[^.]+$/, '').slice(0, 120) ||
-        undefined;
-      if (editingId) {
-        playbackCoordinatorRef.current.pauseAll();
-        applyBoard((current) => ({
-          ...current,
-          items: current.items.map((item) =>
-            item.id === editingId &&
-            (item.kind === 'audio' ||
-              item.kind === 'spotify' ||
-              item.kind === 'youtube')
-              ? {
-                  ...item,
-                  kind: 'audio',
-                  src: undefined,
-                  mediaId: uploaded.mediaId,
-                  label,
-                  width: Math.max(MIN_AUDIO_CARD_WIDTH, item.width),
-                  height: preferredAudioCardHeight(
-                    'audio',
-                    Math.max(MIN_AUDIO_CARD_WIDTH, item.width),
-                  ),
-                }
-              : item,
-          ),
-        }));
-      } else {
-        const point = screenToWorld(
-          { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-          cameraRef.current,
-        );
-        const width = 520;
-        const height = preferredAudioCardHeight('audio', width);
-        const item: BoardItem = {
-          id: createId(),
-          kind: 'audio',
-          mediaId: uploaded.mediaId,
-          label,
-          x: point.x - width / 2,
-          y: point.y - height / 2,
-          width,
-          height,
-          rotation: 0,
-          order:
-            Math.max(0, ...boardRef.current.items.map((entry) => entry.order)) +
-            1,
-        };
-        applyBoard((current) => ({
-          ...current,
-          items: [...current.items, item],
-        }));
-        setSelectedId(item.id);
-      }
-      setPanel(null);
-      showToast(editingId ? 'Audio card updated' : 'Local audio added');
-    } catch (error) {
-      setPanelError(
-        error instanceof Error
-          ? error.message
-          : 'That audio file could not be uploaded.',
-      );
-    } finally {
-      if (audioInputRef.current) audioInputRef.current.value = '';
-      endWorking();
-    }
   }
 
   function submitImageLink(event: FormEvent) {
@@ -2575,7 +1851,7 @@ function BoardWorkspace({
     backgroundDraftTouchedRef.current = false;
     setBackgroundConflict(false);
     setPanelError('');
-    setBackgroundUploadError('');
+    clearBackgroundError();
     showToast(
       backgroundMediaId === undefined
         ? 'Board background updated'
@@ -2624,84 +1900,6 @@ function BoardWorkspace({
     applyBoard((current) => ({ ...current, items: [...current.items, item] }));
     setSelectedId(item.id);
     setPanel(null);
-  }
-
-  async function exportBoard() {
-    const current = boardRef.current;
-    const hasManagedMedia =
-      current.backgroundMediaId !== undefined ||
-      current.items.some((item) => item.mediaId !== undefined);
-    if (localOnly && hasManagedMedia) {
-      showToast(
-        'This guest board contains unsupported managed media and was not exported.',
-      );
-      return;
-    }
-    archiveOperationRef.current?.abort();
-    const controller = new AbortController();
-    archiveOperationRef.current = controller;
-    beginWorking();
-    try {
-      const blob = await createBoardArchive(current, cameraRef.current, {
-        signal: controller.signal,
-      });
-      if (controller.signal.aborted) return;
-      const slug =
-        current.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-|-$/g, '') || 'mood';
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `${slug}.moodboard`;
-      link.click();
-      window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-      showToast('Portable board archive downloaded');
-    } catch (error) {
-      if (!controller.signal.aborted) {
-        showToast(
-          error instanceof Error
-            ? error.message
-            : 'That board could not be exported.',
-        );
-      }
-    } finally {
-      if (archiveOperationRef.current === controller)
-        archiveOperationRef.current = null;
-      endWorking();
-    }
-  }
-
-  async function importBoard(file: File) {
-    archiveOperationRef.current?.abort();
-    const controller = new AbortController();
-    archiveOperationRef.current = controller;
-    beginWorking();
-    try {
-      const imported = await importBoardFile(file, {
-        signal: controller.signal,
-        localOnly,
-      });
-      if (controller.signal.aborted) return;
-      const nextCamera = imported.camera;
-      setPersistenceEnabled(true);
-      replaceDocument(imported.board, nextCamera);
-      setPanel(null);
-      showToast('Board imported');
-    } catch (error) {
-      if (!controller.signal.aborted) {
-        showToast(
-          error instanceof Error
-            ? error.message
-            : 'That board could not be imported.',
-        );
-      }
-    } finally {
-      if (archiveOperationRef.current === controller)
-        archiveOperationRef.current = null;
-      if (importInputRef.current) importInputRef.current.value = '';
-      endWorking();
-    }
   }
 
   function replaceBoard(next: Board) {
@@ -3019,13 +2217,13 @@ function BoardWorkspace({
                 onDraftChange={(nextDraft) => {
                   backgroundDraftTouchedRef.current = true;
                   setPanelError('');
-                  setBackgroundUploadError('');
+                  clearBackgroundError();
                   setBackgroundDraft(nextDraft);
                 }}
                 onChooseImage={(file) => void chooseBackgroundImage(file)}
                 onRemoveImage={() => {
                   backgroundDraftTouchedRef.current = true;
-                  setBackgroundUploadError('');
+                  clearBackgroundError();
                   setBackgroundDraft((current) => {
                     const next = { ...current };
                     delete next.mediaId;
@@ -3035,7 +2233,7 @@ function BoardWorkspace({
                 onReset={() => {
                   backgroundDraftTouchedRef.current = true;
                   setPanelError('');
-                  setBackgroundUploadError('');
+                  clearBackgroundError();
                   setBackgroundDraft({
                     hex: DEFAULT_BOARD_BACKGROUND,
                     lastValidHex: DEFAULT_BOARD_BACKGROUND,
@@ -4086,7 +3284,12 @@ function BoardWorkspace({
           aria-hidden="true"
           onChange={(event) => {
             const file = event.target.files?.[0];
-            if (file) void addLocalAudio(file);
+            if (file)
+              addLocalAudio(
+                file,
+                audioLabel,
+                panel?.type === 'audio' ? panel.itemId : undefined,
+              );
           }}
         />
       )}
@@ -4137,6 +3340,13 @@ export default function BoardEditor({
     [localOnly, navigateRoute],
   );
 
+  const onWorkingChange = useCallback(
+    (sourceBoardId: BoardId, working: boolean) => {
+      if (sourceBoardId === boardId) navigationBlocked.current = working;
+    },
+    [boardId],
+  );
+
   return (
     <BoardWorkspace
       key={boardId}
@@ -4144,9 +3354,7 @@ export default function BoardEditor({
       boardId={boardId}
       onNavigate={navigate}
       localOnly={localOnly}
-      onWorkingChange={(sourceBoardId, working) => {
-        if (sourceBoardId === boardId) navigationBlocked.current = working;
-      }}
+      onWorkingChange={onWorkingChange}
     />
   );
 }

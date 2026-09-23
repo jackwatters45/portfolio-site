@@ -68,7 +68,9 @@ function PrivateApp() {
     };
   }, [revalidate]);
 
-  if (checking || (user === undefined && session.error == null)) {
+  // Keep the account-scoped editor alive during a session refresh. A missing
+  // or rejected session still removes it; the server authorizes every request.
+  if (user === undefined && (checking || session.error == null)) {
     return (
       <main
         className="profile-page"
