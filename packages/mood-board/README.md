@@ -6,7 +6,7 @@ The app keeps an account-scoped IndexedDB backup and syncs through either a self
 
 ## Development
 
-This package was imported from https://github.com/jackwatters45/mood-board at commit `a70ceb7`. It uses the root Bun workspace, lockfile, and `alchemy.run.ts`. Effect and its adapters use `4.0.0-rc.117`, matching the root Alchemy `2.0.0-beta.79` setup.
+This package was imported from https://github.com/jackwatters45/mood-board at commit `a70ceb7`. It uses the root Bun workspace, lockfile, and `alchemy.run.ts`. Package resources live in `packages/mood-board/alchemy.run.ts`, which the root stack imports. It is not a separate stack. Effect and its adapters use `4.0.0-rc.117`, matching the root Alchemy `2.0.0-beta.79` setup.
 
 From the repository root, install dependencies, copy the environment template, provide Cloudflare credentials, and start the local Alchemy stack:
 
@@ -113,10 +113,11 @@ CI deploys all sites through the root `portfolio-site` Alchemy stack after check
 
 Before the first production deployment:
 
-1. Remove the disposable `MoodBoard/prod` stack through the old repository's Alchemy setup. This deletes its old data and releases the custom domain. Do not run this repository's root destroy command: that would delete all sites.
-2. Add `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, and `EMAIL_SENDER` to this repository's GitHub secrets. Use a random auth secret with at least 32 characters.
-3. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` if Google sign-in is required. The callback remains `https://moodboard.jackwatters.dev/api/auth/callback/google`.
+1. Securely copy the production values from the original mood-board project before removing its resources: `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `EMAIL_SENDER`, and any Google credentials. Use the original secret store or authorized local environment; GitHub Actions cannot reveal stored secret values. Do not put secrets in commits, logs, or PR comments. Never use the example development secret in production.
+2. Decide whether to use Infisical before the cutover. If adopted, create a production environment, import the existing values, and configure scoped CI access. Update the workflow to retrieve them before deployment. Infisical is not configured by this PR; the current workflow reads GitHub secrets.
+3. If keeping the current workflow, add those existing values to this repository's GitHub secrets. The Google callback remains `https://moodboard.jackwatters.dev/api/auth/callback/google`.
 4. Verify the existing Cloudflare token can manage D1, R2, Workers, domains, and Secrets Store. Set `MOOD_BOARD_TRUSTED_ORIGINS` as a repository variable only if additional origins are needed.
+5. After credentials are secured and deployment is ready, remove the disposable `MoodBoard/prod` stack through the old repository's Alchemy setup. This deletes its old data and releases the custom domain. Do not run this repository's root destroy command: that would delete all sites.
 
 The workflow fails before deployment if required mood board secrets are absent. Stop deploying from the old repository after the switch. Builds and tests do not delete cloud resources or deploy the stack.
 
