@@ -1,4 +1,6 @@
 ---
+import DisclosureState from './disclosure-state.astro';
+
 interface Props {
   title: string;
   number?: string;
@@ -13,6 +15,7 @@ const Heading = number ? 'h2' : 'h3';
 ---
 
 <details class:list={['plan-disclosure', number ? 'chapter' : 'activity']} id={id} data-comment-anchor={anchor} data-disclosure-key={id ?? headingId} open>
+  <DisclosureState />
   <summary class:list={['plan-summary', { 'section-heading': number }]} aria-label={title}>
     <svg class="plan-chevron" width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d="m4 2 4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />

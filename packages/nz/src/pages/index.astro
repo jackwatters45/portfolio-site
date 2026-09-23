@@ -4,6 +4,7 @@ import '../../theme.css';
 import { Agentation } from 'agentation';
 import Comments from '@personal-sites/comments';
 import PlanSection from '../components/plan-section.astro';
+import DisclosureState from '../components/disclosure-state.astro';
 import '@personal-sites/comments/styles.css';
 ---
 
@@ -157,6 +158,7 @@ import '@personal-sites/comments/styles.css';
             </dl>
             <p class="note">Queenstown–Glenorchy is about 45 km / 45 minutes each way without stops. Leave Glenorchy around 4 PM for refuelling and the 6 PM vehicle return.</p>
             <details class="booking-notes" data-disclosure-key="glenorchy-booking-notes">
+              <DisclosureState />
               <summary>Road restrictions, conditions &amp; cancellation</summary>
               <ul>
                 <li><strong>Roads:</strong> the base drive uses the sealed Queenstown–Glenorchy Road. <a href="https://www.gorentals.co.nz/terms/">GO’s terms</a> exclude cover on Skippers Road, the road to Macetown, unformed tracks and for water-crossing damage. Public gravel roads are not all excluded, but get written approval for the exact extension and vehicle.</li>
@@ -199,6 +201,7 @@ import '@personal-sites/comments/styles.css';
             </dl>
             <p class="note">For skydiving, aim for an early-trip morning and keep a backup day for weather.</p>
             <details class="booking-notes" data-disclosure-key="adventures-booking-notes">
+              <DisclosureState />
               <summary>Cancellation &amp; participation rules</summary>
               <ul>
                 <li><a href="https://www.shotoverjet.com/experience/faqs/">Shotover Jet</a>: 24-hour cancellation policy. Operator weather cancellations offer a refund or reschedule.</li>
