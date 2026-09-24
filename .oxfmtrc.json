@@ -30,6 +30,7 @@
   },
   "sortTailwindcss": true,
   "ignorePatterns": [
+    "**/routeTree.gen.ts",
     "**/*.md",
     "**/*.mdx",
     "**/*.yml",
