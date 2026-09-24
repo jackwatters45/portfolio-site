@@ -47,7 +47,7 @@ export const activities: readonly Activity[] = [
     id: 'ziptrek',
     name: 'Ziptrek',
     itinerary: '#adventures',
-    note: 'Includes the NZ$69 gondola ticket.',
+    note: 'Includes the $69 gondola ticket.',
     options: [
       { id: 'moa', label: 'Moa · 4 lines', cents: 23800, basis: 'adult' },
       { id: 'kea', label: 'Kea · 6 lines', cents: 28800, basis: 'adult' },
@@ -148,7 +148,7 @@ export const activities: readonly Activity[] = [
     id: 'wine',
     name: 'Wine half-day',
     itinerary: '#wine',
-    note: 'Choose bike or bus, not both. Each estimate includes Gibbston and Kinross tastings (NZ$30 each). Bike uses the advertised package starting rate (NZ$105); the e-bike upgrade is unpriced and excluded. No lunch or bottles. Confirm October prices and availability.',
+    note: 'Choose bike or bus, not both. Each estimate includes Gibbston and Kinross tastings ($30 each). Bike uses the advertised package starting rate ($105); the e-bike upgrade is unpriced and excluded. No lunch or bottles. Confirm October prices and availability.',
     options: [
       {
         id: 'bike-and-tastings',
@@ -178,4 +178,4 @@ const dollars = new Intl.NumberFormat('en-NZ', {
 });
 
 export const formatNZD = (cents: number): string =>
-  `NZ$${dollars.format(cents / 100)}`;
+  `$${dollars.format(cents / 100)}`;
