@@ -361,16 +361,6 @@ dd {
   margin-top: 8px;
 }
 
-.rough-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 40px;
-}
-
-.rough-list li + li {
-  margin-top: 0;
-}
-
 .activity + .activity {
   margin-top: 32px;
   padding-top: 28px;
@@ -392,6 +382,27 @@ dd {
   gap: 10px 24px;
   padding: 20px 0;
   border-top: 1px dashed var(--rule);
+}
+
+#wine-cancellations {
+  margin-top: 20px;
+}
+
+#wine-cancellations > summary {
+  padding-left: 16px;
+}
+
+#wine-transport {
+  padding-top: 16px;
+}
+
+#wine-transport .option-list {
+  margin-top: 0;
+}
+
+#wine-transport .option-list > div:first-child {
+  padding-top: 4px;
+  border-top: 0;
 }
 
 .option-list dt {
@@ -699,11 +710,6 @@ dd {
   .trip-facts {
     grid-template-columns: 1fr 1fr;
     gap: 20px;
-  }
-
-  .rough-list {
-    grid-template-columns: 1fr;
-    gap: 8px;
   }
 
   .section-heading {
