@@ -1,5 +1,4 @@
 import { useAtom, useAtomSet, useAtomValue } from '@effect/atom-react';
-import * as Clipboard from '@effect/platform-browser/Clipboard';
 import * as Clock from 'effect/Clock';
 import * as Effect from 'effect/Effect';
 import * as Predicate from 'effect/Predicate';
@@ -9,19 +8,16 @@ import { AsyncResult, Atom } from 'effect/unstable/reactivity';
 import { useMemo } from 'react';
 import type { Target } from './protocol';
 
-export type Selection =
-  | { kind: 'new'; target: Target }
-  | { kind: 'thread'; id: string };
-
 interface UiState {
   mounted: boolean;
   active: boolean;
   picking: boolean;
-  list: 'all' | 'page' | null;
+  list: 'all' | null;
   settings: boolean;
   welcome: boolean;
   keyboardPicker: boolean;
-  selected: Selection | null;
+  selected: Target | null;
+  replyTo: { threadId: string; messageId: string } | null;
   hover: Target | null;
   notice: string;
   layout: number;
@@ -48,6 +44,7 @@ export function useCommentUi(presenceActive: boolean) {
       welcome: false,
       keyboardPicker: false,
       selected: null,
+      replyTo: null,
       hover: null,
       notice: '',
       layout: 0,
@@ -62,21 +59,11 @@ export function useCommentUi(presenceActive: boolean) {
       }),
     );
 
-    const copy = Atom.fn((url: string, get) =>
-      Clipboard.Clipboard.use((clipboard) => clipboard.writeString(url)).pipe(
-        Effect.as('Comment link copied'),
-        Effect.catchTag('ClipboardError', () => Effect.succeed(url)),
-        Effect.tap((message) => Effect.sync(() => get.set(notice, message))),
-        Effect.provide(Clipboard.layer),
-      ),
-    );
-
-    return { state, notice, copy };
+    return { state, notice };
   }, []);
 
   const [value, set] = useAtom(model.state);
   const setNotice = useAtomSet(model.notice);
-  const copyLink = useAtomSet(model.copy);
 
   const presenceNow = useAtomValue(
     value.active || presenceActive ? clock : idleClock,
@@ -100,11 +87,12 @@ export function useCommentUi(presenceActive: boolean) {
       setWelcome: field('welcome'),
       setKeyboardPicker: field('keyboardPicker'),
       setSelected: field('selected'),
+      setReplyTo: field('replyTo'),
       setHover: field('hover'),
       setLayout: field('layout'),
       setKeyboardTarget: field('keyboardTarget'),
     };
   }, [set]);
 
-  return { ...value, ...actions, setNotice, copyLink, presenceNow };
+  return { ...value, ...actions, setNotice, presenceNow };
 }

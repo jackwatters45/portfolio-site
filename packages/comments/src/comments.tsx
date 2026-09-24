@@ -1,7 +1,8 @@
 import { RegistryContext } from '@effect/atom-react';
-import { useContext, useEffect, useId, useMemo, useRef } from 'react';
+import { useContext, useId, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Composer } from './composer';
+import { Conversation } from './conversation';
 import { FloatingPanel, PanelHeading } from './floating-panel';
 import { Icon } from './icons';
 import { MessageActions } from './message-actions';
@@ -55,6 +56,7 @@ export default function Comments({
     welcome,
     keyboardPicker,
     selected,
+    replyTo,
     hover,
     notice,
     layout,
@@ -68,6 +70,7 @@ export default function Comments({
     setWelcome,
     setKeyboardPicker,
     setSelected,
+    setReplyTo,
     setHover,
     setNotice,
     setLayout,
@@ -92,18 +95,46 @@ export default function Comments({
     0,
   );
 
-  const listedThreads = list === 'page' ? pageThreads : live.threads;
+  const channels = useMemo(() => {
+    const grouped = new Map<string, { target: Target; threads: Thread[] }>();
 
-  const activeThread =
-    selected?.kind === 'thread'
-      ? live.threads.find((thread) => thread.id === selected.id)
-      : undefined;
+    for (const thread of live.threads) {
+      const channel = grouped.get(thread.target.selector);
 
-  const target =
-    selected?.kind === 'new' ? selected.target : activeThread?.target;
+      if (channel) channel.threads.push(thread);
+      else
+        grouped.set(thread.target.selector, {
+          target: thread.target,
+          threads: [thread],
+        });
+    }
 
-  const draftKey =
-    selected?.kind === 'thread' ? selected.id : `new:${target?.selector ?? ''}`;
+    return [...grouped.values()];
+  }, [live.threads]);
+
+  const target = selected;
+
+  const conversationThreads = useMemo(
+    () =>
+      live.threads
+        .filter((thread) => thread.target.selector === target?.selector)
+        .sort((a, b) =>
+          (a.messages[0]?.createdAt ?? '').localeCompare(
+            b.messages[0]?.createdAt ?? '',
+          ),
+        ),
+    [live.threads, target?.selector],
+  );
+
+  const replyThread = conversationThreads.find(
+    (thread) => thread.id === replyTo?.threadId,
+  );
+
+  const replyMessage = replyThread?.messages.find(
+    (message) => message.id === replyTo?.messageId,
+  );
+
+  const draftKey = replyThread?.id ?? `new:${target?.selector ?? ''}`;
 
   const typingPeers = live.peers.filter(
     (peer) => peer.typing === draftKey && presenceNow - peer.updatedAt < 6000,
@@ -129,12 +160,14 @@ export default function Comments({
   const closeCard = () => {
     if (sending) return;
     setSelected(null);
+    setReplyTo(null);
     stopTyping();
   };
 
   const clearPanels = () => {
     setWelcome(false);
     setSelected(null);
+    setReplyTo(null);
     setSettings(false);
     setKeyboardPicker(false);
     setList(null);
@@ -145,18 +178,9 @@ export default function Comments({
   const choose = (value: Target) => {
     if (sending) return;
     clearPanels();
-    setSelected({ kind: 'new', target: value });
-    setWelcome(!identified);
-  };
-
-  const openThread = (thread: Thread, locate = true) => {
-    if (sending) return;
-    clearPanels();
     setActive(true);
     setPicking(false);
-    setSelected({ kind: 'thread', id: thread.id });
-
-    if (locate) reveal(thread.target, root.current);
+    setSelected(value);
   };
 
   const close = () => {
@@ -167,26 +191,19 @@ export default function Comments({
     launcher.current?.focus({ preventScroll: true });
   };
 
-  const copyLink = (thread: Thread) => {
-    const url = new URL(location.href);
-    url.hash = `comment=${thread.id}`;
-    ui.copyLink(url.href);
-  };
-
   const submit = async (body: string, previous?: Mutation) => {
-    if (!selected || !target) return;
+    if (!target) return;
 
-    const threadId = await live.submit({
+    await live.submit({
       body,
       previous,
       target,
-      threadId: selected.kind === 'thread' ? selected.id : undefined,
+      threadId: replyThread?.id,
       draft: store.atom(draftKey),
     });
 
-    setSelected({ kind: 'thread', id: threadId });
-    setList(null);
-    setNotice(selected.kind === 'new' ? 'Comment added' : 'Reply added');
+    setReplyTo(null);
+    setNotice(replyThread ? 'Reply added' : 'Message sent');
   };
 
   const like = async (threadId: string, messageId: string, liked: boolean) => {
@@ -199,15 +216,6 @@ export default function Comments({
     }
   };
 
-  const hash = () => {
-    const comment = new URLSearchParams(location.hash.slice(1)).get('comment');
-
-    if (!comment) return;
-    setActive(true);
-    setWelcome(false);
-    setSelected({ kind: 'thread', id: comment });
-  };
-
   usePageEvents({
     rootSelector,
     active,
@@ -216,10 +224,8 @@ export default function Comments({
     root: (element) => {
       root.current = element;
       setMounted(true);
-      hash();
     },
     layout: () => setLayout((value) => value + 1),
-    hash,
     pointer: (event) => {
       if (!root.current || !(event.target instanceof Element)) return;
       const element = targetElement(event.target, root.current);
@@ -263,27 +269,21 @@ export default function Comments({
       else if (settings) setSettings(false);
       else if (keyboardPicker) setKeyboardPicker(false);
       else if (list) setList(null);
-      else if (selected) closeCard();
+      else if (replyTo) {
+        setReplyTo(null);
+        stopTyping();
+      } else if (selected) closeCard();
       else close();
     },
   });
-  const hashRevealed = useRef('');
-  useEffect(() => {
-    if (
-      activeThread &&
-      location.hash === `#comment=${activeThread.id}` &&
-      hashRevealed.current !== activeThread.id
-    ) {
-      hashRevealed.current = activeThread.id;
-      reveal(activeThread.target, root.current);
-    }
-  }, [activeThread]);
-
   const selectedPoint = target ? pointFor(target, root.current) : null;
   const selectedElement = selectedPoint?.element;
+  const mobile = mounted && window.innerWidth <= 600;
 
   const anchor = useMemo(() => {
     if (!target || !mounted) return null;
+
+    if (mobile) return toolbar.current;
 
     if (!target.selector)
       return {
@@ -303,8 +303,7 @@ export default function Comments({
         if (!point) return new DOMRect();
         const right = root.current?.getBoundingClientRect().right ?? 0;
 
-        const inMargin =
-          selected?.kind === 'thread' && window.innerWidth - right >= 310;
+        const inMargin = window.innerWidth - right >= 404;
 
         return new DOMRect(
           inMargin ? right + 4 : point.x,
@@ -314,7 +313,7 @@ export default function Comments({
         );
       },
     };
-  }, [mounted, target, selected?.kind, selectedElement]);
+  }, [mounted, target, mobile, selectedElement]);
 
   if (!mounted) return null;
   const unavailableTarget = target?.selector && !selectedPoint;
@@ -328,11 +327,14 @@ export default function Comments({
       store={store}
       author={preferences}
       connection={live.connection}
-      reply={selected?.kind === 'thread'}
-      focusInput={selected?.kind === 'new'}
+      replyTo={replyMessage}
+      focusInput={!!replyThread || conversationThreads.length === 0}
       sending={sending}
       onSubmit={submit}
-      onCancel={closeCard}
+      onCancel={() => {
+        setReplyTo(null);
+        stopTyping();
+      }}
       onName={() => setWelcome(true)}
       onTyping={(typing) =>
         live.updatePresence({ typing: typing ? draftKey : null })
@@ -369,51 +371,47 @@ export default function Comments({
         <button
           ref={pageMarkers}
           type="button"
-          className={`pc-pin pc-page-comments ${list === 'page' || activeThread?.target.selector === '' ? 'pc-pin-active' : ''}`}
+          className={`pc-pin pc-page-comments ${target?.selector === '' ? 'pc-pin-active' : ''}`}
           aria-label={`Page comments: ${pageMessageCount} ${pageMessageCount === 1 ? 'message' : 'messages'}`}
-          aria-expanded={
-            list === 'page' || activeThread?.target.selector === ''
-          }
+          aria-expanded={target?.selector === ''}
           title="Page comments"
           disabled={sending}
           onClick={() => {
-            if (list === 'page' || activeThread?.target.selector === '') {
-              clearPanels();
-
-              return;
-            }
-
-            const thread =
-              pageThreads.length === 1 ? pageThreads[0] : undefined;
-
-            if (thread) openThread(thread, false);
-            else {
-              clearPanels();
-              setActive(true);
-              setPicking(false);
-              setList('page');
-            }
+            if (target?.selector === '') closeCard();
+            else choose(GENERAL_TARGET);
           }}
         >
           {pageMessageCount}
         </button>
       )}
       {preferences.markers &&
-        live.threads.map((thread) => {
-          const point = pointFor(thread.target, root.current);
+        channels.map((channel) => {
+          const point = pointFor(channel.target, root.current);
+
+          const count = channel.threads.reduce(
+            (sum, thread) =>
+              sum +
+              thread.messages.filter((message) => !message.deletedAt).length,
+            0,
+          );
+
+          const expanded = target?.selector === channel.target.selector;
 
           return point && point.y > 0 && point.y < window.innerHeight ? (
             <button
-              key={thread.id}
+              key={channel.target.selector}
               type="button"
-              className={`pc-pin ${activeThread?.id === thread.id ? 'pc-pin-active' : ''}`}
+              className={`pc-pin ${expanded ? 'pc-pin-active' : ''}`}
               style={{ left: point.x, top: point.y }}
-              aria-label={`${thread.messages.filter((message) => !message.deletedAt).length} comments on ${thread.target.quote}`}
-              aria-pressed={activeThread?.id === thread.id}
+              aria-label={`${count} comments on ${channel.target.quote}`}
+              aria-expanded={expanded}
               disabled={sending}
-              onClick={() => openThread(thread, false)}
+              onClick={() => {
+                if (expanded) closeCard();
+                else choose(channel.target);
+              }}
             >
-              {thread.messages.filter((message) => !message.deletedAt).length}
+              {count}
             </button>
           ) : null;
         })}
@@ -466,17 +464,24 @@ export default function Comments({
           />
         </FloatingPanel>
       )}
-      {active && !welcome && selected?.kind === 'new' && (
+      {active && !welcome && target && (
         <FloatingPanel
           anchor={anchor ?? toolbar.current}
-          placement={target?.selector ? 'bottom-start' : 'bottom-end'}
-          label="New comment"
+          placement={
+            mobile
+              ? 'top-start'
+              : target.selector
+                ? 'bottom-start'
+                : 'bottom-end'
+          }
+          label={target.selector ? 'Element conversation' : 'Page conversation'}
           layoutVersion={layout}
-          className="pc-new-comment"
+          focusIndex={0}
+          className="pc-conversation-panel"
           onClose={closeCard}
         >
           <PanelHeading
-            title={target?.quote ?? 'Page comment'}
+            title={target.selector ? target.quote : 'Page comments'}
             onClose={closeCard}
           />
           {unavailableTarget && (
@@ -484,126 +489,86 @@ export default function Comments({
               Selected element is hidden or unavailable.
             </output>
           )}
+          <Conversation
+            key={target.selector}
+            threads={conversationThreads}
+            renderThread={(thread) => (
+              <ThreadCard
+                thread={thread}
+                replyingTo={
+                  replyThread?.id === thread.id ? replyMessage?.id : undefined
+                }
+                disabled={sending}
+                onReply={(message) => {
+                  stopTyping();
+                  setReplyTo({ threadId: thread.id, messageId: message.id });
+                }}
+                authorId={preferences.id}
+                actions={(message) =>
+                  identified &&
+                  live.ownerId &&
+                  message.ownerId === live.ownerId ? (
+                    <MessageActions
+                      message={message}
+                      threadId={thread.id}
+                      store={store}
+                      author={preferences}
+                      connection={live.connection}
+                      sending={sending}
+                      change={live.change}
+                    />
+                  ) : null
+                }
+                likesDisabled={
+                  !identified || live.connection !== 'live' || live.liking
+                }
+                onLike={(messageId, liked) => like(thread.id, messageId, liked)}
+              />
+            )}
+          />
           {composer}
           {typing}
         </FloatingPanel>
       )}
-      {active && !welcome && activeThread && (
-        <FloatingPanel
-          anchor={anchor ?? toolbar.current}
-          placement={target?.selector ? 'bottom-start' : 'bottom-end'}
-          label="Comment thread"
-          layoutVersion={layout}
-          focusIndex={0}
-          className="pc-thread-panel"
-          onClose={closeCard}
-        >
-          <ThreadCard
-            thread={activeThread}
-            active
-            onOpen={() => openThread(activeThread)}
-            onClose={closeCard}
-            onLocate={() => reveal(activeThread.target, root.current)}
-            onCopy={() => copyLink(activeThread)}
-            authorId={preferences.id}
-            actions={(message) =>
-              identified && live.ownerId && message.ownerId === live.ownerId ? (
-                <MessageActions
-                  message={message}
-                  threadId={activeThread.id}
-                  store={store}
-                  author={preferences}
-                  connection={live.connection}
-                  sending={sending}
-                  change={live.change}
-                />
-              ) : null
-            }
-            likesDisabled={
-              !identified || live.connection !== 'live' || live.liking
-            }
-            onLike={(messageId, liked) =>
-              like(activeThread.id, messageId, liked)
-            }
-          >
-            {unavailableTarget && (
-              <output className="pc-status">
-                Selected element is hidden or unavailable.
-              </output>
-            )}
-            {composer}
-            {typing}
-          </ThreadCard>
-        </FloatingPanel>
-      )}
       {active && !welcome && list && (
         <FloatingPanel
-          anchor={list === 'page' ? pageMarkers.current : toolbar.current}
-          placement={list === 'page' ? 'bottom-end' : 'top-start'}
-          label={list === 'page' ? 'Page comments' : 'All comments'}
+          anchor={toolbar.current}
+          label="All comments"
           className="pc-list-panel"
           onClose={() => setList(null)}
         >
-          <PanelHeading
-            title={list === 'page' ? 'Page comments' : 'Comments'}
-            onClose={() => setList(null)}
-          />
-          <div className="pc-thread-list">
-            {listedThreads.length ? (
-              listedThreads.map((thread) => (
-                <ThreadCard
-                  key={thread.id}
-                  thread={thread}
-                  active={false}
-                  onOpen={() => openThread(thread)}
-                  onClose={closeCard}
-                  onLocate={() => openThread(thread)}
-                  onCopy={() => copyLink(thread)}
-                  authorId={preferences.id}
-                  likesDisabled={
-                    !identified || live.connection !== 'live' || live.liking
-                  }
-                  onLike={(messageId, liked) =>
-                    like(thread.id, messageId, liked)
-                  }
-                />
-              ))
-            ) : (
-              <div className="pc-empty-list">
+          <PanelHeading title="Comments" onClose={() => setList(null)} />
+          <div className="pc-conversation-list">
+            {channels.map((channel) => (
+              <button
+                type="button"
+                className="pc-conversation-link"
+                key={channel.target.selector}
+                onClick={() => {
+                  choose(channel.target);
+                  reveal(channel.target, root.current);
+                }}
+              >
+                <Icon name="comment" size={15} />
                 <span>
-                  {live.connection === 'live'
-                    ? 'No comments yet'
-                    : 'Connecting…'}
+                  {channel.target.selector
+                    ? channel.target.quote
+                    : 'Page comments'}
                 </span>
-                <button
-                  className="pc-text-button"
-                  type="button"
-                  onClick={() => {
-                    setList(null);
-                    setPicking(true);
-                  }}
-                >
-                  Select an element
-                </button>
-              </div>
-            )}
+                <span className="pc-conversation-count">
+                  {channel.threads.reduce(
+                    (sum, thread) =>
+                      sum +
+                      thread.messages.filter((message) => !message.deletedAt)
+                        .length,
+                    0,
+                  )}
+                </span>
+              </button>
+            ))}
           </div>
         </FloatingPanel>
       )}
-      {active &&
-        !welcome &&
-        selected?.kind === 'thread' &&
-        !activeThread &&
-        live.connection === 'live' && (
-          <FloatingPanel
-            anchor={toolbar.current}
-            label="Comment not found"
-            focusIndex={0}
-            onClose={closeCard}
-          >
-            <PanelHeading title="Comment not found" onClose={closeCard} />
-          </FloatingPanel>
-        )}
       {active && !welcome && settings && (
         <FloatingPanel
           anchor={toolbar.current}
@@ -611,7 +576,14 @@ export default function Comments({
           onClose={() => setSettings(false)}
         >
           <PanelHeading title="Settings" onClose={() => setSettings(false)} />
-          <Settings preferences={preferences} update={update} />
+          <Settings
+            preferences={preferences}
+            update={update}
+            onCursors={(cursors) => {
+              update({ cursors });
+              live.updatePresence({ cursor: null });
+            }}
+          />
         </FloatingPanel>
       )}
       {active && !welcome && keyboardPicker && (
@@ -666,24 +638,6 @@ export default function Comments({
           </div>
         </FloatingPanel>
       )}
-      {canPick && (
-        <div className="pc-hint">
-          <span>Select an element</span>
-          <button
-            type="button"
-            className="pc-hint-keyboard"
-            aria-label="Choose a location with keyboard"
-            title="Choose a location with keyboard"
-            onClick={() => setKeyboardPicker(true)}
-          >
-            <Icon name="keyboard" size={15} />
-          </button>
-          <kbd className="pc-hint-keyboard">esc</kbd>
-          <button type="button" className="pc-hint-cancel" onClick={close}>
-            Cancel
-          </button>
-        </div>
-      )}
       {active &&
         !welcome &&
         (live.error || (!selected && live.connection === 'offline')) && (
@@ -702,11 +656,10 @@ export default function Comments({
         welcome={welcome}
         picking={canPick}
         showCards={list === 'all'}
-        cursors={sharingCursors}
         identified={identified}
         settings={settings}
-        pageComment={selected?.kind === 'new' && !selected.target.selector}
-        count={live.threads.length}
+        pageComment={target?.selector === ''}
+        count={channels.length}
         peers={live.peers}
         disabled={sending}
         toolbar={toolbar}
@@ -721,10 +674,11 @@ export default function Comments({
             if (!identified) setList('all');
           }
         }}
-        onPick={() => {
+        onPick={(keyboard) => {
           const next = !canPick;
           clearPanels();
           setPicking(next);
+          setKeyboardPicker(keyboard && next);
         }}
         onList={() => {
           const next = list !== 'all';
@@ -732,10 +686,9 @@ export default function Comments({
           setPicking(false);
           setList(next ? 'all' : null);
         }}
-        onPage={() => choose(GENERAL_TARGET)}
-        onCursors={() => {
-          update({ cursors: !preferences.cursors });
-          live.updatePresence({ cursor: null });
+        onPage={() => {
+          if (target?.selector === '') closeCard();
+          else choose(GENERAL_TARGET);
         }}
         onSettings={() => {
           const next = !settings;

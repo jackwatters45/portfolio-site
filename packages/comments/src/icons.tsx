@@ -11,7 +11,6 @@ export type IconName =
   | 'plus'
   | 'arrow'
   | 'check'
-  | 'link'
   | 'keyboard';
 
 const paths: Record<IconName, string> = {
@@ -29,7 +28,6 @@ const paths: Record<IconName, string> = {
   plus: 'M12 5v14 M5 12h14',
   arrow: 'M7 17 17 7 M7 7h10v10',
   check: 'm5 12 4 4L19 6',
-  link: 'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2 M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',
   keyboard: 'M3 6h18v12H3Z M6 9h1 M10 9h1 M14 9h1 M18 9h1 M7 14h10',
 };
 

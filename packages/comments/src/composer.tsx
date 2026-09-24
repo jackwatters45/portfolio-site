@@ -3,7 +3,13 @@ import { useForm } from '@tanstack/react-form';
 import * as Schema from 'effect/Schema';
 import { useEffect, useEffectEvent, useId, useRef } from 'react';
 import { Icon } from './icons';
-import { BODY_LIMIT, validName, type Author, type Mutation } from './protocol';
+import {
+  BODY_LIMIT,
+  validName,
+  type Author,
+  type Message,
+  type Mutation,
+} from './protocol';
 import type { Connection } from './room-client';
 import { DraftSchema, type draftStore } from './use-preferences';
 
@@ -16,11 +22,11 @@ interface Props {
   store: ReturnType<typeof draftStore>;
   author: Author;
   connection: Connection;
-  reply?: boolean;
+  replyTo?: Message;
   editing?: boolean;
   focusInput?: boolean;
   onSubmit: (body: string, request?: Mutation) => Promise<void>;
-  onCancel: () => void;
+  onCancel?: () => void;
   onName: () => void;
   onTyping: (typing: boolean) => void;
   sending: boolean;
@@ -31,7 +37,7 @@ export function Composer({
   store,
   author,
   connection,
-  reply,
+  replyTo,
   editing,
   focusInput,
   onSubmit,
@@ -42,6 +48,7 @@ export function Composer({
 }: Props) {
   const id = useId();
   const connected = connection === 'live';
+  const reply = !!replyTo;
   const [draft, setDraft] = useAtom(store.atom(draftKey));
   const input = useRef<HTMLTextAreaElement>(null);
   const typing = useEffectEvent(onTyping);
@@ -75,7 +82,7 @@ export function Composer({
     if (focusInput) input.current?.focus({ preventScroll: true });
 
     return () => typing(false);
-  }, [focusInput]);
+  }, [focusInput, replyTo?.id]);
 
   return (
     <form
@@ -86,16 +93,33 @@ export function Composer({
         void form.handleSubmit();
       }}
     >
+      {replyTo && (
+        <div className="pc-reply-context">
+          <div>
+            <strong>Replying to {replyTo.author.name}</strong>
+            <span title={replyTo.body}>{replyTo.body}</span>
+          </div>
+          <button
+            type="button"
+            className="pc-icon-button"
+            aria-label="Cancel reply"
+            disabled={sending}
+            onClick={onCancel}
+          >
+            <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
       <form.Field name="body">
         {(field) => (
           <>
             <label className="pc-sr-only" htmlFor={`${id}-body`}>
-              {editing ? 'Edit comment' : reply ? 'Reply' : 'Comment'}
+              {editing ? 'Edit comment' : reply ? 'Reply' : 'Message'}
             </label>
             <textarea
               ref={input}
               id={`${id}-body`}
-              placeholder={reply ? 'Write a reply…' : 'Leave a comment…'}
+              placeholder={reply ? 'Write a reply…' : 'Write a message…'}
               rows={3}
               maxLength={BODY_LIMIT}
               required
@@ -149,14 +173,16 @@ export function Composer({
             Enter name to {reply ? 'reply' : 'comment'}
           </button>
         )}
-        <button
-          className="pc-text-button"
-          type="button"
-          disabled={sending}
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
+        {editing && onCancel && (
+          <button
+            className="pc-text-button"
+            type="button"
+            disabled={sending}
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+        )}
         <form.Subscribe
           selector={(state) =>
             [state.canSubmit, state.isSubmitting, state.values.body] as const
@@ -181,8 +207,8 @@ export function Composer({
                   ? 'Save'
                   : reply
                     ? 'Reply'
-                    : 'Add'}
-              <Icon name={reply ? 'arrow' : 'plus'} size={14} />
+                    : 'Send'}
+              <Icon name="arrow" size={14} />
             </button>
           )}
         </form.Subscribe>
