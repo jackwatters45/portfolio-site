@@ -1,5 +1,5 @@
 import * as Match from 'effect/Match';
-import type { RefObject } from 'react';
+import type { MouseEventHandler, RefObject } from 'react';
 import { Icon, type IconName } from './icons';
 import type { Peer } from './protocol';
 
@@ -16,7 +16,7 @@ function Tool({
   icon: IconName;
   pressed?: boolean;
   expanded?: boolean;
-  onClick: () => void;
+  onClick: MouseEventHandler<HTMLButtonElement>;
   count?: number;
   disabled?: boolean;
 }) {
@@ -48,7 +48,6 @@ interface Props {
   welcome: boolean;
   picking: boolean;
   showCards: boolean;
-  cursors: boolean;
   identified: boolean;
   settings: boolean;
   pageComment: boolean;
@@ -58,10 +57,9 @@ interface Props {
   toolbar: RefObject<HTMLDivElement | null>;
   launcher: RefObject<HTMLButtonElement | null>;
   onToggle: () => void;
-  onPick: () => void;
+  onPick: (keyboard: boolean) => void;
   onList: () => void;
   onPage: () => void;
-  onCursors: () => void;
   onSettings: () => void;
 }
 
@@ -130,7 +128,14 @@ export function Toolbar(props: Props) {
             icon="select"
             pressed={props.picking}
             disabled={props.disabled}
-            onClick={props.onPick}
+            onClick={(event) => props.onPick(event.detail === 0)}
+          />
+          <Tool
+            label="Page comments"
+            icon="comment"
+            expanded={props.pageComment}
+            disabled={props.disabled}
+            onClick={props.onPage}
           />
           <Tool
             label="Show comments"
@@ -139,20 +144,6 @@ export function Toolbar(props: Props) {
             count={props.count}
             disabled={props.disabled}
             onClick={props.onList}
-          />
-          <Tool
-            label="Page comment"
-            icon="plus"
-            expanded={props.pageComment}
-            disabled={props.disabled}
-            onClick={props.onPage}
-          />
-          <Tool
-            label="Live cursors"
-            icon="cursor"
-            pressed={props.cursors}
-            disabled={!props.identified}
-            onClick={props.onCursors}
           />
           <Tool
             label="Settings"

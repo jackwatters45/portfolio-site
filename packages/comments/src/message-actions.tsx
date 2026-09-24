@@ -3,6 +3,7 @@ import { useForm } from '@tanstack/react-form';
 import { Atom } from 'effect/unstable/reactivity';
 import { useMemo } from 'react';
 import { Composer } from './composer';
+import { Icon } from './icons';
 import type { Author, Message } from './protocol';
 import type { Connection } from './room-client';
 import { DraftSchema, type draftStore } from './use-preferences';
@@ -66,21 +67,6 @@ export function MessageActions({
       />
     );
 
-  if (action?.kind === 'delete')
-    return (
-      <DeleteConfirmation
-        disabled={sending || connection !== 'live'}
-        onCancel={close}
-        onDelete={async () => {
-          await change({
-            change: { type: 'delete', threadId, messageId: message.id },
-            draft: store.atom(`delete:${message.id}`),
-          });
-          close();
-        }}
-      />
-    );
-
   return (
     <div className="pc-message-actions">
       <button
@@ -94,14 +80,28 @@ export function MessageActions({
       >
         Edit
       </button>
-      <button
-        type="button"
-        className="pc-text-button"
-        disabled={sending || connection !== 'live'}
-        onClick={() => setAction({ kind: 'delete' })}
-      >
-        Delete
-      </button>
+      {action?.kind === 'delete' ? (
+        <DeleteConfirmation
+          disabled={sending || connection !== 'live'}
+          onCancel={close}
+          onDelete={async () => {
+            await change({
+              change: { type: 'delete', threadId, messageId: message.id },
+              draft: store.atom(`delete:${message.id}`),
+            });
+            close();
+          }}
+        />
+      ) : (
+        <button
+          type="button"
+          className="pc-text-button pc-delete-label"
+          disabled={sending || connection !== 'live'}
+          onClick={() => setAction({ kind: 'delete' })}
+        >
+          Delete
+        </button>
+      )}
     </div>
   );
 }
@@ -142,7 +142,7 @@ function DeleteConfirmation({
         void form.handleSubmit();
       }}
     >
-      <p>Delete this comment? Other replies will remain.</p>
+      <span className="pc-delete-label">Delete?</span>
       <form.Subscribe
         selector={(state) =>
           [state.isSubmitting, state.errorMap.onSubmit] as const
@@ -150,28 +150,32 @@ function DeleteConfirmation({
       >
         {([pending, error]) => (
           <>
+            <button
+              type="submit"
+              className="pc-icon-button"
+              aria-label={
+                pending ? 'Deleting comment' : 'Confirm delete comment'
+              }
+              title="Confirm delete"
+              disabled={disabled || pending}
+            >
+              <Icon name="check" size={15} />
+            </button>
+            <button
+              type="button"
+              className="pc-icon-button"
+              aria-label="Cancel delete"
+              title="Cancel delete"
+              disabled={pending}
+              onClick={onCancel}
+            >
+              <Icon name="close" size={15} />
+            </button>
             {error && (
               <p className="pc-error" role="alert">
                 {error}
               </p>
             )}
-            <div className="pc-message-actions">
-              <button
-                type="button"
-                className="pc-text-button"
-                disabled={pending}
-                onClick={onCancel}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="pc-primary"
-                disabled={disabled || pending}
-              >
-                {pending ? 'Deleting…' : 'Delete comment'}
-              </button>
-            </div>
           </>
         )}
       </form.Subscribe>

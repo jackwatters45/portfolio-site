@@ -107,19 +107,38 @@
 
 .pc-root .pc-message-actions {
   display: flex;
-  gap: 12px;
+  gap: 2px;
   align-items: center;
 }
-.pc-root .pc-message-actions button {
-  min-height: 44px;
-  min-width: 44px;
-}
 .pc-root .pc-edited {
+  padding-left: 27px;
   color: var(--pc-muted);
   font-size: 11px;
 }
 .pc-root .pc-delete-confirmation {
-  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.pc-root .pc-delete-confirmation .pc-error {
+  flex-basis: 100%;
+}
+.pc-root .pc-delete-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 48px;
+  width: 48px;
+  min-height: 28px;
+  padding: 4px 6px;
+  color: var(--pc-muted);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.pc-root .pc-delete-confirmation .pc-delete-label {
+  color: var(--pc-error);
 }
 
 /* The launcher stays fixed. Tools expand to its right. */
@@ -142,11 +161,11 @@
   transition: width 180ms ease;
 }
 .pc-root .pc-toolbar-open {
-  width: 212px;
+  width: 180px;
   border-radius: 18px;
 }
 .pc-root .pc-toolbar-open:has(.pc-online-count) {
-  width: 262px;
+  width: 230px;
 }
 .pc-root .pc-launcher {
   position: relative;
@@ -351,6 +370,9 @@
   align-items: center;
   gap: 4px;
 }
+.pc-root .pc-composer-footer > .pc-primary {
+  margin-left: auto;
+}
 .pc-root .pc-posting-as {
   display: inline-flex;
   align-items: center;
@@ -470,7 +492,7 @@
   width: 100%;
 }
 
-.pc-root .pc-thread-list {
+.pc-root .pc-conversation-list {
   display: flex;
   flex-direction: column;
   max-height: 380px;
@@ -478,51 +500,105 @@
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
-.pc-root .pc-card {
-  border: 0;
-  background: var(--pc-surface);
-  color: var(--pc-text);
+.pc-root .pc-conversation-link {
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
 }
-.pc-root .pc-thread-list .pc-card + .pc-card {
+.pc-root .pc-conversation-link + .pc-conversation-link {
   border-top: 1px solid var(--pc-border);
 }
-.pc-root .pc-card-context {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 9px;
-  border-bottom: 1px solid var(--pc-border);
+.pc-root .pc-conversation-link:hover {
+  background: var(--pc-input);
+}
+.pc-root .pc-conversation-link svg {
+  flex-shrink: 0;
   color: var(--pc-muted);
 }
-.pc-root .pc-card-context > button:first-child {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  flex: 1;
-  min-width: 0;
-  color: var(--pc-muted);
-  font-size: 10px;
-}
-.pc-root .pc-card-context > button:first-child span {
+.pc-root .pc-conversation-link > span:first-of-type {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.pc-root .pc-card-context svg {
-  flex-shrink: 0;
+.pc-root .pc-conversation-count {
+  margin-left: auto;
+  color: var(--pc-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
-.pc-root .pc-card-preview {
+.pc-root .pc-conversation-panel {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-  width: 100%;
-  padding: 10px 12px;
-  text-align: left;
+  width: min(380px, calc(100vw - 24px));
+  overflow: hidden;
 }
-.pc-root .pc-card-preview:hover {
+.pc-root .pc-conversation-panel > :not(.pc-conversation-messages) {
+  flex-shrink: 0;
+}
+.pc-root .pc-conversation-panel > .pc-composer {
+  border-top: 1px solid var(--pc-border);
+}
+.pc-root .pc-conversation-panel > .pc-status {
+  padding: 8px 14px;
+}
+.pc-root .pc-conversation-messages {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.pc-root .pc-conversation-thread {
+  padding: 12px 14px;
+}
+.pc-root .pc-message-replying {
+  background: color-mix(in srgb, var(--pc-accent) 5%, transparent);
+}
+.pc-root .pc-replies {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 10px 0 0 10px;
+  padding: 0 0 0 18px;
+  border-left: 1px solid var(--pc-border);
+  list-style: none;
+}
+.pc-root .pc-reply-context {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--pc-accent);
   background: var(--pc-input);
+  border-radius: 4px;
+  font-size: 11px;
+}
+.pc-root .pc-reply-context > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.pc-root .pc-reply-context span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--pc-muted);
+}
+.pc-root .pc-message-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding-left: 27px;
+}
+.pc-root .pc-message-controls > form {
+  flex-basis: 100%;
+}
+.pc-root .pc-message-controls > .pc-composer {
+  padding: 8px 0;
 }
 .pc-root .pc-byline {
   display: flex;
@@ -538,7 +614,7 @@
   white-space: nowrap;
 }
 .pc-root .pc-byline time {
-  margin-left: auto;
+  margin-left: 2px;
   flex-shrink: 0;
   color: var(--pc-muted);
   font-size: 9px;
@@ -551,51 +627,25 @@
   flex-shrink: 0;
   width: 21px;
   height: 21px;
-  border-radius: 50%;
+  border-radius: 5px;
   color: white;
   font-size: 10px;
   font-weight: 600;
-}
-.pc-root .pc-preview-body {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow-wrap: anywhere;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.pc-root .pc-reply-count {
-  color: var(--pc-muted);
-  font-size: 10px;
-}
-.pc-root .pc-messages {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 12px;
-  max-height: 240px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
 }
 .pc-root .pc-message {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-.pc-root .pc-message p {
+.pc-root .pc-message > p {
+  padding-left: 27px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.6;
 }
-.pc-root .pc-likes {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
 .pc-root .pc-like-names {
+  padding-left: 27px;
   min-width: 0;
   color: var(--pc-muted);
   font-size: 10px;
@@ -626,17 +676,6 @@
 }
 .pc-root .pc-like[aria-pressed="true"] svg {
   fill: currentColor;
-}
-.pc-root .pc-card-active .pc-composer {
-  border-top: 1px solid var(--pc-border);
-}
-.pc-root .pc-empty-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 22px 14px;
-  color: var(--pc-muted);
 }
 
 .pc-root .pc-highlight {
@@ -694,51 +733,6 @@
   transform: translateY(14px);
   white-space: nowrap;
 }
-.pc-root .pc-hint {
-  position: fixed;
-  left: 20px;
-  bottom: 68px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  border: 1px solid var(--pc-border);
-  border-radius: 7px;
-  background: var(--pc-surface);
-  color: var(--pc-muted);
-  box-shadow: var(--pc-shadow);
-  pointer-events: auto;
-  font-size: 10px;
-}
-.pc-root .pc-hint button {
-  width: 22px;
-  height: 20px;
-  border-radius: 4px;
-}
-.pc-root .pc-hint button:hover {
-  background: var(--pc-input);
-}
-.pc-root .pc-hint .pc-hint-cancel {
-  display: none;
-}
-@media (hover: none), (pointer: coarse) {
-  .pc-root .pc-hint .pc-hint-keyboard {
-    display: none;
-  }
-  .pc-root .pc-hint .pc-hint-cancel {
-    display: inline-flex;
-    width: auto;
-    min-width: 44px;
-    height: 44px;
-  }
-}
-.pc-root .pc-hint kbd {
-  padding: 1px 3px;
-  border: 1px solid var(--pc-border);
-  border-radius: 3px;
-  font: inherit;
-  font-size: 9px;
-}
 .pc-root .pc-notice,
 .pc-root .pc-connection-error {
   position: fixed;
@@ -788,7 +782,7 @@
   }
   .pc-root .pc-toolbar-open,
   .pc-root .pc-toolbar-open:has(.pc-online-count) {
-    width: 250px;
+    width: 212px;
   }
   .pc-root .pc-tool {
     width: 36px;
@@ -803,12 +797,11 @@
   .pc-root .pc-online-count {
     display: none;
   }
-  .pc-root .pc-hint {
-    left: 12px;
-    bottom: 64px;
-  }
   .pc-root .pc-floating-panel {
     width: min(288px, calc(100vw - 24px));
+  }
+  .pc-root .pc-conversation-panel {
+    width: min(380px, calc(100vw - 24px));
   }
   .pc-root :is(input, textarea, select),
   .pc-root .pc-composer textarea {

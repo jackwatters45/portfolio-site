@@ -16,7 +16,6 @@ interface Events {
   leave: () => void;
   click: (event: MouseEvent) => void;
   key: (event: KeyboardEvent) => void;
-  hash: () => void;
 }
 
 export function usePageEvents(events: Events) {
@@ -77,10 +76,6 @@ export function usePageEvents(events: Events) {
 
           yield* layout.pipe(
             Stream.runForEach(() => Effect.sync(updateLayout)),
-            Effect.forkScoped,
-          );
-          yield* BrowserStream.fromEventListenerWindow('hashchange').pipe(
-            Stream.runForEach(() => Effect.sync(() => current.current.hash())),
             Effect.forkScoped,
           );
 

@@ -56,17 +56,13 @@ export function NameForm({
                 required
                 value={field.state.value}
                 onChange={(event) => field.handleChange(event.target.value)}
-                onBlur={field.handleBlur}
+                onBlur={() => {
+                  field.handleBlur();
+
+                  if (!welcome && field.state.value.trim() !== name)
+                    void form.handleSubmit();
+                }}
               />
-              {!welcome && (
-                <button
-                  className="pc-icon-button"
-                  type="submit"
-                  aria-label="Save name"
-                >
-                  <Icon name="check" size={16} />
-                </button>
-              )}
             </div>
           </div>
         )}
@@ -101,9 +97,11 @@ export function NameForm({
 export function Settings({
   preferences,
   update,
+  onCursors,
 }: {
   preferences: Preferences;
   update: (patch: Partial<Preferences>) => void;
+  onCursors: (enabled: boolean) => void;
 }) {
   return (
     <div className="pc-settings-content">
@@ -127,6 +125,15 @@ export function Settings({
           ))}
         </div>
       </fieldset>
+      <label className="pc-setting-toggle">
+        <span>Live cursors</span>
+        <input
+          type="checkbox"
+          checked={validName(preferences.name) && preferences.cursors}
+          disabled={!validName(preferences.name)}
+          onChange={(event) => onCursors(event.target.checked)}
+        />
+      </label>
       <label className="pc-setting-toggle">
         <span>Comment markers</span>
         <input
