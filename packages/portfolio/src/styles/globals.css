@@ -87,7 +87,7 @@
   }
 
   :root {
-    font-family: "Bebas Neue", "Roboto", sans-serif;
+    @apply font-sans;
     line-height: 1.5;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
