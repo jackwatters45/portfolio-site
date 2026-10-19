@@ -4,7 +4,6 @@ suburb: Frankston
 coordinates: [-38.1448416, 145.121712]
 mapsUrl: 'https://www.google.com/maps/place/The+Hop+Shop/@-38.1448416,145.121712,17z/data=!4m16!1m7!3m6!1s0x6ad675d77461172b:0x6684a37ae68fa3fd!2sThe+Hop+Shop!8m2!3d-38.1448416!4d145.121712!16s%2Fg%2F11k2h2y6fg!3m7!1s0x6ad675d77461172b:0x6684a37ae68fa3fd!8m2!3d-38.1448416!4d145.121712!9m1!1b1!16s%2Fg%2F11k2h2y6fg'
 visited: '2026-09-20'
-draft: false
 ratings:
   meg: {}
   jack: {}

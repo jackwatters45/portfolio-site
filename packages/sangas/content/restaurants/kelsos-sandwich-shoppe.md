@@ -5,7 +5,6 @@ address: 248B Glenferrie Rd, Malvern
 coordinates: [-37.8579553, 145.0294295]
 mapsUrl: 'https://www.google.com/maps?cid=9418202658665331488'
 visited: '2026-09-08'
-draft: false
 ratings:
   meg: {}
   jack: {}

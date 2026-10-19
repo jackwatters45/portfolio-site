@@ -5,7 +5,6 @@ address: 157 Burke Rd, Glen Iris
 coordinates: [-37.8643101, 145.0501912]
 mapsUrl: 'https://maps.app.goo.gl/JhyjtD3TTqG6jBaX8'
 visited: '2026-09-17'
-draft: false
 ratings:
   meg: {}
   jack: {}

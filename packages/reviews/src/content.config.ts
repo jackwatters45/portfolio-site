@@ -24,7 +24,6 @@ const restaurants = defineCollection({
       .tuple([z.number().min(-90).max(90), z.number().min(-180).max(180)])
       .optional(),
     visited: z.iso.date().optional(),
-    draft: z.boolean().default(true),
     ratings,
     glutenFreeBread: ratings.optional(),
     items: z

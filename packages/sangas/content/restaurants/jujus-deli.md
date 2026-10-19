@@ -4,7 +4,6 @@ suburb: Thornbury
 address: 750 High St, Thornbury
 coordinates: [-37.7558208, 145.0013214]
 mapsUrl: 'https://www.google.com/maps?cid=2554449490956072179'
-draft: false
 visited: '2026-08-22'
 ratings:
   meg: {}

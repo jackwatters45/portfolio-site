@@ -1,10 +1,7 @@
 import { getCollection } from 'astro:content';
 
 export async function getRestaurants() {
-  const restaurants = await getCollection(
-    'restaurants',
-    ({ data }) => import.meta.env.DEV || !data.draft,
-  );
+  const restaurants = await getCollection('restaurants');
 
   return restaurants.sort(
     (a, b) =>
