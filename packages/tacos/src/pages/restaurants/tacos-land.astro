@@ -1,0 +1,79 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: "Taco's Land",
+  suburb: 'Queenstown',
+  visited: '2026-10-14',
+  mapsUrl: 'https://maps.app.goo.gl/LG2cMDZj98mjvWFfA',
+  dishes: ['Quesabirria taco', 'Oysters'],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <p>One of the highlights of an incredible Queenstown trip. Right off the bat: this is the best taco spot we have hit to date. We visited on Wednesday 14 October and came back on Friday 16 October. Lots of guest reviewers on this one, plus a bonus oyster review. Safe to say Meg will be trying more oysters in the near future.</p>
+    <p>We hobbled into downtown Queenstown after a great day of bungee jumping/canyon swinging and a visit to Arrowtown. This spot was already on our list for the trip, but we got lucky and stumbled across it while wandering through town. (We may have seen it a day or two earlier, but that does not fit the narrative.)</p>
+    <p>The food came out quickly and hot, which was much needed in the chilly weather. The consommé made a wonderful soup once the tacos were finished. A little expensive, but more than worth it. The stand had no seating, so we sat at the Ballarat to eat and drink the beverages we had bought there. We got booted out — somewhat rudely, according to some of our reviewers.</p>
+    <p>Great town, great people, better tacos.</p>
+  </div>
+
+  <section class="section" aria-labelledby="tacos">
+    <h2 id="tacos">Tacos</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Quesabirria taco</h3>
+      </div>
+      <div class="reviews guest-reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 9.5/10</strong></div>
+          <p>9.4/10 with avocado, 9.5/10 without. Potentially the best taco she's ever had. Safe to say Meg's ban on picking restaurants is going well. Would this rating have changed if she was wearing the LM pants?</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 9.2/10</strong></div>
+          <p>One! Two! Three! Four! Five! Six! Seven! Eight! Nine! Well butter my biscuit and call me a cowboy, that's the finest dang birria I ever did eat. Crispy as all get-out, and that there consommé? Hot diggity dog. Only thing needin' a lick of work was the birria meat. YEE-HAW!</p>
+        </section>
+        <section data-person="liam" aria-label="Liam’s review">
+          <div class="scores"><strong>Liam · 8.6/10</strong></div>
+          <p>“It was just good.”</p>
+        </section>
+        <section data-person="claire" aria-label="Claire’s review">
+          <div class="scores"><strong>Claire · 7.9/10</strong></div>
+          <p>“Probably the only thing with coriander in it I've ever eaten.” Weird comment, but okay.</p>
+        </section>
+        <section data-person="becca" aria-label="Becca’s review">
+          <div class="scores"><strong>Becca · 8.9/10</strong></div>
+          <p>The best taco she's had in a long time. Could have used a little more crunch and spice. Would not have guessed Becca can handle spicy food.</p>
+        </section>
+        <section data-person="heather" aria-label="Heather’s review">
+          <div class="scores"><strong>Heather · 8.6/10</strong></div>
+          <p>One of the best birria tacos she's ever had. Good crunch, but should have ordered it spicier. “The soup was really good. Finished the soup.” Would have guessed Heather can handle spicy food.</p>
+        </section>
+        <section data-person="katelyn" aria-label="Katelyn’s review">
+          <div class="scores"><strong>Katelyn · Vegetarian</strong></div>
+          <p>Didn't eat any because she's a vegetarian. Not sure why she has a spot on this list.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section" aria-labelledby="oysters">
+    <h2 id="oysters">Oysters</h2>
+    <p>A different vendor, but part of the same food stop. We had oysters on both Wednesday and Friday too. A few first-timers and a few sceptics gave them a go, mostly with lemon, vinegar and hot sauce.</p>
+    <div class="reviews guest-reviews">
+      <section data-person="meg" aria-label="Meg’s oyster review">
+        <div class="scores"><strong>Meg · 1.7/10</strong></div>
+        <p>For the experience. Threw up in her mouth a little. “I don't like that.” Tried again on Friday with a similar result. Don't think she got either down.</p>
+      </section>
+      <section data-person="katelyn" aria-label="Katelyn’s oyster review">
+        <div class="scores"><strong>Katelyn · 7/10</strong></div>
+        <p>Pretty good. Had a few both days. Didn't actually give a rating, so gonna just say seven. Classic PK.</p>
+      </section>
+      <section data-person="jack" aria-label="Jack’s oyster review">
+        <div class="scores"><strong>Jack · 8.7/10</strong></div>
+        <p>Pretty good. Don't think they're the best I've ever had, but enjoyed slurping them down.</p>
+      </section>
+    </div>
+  </section>
+</RestaurantLayout>
