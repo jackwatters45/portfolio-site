@@ -1,0 +1,115 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: 'Casa NOM Mexican',
+  suburb: 'Prahran',
+  address: '110 Greville St, Prahran',
+  mapsUrl:
+    'https://www.google.com/maps/place/Casa+NOM+Mexican/data=!4m2!3m1!1s0x0:0x51903ae7f9dfc842',
+  coordinates: [-37.849348, 144.9909989],
+  visited: '2026-08-26',
+  dishes: [
+    'Fish taco',
+    'Shrimp taco',
+    'Birria taco',
+    'Carnitas taco',
+    'Chips and guacamole',
+    'Wine',
+  ],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <p>The first Mexican restaurant we tried. A cosy little spot just off Chapel Street. Our server was great — friendly and cracking jokes throughout the night. The food was decent. A good night, with some froyo afterwards to top things off.</p>
+    <p>Meg nearly crashed on the way there. Jack made Meg want to crash on the way back.</p>
+  </div>
+
+  <section class="section" aria-labelledby="shared">
+    <h2 id="shared">Shared dishes</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Fish taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 2/10</strong></div>
+          <p>Meg still does not like fish, but progress. Maybe.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.1/10</strong></div>
+          <p>Not a bad fish taco. It would have been much better, but the bottom was soggy as. Still, probably the best taco of the night, and probably the first fish taco I tried in Melbourne?</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Shrimp taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.3/10</strong></div>
+          <p>Meg likes seafood? No, Meg just likes coconut.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 6.7/10</strong></div>
+          <p>It just tasted like coconut. Give me a fried shrimp.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Birria taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 7.8/10</strong></div>
+          <p>I don't know. Meg didn't hate it, I guess.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8/10</strong></div>
+          <p>Pretty good. Consommé was solid. Nothing to write home about, but a decent birria taco.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Carnitas taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 7.9/10</strong></div>
+          <p>Meg called this a pork taco.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.1/10</strong></div>
+          <p>Not bad. Pretty good char. Could have used a more interesting seasoning.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Chips and guacamole</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.5/10</strong></div>
+          <p>Highlight of the night. Mmmmm, Meg loves chips.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 7.7/10</strong></div>
+          <p>Pretty good chips. Guacamole reminded me a little bit of the mashed avocado I make when I'm hungover.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Wine</h3>
+      </div>
+      <p>Pinot Gris. Tasted like wine. Yum.</p>
+      <div class="reviews"></div>
+    </article>
+  </section>
+</RestaurantLayout>

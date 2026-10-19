@@ -6,7 +6,7 @@ import { defineConfig } from 'astro/config';
 export function reviewSite({ url, port, configUrl }) {
   return defineConfig({
     site: url,
-    srcDir: fileURLToPath(new URL('./src/', import.meta.url)),
+    srcDir: fileURLToPath(new URL('./src/', configUrl)),
     output: 'static',
     compressHTML: true,
     integrations: [react(), sitemap()],

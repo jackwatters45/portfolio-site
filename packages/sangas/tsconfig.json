@@ -3,6 +3,11 @@
   "compilerOptions": {
     "paths": { "@site/*": ["./*"] }
   },
-  "include": [".astro/types.d.ts", "site.ts", "../reviews/src/**/*"],
+  "include": [
+    ".astro/types.d.ts",
+    "site.ts",
+    "src/**/*",
+    "../reviews/src/**/*"
+  ],
   "exclude": ["dist"]
 }
