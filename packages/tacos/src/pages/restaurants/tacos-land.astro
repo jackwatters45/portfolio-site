@@ -5,6 +5,7 @@ import type { Restaurant } from '@personal-sites/reviews/restaurants';
 export const restaurant: Restaurant = {
   name: "Taco's Land",
   suburb: 'Queenstown',
+  coordinates: [-45.0324213, 168.6574889],
   visited: '2026-10-14',
   mapsUrl: 'https://maps.app.goo.gl/LG2cMDZj98mjvWFfA',
   dishes: ['Quesabirria taco', 'Oysters'],
@@ -13,10 +14,11 @@ export const restaurant: Restaurant = {
 
 <RestaurantLayout restaurant={restaurant}>
   <div class="visit-notes">
-    <p>One of the highlights of an incredible Queenstown trip. Right off the bat: this is the best taco spot we have hit to date. We visited on Wednesday 14 October and came back on Friday 16 October. Lots of guest reviewers on this one, plus a bonus oyster review. Safe to say Meg will be trying more oysters in the near future.</p>
+    <img class="tacos-land-lakeside" src="/prints/tacos-land/lakeside-ink-wash.webp" width="1162" height="587" alt="Ink-wash illustration of our taco plates beside Lake Wakatipu, with Queenstown mountains beyond." decoding="async" />
+    <p>One of the highlights of an incredible Queenstown trip. Right off the bat: this is the best taco spot we have hit to date. We visited on Wednesday 14 October and came back on Friday 16 October. Liam and Tom went back again on Saturday. Lots of guest reviewers on this one, plus a bonus oyster review. Safe to say Meg will be trying more oysters in the near future.</p>
     <p>We hobbled into downtown Queenstown after a great day of bungee jumping/canyon swinging and a visit to Arrowtown. This spot was already on our list for the trip, but we got lucky and stumbled across it while wandering through town. (We may have seen it a day or two earlier, but that does not fit the narrative.)</p>
     <p>The food came out quickly and hot, which was much needed in the chilly weather. The consommé made a wonderful soup once the tacos were finished. A little expensive, but more than worth it. The stand had no seating, so we sat at the Ballarat to eat and drink the beverages we had bought there. We got booted out — somewhat rudely, according to some of our reviewers.</p>
-    <p>Great town, great people, better tacos.</p>
+    <p>A bit of a weird name, but I guess that's how you know it's authentic. Great town, great people, better tacos.</p>
   </div>
 
   <section class="section" aria-labelledby="tacos">
