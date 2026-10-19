@@ -2,7 +2,7 @@
 import Layout from '../layouts/layout.astro';
 import { getRestaurants } from '../lib/restaurants';
 
-const restaurants = await getRestaurants();
+const restaurants = getRestaurants();
 
 const date = new Intl.DateTimeFormat('en-AU', {
   day: 'numeric',
@@ -23,12 +23,12 @@ const date = new Intl.DateTimeFormat('en-AU', {
                   {data.visited && <time datetime={data.visited}>{date.format(new Date(data.visited))}</time>}
                 </div>
                 <h2>{data.name}</h2>
-                {data.items.some((item) => item.name) && <p class="entry-dishes">{data.items.filter((item) => item.name).map((item) => item.name).join(' · ')}</p>}
+                {data.dishes.length > 0 && <p class="entry-dishes">{data.dishes.join(' · ')}</p>}
               </div>
               <div class="entry-end">
-                {data.ratings.meg.score !== null && data.ratings.jack.score !== null && (
+                {data.scores && data.scores.meg !== null && data.scores.jack !== null && (
                   <div class="entry-rating" aria-label="Average of Meg and Jack’s overall scores">
-                    <strong>{((data.ratings.meg.score + data.ratings.jack.score) / 2).toFixed(1)}</strong><span class="out-of">/10</span>
+                    <strong>{((data.scores.meg + data.scores.jack) / 2).toFixed(1)}</strong><span class="out-of">/10</span>
                   </div>
                 )}
                 <svg class="entry-arrow" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
