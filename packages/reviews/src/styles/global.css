@@ -334,6 +334,23 @@ a:hover {
   margin: 0 0 32px;
 }
 
+.restaurant-page .tacos-land-food-prints {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 3px double var(--rule);
+}
+.restaurant-page .tacos-land-food-prints img {
+  display: block;
+  width: 100%;
+  height: clamp(44px, 12vw, 72px);
+  object-fit: contain;
+}
+
 .prints-page > section {
   margin-top: 48px;
 }
