@@ -42,7 +42,12 @@ const locations = restaurants.flatMap(({ id, data }) =>
 
   const locations: { name: string; address: string; coordinates: [number, number]; scores: { meg: number | null; jack: number | null }; url: string }[] = JSON.parse(container.dataset.locations!);
 
-  const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).setView([-37.8136, 144.9631], 12);
+  const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).fitBounds([[-38.25, 144.33], [-37.75, 145.35]], { maxZoom: 11 });
+
+  // Anchor the western edge near Geelong, even on wide screens.
+  const westernEdge = map.latLngToContainerPoint([-38.15, 144.33]);
+
+  map.panBy([westernEdge.x, 0], { animate: false });
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -118,8 +123,6 @@ const locations = restaurants.flatMap(({ id, data }) =>
   }
 
   if (locations.length > 0) {
-    // Keep central Melbourne in view as the restaurant collection grows.
-    map.fitBounds(L.latLngBounds([[-37.8136, 144.9631], ...locations.map(({ coordinates }) => coordinates)]), { padding: [48, 48], maxZoom: 13 });
     status.hidden = true;
   } else {
     status.firstChild!.textContent = 'No mapped reviews yet. ';
