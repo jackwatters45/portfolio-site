@@ -14,7 +14,7 @@ export const restaurant: Restaurant = {
 
 <RestaurantLayout restaurant={restaurant}>
   <div class="visit-notes">
-    <img class="tacos-land-lakeside" src="/prints/tacos-land/lakeside-ink-wash.webp" width="1162" height="587" alt="Ink-wash illustration of our taco plates beside Lake Wakatipu, with Queenstown mountains beyond." decoding="async" />
+    <img class="tacos-land-lakeside" src="/prints/tacos-land/lakeside-ink-wash-detail-light.webp" width="1154" height="684" alt="Ink-wash illustration of our taco plates beside Lake Wakatipu, with Queenstown mountains beyond." decoding="async" />
     <p>One of the highlights of an incredible Queenstown trip. Right off the bat: this is the best taco spot we have hit to date. We visited on Wednesday 14 October and came back on Friday 16 October. Liam and Tom went back again on Saturday. Lots of guest reviewers on this one, plus a bonus oyster review. Safe to say Meg will be trying more oysters in the near future.</p>
     <p>We hobbled into downtown Queenstown after a great day of bungee jumping/canyon swinging and a visit to Arrowtown. This spot was already on our list for the trip, but we got lucky and stumbled across it while wandering through town. (We may have seen it a day or two earlier, but that does not fit the narrative.)</p>
     <p>The food came out quickly and hot, which was much needed in the chilly weather. The consommé made a wonderful soup once the tacos were finished. A little expensive, but more than worth it. The stand had no seating, so we sat at the Ballarat to eat and drink the beverages we had bought there. We got booted out — somewhat rudely, according to some of our reviewers.</p>
@@ -82,4 +82,13 @@ export const restaurant: Restaurant = {
       </section>
     </div>
   </section>
+  <div class="tacos-land-food-prints">
+    {[0, 1].map((repeat) => (
+      <>
+        <img src="/prints/tacos-land/close-up-painted.webp" width="853" height="904" alt={repeat === 0 ? 'Painted close-up of quesabirria tacos, lime and consommé.' : ''} loading="lazy" decoding="async" />
+        <img src="/prints/tacos-land/two-plates-painted.webp" width="907" height="1223" alt={repeat === 0 ? 'Painted illustration of two plates of quesabirria tacos and consommé.' : ''} loading="lazy" decoding="async" />
+        <img src="/prints/tacos-land/oysters-painted.webp" width="837" height="806" alt={repeat === 0 ? 'Painted illustration of two open oysters.' : ''} loading="lazy" decoding="async" />
+      </>
+    ))}
+  </div>
 </RestaurantLayout>
