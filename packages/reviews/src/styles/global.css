@@ -3,6 +3,13 @@
   font-family: Georgia, serif;
   color: var(--ink);
   background: var(--paper);
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--paper);
+}
+@media (forced-colors: active) {
+  :root {
+    scrollbar-color: auto;
+  }
 }
 * {
   box-sizing: border-box;
