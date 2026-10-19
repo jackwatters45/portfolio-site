@@ -126,114 +126,114 @@ a:hover {
   font-family: Helvetica, sans-serif;
   font-size: 14px;
 }
-.scores {
+.restaurant-page .scores {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 24px;
   font-family: Helvetica, sans-serif;
   font-variant-numeric: tabular-nums;
 }
-.scores strong {
+.restaurant-page .scores strong {
   color: var(--accent);
   font-family: "Newsreader", Georgia, serif;
   font-size: 18px;
   font-weight: 400;
 }
-.reviews {
+.restaurant-page .reviews {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
 }
-.reviews > section {
+.restaurant-page .reviews > section {
   min-width: 0;
   grid-row: 1;
 }
-.reviews > [data-person="meg"] {
+.restaurant-page .reviews > [data-person="meg"] {
   grid-column: 1;
 }
-.reviews > [data-person="jack"] {
+.restaurant-page .reviews > [data-person="jack"] {
   grid-column: 2;
 }
-.guest-reviews > section {
+.restaurant-page .guest-reviews > section {
   grid-row: auto;
   grid-column: auto;
 }
-.solo-reviews .reviews {
+.restaurant-page .solo-reviews .reviews {
   display: block;
 }
 @media (max-width: 480px) {
-  .reviews {
+  .restaurant-page .reviews {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 }
-.reviews p {
+.restaurant-page .reviews p {
   margin-bottom: 0;
   white-space: pre-line;
 }
-article {
+.restaurant-page article {
   padding: 24px 0;
   border-top: 1px solid var(--rule);
   overflow-wrap: anywhere;
 }
-.restaurant-heading {
+.restaurant-page .restaurant-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px 24px;
   flex-wrap: wrap;
 }
-.restaurant-heading h1 {
+.restaurant-page .restaurant-heading h1 {
   flex: 1 1 240px;
   margin: 0;
 }
-.restaurant-details {
+.restaurant-page .restaurant-details {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
 }
-.visit-notes {
+.restaurant-page .visit-notes {
   font-size: 14px;
   margin-top: 40px;
 }
-.visit-notes + .section {
+.restaurant-page .visit-notes + .section {
   margin-top: 44px;
 }
 @media (max-width: 480px) {
-  .restaurant-details {
+  .restaurant-page .restaurant-details {
     align-items: flex-start;
   }
 }
-.section {
+.restaurant-page .section {
   margin-top: 36px;
 }
-.section > h2 {
+.restaurant-page .section > h2 {
   padding-bottom: 10px;
   border-bottom: 3px double var(--rule);
   color: var(--accent);
   font-style: italic;
 }
-.section > article {
+.restaurant-page .section > article {
   border-top: 0;
   padding: 16px 0 24px;
 }
-.menu-line {
+.restaurant-page .menu-line {
   display: flex;
   align-items: baseline;
   gap: 12px;
   margin-bottom: 16px;
 }
-.menu-line h3 {
+.restaurant-page .menu-line h3 {
   min-width: 0;
 }
-.menu-leader {
+.restaurant-page .menu-leader {
   flex: 1;
   min-width: 16px;
   border-bottom: 1px dotted var(--rule);
 }
-.menu-price {
+.restaurant-page .menu-price {
   flex-shrink: 0;
   margin: 0;
   font-variant-numeric: tabular-nums;

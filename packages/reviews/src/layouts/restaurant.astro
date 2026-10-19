@@ -1,0 +1,30 @@
+---
+import type { Restaurant } from '../lib/restaurants';
+import Layout from './layout.astro';
+
+interface Props {
+  restaurant: Restaurant;
+}
+
+const { restaurant } = Astro.props;
+
+const visited = restaurant.visited && new Intl.DateTimeFormat('en-AU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date(restaurant.visited));
+---
+
+<Layout title={restaurant.name} description={`${restaurant.name}, ${restaurant.suburb}. Restaurant and menu item reviews by Meg and Jack.`}>
+  <div class="restaurant-page">
+    <div class="restaurant-heading">
+      <h1>{restaurant.name}</h1>
+      <div class="meta restaurant-details">
+        {restaurant.mapsUrl ? <a href={restaurant.mapsUrl}>{restaurant.address || restaurant.suburb}</a> : <span>{restaurant.address || restaurant.suburb}</span>}
+        {visited && <time datetime={restaurant.visited}>{visited}</time>}
+      </div>
+    </div>
+    <slot />
+  </div>
+</Layout>

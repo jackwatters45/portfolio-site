@@ -1,0 +1,159 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: 'Lady T - Tatiana Bar',
+  suburb: 'Cremorne',
+  address: '104 Swan St, Cremorne',
+  mapsUrl:
+    'https://www.google.com/maps/place/Lady+T+-+Tatiana+Bar/@-37.8386907,144.9921515,14z/data=!4m17!1m10!4m9!1m6!1m2!1s0x6ad643e6f56a438f:0xe8821d42e4e816bd!2sLady+T+-+Tatiana+Bar,+104+Swan+St,+Cremorne+VIC+3121!2m2!1d144.99337!2d-37.825365!1m0!3e3!3m5!1s0x6ad643e6f56a438f:0xe8821d42e4e816bd!8m2!3d-37.825365!4d144.99337!16s%2Fg%2F11n0bvylxz?entry=ttu',
+  coordinates: [-37.825365, 144.99337],
+  visited: '2026-09-05',
+  dishes: [
+    'Cauliflower taco',
+    'Chicken taco',
+    'Pork taco',
+    'Fish taco',
+    'Chips and guacamole',
+    'Margarita',
+    'Spicy margarita',
+    'Paloma',
+    'Hugo spritz',
+  ],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <p>Visited before the DICE concert. Lady T was a great precursor to the concert. Fun little diner-like restaurant in the front that opens up into a bar out the back through a fake vending machine. Tacos were solid. Bar was pretty cool. Wouldn’t mind revisiting, maybe before the next DICE concert.</p>
+    <p>2 drinks were spilled. 1 by Meg, the other by a freak earthquake no one could have prevented.</p>
+  </div>
+
+  <section class="section" aria-labelledby="shared">
+    <h2 id="shared">Shared dishes</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Cauliflower taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8/10</strong></div>
+          <p>Must have had gluten in it. This taco was delicious, and an 8 is preposterous.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 9.1/10</strong></div>
+          <p>Maybe the best vegetarian taco in Melbourne? Certainly the best taco at Lady T and the one I would go back for.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Chicken taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.2/10</strong></div>
+          <p>The best taco of the night. Did it deserve better than an 8.2? Yes.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.9/10</strong></div>
+          <p>The sauce. Something about the damn sauce. Normally not a huge fan of chicken in tacos, but this one rocked my world.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Pork taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 7.8/10</strong></div>
+          <p>Did Meg even eat the pork taco? Think she was too busy spilling her drink on herself.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.2/10</strong></div>
+          <p>Decent, nothing to write home about. Would have preferred something more interesting, like al pastor.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Chips and guacamole</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.7/10</strong></div>
+          <p>Curiously always Meg's highest scoring dish..</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.5/10</strong></div>
+          <p>Pretty good guac and a nice red salsa. Great warm-up.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section solo-reviews" aria-labelledby="meg-extras">
+    <h2 id="meg-extras">Meg</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Paloma</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>7.6/10</strong></div>
+          <p>Tequila? Not totally disgusting? Could be good.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Hugo spritz</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>3/10</strong></div>
+          <p>Worst Hugo spritz Meg has ever had. Too sweet? Sticking to the Mount Erica.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section solo-reviews" aria-labelledby="jack-extras">
+    <h2 id="jack-extras">Jack</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Fish taco</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>8.1/10</strong></div>
+          <p>Decent, but nothing to write home about. Yet to find a great fish taco in Melbourne.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Margarita</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>7.5/10</strong></div>
+          <p>Marg. Ahorita.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Spicy margarita</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>8.7/10</strong></div>
+          <p>Really, really good before it ended up on the floor. Damn earthquake.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+</RestaurantLayout>

@@ -4,7 +4,7 @@ import site from '@site/site';
 import Layout from '../layouts/layout.astro';
 import { getRestaurants } from '../lib/restaurants';
 
-const restaurants = await getRestaurants();
+const restaurants = getRestaurants();
 
 const locations = restaurants.flatMap(({ id, data }) =>
   data.coordinates
@@ -14,8 +14,8 @@ const locations = restaurants.flatMap(({ id, data }) =>
           address: data.address ?? data.suburb,
           coordinates: data.coordinates,
           scores: {
-            meg: data.ratings.meg.score,
-            jack: data.ratings.jack.score,
+            meg: data.scores?.meg ?? null,
+            jack: data.scores?.jack ?? null,
           },
           url: `/restaurants/${id}/`,
         },
