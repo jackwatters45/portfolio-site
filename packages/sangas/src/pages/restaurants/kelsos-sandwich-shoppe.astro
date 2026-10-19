@@ -1,0 +1,63 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: "Kelso's Sandwich Shoppe",
+  suburb: 'Malvern',
+  address: '248B Glenferrie Rd, Malvern',
+  mapsUrl: 'https://www.google.com/maps?cid=9418202658665331488',
+  coordinates: [-37.8579553, 145.0294295],
+  visited: '2026-09-08',
+  dishes: ['Chopped cheese', 'Fries'],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <p>Great spot next to Malvern Town Hall. Terrible hours, and if you go on an off day, there’s usually only 1 person working. Doesn’t matter. The chopped cheese is elite. Also, Meg can’t shoot.</p>
+  </div>
+
+  <section class="section" aria-labelledby="shared">
+    <h2 id="shared">Shared dishes</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Chopped cheese</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.3/10</strong></div>
+          <p>Surprisingly, the gluten-free bread was okay. "Basically a hamburger." Jalapeños were soooo spicy. May have slipped the second half to Maisy under the table.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.8/10</strong></div>
+          <p>Best meal in Malvern. Please try it. Please. Please.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Fries</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 5.2/10</strong></div>
+          <p>Don't know if Meg ate any, but we'll pretend she thought they were great.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8/10</strong></div>
+          <p>Pretty standard fries. Sometimes they give you a dip, sometimes not.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section" aria-labelledby="gluten-free-bread">
+    <h2 id="gluten-free-bread">Gluten-free bread</h2>
+    <div class="reviews">
+      <section data-person="meg" aria-label="Meg’s review">
+        <div class="scores"><strong>8.6/10</strong></div>
+      </section>
+    </div>
+  </section>
+</RestaurantLayout>

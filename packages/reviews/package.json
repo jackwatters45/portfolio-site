@@ -4,7 +4,10 @@
   "type": "module",
   "exports": {
     "./config": "./astro.config.mjs",
-    "./site": "./src/site.ts"
+    "./site": "./src/site.ts",
+    "./restaurants": "./src/lib/restaurants.ts",
+    "./layouts/restaurant": "./src/layouts/restaurant.astro",
+    "./pages/*": "./src/pages/*.astro"
   },
   "dependencies": {
     "@astrojs/react": "6.0.6",

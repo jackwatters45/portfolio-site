@@ -1,0 +1,71 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: "Grazia D'Asporto",
+  suburb: 'Glen Iris',
+  address: '157 Burke Rd, Glen Iris',
+  mapsUrl: 'https://maps.app.goo.gl/JhyjtD3TTqG6jBaX8',
+  coordinates: [-37.8643101, 145.0501912],
+  visited: '2026-09-17',
+  dishes: ['Prosciutto', 'Porchetta', 'Coke Zero (bottle)'],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <p>Quick trip to Grazia after a way-too-early shoot-around. Meg shot better today. Clearly practising her around-the-worlds. Meg did some 6 am sprints, but Jack outclassed her with day 2 of his marathon streak (2:10 btw).</p>
+    <p>Wow, what a spot. Greatest sandwich spot ever. The napkins were way too thick. Trying to think of something else to be negative about. Need to bump Meg down a peg.</p>
+  </div>
+
+  <section class="section solo-reviews" aria-labelledby="meg-extras">
+    <h2 id="meg-extras">Meg</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Prosciutto</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>9.9/10</strong></div>
+          <p>Deathbed meal. Face instantly lit up every bite. Not sure why we're doing this list since nothing can beat this.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section solo-reviews" aria-labelledby="jack-extras">
+    <h2 id="jack-extras">Jack</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Porchetta</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>8.7/10</strong></div>
+          <p>Yeah mate, alright, pretty good. Messiest sandwich of all time, but pretty tasty. Bumped my rating a bit because Meg loves this place!</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Coke Zero (bottle)</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>9/10</strong></div>
+          <p>Good.</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
+  <section class="section" aria-labelledby="gluten-free-bread">
+    <h2 id="gluten-free-bread">Gluten-free bread</h2>
+    <div class="reviews">
+      <section data-person="meg" aria-label="Meg’s review">
+        <div class="scores"><strong>9.3/10</strong></div>
+      </section>
+    </div>
+  </section>
+</RestaurantLayout>

@@ -34,6 +34,7 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
   </head>
   <body class:list={{ 'map-page': map }}>
     {!map && <BackgroundPrints />}
+    <div class="page-content">
     <a class="skip" href="#main">Skip to content</a>
     <header>
       <a class="site-title" href="/">{site.name}</a>
@@ -43,6 +44,7 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
       </nav>}
     </header>
     <main id="main"><slot /></main>
+    </div>
     {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
   </body>
 </html>
