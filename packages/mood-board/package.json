@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build && oxfmt --write src/routeTree.gen.ts",
-    "dev": "cd ../.. && alchemy dev",
+    "dev": "vite dev",
     "local": "bun src/mcp/main.ts",
     "test": "vitest run tests",
     "typecheck": "tsgo --noEmit"
