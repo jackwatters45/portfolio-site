@@ -11,11 +11,17 @@ body {
   position: relative;
   isolation: isolate;
   min-height: 100dvh;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.page-content {
   max-width: 672px;
   margin: 0 auto;
   padding: 0 24px;
-  font-size: 15px;
-  line-height: 1.6;
+}
+.map-page .page-content {
+  display: contents;
 }
 @font-face {
   font-family: "Newsreader";

@@ -58,7 +58,11 @@ export default Alchemy.Stack(
     const tacos = yield* Cloudflare.Website.StaticSite('tacos', {
       command: 'bun run build --filter=@personal-sites/tacos',
       outdir: 'packages/tacos/dist',
-      dev: { command: 'bun run dev', cwd: 'packages/tacos' },
+      dev: {
+        command: 'bun run dev',
+        cwd: 'packages/tacos',
+        env: { NODE_ENV: 'development' },
+      },
       domain:
         stage === 'prod'
           ? {
@@ -72,7 +76,11 @@ export default Alchemy.Stack(
     const sangas = yield* Cloudflare.Website.StaticSite('sangas', {
       command: 'bun run build --filter=@personal-sites/sangas',
       outdir: 'packages/sangas/dist',
-      dev: { command: 'bun run dev', cwd: 'packages/sangas' },
+      dev: {
+        command: 'bun run dev',
+        cwd: 'packages/sangas',
+        env: { NODE_ENV: 'development' },
+      },
       domain:
         stage === 'prod'
           ? {
