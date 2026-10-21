@@ -1,0 +1,169 @@
+{
+  "paperFile": "01M5A0BC9F96Y1YT9XBMWTS1XB",
+  "status": "approved-integrated",
+  "board": "47-0",
+  "boardName": "Taco’s Land style match — covers and food",
+  "styleContract": {
+    "paintedReference": "packages/tacos/public/prints/tacos-land/close-up-painted.webp",
+    "inkWashReference": "packages/tacos/public/prints/tacos-land/lakeside-ink-wash-detail-light.webp",
+    "referenceRoles": "Photographs control subjects and arrangement. Approved Taco’s Land assets control marks and technique. Initial style references were composited over pure white without changing artwork.",
+    "coverScope": "Only the two-tray sandwich cover and Jack eating outside the window include surroundings. Add descriptive detail without changing the ink-wash technique.",
+    "foodScope": "Food and complete serving trays or baskets only; no table, floor, grass, hand or other surrounding background.",
+    "graziaPalette": "Natural food colours. No blue pigment. The first blue paintings had the right technique, not the right palette.",
+    "review": "The user approved all six images after comparison in Paper. Integrated them into the local Grazia and Tacos Jaguar pages."
+  },
+  "selectedArtwork": [
+    {
+      "group": "jaguar",
+      "source": "IMG_2385.jpg",
+      "slug": "cover-eating-ink-wash-style-match",
+      "style": "ink-wash",
+      "status": "approved-integrated",
+      "model": "google-nano-banana-2-1",
+      "node": "4M-0",
+      "displayNode": "52-0",
+      "referenceNodes": ["3D-0", "4A-0"],
+      "prompt": "The FIRST reference photograph controls the actual scene, pose, proportions and object locations. The SECOND reference is the approved Taco’s Land lakeside ink-wash cover: it controls the EXACT mark-making, light pigment density, broken fine contours, translucent washes, small pooled ink accents and white open space. This is a new image in that same illustrated series, not a new style. Keep the same delicate wash technique and muted visual weight; add descriptive detail WITHIN that technique, not thick outlines or realistic rendering. Do not copy the lake scene or plates from the style reference. Cover scene with background: the short-haired man outside the cafe window bends down with a taco in his RIGHT hand and a dark paper cup in his LEFT hand. Preserve his actual face, sunglasses on top of his head, lowered eyes, nose, mouth, ear, bent neck, fingers and shirt folds. His face and hands need clear, small descriptive marks, not blank blobs. Retain the seated person's back of head and shoulder in the right foreground, the window structure, a hanging leafy plant on the left, the porch roof/eaves above, outdoor bushes and a few faint street and distant mountain marks seen THROUGH the window. Window lines are part of the real scene, not an added border. Break the outer edges into open strokes instead of a full rectangle. The man eating remains the focal point; background is lighter and less detailed. Same three pigments as the style reference: brick red #963d2e, dark brown #352b25, tan #d9c6aa. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZYQ7RN9EASZCJA913VZZ4.png",
+      "asset": "packages/tacos/public/prints/tacos-jaguar/cover-eating-ink-wash-style-match.webp",
+      "width": 1130,
+      "height": 773,
+      "preparation": {
+        "method": "palette-matting",
+        "cutoff": 0.065,
+        "padding": 20,
+        "format": "lossless-webp",
+        "pigments": ["#963d2e", "#352b25", "#d9c6aa"]
+      }
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2383.jpg",
+      "slug": "birria-painted-style-match",
+      "style": "painted",
+      "status": "approved-integrated",
+      "model": "google-nano-banana-2-1",
+      "node": "4S-0",
+      "displayNode": "56-0",
+      "referenceNodes": ["35-0", "4E-0"],
+      "prompt": "The FIRST reference is the photograph and controls ONLY subject, food shape, angle and spatial arrangement. The SECOND reference is approved Taco’s Land painted artwork and controls the EXACT ILLUSTRATION STYLE. Make this look drawn by the same hand as the second image, part of the same small series. Match its broad flat opaque pigment shapes, chunky irregular dry brush edges, flat overlapping patches, strong open highlights and sparse dark accents. Use roughly the same brush size relative to the food. Do not draw every ingredient, bread pore or crease. No fine ink contours, watercolor shading, realistic texture, photorealism, gradients or detailed editorial food sketching. Food should read in a few bold hand-painted masses, just like the style reference. Do not copy the taco subject into a sandwich scene. Paint ONLY the two folded birria tacos, the round consomme cup at front left and their COMPLETE oval serving basket with its paper liner. Preserve this source photo's arrangement. Keep the complete outside basket silhouette: rim, sides and base edge. Use a few large simple lattice openings, not detailed wicker. Do not show just scattered fragments of a basket, and do not copy the round PLATE from the style reference. No table, placemat, napkin outside the basket or surroundings. Same palette as approved tacos: brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E04V8EX7N62PDG6BDMH0JB.png",
+      "asset": "packages/tacos/public/prints/tacos-jaguar/birria-painted-style-match.webp",
+      "width": 973,
+      "height": 846,
+      "preparation": {
+        "method": "palette-matting",
+        "cutoff": 0.065,
+        "padding": 20,
+        "format": "lossless-webp",
+        "pigments": ["#963d2e", "#352b25", "#d9c6aa"]
+      }
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2384.jpg",
+      "slug": "chicken-tinga-painted-style-match",
+      "style": "painted",
+      "status": "approved-integrated",
+      "model": "google-nano-banana-2-1",
+      "node": "4U-0",
+      "displayNode": "58-0",
+      "referenceNodes": ["39-0", "4E-0"],
+      "prompt": "The FIRST reference is the photograph and controls ONLY subject, food shape, angle and spatial arrangement. The SECOND reference is approved Taco’s Land painted artwork and controls the EXACT ILLUSTRATION STYLE. Make this look drawn by the same hand as the second image, part of the same small series. Match its broad flat opaque pigment shapes, chunky irregular dry brush edges, flat overlapping patches, strong open highlights and sparse dark accents. Use roughly the same brush size relative to the food. Do not draw every ingredient, bread pore or crease. No fine ink contours, watercolor shading, realistic texture, photorealism, gradients or detailed editorial food sketching. Food should read in a few bold hand-painted masses, just like the style reference. Do not copy the taco subject into a sandwich scene. Paint ONLY the two open chicken tinga tacos with broad tortilla curves, a few onion-ring strokes, crema marks and filling, in their COMPLETE oval serving basket with paper liner tucked inside it. Preserve the source photo's arrangement. The entire outer basket must be visible and structurally complete, with rim, sides, lower edge and only a few chunky lattice openings. Not partial floating fragments, not a round plate copied from the style reference. No table, mat, napkin outside the basket or background. Exact restrained palette of the approved tacos: brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E04V9WXNQS855M2NDK0FFJ.png",
+      "asset": "packages/tacos/public/prints/tacos-jaguar/chicken-tinga-painted-style-match.webp",
+      "width": 1012,
+      "height": 837,
+      "preparation": {
+        "method": "palette-matting",
+        "cutoff": 0.065,
+        "padding": 20,
+        "format": "lossless-webp",
+        "pigments": ["#963d2e", "#352b25", "#d9c6aa"]
+      }
+    }
+  ],
+  "rejectedCompositionEdits": [],
+  "intermediateRevisions": [
+    {
+      "group": "jaguar",
+      "slug": "birria-painted-complete-basket",
+      "source": "IMG_2383.jpg",
+      "refs": ["37-0", "35-0"],
+      "style": "painted",
+      "model": "google-nano-banana-2-1",
+      "prompt": "Refine the FIRST approved gouache illustration using the second photo as a reference for the container. Keep the exact existing painted food forms, colour palette and rough brushwork. The change is the basket: include the COMPLETE oval serving basket, all of its outside rim, sides and base edge, with the whole paper liner tucked into it. The basket must visibly support the tacos and cup, not a few disconnected arc fragments and not half a container. Retain the two folded birria tacos and the round consomme cup at the front left. Simplify the lattice to several deliberate chunky painted gaps, but do not erase structural parts of the basket. No table or placemat. Only brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Pure solid white background for later removal, no paper grain or background tint. Entire basket and all food must fit inside central 70 percent of canvas. Complete clean silhouette and generous blank margins, no cropping.",
+      "node": "43-0",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZFZYTSSGR4TDZV9JPQ11Q.png",
+      "status": "superseded-style-mismatch"
+    },
+    {
+      "group": "jaguar",
+      "slug": "chicken-tinga-painted-complete-basket",
+      "source": "IMG_2384.jpg",
+      "refs": ["3B-0", "39-0"],
+      "style": "painted",
+      "model": "google-nano-banana-2-1",
+      "prompt": "Refine the FIRST approved gouache illustration using the second photograph for the whole serving container. Preserve the original loose opaque paint, irregular brushwork and food shapes: two open chicken tinga tacos with onion rings, crema and filling. Include the COMPLETE oval serving basket underneath, with all of its outside rim, sides and lower edge. The basket is a recognizable whole object, not partial floating rim fragments. Include a simplified complete paper liner tucked inside. Use a few chunky open lattice marks but keep all structural edges. Omit placemat, table and logo. Only brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Pure solid white background for later removal, no paper grain or background tint. Entire basket and tacos occupy central 70 percent of canvas with blank margins on every side. No clipped objects.",
+      "node": "45-0",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZFZYWKE57V48WWFJV91BS.png",
+      "status": "superseded-style-mismatch"
+    }
+  ],
+  "previousStudies": [
+    {
+      "group": "jaguar",
+      "source": "IMG_2383.jpg",
+      "slug": "birria-ink-wash",
+      "style": "ink-wash",
+      "node": "3O-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two folded birria tacos in an oval basket with a small round consommé cup at front left. Keep taco folds, meat, herbs and cup. Omit placemat and table, simplify basket to broken rim and a few woven marks. Observational ink wash, thin translucent pigments, natural blooms, pooled drying edges and selective firm brush accents. Describe food folds, filling layers, onion rings, cup rim and a few basket marks clearly. Medium detail; keep broad empty spaces. Only brick red #963d2e, dark brown #352b25, tan #d9c6aa. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSE0483EH7GB8HNHR0G7S.png"
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2384.jpg",
+      "slug": "chicken-tinga-ink-wash",
+      "style": "ink-wash",
+      "node": "3Q-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two open chicken tinga tacos with curved tortillas, pink pickled onion rings, white crema and shredded filling in an oval basket. Simplify basket rim. Omit placemat, napkin and table. Observational ink wash, thin translucent pigments, natural blooms, pooled drying edges and selective firm brush accents. Describe food folds, filling layers, onion rings, cup rim and a few basket marks clearly. Medium detail; keep broad empty spaces. Only brick red #963d2e, dark brown #352b25, tan #d9c6aa. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSE0Q35Y84PGFQFYZKW9A.png"
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2385.jpg",
+      "slug": "cover-eating-ink-wash-detailed",
+      "style": "ink-wash",
+      "node": "3S-0",
+      "prompt": "Create a handmade translucent ink-wash illustration with natural blooms and pooled edges of this exact photo. Increase observational detail substantially while retaining a light, open illustration. The man outside is leaning down eating a taco in his hands. Render his recognizable short dark hair, eyebrows, facial features, ears, bent neck, fingers holding the taco, folded dark shirt sleeves, shirt seams and food layers. Keep his pose and proportions. Retain the back of the seated observer on the right with hair strands, ear outline, neck and hood folds. Include the structural window bars, a few roof beam marks, climbing leaves on left and selective outdoor foliage. Keep the central eating man visually strongest; do not leave him as a tiny blurry silhouette. Use brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Detailed handmade drawing, not photorealistic. Plain pure white background with NO paper grain or tinted field. Open, broken outer silhouette, no enclosing rectangular border, no text, no logos or shadow. Fit all marks within central 80 percent of canvas, preserve generous margins. No empty or missing face. No photographic fragments.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSE1A10R8B0E884A7GYFG.png"
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2385.jpg",
+      "slug": "cover-eating-painted-detailed",
+      "style": "painted",
+      "node": "3U-0",
+      "prompt": "Create a handmade opaque gouache painting with dry bristle edges and irregular painted planes of this exact photo. Increase observational detail substantially while retaining a light, open illustration. The man outside is leaning down eating a taco in his hands. Render his recognizable short dark hair, eyebrows, facial features, ears, bent neck, fingers holding the taco, folded dark shirt sleeves, shirt seams and food layers. Keep his pose and proportions. Retain the back of the seated observer on the right with hair strands, ear outline, neck and hood folds. Include the structural window bars, a few roof beam marks, climbing leaves on left and selective outdoor foliage. Keep the central eating man visually strongest; do not leave him as a tiny blurry silhouette. Use brick red #963d2e, dark brown #352b25 and tan #d9c6aa. Detailed handmade drawing, not photorealistic. Plain pure white background with NO paper grain or tinted field. Open, broken outer silhouette, no enclosing rectangular border, no text, no logos or shadow. Fit all marks within central 80 percent of canvas, preserve generous margins. No empty or missing face. No photographic fragments.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSE1V49XYY15BB6BFAPFP.png"
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2383.jpg",
+      "slug": "birria-painted",
+      "style": "painted",
+      "node": "37-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two folded birria tacos in an oval basket with a small round consommé cup at front left. Keep taco folds, meat, herbs and cup. Omit placemat and table, simplify basket to broken rim and a few woven marks. Opaque observational gouache, flat irregular shapes, dry bristle tracks, broken paint edges and two or three pencil accents. No precise outlines or watercolor. Only brick red #963d2e, dark brown #352b25, tan #d9c6aa. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYFHVXDYVC74FF64NFFYGC.png"
+    },
+    {
+      "group": "jaguar",
+      "source": "IMG_2384.jpg",
+      "slug": "chicken-tinga-painted",
+      "style": "painted",
+      "node": "3B-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two open chicken tinga tacos with curved tortillas, pink pickled onion rings, white crema and shredded filling in an oval basket. Simplify basket rim. Omit placemat, napkin and table. Opaque observational gouache, flat irregular shapes, dry bristle tracks, broken paint edges and two or three pencil accents. No precise outlines or watercolor. Only brick red #963d2e, dark brown #352b25, tan #d9c6aa. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYFKX0Q8A3RRF3Z069X7KQ.png"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+---
+import RestaurantLayout from '@personal-sites/reviews/layouts/restaurant';
+import type { Restaurant } from '@personal-sites/reviews/restaurants';
+
+export const restaurant: Restaurant = {
+  name: 'Tacos Jaguar',
+  suburb: 'Glenorchy',
+  address: '25 Mull Street, Glenorchy',
+  mapsUrl: 'https://maps.app.goo.gl/phN3Atr8ptrMp9Qm6',
+  coordinates: [-44.8498621, 168.3840581],
+  visited: '2026-10-15',
+  dishes: ['Birria taco', 'Chicken tinga taco'],
+};
+---
+
+<RestaurantLayout restaurant={restaurant}>
+  <div class="visit-notes">
+    <img class="review-cover" src="/prints/tacos-jaguar/cover-eating-ink-wash-style-match.webp" width="1130" height="773" alt="Ink-wash illustration of Jack eating a taco outside the window, seen from inside the café." decoding="async" />
+    <p>A pleasant little taco tasting at the Glenorchy stop of our Thursday road trip. The day was particularly chilly and the rain rudely did not consider our plans.</p>
+    <p>Meg prefers not to eat gluten, so she was unable to join us at the café/taphouse everyone else went to. Becca was kind enough to join her out of pity and a bit of loathing. Jack requested some takeaway after eating his normal people food and was lucky enough that Meg obliged, however not without doling out some much unappreciated sass beforehand.</p>
+    <p>While not a participant, it should be noted that Claire was in a terrible mood and being a real RC. Thankfully, BL bore the brunt of her rage.</p>
+  </div>
+
+  <section class="section" aria-labelledby="shared">
+    <h2 id="shared">Shared</h2>
+    <article>
+      <div class="menu-line">
+        <h3>Birria taco</h3>
+      </div>
+      <div class="reviews guest-reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 8.3/10</strong></div>
+          <p>Good portions on meat, good flavour and very good dipping sauce (?). Not the best tortilla and needed to be cheesier and crispier.</p>
+          <p>“Minus points for eating it without you 💔💔”</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.4/10</strong></div>
+          <p>The birria and consommé were fantastic. Better than Taco's Land. Unfortunately, the rest of the taco left a little to be desired.</p>
+          <p>If Taco's Land and Tacos Jaguar had a baby, it would produce the greatest tacos in the world.</p>
+        </section>
+        <section data-person="becca" aria-label="Becca’s review">
+          <div class="scores"><strong>Becca · 10/10</strong></div>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Chicken tinga taco</h3>
+      </div>
+      <div class="reviews guest-reviews">
+        <section data-person="meg" aria-label="Meg’s review">
+          <div class="scores"><strong>Meg · 6.4/10</strong></div>
+          <p>Good flavour but very eh. Weird combo of toppings. Only good thing was the sour cream on it. SOUR CREAM DOES NOT BELONG ON TACOS.</p>
+        </section>
+        <section data-person="becca" aria-label="Becca’s review">
+          <div class="scores"><strong>Becca · 10/10</strong></div>
+        </section>
+      </div>
+    </article>
+  </section>
+  <div class="review-food-prints">
+    {[0, 1, 2].map((repeat) => (
+      <>
+        <img src="/prints/tacos-jaguar/birria-painted-style-match.webp" width="973" height="846" alt={repeat === 0 ? 'Painted birria tacos with a cup of consommé.' : ''} loading="lazy" decoding="async" />
+        <img src="/prints/tacos-jaguar/chicken-tinga-painted-style-match.webp" width="1012" height="837" alt={repeat === 0 ? 'Painted chicken tinga tacos with pickled onions and crema.' : ''} loading="lazy" decoding="async" />
+      </>
+    ))}
+  </div>
+</RestaurantLayout>
