@@ -42,12 +42,16 @@ const locations = restaurants.flatMap(({ id, data }) =>
 
   const locations: { name: string; address: string; coordinates: [number, number]; scores: { meg: number | null; jack: number | null }; url: string }[] = JSON.parse(container.dataset.locations!);
 
-  const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).fitBounds([[-38.25, 144.33], [-37.75, 145.35]], { maxZoom: 11 });
+  // Include greater Melbourne and the peninsula, but exclude distant reviews from the opening view.
+  const melbourneArea = L.latLngBounds([[-38.5, 144.3], [-37.4, 145.6]]);
 
-  // Anchor the western edge near Geelong, even on wide screens.
-  const westernEdge = map.latLngToContainerPoint([-38.15, 144.33]);
+  const melbourneLocations = locations.filter(({ coordinates }) => melbourneArea.contains(coordinates));
 
-  map.panBy([westernEdge.x, 0], { animate: false });
+  const initialBounds = melbourneLocations.length > 0
+    ? L.latLngBounds(melbourneLocations.map(({ coordinates }) => coordinates))
+    : melbourneArea;
+
+  const map = L.map(container, { zoomControl: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 180, fadeAnimation: false, zoomAnimation: false, markerZoomAnimation: false }).fitBounds(initialBounds, { padding: [60, 80], maxZoom: 13 });
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
