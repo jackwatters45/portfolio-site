@@ -1,0 +1,189 @@
+{
+  "paperFile": "01M5A0BC9F96Y1YT9XBMWTS1XB",
+  "status": "approved-integrated",
+  "board": "47-0",
+  "boardName": "Taco’s Land style match — covers and food",
+  "styleContract": {
+    "paintedReference": "packages/tacos/public/prints/tacos-land/close-up-painted.webp",
+    "inkWashReference": "packages/tacos/public/prints/tacos-land/lakeside-ink-wash-detail-light.webp",
+    "referenceRoles": "Photographs control subjects and arrangement. Approved Taco’s Land assets control marks and technique. Initial style references were composited over pure white without changing artwork.",
+    "coverScope": "Only the two-tray sandwich cover and Jack eating outside the window include surroundings. Add descriptive detail without changing the ink-wash technique.",
+    "foodScope": "Food and complete serving trays or baskets only; no table, floor, grass, hand or other surrounding background.",
+    "graziaPalette": "Natural food colours. No blue pigment. The first blue paintings had the right technique, not the right palette.",
+    "review": "The user approved all six images after comparison in Paper. Integrated them into the local Grazia and Tacos Jaguar pages."
+  },
+  "selectedArtwork": [
+    {
+      "group": "grazia",
+      "source": "IMG_2622.jpeg",
+      "slug": "sandwich-2622-painted-style-match",
+      "style": "painted",
+      "status": "approved-integrated",
+      "model": "google-nano-banana-2-1",
+      "node": "4K-0",
+      "displayNode": "50-0",
+      "referenceNodes": ["2N-0", "4E-0"],
+      "prompt": "The FIRST reference is the photograph and controls ONLY subject, food shape, angle and spatial arrangement. The SECOND reference is approved Taco’s Land painted artwork and controls the EXACT ILLUSTRATION STYLE. Make this look drawn by the same hand as the second image, part of the same small series. Match its broad flat opaque pigment shapes, chunky irregular dry brush edges, flat overlapping patches, strong open highlights and sparse dark accents. Use roughly the same brush size relative to the food. Do not draw every ingredient, bread pore or crease. No fine ink contours, watercolor shading, realistic texture, photorealism, gradients or detailed editorial food sketching. Food should read in a few bold hand-painted masses, just like the style reference. Do not copy the taco subject into a sandwich scene. Paint ONLY the TWO sandwich halves in their complete small folded cardboard tray. Keep the long cut bread faces and layered filling. Omit hands, lap, grass, ground and table. Show the tray as a simple COMPLETE structural shape with all its outer corners, supporting the food, not a detached partial edge. Use only four natural food pigments: bread tan #cfbea0, dark toasted brown #49372a, olive green #526b3e and muted cured-meat red #b96550. Trays are blank areas with sparse tan brush planes. Absolutely no blue. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZYQ70GDEFRPZY4BZGFM26.png",
+      "asset": "packages/sangas/public/prints/grazia/sandwich-2622-painted-style-match.webp",
+      "width": 879,
+      "height": 948,
+      "preparation": {
+        "method": "palette-matting",
+        "cutoff": 0.065,
+        "padding": 20,
+        "format": "lossless-webp",
+        "pigments": ["#cfbea0", "#49372a", "#526b3e", "#b96550"]
+      }
+    },
+    {
+      "group": "grazia",
+      "source": "IMG_2623.jpeg",
+      "slug": "sandwich-2623-painted-style-match",
+      "style": "painted",
+      "status": "approved-integrated",
+      "model": "google-nano-banana-2-1",
+      "node": "4O-0",
+      "displayNode": "54-0",
+      "referenceNodes": ["2T-0", "4E-0"],
+      "prompt": "The FIRST reference is the photograph and controls ONLY subject, food shape, angle and spatial arrangement. The SECOND reference is approved Taco’s Land painted artwork and controls the EXACT ILLUSTRATION STYLE. Make this look drawn by the same hand as the second image, part of the same small series. Match its broad flat opaque pigment shapes, chunky irregular dry brush edges, flat overlapping patches, strong open highlights and sparse dark accents. Use roughly the same brush size relative to the food. Do not draw every ingredient, bread pore or crease. No fine ink contours, watercolor shading, realistic texture, photorealism, gradients or detailed editorial food sketching. Food should read in a few bold hand-painted masses, just like the style reference. Do not copy the taco subject into a sandwich scene. Paint ONLY TWO upright sandwich halves side by side in their complete small folded cardboard tray. Keep their cut bread faces, chunky tomato/filling planes and green leaf shapes. No hands, grass, table or surroundings. Entire tray perimeter, all corners and both sandwich ends must be present; complete the simple tray rather than fading half of it away. Tray construction needs just a few broad tan strokes and blank highlights. Four natural pigments only: bread tan #cfbea0, dark toasted brown #49372a, olive green #526b3e and muted tomato red #b96550. No blue. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E04V5GBP9417NF05BZ0V1P.png",
+      "asset": "packages/sangas/public/prints/grazia/sandwich-2623-painted-style-match.webp",
+      "width": 699,
+      "height": 785,
+      "preparation": {
+        "method": "palette-matting",
+        "cutoff": 0.065,
+        "padding": 20,
+        "format": "lossless-webp",
+        "pigments": ["#cfbea0", "#49372a", "#526b3e", "#b96550"]
+      }
+    },
+    {
+      "group": "grazia",
+      "source": "IMG_2624.jpeg",
+      "slug": "cover-two-trays-ink-wash-style-match-complete",
+      "style": "ink-wash",
+      "status": "approved-integrated",
+      "model": "openai-gpt-image-edit-2-5",
+      "node": "5G-0",
+      "displayNode": "5K-0",
+      "referenceNodes": ["4Y-0", "2Z-0"],
+      "prompt": "Make one narrowly scoped repair to the FIRST ink-wash illustration. Preserve the existing illustration, its exact fine loose ink lines, pale washes, colours and shapes. DO NOT change art style, repaint everything, add realism, or add detail elsewhere. The lower foreground sandwich and the bottom rim of the lower cardboard tray are visibly cut in half at an artificial horizontal line. Reconstruct those missing LOWER food and container parts: draw the full second foreground sandwich half, completing its curved bread crust and filling down to its lower tip, and the continuous bottom/front wall and both front corners of its tray beneath it. The bottom tray must be a whole, intelligible cardboard tray, as complete as the top tray. The SECOND photograph supplies original food identity and arrangement, but its crop must not be copied. Do NOT solve this by merely shrinking the same cut-off image or adding white space. Extend the actual illustrated bread and tray shapes below their current abrupt cutoff. Four sandwich halves total, two complete trays total. Keep the table and checkerboard wash exactly as in the first artwork. Remove red logo shapes from wrappers; wrappers are plain. Maintain generous blank white margins outside all marks, with complete bottom bread and tray visibly ending ABOVE the bottom blank margin. Pure white background, no texture field, no frame, no text.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E0CY38P2GEAJECAEH079V7.png",
+      "asset": "packages/sangas/public/prints/grazia/cover-two-trays-ink-wash-style-match-complete.webp",
+      "width": 770,
+      "height": 822,
+      "preparation": {
+        "method": "native-alpha",
+        "discardAlphaAtOrBelow": 2,
+        "cropToAlphaBounds": true,
+        "padding": 20,
+        "format": "lossless-webp"
+      }
+    }
+  ],
+  "rejectedCompositionEdits": [
+    {
+      "group": "grazia",
+      "source": "IMG_2624.jpeg",
+      "slug": "cover-two-trays-ink-wash-style-match",
+      "style": "ink-wash",
+      "photoNode": "2Z-0",
+      "refs": ["2Z-0", "4A-0"],
+      "row": "cover",
+      "prompt": "The FIRST reference photograph controls the actual scene, pose, proportions and object locations. The SECOND reference is the approved Taco’s Land lakeside ink-wash cover: it controls the EXACT mark-making, light pigment density, broken fine contours, translucent washes, small pooled ink accents and white open space. This is a new image in that same illustrated series, not a new style. Keep the same delicate wash technique and muted visual weight; add descriptive detail WITHIN that technique, not thick outlines or realistic rendering. Do not copy the lake scene or plates from the style reference. Cover scene WITH background: retain the two sandwich trays arranged diagonally on the cafe table. The upper tray contains two bread halves with darker filling; the lower tray contains two halves with cured meat, leaves and cheese. Show the reddish-brown tabletop around and BETWEEN the trays, the folded blank deli paper beneath them, and a small corner of the red-and-cream checkerboard floor. Preserve the photo's arrangement. Complete the lower tray and lower sandwich that the source photo crops. Use a few extra selective descriptive marks for filling layers, cut bread, wrappers and tray folds. Do not make a dense realistic sandwich painting. Washes remain pale and open like the lakeside reference; the tabletop is a few translucent irregular strokes, not a solid rectangle. Omit arm, logos, text and unrelated clutter. Natural warm colours, never blue: dark toasted brown #49372a, olive green #526b3e and muted red #b96550, diluted to light tan and soft pink washes. Create only one new illustration, not a collage. Plain solid pure white outside the artwork for later background removal; no off-white paper, paper grain, ground shadow, frame, caption or logos. Compose all intended marks within the central 70 percent of the canvas, with generous WHITE margins on EVERY side. Nothing cropped or touching an edge.",
+      "node": "4Q-0",
+      "model": "google-nano-banana-2-1",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E04V74ZTHXDHPZGQMNV04V.png",
+      "mimeType": "image/jpeg",
+      "width": 1376,
+      "height": 768,
+      "status": "rejected-cropped-lower-tray"
+    },
+    {
+      "group": "grazia",
+      "source": "IMG_2624.jpeg",
+      "slug": "cover-two-trays-ink-wash-style-match-full",
+      "style": "ink-wash",
+      "photoNode": "2Z-0",
+      "refs": ["4Q-0", "2Z-0", "4W-0"],
+      "row": "cover",
+      "prompt": "Correct the composition of the FIRST illustration. Its ink-wash style and food shapes are right but the lower tray is cropped. Keep the same light ink contours, pale translucent blooms, muted natural brown, red and olive pigments. The SECOND reference is the source photograph; the THIRD is the approved Taco’s Land ink-wash style on a PORTRAIT canvas. Use a PORTRAIT canvas like the third reference, not a wide horizontal image. ZOOM OUT: make the whole scene much smaller inside the canvas. Complete and show every lower tray corner and the full lower sandwich. Both trays, all FOUR sandwich halves, and every outline must end well inside a 15-percent blank white margin on ALL sides. Preserve the diagonal relationship between upper and lower trays. Include the reddish-brown table between and around both trays, folded plain deli paper and a small hint of the checkerboard floor, ending naturally in an irregular open wash silhouette. No printed marks, logos or letters on wrappers. NO cropping and NO cuts through the food at any edge. Same airy ink-wash technique as the approved cover, no change to painted gouache, no dark heavy contours. Pure solid white outside the illustration for later removal, no paper texture, rectangular background, border, shadow or caption.",
+      "node": "4Y-0",
+      "model": "google-nano-banana-2-1",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5E09RQRY6HESVH3H6WP4T82.png",
+      "mimeType": "image/jpeg",
+      "width": 928,
+      "height": 1152,
+      "status": "rejected-incomplete-lower-tray"
+    }
+  ],
+  "intermediateRevisions": [
+    {
+      "group": "grazia",
+      "slug": "sandwich-2622-painted-recolour",
+      "source": "IMG_2622.jpeg",
+      "refs": ["2P-0", "2N-0"],
+      "style": "painted",
+      "model": "openai-gpt-image-edit-2-5",
+      "prompt": "EDIT the FIRST reference illustration. Preserve its exact loose gouache brushwork, jagged strokes, broad simplified planes, amount of detail, angle and composition. The second reference is the original photograph, used ONLY to assign the correct natural food colours. Change the blue paint to natural muted greens in leaves, warm tan in bread, muted pink/brown in meat. Keep the original dark brush accents and tan bread planes. NO BLUE. Do not redraw the image in a smooth, realistic or detailed style. Do not sharpen outlines or add photorealistic shading. Retain TWO sandwich halves and the COMPLETE small folded cardboard tray with all four corners and continuous full outside silhouette. Focus only on food and its entire tray: omit hand, grass, lap, shadows and logos. Deliver native transparent alpha background, not white and not a checkerboard. Include 12 percent completely transparent margin around every edge. All tray corners and sandwich ends must fit fully inside the canvas.",
+      "node": "3X-0",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZB6XVGW4R27SDT0B7EAJC.png",
+      "status": "superseded-style-mismatch"
+    },
+    {
+      "group": "grazia",
+      "slug": "sandwich-2623-painted-recolour",
+      "source": "IMG_2623.jpeg",
+      "refs": ["2V-0", "2T-0"],
+      "style": "painted",
+      "model": "openai-gpt-image-edit-2-5",
+      "prompt": "EDIT the FIRST reference illustration. Keep its exact loose opaque gouache style, broad rough paint marks, simplified shapes and composition. Recolour only: use the second photograph to assign natural warm bread, muted tomato red, olive green leaves and brown filling, never blue food. No increase in realism, crispness or smoothness. Keep TWO sandwich halves upright side by side and the COMPLETE small folded cardboard tray. Show the whole outside rim and all tray corners, not half a container. Food and tray only, omit hand, grass and surroundings. Original style is approved; colour was the only problem. Deliver native transparent alpha background, no white canvas and no checkerboard. Keep the entire object within central 75 percent of the image; no edge clipping.",
+      "node": "3Z-0",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZB6Z06A1V63ABDBZTKZ8H.png",
+      "status": "superseded-style-mismatch"
+    },
+    {
+      "group": "grazia",
+      "slug": "cover-two-trays-ink-wash-background",
+      "source": "IMG_2624.jpeg",
+      "refs": ["2Z-0"],
+      "style": "ink-wash",
+      "model": "google-nano-banana-2-1",
+      "prompt": "Create a detailed but airy handmade ink-wash illustration of this exact sandwich photograph as an editorial cover vignette. Preserve the diagonal arrangement of TWO trays, each holding two sandwich halves: the upper tray with shredded darker filling and the lower tray with cured meat, leafy greens and cheese. IMPORTANT: include the recognizable reddish-brown cafe tabletop between and around both trays, folds of the plain deli paper beneath them, and a small hint of the red-and-cream checkerboard floor in the upper right. Omit arm, logos, lettering and irrelevant clutter. Complete the lower sandwich and tray so all intended shapes fit inside the image, do not copy the photo crop. Use natural muted food colours: golden tan bread, dark brown meat, olive green leaves, muted red/pink cured meat and tomatoes, soft warm greys for trays and wrappers, reddish brown table. Thin transparent pigment washes, visible natural blooms, pooled dark accents, selective hand-drawn details in bread pores, filling layers, tray corners and paper folds. Not gouache, not etched, not blue. More descriptive detail than the earlier minimal food studies. Let the tabletop wash end in an irregular open contour, not a filled rectangular photo. Pure solid white outside the illustration for later removal, no paper grain, shadows, border or text. Entire scene including complete lower tray is smaller than the canvas with at least 12 percent blank margins on all sides.",
+      "node": "41-0",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DZB6ZZSAN35YX6D6YJ5WEQ.png",
+      "status": "superseded-style-mismatch"
+    }
+  ],
+  "previousStudies": [
+    {
+      "group": "grazia",
+      "source": "IMG_2622.jpeg",
+      "slug": "sandwich-2622-painted-natural",
+      "style": "painted",
+      "node": "3I-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two sandwich halves upright in a small paper tray, cut faces visible, long bread edges, thin folded meat and leafy greens. Keep sandwich proportions, omit hand, lap, ground and text. Opaque observational gouache, flat irregular shapes, dry bristle tracks, broken paint edges and two or three pencil accents. No precise outlines or watercolor. Natural food colours, not website blue: warm bread tan #cfbea0, dark toasted brown #49372a, leafy olive green #526b3e, muted tomato/cured-meat red #b96550. Use these with unpainted pale bread and cheese highlights. NO blue pigment anywhere. Keep the recognizable filling layers and shapes from the photo. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks. Keep entire trays and sandwich ends inside generous margins; no clipped bottom edges.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSDWJYD1GE16FTXMZEG6B.png"
+    },
+    {
+      "group": "grazia",
+      "source": "IMG_2623.jpeg",
+      "slug": "sandwich-2623-painted-natural",
+      "style": "painted",
+      "node": "3K-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two sandwich halves upright side by side in a small tray, visible layers of tomatoes, greens and filling. Omit hand, grass, shadows and surroundings. Opaque observational gouache, flat irregular shapes, dry bristle tracks, broken paint edges and two or three pencil accents. No precise outlines or watercolor. Natural food colours, not website blue: warm bread tan #cfbea0, dark toasted brown #49372a, leafy olive green #526b3e, muted tomato/cured-meat red #b96550. Use these with unpainted pale bread and cheese highlights. NO blue pigment anywhere. Keep the recognizable filling layers and shapes from the photo. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks. Keep entire trays and sandwich ends inside generous margins; no clipped bottom edges.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSDYGZDSW9DRH0ZQTF06C.png"
+    },
+    {
+      "group": "grazia",
+      "source": "IMG_2624.jpeg",
+      "slug": "sandwich-2624-painted-natural",
+      "style": "painted",
+      "node": "3M-0",
+      "prompt": "Make one standalone handmade illustration from the attached photograph. Two separate trays of sandwich halves arranged diagonally, upper tray contains darker filling, lower tray contains folded pink meat and greens. Preserve this arrangement. Omit table, floor tiles and branding. Complete the simple lower tray silhouette without cropping its edge. Opaque observational gouache, flat irregular shapes, dry bristle tracks, broken paint edges and two or three pencil accents. No precise outlines or watercolor. Natural food colours, not website blue: warm bread tan #cfbea0, dark toasted brown #49372a, leafy olive green #526b3e, muted tomato/cured-meat red #b96550. Use these with unpainted pale bread and cheese highlights. NO blue pigment anywhere. Keep the recognizable filling layers and shapes from the photo. Open irregular silhouette with large empty gaps. Plain pure white background for later removal, absolutely no background paper grain, tint or wash field. No text, logos, borders, drop shadows or photorealism. Keep all intended forms in central 70 percent of canvas, generous blank margins on EVERY side. Texture confined to pigment marks. Keep entire trays and sandwich ends inside generous margins; no clipped bottom edges.",
+      "originalUrl": "https://app.paper.design/file-assets/01M5A0BC9F96Y1YT9XBMWTS1XB/01M5DYSDZKSQ4BWDY26ZFZ0B8N.png"
+    }
+  ]
+}
