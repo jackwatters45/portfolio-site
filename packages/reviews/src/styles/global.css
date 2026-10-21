@@ -167,7 +167,7 @@ a:hover {
 .restaurant-page .reviews > [data-person="jack"] {
   grid-column: 2;
 }
-.restaurant-page .guest-reviews > section {
+.restaurant-page .reviews.guest-reviews > section {
   grid-row: auto;
   grid-column: auto;
 }
@@ -327,14 +327,19 @@ a:hover {
   text-underline-offset: 5px;
 }
 
-.restaurant-page .tacos-land-lakeside {
+.restaurant-page .review-cover {
   display: block;
   width: 100%;
   height: auto;
   margin: 0 0 32px;
 }
 
-.restaurant-page .tacos-land-food-prints {
+.restaurant-page .review-cover-portrait {
+  max-height: 440px;
+  object-fit: contain;
+}
+
+.restaurant-page .review-food-prints {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
@@ -344,7 +349,7 @@ a:hover {
   padding-top: 24px;
   border-top: 3px double var(--rule);
 }
-.restaurant-page .tacos-land-food-prints img {
+.restaurant-page .review-food-prints img {
   display: block;
   width: 100%;
   height: clamp(44px, 12vw, 72px);
