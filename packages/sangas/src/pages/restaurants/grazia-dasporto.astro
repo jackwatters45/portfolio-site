@@ -9,26 +9,31 @@ export const restaurant: Restaurant = {
   mapsUrl: 'https://maps.app.goo.gl/JhyjtD3TTqG6jBaX8',
   coordinates: [-37.8643101, 145.0501912],
   visited: '2026-09-17',
-  dishes: ['Prosciutto', 'Porchetta', 'Coke Zero (bottle)'],
+  dishes: ['Prosciutto', 'Porchetta', 'Cotoletta di Pollo', 'Coke Zero (bottle)', 'Iced latte'],
 };
 ---
 
 <RestaurantLayout restaurant={restaurant}>
   <div class="visit-notes">
+    <img class="review-cover review-cover-portrait" src="/prints/grazia/cover-two-trays-ink-wash-style-match-complete.webp" width="770" height="822" alt="Ink-wash illustration of two sandwich trays on a café table with folded deli paper." decoding="async" />
     <p>Quick trip to Grazia after a way-too-early shoot-around. Meg shot better today. Clearly practising her around-the-worlds. Meg did some 6 am sprints, but Jack outclassed her with day 2 of his marathon streak (2:10 btw).</p>
     <p>Wow, what a spot. Greatest sandwich spot ever. The napkins were way too thick. Trying to think of something else to be negative about. Need to bump Meg down a peg.</p>
+    <p><em>21/10/2026 edit:</em> We have since been back multiple times. Meg has only ever gotten the prosciutto, but Jack is adding sandwiches. Cotoletta di Pollo (20/10/2026), prosciutto (21/10/2026).</p>
   </div>
 
-  <section class="section solo-reviews" aria-labelledby="meg-extras">
-    <h2 id="meg-extras">Meg</h2>
+  <section class="section" aria-labelledby="shared">
+    <h2 id="shared">Shared dishes</h2>
     <article>
       <div class="menu-line">
         <h3>Prosciutto</h3>
       </div>
       <div class="reviews">
         <section data-person="meg" aria-label="Meg’s review">
-          <div class="scores"><strong>9.9/10</strong></div>
+          <div class="scores"><strong>Meg · 9.9/10</strong></div>
           <p>Deathbed meal. Face instantly lit up every bite. Not sure why we're doing this list since nothing can beat this.</p>
+        </section>
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>Jack · 8.8/10</strong></div>
         </section>
       </div>
     </article>
@@ -49,12 +54,33 @@ export const restaurant: Restaurant = {
     </article>
     <article>
       <div class="menu-line">
+        <h3>Cotoletta di Pollo</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>8.9/10</strong></div>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
         <h3>Coke Zero (bottle)</h3>
       </div>
       <div class="reviews">
         <section data-person="jack" aria-label="Jack’s review">
           <div class="scores"><strong>9/10</strong></div>
           <p>Good.</p>
+        </section>
+      </div>
+    </article>
+    <article>
+      <div class="menu-line">
+        <h3>Iced latte</h3>
+      </div>
+      <div class="reviews">
+        <section data-person="jack" aria-label="Jack’s review">
+          <div class="scores"><strong>9/10</strong></div>
+          <p>Pretty damn good. Nothing crazy, but a solid iced latte. Came in a can, which made it easy to carry around. Pretty convenient.</p>
         </section>
       </div>
     </article>
@@ -68,4 +94,12 @@ export const restaurant: Restaurant = {
       </section>
     </div>
   </section>
+  <div class="review-food-prints">
+    {[0, 1, 2].map((repeat) => (
+      <>
+        <img src="/prints/grazia/sandwich-2622-painted-style-match.webp" width="879" height="948" alt={repeat === 0 ? 'Painted sandwich halves with meat and greens in a paper tray.' : ''} loading="lazy" decoding="async" />
+        <img src="/prints/grazia/sandwich-2623-painted-style-match.webp" width="699" height="785" alt={repeat === 0 ? 'Painted sandwich halves with tomato and greens in a paper tray.' : ''} loading="lazy" decoding="async" />
+      </>
+    ))}
+  </div>
 </RestaurantLayout>
