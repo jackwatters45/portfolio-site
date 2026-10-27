@@ -62,13 +62,9 @@ a:hover {
 .skip:focus {
   transform: translateY(0);
 }
-.journal .empty,
 .journal .letter-list {
   margin: 24px 0 0;
   border-top: 3px double var(--rule);
-}
-.journal .empty {
-  padding-top: 28px;
 }
 .journal .letter-list {
   padding: 0;

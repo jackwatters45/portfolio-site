@@ -6,11 +6,8 @@ const letters = await publishedLetters();
 ---
 
 <Layout>
-  <section class="journal" aria-labelledby="letters-heading">
-    <h1 id="letters-heading">Letters &amp; notes</h1>
-    {letters.length === 0 ? (
-      <p class="empty">The first letter is still to come.</p>
-    ) : (
+  <div class="journal">
+    {letters.length > 0 && (
       <ol class="letter-list">
         {letters.map((letter) => (
           <li>
@@ -24,5 +21,5 @@ const letters = await publishedLetters();
         ))}
       </ol>
     )}
-  </section>
+  </div>
 </Layout>
