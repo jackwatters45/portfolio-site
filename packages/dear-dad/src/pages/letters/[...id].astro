@@ -1,0 +1,33 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/layout.astro';
+import { formatDate, publishedLetters } from '../../lib/letters';
+
+export async function getStaticPaths() {
+  const letters = await publishedLetters();
+
+  return letters.map((letter) => ({
+    params: { id: letter.id },
+    props: { letter },
+  }));
+}
+
+interface Props {
+  letter: CollectionEntry<'letters'>;
+}
+
+const { letter } = Astro.props;
+
+const { Content } = await render(letter);
+---
+
+<Layout title={letter.data.title}>
+  <article class="letter">
+    <time datetime={letter.data.date.toISOString()}>{formatDate(letter.data.date)}</time>
+    <h1>{letter.data.title}</h1>
+    <div class="letter-body"><Content /></div>
+  </article>
+  <nav class="letter-navigation" aria-label="Letters">
+    <a href="/">All letters &amp; notes</a>
+  </nav>
+</Layout>

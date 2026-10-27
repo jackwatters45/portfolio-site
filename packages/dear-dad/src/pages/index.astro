@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/layout.astro';
+import { formatDate, publishedLetters } from '../lib/letters';
+
+const letters = await publishedLetters();
+---
+
+<Layout>
+  <section class="journal" aria-labelledby="letters-heading">
+    <h1 id="letters-heading">Letters &amp; notes</h1>
+    {letters.length === 0 ? (
+      <p class="empty">The first letter is still to come.</p>
+    ) : (
+      <ol class="letter-list">
+        {letters.map((letter) => (
+          <li>
+            <a href={`/letters/${letter.id}/`}>
+              <time datetime={letter.data.date.toISOString()}>
+                {formatDate(letter.data.date)}
+              </time>
+              <h2>{letter.data.title}</h2>
+            </a>
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+</Layout>
