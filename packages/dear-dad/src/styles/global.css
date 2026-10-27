@@ -1,0 +1,120 @@
+:root {
+  color-scheme: light;
+  font-family: Georgia, serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.page-content {
+  max-width: 672px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.site-header {
+  padding: 64px 0 48px;
+}
+.site-header a {
+  text-decoration: none;
+}
+main {
+  padding-bottom: 64px;
+  overflow-wrap: anywhere;
+}
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+h1 {
+  margin: 8px 0 24px;
+  color: var(--accent);
+  font-size: clamp(28px, 5vw, 36px);
+}
+a {
+  color: var(--accent);
+  text-underline-offset: 4px;
+}
+a:hover {
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.skip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  transform: translateY(-200%);
+  background: var(--paper);
+  padding: 8px;
+}
+.skip:focus {
+  transform: translateY(0);
+}
+.journal .letter-list {
+  margin: 24px 0 0;
+  border-top: 3px double var(--rule);
+}
+.journal .letter-list {
+  padding: 0;
+  list-style: none;
+}
+.journal .letter-list li {
+  border-bottom: 1px solid var(--rule);
+}
+.journal .letter-list a {
+  display: block;
+  padding: 28px 0;
+  text-decoration: none;
+}
+.journal .letter-list h2 {
+  margin: 8px 0 0;
+  font-size: 26px;
+}
+.journal .letter-list a:hover h2,
+.journal .letter-list a:focus-visible h2 {
+  text-decoration: underline;
+}
+.journal time,
+.letter time {
+  color: var(--ink);
+  font-family: Helvetica, sans-serif;
+  font-size: 13px;
+}
+.letter .letter-body {
+  margin-top: 32px;
+  border-top: 3px double var(--rule);
+  padding-top: 16px;
+}
+.letter .letter-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.letter .letter-body pre {
+  overflow-x: auto;
+}
+.letter .letter-body blockquote {
+  margin-inline: 0;
+  padding-left: 24px;
+  border-left: 2px solid var(--rule);
+}
+.letter-navigation {
+  margin-top: 48px;
+}
+@media (min-width: 768px) {
+  .site-header {
+    padding-top: 96px;
+  }
+}

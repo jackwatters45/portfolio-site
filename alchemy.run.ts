@@ -91,6 +91,25 @@ export default Alchemy.Stack(
       assets: { notFoundHandling: '404-page' },
     });
 
+    const dearDad = yield* Cloudflare.Website.StaticSite('dear-dad', {
+      command: 'bun run build --filter=@personal-sites/dear-dad',
+      outdir: 'packages/dear-dad/dist',
+      dev: {
+        command: 'bun run dev',
+        cwd: 'packages/dear-dad',
+        env: { NODE_ENV: 'development' },
+        url: 'http://localhost:4327',
+      },
+      domain:
+        stage === 'prod'
+          ? {
+              name: 'dear-dad.jackwatters.dev',
+              redirects: ['www.dear-dad.jackwatters.dev'],
+            }
+          : undefined,
+      assets: { notFoundHandling: '404-page' },
+    });
+
     const moodBoardSite = yield* moodBoard;
 
     const nz = yield* Cloudflare.Website.StaticSite('nz', {
@@ -125,6 +144,7 @@ export default Alchemy.Stack(
       site: site.url,
       tacos: tacos.url,
       sangas: sangas.url,
+      dearDad: dearDad.url,
       nz: nz.url,
       moodBoard: moodBoardSite.url,
     };

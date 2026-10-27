@@ -1,0 +1,37 @@
+---
+import '../../theme.css';
+import '../styles/global.css';
+import { Agentation } from 'agentation';
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+
+const pageTitle = title ? `${title} · Dear Dad` : 'Dear Dad';
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en-AU">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{pageTitle}</title>
+    <meta name="description" content="Letters and notes for Dad." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href={canonical} />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="page-content">
+      <header class="site-header">
+        <a href="/">Dear Dad</a>
+      </header>
+      <main id="main"><slot /></main>
+    </div>
+    {import.meta.env.DEV && <Agentation client:only="react" endpoint="http://localhost:4747" />}
+  </body>
+</html>

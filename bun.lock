@@ -44,6 +44,21 @@
         "react-dom": "^19.2.8",
       },
     },
+    "packages/dear-dad": {
+      "name": "@personal-sites/dear-dad",
+      "dependencies": {
+        "@astrojs/react": "6.0.6",
+        "agentation": "^3.0.2",
+        "astro": "7.3.3",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+      },
+      "devDependencies": {
+        "@astrojs/check": "0.9.10",
+        "@types/react": "^19.2.17",
+        "@types/react-dom": "^19.2.3",
+      },
+    },
     "packages/mood-board": {
       "name": "@personal-sites/mood-board",
       "version": "0.1.0",
@@ -743,6 +758,8 @@
     "@oxlint/plugins": ["@oxlint/plugins@1.85.0", "", {}, "sha512-qqHqML3ME3cxGgFvWJG8wwMnJc9ol5SMdtqkq0k8r7l0USmC+HRXYjzDacME4Dqkx4yqrUsBhj0JYvji8fHxJQ=="],
 
     "@personal-sites/comments": ["@personal-sites/comments@workspace:packages/comments"],
+
+    "@personal-sites/dear-dad": ["@personal-sites/dear-dad@workspace:packages/dear-dad"],
 
     "@personal-sites/mood-board": ["@personal-sites/mood-board@workspace:packages/mood-board"],
 
